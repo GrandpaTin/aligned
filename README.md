@@ -8,6 +8,17 @@ Aligned is a two-player compatibility game for meaningful, playful, and honest c
 
 ![Aligned social preview](og-image.jpg)
 
+## Play anywhere
+
+| Platform | How to play | Offline |
+| --- | --- | --- |
+| Android phones & tablets | Download [Aligned.apk](downloads/Aligned.apk) and open it (allow your browser to install apps if asked), or in Chrome choose ⋮ › Add to Home screen | Yes |
+| iPhone & iPad | Open the live game in Safari, tap Share › Add to Home Screen | Yes, after the first visit |
+| Windows, Mac, Linux, Chromebook | Install from Chrome or Edge (install icon in the address bar), Safari on Mac (File › Add to Dock), or download the single-file [offline copy](downloads/Aligned-offline.html) | Yes |
+| Any modern browser | Just open the live game | Yes, after the first visit |
+
+Everything works without internet except pairing two phones, which needs a connection on both. Settings › *Play offline, on any device* shows the right steps for the current device.
+
 ## Gameplay
 
 1. Enter two player names and choose a session, length, intensity, round style, and question packs.
@@ -20,7 +31,7 @@ Aligned is a two-player compatibility game for meaningful, playful, and honest c
 ## Features
 
 - One-device pass-and-play with a private handoff lock screen
-- Automatic one-scan two-phone play with short-lived signaling and encrypted WebRTC transport
+- Automatic one-scan two-phone play with short-lived signaling and encrypted WebRTC transport, which survives reloads and brief dropouts, shows each partner’s progress, and can finish on one phone if the second phone drops out
 - 309 built-in questions across Connection, Lifestyle, Future, Love, Fun, Spicy, Money, Politics, and Dealbreakers
 - Mixed, slider-heavy, and sliders-only rounds with 5, 10, or 15 questions
 - Cozy, Curious, Deep, Spicy, and No-filter conversation intensities
@@ -29,7 +40,7 @@ Aligned is a two-player compatibility game for meaningful, playful, and honest c
 - Overall and topic alignment, relationship-fit scoring, match celebrations, and difference heat colors
 - Local persistence, readable JSON backup import/export, optional AES-GCM encrypted backups, and a device-local privacy PIN
 - Four visual themes, three sound themes, reduced motion, high contrast, and adjustable text size
-- Installable PWA behavior and offline app-shell support
+- Installable PWA, an offline Android app, and a single-file offline copy for computers
 
 ## Conversation intensities
 
@@ -63,6 +74,17 @@ node scripts/serve.mjs --host 0.0.0.0
 
 Then open `http://YOUR-COMPUTER-IP:4173` on the phone. A firewall permission prompt may appear.
 
+## Building the offline downloads
+
+```bash
+npm run build
+```
+
+- `downloads/Aligned-offline.html` is built by `scripts/build-offline.mjs` (no dependencies).
+- `downloads/Aligned.apk` is built by `scripts/build-android.mjs` without Gradle. It needs JDK 17+ and the Android SDK (`build-tools;35.0.0`, `platforms;android-35`); set `JAVA_HOME` and `ANDROID_SDK_ROOT` if they are not in the default locations listed in the script. The release keystore (`ALIGNED_KEYSTORE`, created on first build outside the repository) must be kept and reused: Android only installs updates signed with the same key.
+
+The Android app is a small WebView shell (`android/`) that serves the bundled game under the public site address, so saved games, QR links and two-phone pairing behave exactly as on the web. Rebuild both downloads whenever `index.html` changes, and bump `version` in `package.json` together with `APP_VERSION` in `index.html`.
+
 ## Quality checks
 
 ```bash
@@ -93,6 +115,8 @@ Current stable Chrome, Edge, Firefox, and Safari releases are supported. Two-pho
 - `scripts/serve.mjs` — dependency-free local web server
 - `tests/` — production and signaling regression checks
 - `worker/` — one-scan signaling service
+- `android/` — offline Android app shell
+- `downloads/` — built APK and single-file offline copy
 - `docs/` — current desktop and mobile screenshots
 
 ## Screenshots
@@ -111,7 +135,7 @@ Aligned has no accounts, analytics, advertising SDKs, or cloud answer storage. G
 - Broader relationship and friendship wording modes
 - Expanded automated cross-browser and accessibility coverage
 - More locally stored post-round intentions and reflection tools
-- Optional installable iOS and Android wrappers using the same local-first core
+- An App Store wrapper for iOS (the installable web app already works offline on iPhone and iPad)
 
 ## License
 

@@ -25,8 +25,6 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -46,9 +44,12 @@ public class MainActivity extends Activity {
     static final String SITE_PATH = "/aligned/";
     static final String HOME_URL = "https://" + SITE_HOST + SITE_PATH;
     private static final int FILE_CHOOSER_REQUEST = 41;
+    private static final int SAVE_FILE_REQUEST = 42;
 
     private WebView web;
     private ValueCallback<Uri[]> pendingFileCallback;
+    private byte[] pendingSaveBytes;
+    private String pendingSaveName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,6 +124,21 @@ public class MainActivity extends Activity {
             pendingFileCallback = null;
             return;
         }
+        if (requestCode == SAVE_FILE_REQUEST) {
+            byte[] bytes = pendingSaveBytes;
+            String name = pendingSaveName;
+            pendingSaveBytes = null;
+            Uri target = data == null ? null : data.getData();
+            if (resultCode != RESULT_OK || target == null || bytes == null) return;
+            try (OutputStream out = getContentResolver().openOutputStream(target)) {
+                if (out == null) throw new IOException("Location unavailable");
+                out.write(bytes);
+                Toast.makeText(this, "Saved " + name, Toast.LENGTH_LONG).show();
+            } catch (IOException error) {
+                Toast.makeText(this, "Could not save the file.", Toast.LENGTH_LONG).show();
+            }
+            return;
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -137,8 +153,10 @@ public class MainActivity extends Activity {
 
     static boolean isAppUri(Uri uri) {
         String path = uri.getPath() == null ? "" : uri.getPath();
+        // Downloads (a newer APK, the offline copy) always come from the live site, never the bundled assets.
         return "https".equals(uri.getScheme()) && SITE_HOST.equalsIgnoreCase(uri.getHost())
-            && (path.equals("/aligned") || path.startsWith(SITE_PATH));
+            && (path.equals("/aligned") || path.startsWith(SITE_PATH))
+            && !path.startsWith(SITE_PATH + "downloads/");
     }
 
     private String appVersion() {
@@ -251,11 +269,23 @@ public class MainActivity extends Activity {
                         out.write(bytes);
                     }
                 } else {
-                    File folder = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-                    if (folder == null) throw new IOException("Storage unavailable");
-                    try (OutputStream out = new FileOutputStream(new File(folder, safeName))) {
-                        out.write(bytes);
-                    }
+                    // Before Android 10 there is no permission-free Downloads folder, so let the person pick
+                    // where the backup goes with the system "save as" screen.
+                    pendingSaveBytes = bytes;
+                    pendingSaveName = safeName;
+                    runOnUiThread(() -> {
+                        Intent create = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                        create.addCategory(Intent.CATEGORY_OPENABLE);
+                        create.setType(mimeType == null || mimeType.isEmpty() ? "application/octet-stream" : mimeType);
+                        create.putExtra(Intent.EXTRA_TITLE, safeName);
+                        try {
+                            startActivityForResult(create, SAVE_FILE_REQUEST);
+                        } catch (ActivityNotFoundException error) {
+                            pendingSaveBytes = null;
+                            Toast.makeText(MainActivity.this, "No app is available to save files.", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    return true;
                 }
                 runOnUiThread(() -> Toast.makeText(MainActivity.this, "Saved " + safeName + " to Downloads", Toast.LENGTH_LONG).show());
                 return true;

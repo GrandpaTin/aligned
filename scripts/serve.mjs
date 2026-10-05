@@ -18,7 +18,8 @@ const mimeTypes = {
   ".webmanifest": "application/manifest+json; charset=utf-8",
   ".png": "image/png",
   ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg"
+  ".jpeg": "image/jpeg",
+  ".apk": "application/vnd.android.package-archive"
 };
 
 const server = createServer((request, response) => {

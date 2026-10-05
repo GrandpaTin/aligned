@@ -64,7 +64,7 @@ const storedStateJSON = vm.runInNewContext(`(${storedStateFunctionMatch[0].repla
 assert.equal(storedStateJSON(), legacyRawState, "Legacy browser state must be returned during migration");
 assert.equal(storageValues.get("aligned-state-v1"), legacyRawState, "Legacy browser state must be copied to the Aligned key");
 
-const requiredFiles = ["index.html", "manifest.webmanifest", "sw.js", "icon-192.png", "icon-512.png", "og-image.jpg", "README.md", "LICENSE", ".nojekyll", "worker/src/index.js", "worker/wrangler.jsonc"];
+const requiredFiles = ["index.html", "manifest.webmanifest", "sw.js", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png", "android/res/mipmap-anydpi-v26/ic_launcher.xml", "og-image.jpg", "README.md", "LICENSE", ".nojekyll", "worker/src/index.js", "worker/wrangler.jsonc"];
 requiredFiles.forEach((file) => assert(existsSync(resolve(root, file)), `Missing required file: ${file}`));
 for (const icon of manifest.icons) {
   assert(icon.src.startsWith("./"), `Manifest icon path must be relative: ${icon.src}`);
@@ -118,6 +118,12 @@ assert(html.includes("window.alignedHandleBack"), "The Android app shell needs a
 assert(html.includes("saveWithAndroidBridge"), "Backups must save through the Android app bridge");
 const packageVersion = JSON.parse(read("package.json")).version;
 assert(html.includes(`const APP_VERSION = "${packageVersion}"`), "The in-app version must match package.json");
+assert(manifest.icons.some((icon) => icon.purpose === "maskable"), "The PWA must ship a maskable icon for Android launchers");
+assert(html.includes('<link rel="apple-touch-icon" href="apple-touch-icon.png">'), "iOS needs an opaque, full-bleed touch icon");
+assert(html.includes(String.raw`/^[\w-]{1,80}$/`), "Saved ids must be validated with a word-character pattern");
+const plainBlurs = (html.match(/[^-]backdrop-filter:/g) || []).length;
+const prefixedBlurs = (html.match(/-webkit-backdrop-filter:/g) || []).length;
+assert(prefixedBlurs >= plainBlurs, "Blurred surfaces need the -webkit- prefix for older Safari");
 assert(html.includes("hasComparableAnswer"), "Scores must skip questions that only one person answered");
 assert(!html.includes("Scan response QR"), "The retired second-QR step must not return");
 assert(html.includes('https://are-we-compatible-signal.bdaytin.workers.dev'), "Production signaling endpoint must be configured");

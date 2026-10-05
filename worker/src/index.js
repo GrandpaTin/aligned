@@ -216,7 +216,7 @@ export class PairingRoom {
     }
     let payload;
     try { payload = JSON.parse(text); } catch { return; }
-    if (!["offer", "answer", "candidate", "ping"].includes(payload.type)) return;
+    if (!["offer", "answer", "candidate", "leave", "ping"].includes(payload.type)) return;
     if (payload.type === "ping") {
       socket.send(JSON.stringify({ type: "pong", at: Date.now() }));
       await this.extendWhileActive(socket);

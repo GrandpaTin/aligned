@@ -10,4 +10,5 @@
     </style>
     <color name="midnight">#FF0F172A</color>
     <color name="rose">#FFFB7185</color>
+    <color name="icon_background">#FFFFFEFE</color>
 </resources>

@@ -46,7 +46,7 @@ rmSync(out, { recursive: true, force: true });
 for (const folder of ["compiled-res", "gen", "classes", "dex", "assets/www"]) mkdirSync(join(out, folder), { recursive: true });
 
 // The APK ships the same files the website serves, minus the service worker (assets are already local).
-for (const file of ["index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png"]) {
+for (const file of ["index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png"]) {
   copyFileSync(join(root, file), join(out, "assets", "www", file));
 }
 
