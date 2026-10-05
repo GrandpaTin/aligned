@@ -1,4 +1,6 @@
 const ROOM_TTL_MS = 15 * 60 * 1000;
+// While both phones keep the room in use it stays open (for reconnects) up to this hard limit.
+const ROOM_MAX_LIFETIME_MS = 6 * 60 * 60 * 1000;
 const MAX_SIGNAL_BYTES = 96 * 1024;
 const DEFAULT_ALLOWED_ORIGINS = [
   "https://grandpatin.github.io",
@@ -93,7 +95,7 @@ export default {
       const created = await stub.fetch("https://room.internal/create", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ hostToken, joinToken, expiresAt })
+        body: JSON.stringify({ hostToken, joinToken, expiresAt, createdAt: Date.now() })
       });
       if (!created.ok) return json({ error: "Unable to create a pairing room" }, 503, cors);
       return json({ roomId, hostToken, joinToken, expiresAt, iceServers: await iceServersFor(env) }, 201, {
@@ -113,7 +115,8 @@ export default {
         body: JSON.stringify({ token })
       });
       if (!validated.ok) return json({ error: validated.status === 410 ? "This pairing room expired" : "Invalid pairing link" }, validated.status, cors);
-      return json({ roomId: joinMatch[1], iceServers: await iceServersFor(env) }, 200, {
+      const { expiresAt } = await validated.json().catch(() => ({}));
+      return json({ roomId: joinMatch[1], expiresAt, iceServers: await iceServersFor(env) }, 200, {
         ...cors,
         "cache-control": "no-store"
       });
@@ -152,7 +155,7 @@ export class PairingRoom {
 
     if (request.method === "POST" && url.pathname === "/validate-join") {
       const { token = "" } = await request.json();
-      return token === configuration.joinToken ? json({ ok: true }) : json({ error: "Invalid token" }, 403);
+      return token === configuration.joinToken ? json({ ok: true, expiresAt: configuration.expiresAt }) : json({ error: "Invalid token" }, 403);
     }
 
     if (url.pathname !== "/api/rooms/" + url.pathname.split("/")[3] + "/socket" && !url.pathname.endsWith("/socket")) {
@@ -166,9 +169,21 @@ export class PairingRoom {
     const pair = new WebSocketPair();
     const client = pair[0];
     const server = pair[1];
-    for (const socket of this.ctx.getWebSockets()) {
-      if (socket.deserializeAttachment()?.role === role) socket.close(4001, "Replaced by a newer connection");
+    // The same phone reconnecting (same device id) replaces its old socket. A different phone using the
+    // same join link is refused, so a third device can never take over a room.
+    const device = (url.searchParams.get("device") || "").slice(0, 64);
+    const existing = this.ctx.getWebSockets().filter((socket) => socket.deserializeAttachment()?.role === role);
+    if (role === "join" && device && configuration.joinDevice && configuration.joinDevice !== device && existing.length) {
+      this.ctx.acceptWebSocket(server);
+      server.serializeAttachment({ role: "rejected" });
+      server.close(4009, "This link is already in use");
+      return new Response(null, { status: 101, webSocket: client });
     }
+    if (role === "join" && device && configuration.joinDevice !== device) {
+      configuration.joinDevice = device;
+      await this.ctx.storage.put("configuration", configuration);
+    }
+    for (const socket of existing) socket.close(4001, "Replaced by a newer connection");
     server.serializeAttachment({ role });
     this.ctx.acceptWebSocket(server);
     server.send(JSON.stringify({ type: "socket-ready", role, expiresAt: configuration.expiresAt }));
@@ -204,12 +219,31 @@ export class PairingRoom {
     if (!["offer", "answer", "candidate", "ping"].includes(payload.type)) return;
     if (payload.type === "ping") {
       socket.send(JSON.stringify({ type: "pong", at: Date.now() }));
+      await this.extendWhileActive(socket);
       return;
     }
     const senderRole = socket.deserializeAttachment()?.role;
+    if (senderRole !== "host" && senderRole !== "join") return;
     const recipientRole = senderRole === "host" ? "join" : "host";
     for (const recipient of this.socketsByRole()[recipientRole]) {
       try { recipient.send(text); } catch {}
+    }
+  }
+
+  // Keeps a room that is actively in use alive, so phones can reconnect during long rounds.
+  async extendWhileActive(socket) {
+    const configuration = await this.configuration();
+    if (!configuration) return;
+    const now = Date.now();
+    const limit = (configuration.createdAt || now) + ROOM_MAX_LIFETIME_MS;
+    const sockets = this.socketsByRole();
+    if (!sockets.host.length || !sockets.join.length) return;
+    if (configuration.expiresAt - now > ROOM_TTL_MS / 2) return;
+    configuration.expiresAt = Math.min(limit, now + ROOM_TTL_MS);
+    await this.ctx.storage.put("configuration", configuration);
+    await this.ctx.storage.setAlarm(configuration.expiresAt);
+    for (const peer of [...sockets.host, ...sockets.join]) {
+      try { peer.send(JSON.stringify({ type: "room-extended", expiresAt: configuration.expiresAt })); } catch {}
     }
   }
 
@@ -223,6 +257,11 @@ export class PairingRoom {
   }
 
   async alarm() {
+    const configuration = await this.configuration();
+    if (configuration && Date.now() < configuration.expiresAt) {
+      await this.ctx.storage.setAlarm(configuration.expiresAt);
+      return;
+    }
     for (const socket of this.ctx.getWebSockets()) {
       try { socket.close(4000, "Pairing room expired"); } catch {}
     }

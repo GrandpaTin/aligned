@@ -23,3 +23,6 @@ dist/
 .env
 .env.*
 !.env.example
+
+# Android build intermediates (the signed APK in downloads/ is published)
+android/build/

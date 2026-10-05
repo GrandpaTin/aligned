@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AlignedTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/midnight</item>
+        <item name="android:statusBarColor">@color/midnight</item>
+        <item name="android:navigationBarColor">@color/midnight</item>
+        <item name="android:colorPrimary">@color/rose</item>
+        <item name="android:colorPrimaryDark">@color/midnight</item>
+        <item name="android:colorAccent">@color/rose</item>
+    </style>
+    <color name="midnight">#FF0F172A</color>
+    <color name="rose">#FFFB7185</color>
+</resources>

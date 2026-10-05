@@ -1,13 +1,16 @@
 {
   "name": "aligned",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "A two-player compatibility game for meaningful, playful, and honest conversations.",
   "type": "module",
   "scripts": {
     "start": "node scripts/serve.mjs",
     "test": "node tests/production-check.mjs && node tests/signaling-check.mjs",
-    "deploy:signal": "wrangler deploy --config worker/wrangler.jsonc"
+    "deploy:signal": "wrangler deploy --config worker/wrangler.jsonc",
+    "build:offline": "node scripts/build-offline.mjs",
+    "build:android": "node scripts/build-android.mjs",
+    "build": "node scripts/build-offline.mjs && node scripts/build-android.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.102.0"

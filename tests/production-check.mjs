@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import vm from "node:vm";
 
-const root = resolve(new URL("../", import.meta.url).pathname.replace(/^\/(?:[A-Za-z]:)/, (match) => match.slice(1)));
+const root = resolve(fileURLToPath(new URL("../", import.meta.url)));
 const read = (path) => readFileSync(resolve(root, path), "utf8");
 const html = read("index.html");
 const manifest = JSON.parse(read("manifest.webmanifest"));
@@ -105,7 +106,19 @@ assert(html.includes("const unanswered = questions.filter"), "Question selection
 assert(html.includes('launchHashParams.get("join")'), "Two-phone mode must accept the one-scan room link");
 assert(html.includes('window.addEventListener("hashchange", handleNearbyJoinLaunch)'), "A reused mobile browser tab must process newly scanned join links");
 assert(html.includes("window.setTimeout(startNearbyRound, 650)"), "The host must start a connected private round automatically");
-assert(html.includes("There is no second QR"), "The pairing interface must explain the one-scan flow");
+assert(html.includes("Nothing needs to be scanned or typed on this phone"), "The pairing interface must explain the one-scan flow");
+assert(html.includes("const NEARBY_SESSION_KEY = \"aligned-nearby-session-v1\""), "Two-phone rounds must survive a reload by persisting the private room");
+assert(html.includes("function flushNearbyOutbox()"), "Messages sent while the phones are disconnected must be queued and re-sent");
+assert(html.includes("function sendNearbyHello()"), "Reconnected phones must resynchronise round setup, answers and reveal state");
+assert(html.includes("roundId: state.nearbyRoundId"), "Two-phone messages must be scoped to a round");
+assert(html.includes("finishNearbyRoundOnThisDevice"), "A round must be finishable on one phone when the second phone cannot reconnect");
+assert(html.includes("NEARBY_CONNECT_TIMEOUT_MS"), "A connection that cannot be made must time out with guidance");
+assert(html.includes("PUBLIC_APP_URL"), "Offline copies must still produce scannable public join links");
+assert(html.includes("window.alignedHandleBack"), "The Android app shell needs a Back-button hook");
+assert(html.includes("saveWithAndroidBridge"), "Backups must save through the Android app bridge");
+const packageVersion = JSON.parse(read("package.json")).version;
+assert(html.includes(`const APP_VERSION = "${packageVersion}"`), "The in-app version must match package.json");
+assert(html.includes("hasComparableAnswer"), "Scores must skip questions that only one person answered");
 assert(!html.includes("Scan response QR"), "The retired second-QR step must not return");
 assert(html.includes('https://are-we-compatible-signal.bdaytin.workers.dev'), "Production signaling endpoint must be configured");
 assert(!html.includes("__SIGNALING_SERVICE_URL__"), "A signaling placeholder must never reach production");
