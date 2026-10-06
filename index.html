@@ -6443,6 +6443,9 @@
     .guess-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; font-weight: 800; }
     .guess-label small { color: var(--muted); font-weight: 600; }
     .guess-input::-webkit-slider-thumb { background: var(--violet); }
+    .guess-panel.guessed .guess-input::-webkit-slider-runnable-track { background: linear-gradient(90deg, var(--violet) 0, var(--violet) var(--range-progress), #475569 var(--range-progress), #475569 100%); }
+    .guess-panel:not(.guessed) .guess-input::-webkit-slider-runnable-track { background: #475569; }
+    .guess-panel:not(.guessed) .guess-input::-webkit-slider-thumb { opacity: .7; }
     .answer-extras { margin-top: 14px; border: 1px solid var(--line); border-radius: 16px; padding: 4px 14px; }
     .answer-extras > summary { cursor: pointer; font-weight: 750; }
     .answer-extras > summary small, .card-more > summary small { margin-left: 6px; color: var(--muted); font-weight: 600; }
@@ -13975,7 +13978,7 @@ var qrcode = function() {
               <span class="category-pill"><span class="category-symbol">${categorySymbol(question.category)}</span>${escapeHTML(question.category)}</span>
               <span class="question-meta-actions">
                 <button class="favorite-button ${isFavorite ? "active" : ""}" id="favorite-current" type="button" aria-label="${isFavorite ? "Remove from" : "Add to"} favorites" aria-pressed="${isFavorite}">★</button>
-                <span class="type-chip"><span aria-hidden="true">${question.type === "slider" ? "↔" : "✎"}</span>${question.type === "slider" ? "Slide your answer" : "Write your answer"}</span>
+                <span class="type-chip"><span aria-hidden="true">${quickPick ? "⇄" : question.type === "slider" ? "↔" : "✎"}</span>${quickPick ? "Pick a side" : question.type === "slider" ? "Slide your answer" : "Write your answer"}</span>
               </span>
             </div>
             <h2 class="prompt" id="question-title">${escapeHTML(question.prompt)}</h2>
@@ -14410,7 +14413,7 @@ var qrcode = function() {
       </article>`;
       const closestHighlight = [...comparable].sort((a, b) => b.match.percent - a.match.percent)[0];
       const surpriseHighlight = [...comparable].filter((item) => item !== closestHighlight && item.match.percent < (closestHighlight?.match.percent ?? 101)).sort((a, b) => a.match.percent - b.match.percent)[0];
-      const conversationHighlight = [...comparable].filter((item) => item !== closestHighlight && item !== surpriseHighlight).sort((a, b) => (b.importance * (100 - b.match.percent)) - (a.importance * (100 - a.match.percent)))[0];
+      const conversationHighlight = [...comparable].filter((item) => item !== closestHighlight && item !== surpriseHighlight && item.match.percent < 100).sort((a, b) => (b.importance * (100 - b.match.percent)) - (a.importance * (100 - a.match.percent)))[0];
       const cards = questions.map((question, index) => {
         const isFlipped = state.revealedIds.includes(question.id);
         const escapedQuestionId = escapeHTML(question.id);
@@ -14493,7 +14496,7 @@ var qrcode = function() {
             <div class="score-lock" aria-hidden="${allRevealed}"><span aria-hidden="true">✦</span><strong>Your scores are hiding</strong><small>Flip every card to unlock how in sync you are.</small></div>
             <div class="dual-score-dashboard">
               <div class="overall-alignment">
-                ${alignmentRingMarkup(alignment.overall, "similarity")}
+                ${alignmentRingMarkup(alignment.overall, "similar")}
                 <div class="alignment-summary-copy">
                   <p class="eyebrow">Answer similarity</p>
                   <h3 id="alignment-title">${alignmentCopy.title}</h3>
@@ -14509,11 +14512,11 @@ var qrcode = function() {
                 </div>
               </div>
             </div>
-            <details class="topic-alignment-area" ${window.innerWidth > 600 ? "open" : ""}>
+            ${topicAlignmentCards ? `<details class="topic-alignment-area" ${window.innerWidth > 600 ? "open" : ""}>
               <summary class="topic-alignment-title">Alignment by question pack</summary>
               <div class="topic-alignment-grid">${topicAlignmentCards}</div>
               <div class="alignment-legend"><span>Less aligned</span><span class="heat-gradient"></span><span>More aligned</span></div>
-            </details>
+            </details>` : ""}
           </section>
           <section class="highlight-grid ${allRevealed ? "" : "locked"}" aria-label="Round highlights" id="round-highlights">
             ${highlightCard("Closest match", closestHighlight, "Complete more scored answers to unlock this highlight.")}

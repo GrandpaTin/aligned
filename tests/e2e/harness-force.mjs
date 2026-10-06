@@ -29,7 +29,8 @@ export async function newPage(browser, name, opts, errors) {
 }
 
 export const screenOf = (p) => p.evaluate(() => { try { return JSON.parse(localStorage.getItem("aligned-state-v1")).screen; } catch { return null; } });
-export const dismissTutorial = async (p) => { const t = p.locator("#tutorial-finish"); if (await t.isVisible().catch(() => false)) await t.click(); };
+// The tutorial opens on the next animation frame, which can lag under load; wait briefly for it.
+export const dismissTutorial = async (p) => { const t = p.locator("#tutorial-finish"); await t.waitFor({ state: "visible", timeout: 1500 }).catch(() => {}); if (await t.isVisible().catch(() => false)) { await p.waitForTimeout(450); await t.click(); await t.waitFor({ state: "hidden", timeout: 3000 }).catch(() => {}); } };
 
 export async function answerAll(p, who, { stopAfter = 99 } = {}) {
   await p.waitForSelector("#question-form", { timeout: 4000 }).catch(() => {});
@@ -38,7 +39,11 @@ export async function answerAll(p, who, { stopAfter = 99 } = {}) {
     if (!(await p.locator("#question-form").isVisible().catch(() => false))) return i;
     const ta = p.locator("textarea#answer-input");
     if (await ta.count()) await ta.fill(`${who} answer ${i}`);
-    else await p.locator("input#answer-input").fill(String(1 + (i * 3) % 10));
+    else if (await p.locator("[data-quick-pick]").count()) {
+      await p.locator("[data-quick-pick]").nth(i % 2).click({ force: true });
+      await p.waitForTimeout(900);
+      continue;
+    } else await p.locator("input#answer-input").fill(String(1 + (i * 3) % 10));
     await p.locator('#question-form button[type="submit"]').last().click({ force: true });
     await p.waitForTimeout(250);
   }
