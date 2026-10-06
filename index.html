@@ -6472,9 +6472,10 @@
     /* Narrow phones keep the category name and let the answer-type chip shrink to its icon. */
     @media (max-width: 340px) {
       .question-screen .question-meta { flex-wrap: nowrap; gap: 6px; }
-      .question-screen .category-pill { flex-shrink: 0; white-space: nowrap; }
-      .question-screen .type-chip { padding-inline: 8px; white-space: nowrap; font-size: 0 !important; gap: 0; }
-      .question-screen .type-chip > span { font-size: max(12px, 0.8rem) !important; }
+      .question-screen .category-pill { min-width: 0; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .question-screen .question-meta-actions { flex-shrink: 0; }
+      .question-screen .question-meta .type-chip { padding-inline: 8px; white-space: nowrap; font-size: 0 !important; gap: 0; }
+      .question-screen .question-meta .type-chip > span { font-size: max(12px, 0.8rem) !important; }
     }
     @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
       [data-text-size="large"] .question-screen .quick-pick-option { min-height: 48px; padding-block: 6px; }
@@ -10154,6 +10155,7 @@ var qrcode = function() {
         restored.highContrast = restored.highContrast === true;
         restored.reducedMotion = restored.reducedMotion === true;
         restored.privatePinHash = String(restored.privatePinHash || "");
+        restored.playStyleBeforeJoin = restored.playStyleBeforeJoin === "pass-and-play" ? "pass-and-play" : "";
         restored.sessionPreset = restored.sessionPreset === "pack" || SESSION_PRESETS.some((preset) => preset.id === restored.sessionPreset) ? restored.sessionPreset : "custom";
         restored.playStyle = ["pass-and-play", "nearby"].includes(restored.playStyle) ? restored.playStyle : "pass-and-play";
         restored.tutorialSeen = restored.tutorialSeen === true;
@@ -15079,7 +15081,7 @@ var qrcode = function() {
         const topics = new Set(state.selectedTopics);
         const fresh = getQuestionCatalog().filter((question) => topics.has(question.topic) && usable(question)).length;
         if (fresh >= state.questionCount) return "";
-        return `<p class="topic-note vibe-running-low" role="status">Your chosen packs have only ${fresh} new question${fresh === 1 ? "" : "s"} left — add another pack below for fresh ones, or replay favourites.</p>`;
+        return `<p class="topic-note vibe-running-low" role="status">${fresh ? `Your chosen packs have only ${fresh} new question${fresh === 1 ? "" : "s"} left` : "You’ve played every question in your chosen packs"} — add another pack below for fresh ones, or replay favourites.</p>`;
       }
       return "";
     }
@@ -15496,6 +15498,9 @@ var qrcode = function() {
         markPresetCustom();
         state.selectedTopics = topicInputs.filter((input) => input.checked && !input.disabled).map((input) => input.value);
         saveState();
+        // The "running low" note follows the packs the couple just picked.
+        const note = document.querySelector(".vibe-running-low");
+        if (note) note.outerHTML = vibeRunningLow();
       };
 
       topicInputs.forEach((input) => {
@@ -17164,7 +17169,7 @@ var qrcode = function() {
       };
       const linkLive = Boolean(nearbyRuntime.role) && nearbyRuntime.status !== "idle";
       const localRoundOpen = (state.playStyle !== "nearby" || !linkLive) && state.selectedQuestionIds.length > 0
-        && (["question", "intermission"].includes(state.screen) || ["question", "intermission"].includes(state.resumeScreen) || revealUnfinished());
+        && (["question", "intermission", "nearby-wait"].includes(state.screen) || ["question", "intermission", "nearby-wait"].includes(state.resumeScreen) || revealUnfinished());
       if (!localRoundOpen) {
         join();
         return true;

@@ -101,15 +101,15 @@ behave well? Recommend concrete synthesis changes (notes, envelopes, layering, p
 
 ## Score history
 
-| Reviewer | R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15 | R16 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Mobile | 7.0–8.2 | 8.4–9.2 | 8.6–9.3 | 8.6–9.3 | 8.3–9.2 | 8.7–9.3 | 8.4–9.3 | 8.5–9.3 | 8.8–9.3 | 9.0–9.3 | 9.2–9.4 | 9.3–9.4 | 9.3–9.4 | 9.3–9.5 | 9.3–9.5 | 9.4–9.5 |
-| Desktop | 7.5–8.8 | 7.9–9.2 | 8.0–9.1 | 8.5–9.3 | 7.8–9.0 | 8.4–9.1 | 8.3–9.2 | 8.6–9.3 | 8.8–9.3 | 8.8–9.3 | 9.1–9.3 | 9.1–9.4 | 9.1–9.4 | 9.1–9.4 | 9.3–9.5 | 9.3–9.5 |
-| Multiplayer/QR | 5.0–7.0 | 7.6–8.8 | 8.3–9.0 | 8.5–9.2 | 8.3–9.0 | 8.7–9.2 | 8.8–9.2 | 8.9–9.3 | 9.0–9.3 | 8.8–9.3 | 9.1–9.3 | 9.0–9.3 | 9.2–9.4 | 9.3–9.4 | 9.3–9.5 | 9.3–9.5 |
-| QA/accessibility | 6.6–8.6 | 8.0–8.9 | 8.5–9.2 | 8.6–9.3 | 8.6–9.3 | 8.7–9.2 | 8.0–9.2 | 8.6–9.2 | 8.9–9.3 | — (API outage) | 9.2–9.3 | 9.1–9.4 | 9.1–9.4 | 9.2–9.4 | 9.3–9.5 | 9.2–9.5 |
-| Cross-platform/offline | — | 8.0–9.2 | 8.7–9.5 | 9.3–9.5 | 8.6–9.3 | 9.2–9.5 | 8.5–9.5 | 8.9–9.5 | 9.0–9.5 | 9.2–9.5 | 9.2–9.5 | 9.2–9.5 | 9.2–9.5 | 9.3–9.5 | 9.3–9.5 | 9.3–9.5 |
-| Fun & engagement | — | — | — | — | 7.6–9.1 (fun 7.6) | 8.6–9.1 (fun 8.6) | 8.9–9.3 (fun 8.9) | 8.7–9.3 (fun 9.1) | 8.8–9.3 (fun 9.1) | 9.0–9.3 (fun 9.1/9.2) | 9.2–9.3 (fun 9.3) | 9.2–9.4 (fun 9.2/9.3) | 9.1–9.4 (fun 9.1/9.2) | 9.2–9.4 (fun 9.2/9.3) | 9.1–9.5 (fun 9.1/9.1) | 9.2–9.5 (fun 9.2/9.2) |
-| Sound design | — | — | — | — | 5.8 mobile / 6.0 desktop | 7.4 mobile / 7.8 desktop | 8.3 mobile / 8.6 desktop | 8.7 mobile / 8.9 desktop | 9.0 mobile / 9.2 desktop | 9.2 mobile / 9.3 desktop | 9.3 mobile / 9.4 desktop | 9.4 mobile / 9.5 desktop | 9.3 mobile / 9.4 desktop | 9.4 mobile / 9.5 desktop | 9.4 mobile / 9.5 desktop | 9.4 mobile / 9.5 desktop |
+| Reviewer | R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15 | R16 | R17 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Mobile | 7.0–8.2 | 8.4–9.2 | 8.6–9.3 | 8.6–9.3 | 8.3–9.2 | 8.7–9.3 | 8.4–9.3 | 8.5–9.3 | 8.8–9.3 | 9.0–9.3 | 9.2–9.4 | 9.3–9.4 | 9.3–9.4 | 9.3–9.5 | 9.3–9.5 | 9.4–9.5 | 9.4–9.5 |
+| Desktop | 7.5–8.8 | 7.9–9.2 | 8.0–9.1 | 8.5–9.3 | 7.8–9.0 | 8.4–9.1 | 8.3–9.2 | 8.6–9.3 | 8.8–9.3 | 8.8–9.3 | 9.1–9.3 | 9.1–9.4 | 9.1–9.4 | 9.1–9.4 | 9.3–9.5 | 9.3–9.5 | 9.3–9.5 |
+| Multiplayer/QR | 5.0–7.0 | 7.6–8.8 | 8.3–9.0 | 8.5–9.2 | 8.3–9.0 | 8.7–9.2 | 8.8–9.2 | 8.9–9.3 | 9.0–9.3 | 8.8–9.3 | 9.1–9.3 | 9.0–9.3 | 9.2–9.4 | 9.3–9.4 | 9.3–9.5 | 9.3–9.5 | 9.3–9.5 |
+| QA/accessibility | 6.6–8.6 | 8.0–8.9 | 8.5–9.2 | 8.6–9.3 | 8.6–9.3 | 8.7–9.2 | 8.0–9.2 | 8.6–9.2 | 8.9–9.3 | — (API outage) | 9.2–9.3 | 9.1–9.4 | 9.1–9.4 | 9.2–9.4 | 9.3–9.5 | 9.2–9.5 | 9.3–9.5 |
+| Cross-platform/offline | — | 8.0–9.2 | 8.7–9.5 | 9.3–9.5 | 8.6–9.3 | 9.2–9.5 | 8.5–9.5 | 8.9–9.5 | 9.0–9.5 | 9.2–9.5 | 9.2–9.5 | 9.2–9.5 | 9.2–9.5 | 9.3–9.5 | 9.3–9.5 | 9.3–9.5 | 9.4–9.5 |
+| Fun & engagement | — | — | — | — | 7.6–9.1 (fun 7.6) | 8.6–9.1 (fun 8.6) | 8.9–9.3 (fun 8.9) | 8.7–9.3 (fun 9.1) | 8.8–9.3 (fun 9.1) | 9.0–9.3 (fun 9.1/9.2) | 9.2–9.3 (fun 9.3) | 9.2–9.4 (fun 9.2/9.3) | 9.1–9.4 (fun 9.1/9.2) | 9.2–9.4 (fun 9.2/9.3) | 9.1–9.5 (fun 9.1/9.1) | 9.2–9.5 (fun 9.2/9.2) | 9.2–9.5 (fun 9.2/9.2) |
+| Sound design | — | — | — | — | 5.8 mobile / 6.0 desktop | 7.4 mobile / 7.8 desktop | 8.3 mobile / 8.6 desktop | 8.7 mobile / 8.9 desktop | 9.0 mobile / 9.2 desktop | 9.2 mobile / 9.3 desktop | 9.3 mobile / 9.4 desktop | 9.4 mobile / 9.5 desktop | 9.3 mobile / 9.4 desktop | 9.4 mobile / 9.5 desktop | 9.4 mobile / 9.5 desktop | 9.4 mobile / 9.5 desktop | 9.4 mobile / 9.5 desktop |
 
 R5 reviewed round 5's game-feel branch (commit 0ec3741). Its fixes ship as **1.2.0**: a rebuilt audio engine
 (mix bus, compressor + limiter, ducked generative F-major ambient that suspends in the background, in-key
@@ -231,6 +231,15 @@ from sensitive packs; Home notes a used-up playful vibe with a switch button; bo
 (joiner takes the host's prompt history); join links ask before replacing a local round and keep it resumable until
 the host's round arrives; phone landscape keeps the guess first in a compact row; blur band outside the top bar;
 live Compact floor; reduced-motion finale waits for the match chime; ladder passing notes; bass whole-step rubs.
+
+R17 reviewed 1.3.1 (e0aaef1–5d19d56; cross-platform on 1.3.2 c4e0285), now with three time-boxed reviewers at a
+time and one full suite per round. Its fixes ship as **1.3.2**: the picker prefers vibe-matching questions and caps
+format drift; used-up notes per format and for Custom packs; follow-ups take the first pool with an unheard line, with
+bigger playful/Cozy/written pools and multi-family joke checks; every pairing-screen exit keeps a local round
+resumable; level-1 screen headings; 320 px category name kept; live Home resume-card copy while the partner reveals;
+join warning for orphaned two-phone rounds; guess-aware surprise highlight and honest teases; reduced-motion finale
+after Reveal all waits for the chime; low-only bass rubs; rising ladder passing notes. Cross-platform found no defects;
+its remaining caps are owner items (TURN relay key, real-iPhone audio check).
 
 Round 4 is on `main` (tested, deployed). Round 5's game-design changes are on branch
 **`wip/round5-game-feel`** and are **not yet tested** — they address the Fun findings:
