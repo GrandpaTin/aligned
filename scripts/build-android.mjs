@@ -17,7 +17,8 @@ const javaHome = process.env.JAVA_HOME || join(toolsRoot, "jdk", "jdk-17.0.20.1+
 const sdk = process.env.ANDROID_SDK_ROOT || process.env.ANDROID_HOME || join(toolsRoot, "sdk");
 const buildTools = join(sdk, "build-tools", "35.0.0");
 const androidJar = join(sdk, "platforms", "android-35", "android.jar");
-const keystore = process.env.ALIGNED_KEYSTORE || join(toolsRoot, "aligned-release.jks");
+// Prefer the keystore kept (git-ignored) in the repository folder, then the shared tools folder.
+const keystore = process.env.ALIGNED_KEYSTORE || (existsSync(join(root, "aligned-release.jks")) ? join(root, "aligned-release.jks") : join(toolsRoot, "aligned-release.jks"));
 const storePassword = process.env.ALIGNED_KEYSTORE_PASSWORD || "aligned-local-release";
 const isWindows = process.platform === "win32";
 const exe = (name) => join(buildTools, isWindows ? `${name}.exe` : name);
