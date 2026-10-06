@@ -1,0 +1,17 @@
+import { launch, BASE, dismissTutorial } from "./harness.mjs";
+const b = await launch(); const errors = [];
+const ctx = await b.newContext({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true, userAgent: "Mozilla/5.0 (Linux; Android 14; Pixel 9a) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Mobile Safari/537.36 wv AlignedAndroid/1.1.0" });
+await ctx.addInitScript(() => { window.__calls = []; window.AlignedAndroid = { version: () => "1.1.0", saveFile: (n, m, b64) => { window.__calls.push(["saveFile", n, m, atob(b64).length]); return true; }, share: (t, x, u) => window.__calls.push(["share", u.slice(0, 40)]), copyText: (t) => { window.__calls.push(["copy", t.slice(0, 40)]); return true; }, openExternal: (u) => window.__calls.push(["open", u]) }; });
+const p = await ctx.newPage(); p.on("pageerror", e => errors.push(String(e))); p.on("console", m => m.type() === "error" && errors.push(m.text()));
+await p.goto(BASE); await p.waitForTimeout(800); await dismissTutorial(p);
+console.log("share:", await p.evaluate(() => [typeof navigator.share, IN_ANDROID_APP, String(navigator.share).slice(0,60)])); console.log("sw registered:", await p.evaluate(async () => !!(await navigator.serviceWorker.getRegistration())));
+await p.click("#settings-button"); await p.waitForTimeout(300);
+console.log((await p.locator("#offline-card").innerText()).replace(/\s+/g, " ").slice(0, 200));
+await p.click("#export-data"); await p.waitForTimeout(300);
+console.log("back on settings ->", await p.evaluate(() => window.alignedHandleBack()), await p.evaluate(() => JSON.parse(localStorage.getItem("aligned-state-v1")).screen));
+console.log("back on home ->", await p.evaluate(() => window.alignedHandleBack()));
+await p.fill("#player-one", "Avery"); await p.fill("#player-two", "Jordan"); await p.click('[data-play-style="nearby"]'); await p.locator('#setup-form button[type="submit"]').click();
+await p.waitForSelector("#nearby-host"); await p.click("#nearby-host"); await p.waitForSelector("#copy-join-link", { timeout: 15000 });
+await p.click("#copy-join-link"); if (await p.locator("#share-join-link").count()) await p.click("#share-join-link");
+await p.waitForTimeout(300); console.log("calls", await p.evaluate(() => window.__calls));
+console.log("errors", errors); await b.close();

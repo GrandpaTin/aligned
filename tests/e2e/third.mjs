@@ -1,0 +1,10 @@
+import { launch, newPage, PHONE, DESKTOP, pair, dismissTutorial } from "./harness.mjs";
+const errors = []; const b = await launch();
+const host = await newPage(b, "host", DESKTOP, errors); const join = await newPage(b, "join", PHONE, errors); const third = await newPage(b, "third", PHONE, errors);
+const url = await pair(host, join);
+await third.goto(url); await third.waitForTimeout(500); await dismissTutorial(third); await third.waitForTimeout(6000);
+const st = await third.evaluate(() => nearbyRuntime.status);
+const joinOk = await join.evaluate(() => nearbyChannelOpen());
+console.log("third status:", st, "| partner still connected:", joinOk);
+await third.screenshot({ path: "third.png" });
+console.log(st === "in-use" && joinOk ? "RESULT PASS third" : "RESULT FAIL third", "errors", errors); await b.close();
