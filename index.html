@@ -6239,7 +6239,7 @@
     }
     [data-theme="pastel"] :is(button, a, summary, select, textarea, [tabindex]):focus-visible,
     [data-theme="pastel"] input:focus-visible + :is(.count-card, .topic-chip, .intensity-card, .mode-card) { outline-color: #be123c; }
-    h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
+    h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus, h3[tabindex="-1"]:focus:not(:focus-visible) { outline: none; }
 
     .setting-row { cursor: pointer; }
     .setting-row input[type="checkbox"] {
@@ -11011,6 +11011,11 @@ var qrcode = function() {
 
     function refreshRevealFromPartner() {
       if (state.screen === "results") { render(); return; }
+      if (state.screen === "setup" && ["celebration", "reveal"].includes(state.resumeScreen)) {
+        const line = document.querySelector(".resume-card .resume-copy span");
+        if (line) line.textContent = resumeRevealCopy();
+        return;
+      }
       if (state.screen !== "reveal") return;
       // The partner just finished the reveal: a "scores not revealed yet" warning is now false.
       if (!revealUnfinished()) dismissConfirmDialogs("reveal-guard");
@@ -12236,7 +12241,7 @@ var qrcode = function() {
         const rubs = (frequency, chord) => chord.some((other) => {
           const cents = Math.abs(1200 * Math.log2(frequency / other)) % 1200;
           const distance = Math.min(cents, 1200 - cents);
-          return (distance > 50 && distance < 150) || (Math.min(frequency, other) < 300 && distance >= 150 && distance < 250);
+          return (distance > 50 && distance < 150) || (Math.max(frequency, other) < 300 && distance >= 150 && distance < 250);
         });
         const curve = (rising) => Float32Array.from({ length: 32 }, (_, step) => {
           const phase = (step / 31) * Math.PI / 2;
@@ -12617,16 +12622,18 @@ var qrcode = function() {
           const rung = ladder[index];
           const stepPeak = 0.08 * jitter() * (themeName === "dreamy" ? 0.85 : 1);
           const stepExtra = themeName === "dreamy" ? { ...wobble(), decay: 0.7 } : wobble();
-          sequence(rung.map((d) => pentatonic(d)), 0.055, stepPeak, stepExtra);
-          if (raw > 0 && rungIndex(raw - 1) === index) {
-            const lift = rung[1] + 1 < ladder[ladder.length - 1][1] ? rung[1] + 1 : rung[0] + 1;
-            end = Math.max(end, note(pentatonic(lift), start + 2 * gap(0.055), stepPeak * 0.5, stepExtra));
+          const repeated = raw > 0 && rungIndex(raw - 1) === index;
+          const canLift = rung[1] + 1 < ladder[ladder.length - 1][1];
+          sequence((repeated && !canLift ? [rung[0], rung[0] + 1, rung[1]] : rung).map((d) => pentatonic(d)), 0.055, stepPeak, stepExtra);
+          if (repeated && canLift) {
+            end = Math.max(end, note(pentatonic(rung[1] + 1), start + 2 * gap(0.055), stepPeak * 0.5, stepExtra));
           }
         } else if (kind === "lock") {
           sequence([pentatonic(3), pentatonic(2), pentatonic(0)], 0.075, 0.08, themeName === "cute" ? { octaveLevel: 0.6 } : undefined);
         } else if (kind === "unlock") {
           sequence([pentatonic(3, 4), pentatonic(0), pentatonic(2), pentatonic(3)], 0.06, 0.09, themeName === "cute" ? { octaveLevel: 0.6 } : undefined);
         } else if (kind === "reveal") {
+          audioEngine.lastRevealAt = Date.now();
           noiseSweep(ctx, start, { from: 1400, to: 2800, duration: 0.07, peak: 0.04 });
           const d = (Number(options.degree) || 0) % 5;
           sequence([pentatonic(d), pentatonic(d + 3)], 0.06, 0.09 * (themeName === "dreamy" ? 0.75 : 1));
@@ -15077,6 +15084,11 @@ var qrcode = function() {
       return "";
     }
 
+    function resumeRevealCopy() {
+      const left = revealRemainingCopy();
+      return left ? `${left} · your scores are still hiding` : "Everything’s revealed — your scores are ready to count up";
+    }
+
     function presetAfterPack() {
       const previous = state.packReturnPreset;
       return SESSION_PRESETS.some((preset) => preset.id === previous) ? previous : "custom";
@@ -15106,7 +15118,7 @@ var qrcode = function() {
           <div class="resume-copy">
             <strong>${["celebration", "reveal"].includes(state.resumeScreen) ? "Back to your reveal board" : "Continue your paused round"}</strong>
             <span>${["celebration", "reveal"].includes(state.resumeScreen)
-              ? `${escapeHTML(revealRemainingCopy() || "Everything’s revealed")} · your scores are still hiding`
+              ? escapeHTML(resumeRevealCopy())
               : state.resumeScreen === "intermission"
               ? `Handoff to ${escapeHTML(state.names[state.activePlayer === 0 ? 1 : 0] || "the next player")}`
               : state.resumeScreen === "nearby-wait"
@@ -16476,7 +16488,9 @@ var qrcode = function() {
       const biggestMiss = (item) => Math.max(...[0, 1].map((player) => guessHit(item.question, player)?.distance ?? -1));
       // The best surprise is a confident guess that missed; otherwise the widest gap.
       const guessSurprise = [...comparable].filter((item) => item !== closestHighlight && biggestMiss(item) >= 3).sort((a, b) => biggestMiss(b) - biggestMiss(a))[0];
-      const surpriseHighlight = guessSurprise || [...comparable].filter((item) => item !== closestHighlight && item.match.percent < (closestHighlight?.match.percent ?? 101)).sort((a, b) => a.match.percent - b.match.percent)[0];
+      // A gap both partners predicted correctly is no surprise, so it never stands in for one.
+      const bothReadIt = (item) => [0, 1].every((player) => guessHit(item.question, player)?.distance === 0);
+      const surpriseHighlight = guessSurprise || [...comparable].filter((item) => item !== closestHighlight && !bothReadIt(item) && item.match.percent < (closestHighlight?.match.percent ?? 101)).sort((a, b) => a.match.percent - b.match.percent)[0];
       const surpriseNote = (() => {
         if (!guessSurprise || surpriseHighlight !== guessSurprise) return "";
         const player = [0, 1].sort((a, b) => (guessHit(guessSurprise.question, b)?.distance ?? -1) - (guessHit(guessSurprise.question, a)?.distance ?? -1))[0];
@@ -16600,8 +16614,8 @@ var qrcode = function() {
             </details>` : ""}
           </section>
           <section class="highlight-grid ${allRevealed ? "" : "locked"}" aria-label="Round highlights" id="round-highlights">
-            ${highlightCard(closestHighlight && closestHighlight.match.percent < 60 ? "Nearest common ground" : "Closest match", closestHighlight, "Complete more scored answers to unlock this highlight.", "", "One answer lines up beautifully…")}
-            ${highlightCard(surpriseNote && surpriseHighlight?.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No big surprises this round.", surpriseNote, surpriseHighlight ? "Someone is in for a surprise…" : "Will anything surprise you? Unlocks with the scores…")}
+            ${highlightCard(closestHighlight && closestHighlight.match.percent < 60 ? "Nearest common ground" : "Closest match", closestHighlight, "Complete more scored answers to unlock this highlight.", "", closestHighlight && closestHighlight.match.percent < 60 ? "Your nearest common ground is waiting…" : "One answer lines up beautifully…")}
+            ${highlightCard(surpriseNote && surpriseHighlight?.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No big surprises this round.", surpriseNote, guessSurprise ? "Someone is in for a surprise…" : surpriseHighlight ? "The widest gap is waiting…" : "Will anything surprise you?")}
             ${conversationHighlight ? highlightCard("Best conversation starter", conversationHighlight, "", "", "There is a story waiting in one card…") : ""}
             ${tally.some((item) => item.made) ? `<article class="highlight-card mind-reader"><span>🔮 Mind-reader</span><strong class="highlight-answer">${mindReaderHeadline(tally)}<small class="highlight-note">${tally.filter((item) => item.made).map((item) => `${escapeHTML(state.names[item.player])} read ${escapeHTML(state.names[item.player === 0 ? 1 : 0])} ${item.hits}/${item.made}`).join(" · ")}</small></strong><strong class="highlight-locked">${tally.some((item) => item.hits) ? "Someone read the other’s mind… " : "Did anyone read minds tonight? "}<small>${everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"}</small></strong></article>` : ""}
           </section>
@@ -16777,7 +16791,8 @@ var qrcode = function() {
         announce(`Scores unlocked: ${ringNames}.`);
         if (motionReduced()) {
           const sinceMatch = Date.now() - (audioEngine.lastMatchAt || 0);
-          window.setTimeout(() => playSound("celebrate", { finale: true }), Math.max(0, 650 - sinceMatch));
+          const sinceReveal = Date.now() - (audioEngine.lastRevealAt || 0);
+          window.setTimeout(() => playSound("celebrate", { finale: true }), Math.max(0, 650 - sinceMatch, 300 - sinceReveal));
           window.setTimeout(() => {
             dashboard.scrollIntoView({ block: "center", behavior: "auto" });
             const heading = dashboard.querySelector("#alignment-title");
@@ -16952,8 +16967,6 @@ var qrcode = function() {
         flipCards.forEach((card) => {
           applyCardState(card, shouldReveal);
         });
-        updateRevealAllButton();
-        saveState();
         if (shouldReveal) {
           const matches = questions.filter((question) => matchInfoById.get(question.id)?.isMatch).length;
           if (matches) {
@@ -16965,6 +16978,8 @@ var qrcode = function() {
         } else {
           playSound("tap");
         }
+        updateRevealAllButton();
+        saveState();
         requestAnimationFrame(() => requestAnimationFrame(sizeAllCards));
       });
 
@@ -17147,7 +17162,8 @@ var qrcode = function() {
         render();
         prepareNearbyJoin(launchRoomId, launchJoinToken);
       };
-      const localRoundOpen = state.playStyle !== "nearby" && state.selectedQuestionIds.length > 0
+      const linkLive = Boolean(nearbyRuntime.role) && nearbyRuntime.status !== "idle";
+      const localRoundOpen = (state.playStyle !== "nearby" || !linkLive) && state.selectedQuestionIds.length > 0
         && (["question", "intermission"].includes(state.screen) || ["question", "intermission"].includes(state.resumeScreen) || revealUnfinished());
       if (!localRoundOpen) {
         join();
