@@ -1,4 +1,4 @@
-const CACHE_NAME = "aligned-v19";
+const CACHE_NAME = "aligned-v20";
 const NAVIGATION_TIMEOUT_MS = 3000;
 const APP_FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./og-image.jpg", "./apple-touch-icon.png", "./icon-maskable-512.png"];
 

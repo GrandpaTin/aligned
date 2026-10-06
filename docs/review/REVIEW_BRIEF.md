@@ -101,15 +101,15 @@ behave well? Recommend concrete synthesis changes (notes, envelopes, layering, p
 
 ## Score history
 
-| Reviewer | R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Mobile | 7.0–8.2 | 8.4–9.2 | 8.6–9.3 | 8.6–9.3 | 8.3–9.2 | 8.7–9.3 | 8.4–9.3 | 8.5–9.3 | 8.8–9.3 | 9.0–9.3 |
-| Desktop | 7.5–8.8 | 7.9–9.2 | 8.0–9.1 | 8.5–9.3 | 7.8–9.0 | 8.4–9.1 | 8.3–9.2 | 8.6–9.3 | 8.8–9.3 | 8.8–9.3 |
-| Multiplayer/QR | 5.0–7.0 | 7.6–8.8 | 8.3–9.0 | 8.5–9.2 | 8.3–9.0 | 8.7–9.2 | 8.8–9.2 | 8.9–9.3 | 9.0–9.3 | 8.8–9.3 |
-| QA/accessibility | 6.6–8.6 | 8.0–8.9 | 8.5–9.2 | 8.6–9.3 | 8.6–9.3 | 8.7–9.2 | 8.0–9.2 | 8.6–9.2 | 8.9–9.3 | — (API outage) |
-| Cross-platform/offline | — | 8.0–9.2 | 8.7–9.5 | 9.3–9.5 | 8.6–9.3 | 9.2–9.5 | 8.5–9.5 | 8.9–9.5 | 9.0–9.5 | 9.2–9.5 |
-| Fun & engagement | — | — | — | — | 7.6–9.1 (fun 7.6) | 8.6–9.1 (fun 8.6) | 8.9–9.3 (fun 8.9) | 8.7–9.3 (fun 9.1) | 8.8–9.3 (fun 9.1) | 9.0–9.3 (fun 9.1/9.2) |
-| Sound design | — | — | — | — | 5.8 mobile / 6.0 desktop | 7.4 mobile / 7.8 desktop | 8.3 mobile / 8.6 desktop | 8.7 mobile / 8.9 desktop | 9.0 mobile / 9.2 desktop | 9.2 mobile / 9.3 desktop |
+| Reviewer | R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | R11 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Mobile | 7.0–8.2 | 8.4–9.2 | 8.6–9.3 | 8.6–9.3 | 8.3–9.2 | 8.7–9.3 | 8.4–9.3 | 8.5–9.3 | 8.8–9.3 | 9.0–9.3 | 9.2–9.4 |
+| Desktop | 7.5–8.8 | 7.9–9.2 | 8.0–9.1 | 8.5–9.3 | 7.8–9.0 | 8.4–9.1 | 8.3–9.2 | 8.6–9.3 | 8.8–9.3 | 8.8–9.3 | 9.1–9.3 |
+| Multiplayer/QR | 5.0–7.0 | 7.6–8.8 | 8.3–9.0 | 8.5–9.2 | 8.3–9.0 | 8.7–9.2 | 8.8–9.2 | 8.9–9.3 | 9.0–9.3 | 8.8–9.3 | 9.1–9.3 |
+| QA/accessibility | 6.6–8.6 | 8.0–8.9 | 8.5–9.2 | 8.6–9.3 | 8.6–9.3 | 8.7–9.2 | 8.0–9.2 | 8.6–9.2 | 8.9–9.3 | — (API outage) | 9.2–9.3 |
+| Cross-platform/offline | — | 8.0–9.2 | 8.7–9.5 | 9.3–9.5 | 8.6–9.3 | 9.2–9.5 | 8.5–9.5 | 8.9–9.5 | 9.0–9.5 | 9.2–9.5 | 9.2–9.5 |
+| Fun & engagement | — | — | — | — | 7.6–9.1 (fun 7.6) | 8.6–9.1 (fun 8.6) | 8.9–9.3 (fun 8.9) | 8.7–9.3 (fun 9.1) | 8.8–9.3 (fun 9.1) | 9.0–9.3 (fun 9.1/9.2) | 9.2–9.3 (fun 9.3) |
+| Sound design | — | — | — | — | 5.8 mobile / 6.0 desktop | 7.4 mobile / 7.8 desktop | 8.3 mobile / 8.6 desktop | 8.7 mobile / 8.9 desktop | 9.0 mobile / 9.2 desktop | 9.2 mobile / 9.3 desktop | 9.3 mobile / 9.4 desktop |
 
 R5 reviewed round 5's game-feel branch (commit 0ec3741). Its fixes ship as **1.2.0**: a rebuilt audio engine
 (mix bus, compressor + limiter, ducked generative F-major ambient that suspends in the background, in-key
@@ -173,6 +173,17 @@ a pack, no duplicate pack names, pastel error colour, red discard confirm; conne
 round from Home, joiner leave committed only once the new round starts (and they become Player 1), focus
 never restored into text fields, expired-room host asked before leaving an unfinished reveal; reduced-motion
 face switch without delay, nested-dialog Esc, sticky-bar background fallback.
+
+R11 reviewed 1.2.5 (commit caa1078), now run **two reviewers at a time** to keep the machine responsive. Its fixes
+ship as **1.2.6**: linked phones end the two-phone link properly before starting a pack or one-device round (host
+packs start as shared rounds), round-inits never replace a local round and close stale leave dialogs; import
+asks before replacing packs/favourites/edits; empty packs aren't offered; pack ids de-duplicated; delete toast
+and focus; card back focusable at once but opaque only at 90°; round intro in the question header instead of a
+toast; settings tooltip opens leftwards; pointer verbs in toasts; vibe-first non-repeating celebration
+headlines, written-answer teaser and library progress, twin questions not repeated in one night, stricter light
+detection; short pad crossfade, cute low cues lifted for phones, louder count-up landing with the rings, an
+11-rung step ladder, slider capped at E6, idle audio suspended; edit-dialog textarea, stale errors cleared,
+pack builder stays open, theme-matched Start bar, 12 px floor on desktop meta text.
 
 Round 4 is on `main` (tested, deployed). Round 5's game-design changes are on branch
 **`wip/round5-game-feel`** and are **not yet tested** — they address the Fun findings:
