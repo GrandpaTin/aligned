@@ -26,3 +26,7 @@ dist/
 
 # Android build intermediates (the signed APK in downloads/ is published)
 android/build/
+
+# Android release signing key: never commit (the repository is public)
+*.jks
+*.keystore
