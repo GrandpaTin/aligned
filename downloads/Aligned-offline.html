@@ -6602,6 +6602,7 @@
     /* D3: forced colors turn the faint decorative rings into solid arcs over the text. */
     @media (forced-colors: active) { .card-front::after, .card-front::before, .question-decor { display: none !important; } }
     /* D1: every clickable card, chip and button answers the pointer before it is clicked, in every theme. */
+    .measuring-text * { transition: none !important; }
     /* F2: a closed card's hidden back must not hang below it and stretch the page (after the 90° swap). */
     .flip-card:not(.flipped) .card-back { max-height: 100%; overflow: hidden; transition: opacity 0s linear 0.089s, visibility 0s linear 0.089s, max-height 0s linear 0.089s; }
     /* Windows High Contrast flattens the tinted selected states; mark them with the system highlight. */
@@ -6612,7 +6613,8 @@
       .setting-row input[type="checkbox"]:checked { background: Highlight; border-color: Highlight; forced-color-adjust: none; }
       .setting-row input[type="checkbox"]:checked::before { background: HighlightText; }
       .range-input { forced-color-adjust: auto; border: 1px solid ButtonText; border-radius: 999px; }
-      .theme-option input:checked + .theme-card { outline: 3px solid Highlight !important; outline-offset: 2px; border-color: Highlight !important; }
+      .theme-option input:checked + .theme-card,
+      :is(.count-option, .intensity-option, .mode-option, .topic-option) input:checked + * { outline: 3px solid Highlight !important; outline-offset: 2px; border-color: Highlight !important; }
       :is(.active, .chosen, .selected, [aria-pressed="true"], [aria-checked="true"], [aria-selected="true"]) { outline: 3px solid Highlight !important; outline-offset: 2px; border-color: Highlight !important; }
     }
     @media (hover: hover) {
@@ -13856,6 +13858,7 @@ var qrcode = function() {
     function enforceCompactFloor() {
       document.querySelectorAll("[data-compact-floor]").forEach((element) => { element.style.removeProperty("font-size"); element.removeAttribute("data-compact-floor"); });
       if (state.textSize !== "small") return;
+      document.documentElement.classList.add("measuring-text");
       document.querySelectorAll("#app *, .topbar *, .bottom-nav *").forEach((element) => {
         if (element.closest(".text-size-option, svg, .reveal-buddy, .progress-star, .pass-person, .card-spark, .question-decor") || !element.textContent.trim()) return;
         if (parseFloat(getComputedStyle(element).fontSize) < 11.95) {
@@ -13863,6 +13866,7 @@ var qrcode = function() {
           element.setAttribute("data-compact-floor", "");
         }
       });
+      document.documentElement.classList.remove("measuring-text");
     }
 
     function render() {
@@ -16498,6 +16502,7 @@ var qrcode = function() {
         const back = card.querySelector(".card-back");
         const activeFace = card.classList.contains("flipped") ? back : front;
         const requiredHeight = Math.max(card.classList.contains("flipped") ? activeFace.scrollHeight : activeFace.offsetHeight, 210);
+        if (!card.classList.contains("flipped")) card.dataset.closedHeight = String(requiredHeight);
         card.style.height = `${requiredHeight}px`;
       }
 
@@ -16505,15 +16510,15 @@ var qrcode = function() {
         flipCards.forEach(sizeCard);
         const rows = new Map();
         flipCards.forEach((card) => {
-          if (card.classList.contains("flipped")) return;
           const top = card.offsetTop;
           if (!rows.has(top)) rows.set(top, []);
           rows.get(top).push(card);
         });
         rows.forEach((row) => {
           if (row.length < 2) return;
-          const tallest = Math.max(...row.map((card) => parseFloat(card.style.height) || 0));
-          row.forEach((card) => { card.style.height = `${tallest}px`; });
+          const closedHeight = (card) => card.classList.contains("flipped") ? Number(card.dataset.closedHeight) || 0 : parseFloat(card.style.height) || 0;
+          const tallest = Math.max(...row.map(closedHeight));
+          row.forEach((card) => { if (!card.classList.contains("flipped")) card.style.height = `${tallest}px`; });
         });
       }
 
@@ -16665,8 +16670,8 @@ var qrcode = function() {
         requestAnimationFrame(() => {
           sizeCard(card);
           if (!card.classList.contains("flipped")) {
-            const neighbours = flipCards.filter((other) => other !== card && !other.classList.contains("flipped") && other.offsetTop === card.offsetTop);
-            const tallest = Math.max(parseFloat(card.style.height) || 0, ...neighbours.map((other) => parseFloat(other.style.height) || 0));
+            const neighbours = flipCards.filter((other) => other !== card && other.offsetTop === card.offsetTop);
+            const tallest = Math.max(parseFloat(card.style.height) || 0, ...neighbours.map((other) => other.classList.contains("flipped") ? Number(other.dataset.closedHeight) || 0 : parseFloat(other.style.height) || 0));
             card.style.height = `${tallest}px`;
           }
           if (!focus) return;
