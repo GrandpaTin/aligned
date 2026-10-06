@@ -6465,6 +6465,20 @@
     @media (hover: hover) { .quick-pick-option:hover { border-color: color-mix(in srgb, var(--question-color, var(--coral)) 45%, var(--line)); } }
     .quick-pick-option.active { border-color: var(--question-color, var(--coral)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--question-color, var(--coral)) 22%, transparent); transform: translateY(-2px); }
     [data-theme="pastel"] .quick-pick-option { background: #ffffff; color: #1e293b; }
+    .nowrap { white-space: nowrap; }
+    .quick-pick-option, .quick-guess-option { overflow-wrap: normal; word-break: normal; hyphens: auto; -webkit-hyphens: auto; }
+    @media (max-width: 380px) {
+      .quick-pick-option { flex-direction: column; gap: 4px; padding: 12px 10px; min-height: 84px; }
+      .quick-guess-option { flex: 1 1 100%; }
+    }
+    @media (max-width: 340px) { .quick-pick { grid-template-columns: 1fr; } .quick-pick-option { min-height: 64px; flex-direction: row; } }
+    @media (max-width: 420px) {
+      [data-text-size="large"] .quick-pick { grid-template-columns: 1fr; }
+      [data-text-size="large"] .quick-pick-option { min-height: 64px; flex-direction: row; }
+      [data-text-size="large"] .quick-guess-option { flex: 1 1 100%; }
+    }
+    /* M2: the light theme's category label needs a darker mix to stay readable on its tint. */
+    [data-theme="pastel"] .question-card .category-pill { color: color-mix(in srgb, var(--question-color, #7c3aed) 50%, #1e293b) !important; }
     .quick-pick-between > summary { cursor: pointer; color: var(--muted); list-style: none; }
     .quick-pick-between > summary::-webkit-details-marker { display: none; }
     .quick-pick-between > summary::before { content: "▸"; display: inline-block; margin-right: 6px; color: var(--coral); transition: transform 160ms ease; }
@@ -6637,6 +6651,11 @@
     @media (hover: hover) and (prefers-reduced-motion: reduce) { :is(.play-style-card, .preset-card, .theme-card):hover { transform: none !important; } }
     /* Phone landscape: the sticky action bar would cover the prompt itself, so it scrolls with the card. */
     @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+      .question-screen .turn-name { font-size: 1.15rem !important; line-height: 1.2; }
+      .question-screen .question-header .eyebrow { margin-bottom: 0; }
+      .question-screen .quick-guess, .question-screen .guess-panel { margin-top: 8px; padding: 6px 10px; }
+      .question-screen .quick-guess small, .question-screen .guess-label small { display: none; }
+      .question-screen .quick-pick-option { min-height: 56px; padding: 8px 10px; }
       .question-screen .question-actions { position: static !important; box-shadow: none !important; }
       .question-screen .progress-constellation { display: none; }
       .question-screen .question-header { margin-bottom: 4px; }
@@ -11161,7 +11180,10 @@ var qrcode = function() {
         if (state.screen === "reveal" && (payload.all === true || payload.all === false)) {
           const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "Your partner";
           showToast(payload.all ? `${partner} revealed every card` : `${partner} hid every card`);
-          playSound(payload.all ? "reveal" : "tap");
+          if (payload.all) {
+            const anyMatch = getSelectedQuestions().filter(Boolean).some((question) => revealMatchInfo(question, state.answers[0][question.id], state.answers[1][question.id])?.isMatch);
+            playSound("partner-flip", { match: anyMatch, degree: 0 });
+          }
         } else if (state.screen === "reveal" && newlyRevealed.length === 1) {
           const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "Your partner";
           const number = state.selectedQuestionIds.indexOf(newlyRevealed[0]) + 1;
@@ -12152,20 +12174,21 @@ var qrcode = function() {
           osc.type = "triangle";
           osc.frequency.value = frequency;
           // Detune follows the pitch, not the voice slot, so a note shared by two chords stays in tune with itself.
-          const noteNumber = Math.round(12 * Math.log2(frequency / 440));
-          osc.detune.value = (noteNumber % 2 === 0 ? 4 : -4) + ((noteNumber * 7) % 3 - 1);
+          const pitchClass = ((Math.round(12 * Math.log2(frequency / 440)) % 12) + 12) % 12;
+          osc.detune.value = (pitchClass % 2 === 0 ? 4 : -4) + ((pitchClass * 7) % 3 - 1);
           const lateIn = !first && rubs(frequency, previous);
           const earlyOut = rubs(frequency, next);
-          if (first || lateIn) {
+          if (first) {
             gain.gain.setValueAtTime(0.0001, at);
-            if (lateIn) gain.gain.setValueAtTime(0.0001, at + 0.3);
-            gain.gain.linearRampToValueAtTime(0.03, at + (first ? fadeIn : 1.2));
+            gain.gain.linearRampToValueAtTime(0.03, at + fadeIn);
+          } else if (lateIn) {
+            gain.gain.setValueAtTime(0.0001, at);
+            gain.gain.setValueCurveAtTime(curve(true), at + 0.3, 0.9);
           } else {
             gain.gain.setValueCurveAtTime(curve(true), at, 1.2);
           }
           if (earlyOut) {
-            gain.gain.setValueAtTime(0.03, at + CHORD_SECONDS);
-            gain.gain.linearRampToValueAtTime(0.0001, at + CHORD_SECONDS + 0.6);
+            gain.gain.setValueCurveAtTime(curve(false), at + CHORD_SECONDS, 0.6);
           } else {
             gain.gain.setValueCurveAtTime(curve(false), at + CHORD_SECONDS, 1.2);
           }
@@ -12520,8 +12543,8 @@ var qrcode = function() {
           const stepPeak = 0.08 * jitter() * (themeName === "dreamy" ? 0.85 : 1);
           const stepExtra = themeName === "dreamy" ? { ...wobble(), decay: 0.7 } : wobble();
           sequence(rung.map((d) => pentatonic(d)), 0.055, stepPeak, stepExtra);
-          if (raw > 0 && rungIndex(raw - 1) === index) {
-            end = Math.max(end, note(pentatonic(Math.min(rung[1] + 1, ladder[ladder.length - 1][1] - 1)), start + 2 * gap(0.055), stepPeak * 0.5, stepExtra));
+          if (raw > 0 && rungIndex(raw - 1) === index && rung[1] + 1 < ladder[ladder.length - 1][1]) {
+            end = Math.max(end, note(pentatonic(rung[1] + 1), start + 2 * gap(0.055), stepPeak * 0.5, stepExtra));
           }
         } else if (kind === "lock") {
           sequence([pentatonic(3), pentatonic(2), pentatonic(0)], 0.075, 0.08, themeName === "cute" ? { octaveLevel: 0.6 } : undefined);
@@ -12595,8 +12618,8 @@ var qrcode = function() {
           duck = 0.8;
         } else if (kind === "partner-flip") {
           const d = (Number(options.degree) || 0) % 5;
-          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045, { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true });
-          duck = 0.9;
+          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 1.4 : 1), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true });
+          duck = 0.8;
         } else if (kind === "open") {
           noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.11, q: 0.8 });
           sequence([pentatonic(0), pentatonic(2), pentatonic(4)], 0.08, 0.08, themeName === "cute" ? { octaveLevel: 0.6 } : undefined);
@@ -16275,7 +16298,7 @@ var qrcode = function() {
         return `
           <div class="topic-alignment-card">
             ${alignmentRingMarkup(item.score, "similar")}
-            <span class="topic-alignment-name">${topic?.icon || "•"} ${escapeHTML(topic?.label || item.topic)} · ${item.fitScore}% fit · ${item.count}Q</span>
+            <span class="topic-alignment-name"><span class="nowrap">${topic?.icon || "•"} ${escapeHTML(topic?.label || item.topic)}</span> <span class="nowrap">· ${item.fitScore}% fit</span> <span class="nowrap">· ${item.count}Q</span></span>
           </div>
         `;
       }).join("");
