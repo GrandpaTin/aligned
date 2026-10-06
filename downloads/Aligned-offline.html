@@ -6238,7 +6238,7 @@
     }
     [data-theme="pastel"] :is(button, a, summary, select, textarea, [tabindex]):focus-visible,
     [data-theme="pastel"] input:focus-visible + :is(.count-card, .topic-chip, .intensity-card, .mode-card) { outline-color: #be123c; }
-    h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
+    h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus, h3[tabindex="-1"]:focus:not(:focus-visible) { outline: none; }
 
     .setting-row { cursor: pointer; }
     .setting-row input[type="checkbox"] {
@@ -6468,11 +6468,22 @@
     .vibe-running-low { grid-column: 1 / -1; margin: 4px 0 0; }
     @media (pointer: coarse) { .vibe-running-low .text-btn { min-height: 44px; } }
     .topic-alignment-card { justify-content: flex-start !important; }
+    /* Narrow phones keep the category name and let the answer-type chip shrink to its icon. */
     @media (max-width: 340px) {
       .question-screen .question-meta { flex-wrap: nowrap; gap: 6px; }
-      .question-screen .category-pill { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .question-screen .type-chip { padding-inline: 8px; white-space: nowrap; }
+      .question-screen .category-pill { flex-shrink: 0; white-space: nowrap; }
+      .question-screen .type-chip { padding-inline: 8px; white-space: nowrap; font-size: 0 !important; gap: 0; }
+      .question-screen .type-chip > span { font-size: max(12px, 0.8rem) !important; }
     }
+    @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+      [data-text-size="large"] .question-screen .quick-pick-option { min-height: 48px; padding-block: 6px; }
+      [data-text-size="large"] .question-screen .quick-pick { margin-top: 4px; }
+    }
+    @media (max-width: 400px) {
+      [data-text-size="large"] .question-actions .primary-btn { white-space: nowrap; flex: 1 0 auto; }
+    }
+    .vibe-running-low .text-btn { color: var(--coral); font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+    [data-theme="pastel"] .vibe-running-low .text-btn { color: #be123c; }
     /* Words break only when one can't fit a line on its own (hyphens: auto would hyphenate words that fit). */
     .quick-pick-option, .quick-guess-option { overflow-wrap: break-word; word-break: normal; hyphens: manual; -webkit-hyphens: manual; }
     @media (max-width: 380px) {
@@ -9650,7 +9661,14 @@ var qrcode = function() {
           "What tiny tradition could celebrate this one?",
           "Who said it first in your heads? Be honest.",
           "Give this match a nickname you’ll both remember.",
-          "What would your future selves toast to here?"
+          "What would your future selves toast to here?",
+          "If this match had a theme song, what would it be called?",
+          "Celebrate this with a ten-second victory dance — or just describe one.",
+          "What emoji sums up this match?",
+          "Give yourselves a gold star — what’s the prize?",
+          "Which of you would brag about this match first?",
+          "What would a fortune cookie say about this one?",
+          "Rate this match on a scale of one to fireworks."
         ],
         medium: [
           "Where do your answers overlap, even if the numbers or wording differ?",
@@ -9819,7 +9837,7 @@ var qrcode = function() {
       ]
     };
     // The playful lines at the end of warm.close, offered first on every other match of a soft night.
-    const PLAYFUL_WARM_CLOSE = DISCUSSION_PROMPTS.warm.close.slice(-5);
+    const PLAYFUL_WARM_CLOSE = DISCUSSION_PROMPTS.warm.close.slice(-12);
     DISCUSSION_PROMPTS.cozyFar = [
       "What’s the story behind your answer?",
       "Give one compliment about the other side.",
@@ -9828,7 +9846,13 @@ var qrcode = function() {
       "What would a perfect evening look like with a bit of both?",
       "Ask one curious question about the other answer.",
       "What did you learn about each other just now?",
-      "Where would you each be happy to meet in the middle?"
+      "Where would you each be happy to meet in the middle?",
+      "What’s one thing you’d enjoy trying from the other answer?",
+      "Which answer would your friends guess was whose?",
+      "What made you smile about the other answer?",
+      "If you swapped answers for an evening, what would you do?",
+      "What would make the other side easy to say yes to?",
+      "What’s a question you’d like to ask about their answer?"
     ];
     DISCUSSION_PROMPTS.lightText = {
       close: DISCUSSION_PROMPTS.light.close,
@@ -9839,7 +9863,13 @@ var qrcode = function() {
         "Which answer would win a talk-show debate? Make your case.",
         "Combine both answers into one ridiculous plan.",
         "Rate each other’s answer out of ten — be generous.",
-        "Whose answer would your friends bet on? Argue it out."
+        "Whose answer would your friends bet on? Argue it out.",
+        "Give the other answer a dramatic movie title.",
+        "Which answer would win a cooking-show challenge?",
+        "Read both answers in a sports-announcer voice.",
+        "Invent a holiday that celebrates both answers.",
+        "Which answer would a cat choose, and why?",
+        "Turn both answers into a two-line poem."
       ]
     };
 
@@ -10216,7 +10246,7 @@ var qrcode = function() {
     let nearbyLastPeerMessageAt = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.3.1";
+    const APP_VERSION = "1.3.2";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -10980,6 +11010,11 @@ var qrcode = function() {
 
     function refreshRevealFromPartner() {
       if (state.screen === "results") { render(); return; }
+      if (state.screen === "setup" && ["celebration", "reveal"].includes(state.resumeScreen)) {
+        const line = document.querySelector(".resume-card .resume-copy span");
+        if (line) line.textContent = resumeRevealCopy();
+        return;
+      }
       if (state.screen !== "reveal") return;
       // The partner just finished the reveal: a "scores not revealed yet" warning is now false.
       if (!revealUnfinished()) dismissConfirmDialogs("reveal-guard");
@@ -12205,7 +12240,7 @@ var qrcode = function() {
         const rubs = (frequency, chord) => chord.some((other) => {
           const cents = Math.abs(1200 * Math.log2(frequency / other)) % 1200;
           const distance = Math.min(cents, 1200 - cents);
-          return (distance > 50 && distance < 150) || (Math.min(frequency, other) < 300 && distance >= 150 && distance < 250);
+          return (distance > 50 && distance < 150) || (Math.max(frequency, other) < 300 && distance >= 150 && distance < 250);
         });
         const curve = (rising) => Float32Array.from({ length: 32 }, (_, step) => {
           const phase = (step / 31) * Math.PI / 2;
@@ -12586,16 +12621,18 @@ var qrcode = function() {
           const rung = ladder[index];
           const stepPeak = 0.08 * jitter() * (themeName === "dreamy" ? 0.85 : 1);
           const stepExtra = themeName === "dreamy" ? { ...wobble(), decay: 0.7 } : wobble();
-          sequence(rung.map((d) => pentatonic(d)), 0.055, stepPeak, stepExtra);
-          if (raw > 0 && rungIndex(raw - 1) === index) {
-            const lift = rung[1] + 1 < ladder[ladder.length - 1][1] ? rung[1] + 1 : rung[0] + 1;
-            end = Math.max(end, note(pentatonic(lift), start + 2 * gap(0.055), stepPeak * 0.5, stepExtra));
+          const repeated = raw > 0 && rungIndex(raw - 1) === index;
+          const canLift = rung[1] + 1 < ladder[ladder.length - 1][1];
+          sequence((repeated && !canLift ? [rung[0], rung[0] + 1, rung[1]] : rung).map((d) => pentatonic(d)), 0.055, stepPeak, stepExtra);
+          if (repeated && canLift) {
+            end = Math.max(end, note(pentatonic(rung[1] + 1), start + 2 * gap(0.055), stepPeak * 0.5, stepExtra));
           }
         } else if (kind === "lock") {
           sequence([pentatonic(3), pentatonic(2), pentatonic(0)], 0.075, 0.08, themeName === "cute" ? { octaveLevel: 0.6 } : undefined);
         } else if (kind === "unlock") {
           sequence([pentatonic(3, 4), pentatonic(0), pentatonic(2), pentatonic(3)], 0.06, 0.09, themeName === "cute" ? { octaveLevel: 0.6 } : undefined);
         } else if (kind === "reveal") {
+          audioEngine.lastRevealAt = Date.now();
           noiseSweep(ctx, start, { from: 1400, to: 2800, duration: 0.07, peak: 0.04 });
           const d = (Number(options.degree) || 0) % 5;
           sequence([pentatonic(d), pentatonic(d + 3)], 0.06, 0.09 * (themeName === "dreamy" ? 0.75 : 1));
@@ -12923,8 +12960,11 @@ var qrcode = function() {
       if (state.screen === "nearby") {
         // Nothing is in progress on the pairing screen; leaving it closes the room so a late scan can't hang.
         closeNearbyConnection({ notifyPartner: true });
-        state.resumeScreen = state.nearbyRepairScreen || null;
+        // Leaving without a partner round keeps any local round resumable and its one-device play style.
+        state.resumeScreen = state.nearbyRepairScreen || state.resumeScreen || null;
         state.nearbyRepairScreen = "";
+        if (state.playStyleBeforeJoin) state.playStyle = state.playStyleBeforeJoin;
+        state.playStyleBeforeJoin = "";
         state.screen = screen;
         saveState();
         render();
@@ -13518,9 +13558,14 @@ var qrcode = function() {
         const remaining = pool.filter((question) => !selectedIds.has(question.id));
         if (!remaining.length) break;
         const wantPlayful = topic === "spicy" && activePreset?.id === "spicy-night" && selected.filter((id) => PLAYFUL_SPICY.test(id)).length < 3;
+        const drifted = type === "slider"
+          ? selected.filter((id) => catalogById.get(id)?.type === "text").length >= textTarget + 2
+          : selected.filter((id) => catalogById.get(id)?.type === "slider").length >= sliderTarget + 2;
         const rank = (question) => [
+          drifted && question.type !== type ? 1 : 0,
           tonightIds.has(question.id) ? 1 : 0,
           question.type === type ? 0 : 1,
+          activePreset?.tone === "light" && questionTone(question) !== "light" ? 1 : 0,
           coupleSeen.has(question.id) ? 1 : 0,
           isTwin(question) ? 1 : 0,
           wantPlayful && !PLAYFUL_SPICY.test(question.id) ? 1 : 0,
@@ -13897,6 +13942,7 @@ var qrcode = function() {
       document.getElementById("nearby-one-device")?.addEventListener("click", () => {
         closeNearbyConnection({ notifyPartner: true });
         state.playStyle = "pass-and-play";
+        state.playStyleBeforeJoin = "";
         state.screen = "setup";
         saveState();
         render();
@@ -13969,7 +14015,7 @@ var qrcode = function() {
       if (state.textSize !== "small") return;
       document.documentElement.classList.add("measuring-text");
       document.querySelectorAll("#app *, .topbar *, .bottom-nav *").forEach((element) => {
-        if (element.closest(".text-size-option, svg, .reveal-buddy, .progress-star, .pass-person, .card-spark, .question-decor") || !element.textContent.trim()) return;
+        if (element.closest(".text-size-option, svg, .reveal-buddy, .progress-star, .pass-person, .card-spark, .question-decor") || (element.matches(".type-chip") && innerWidth <= 340) || !element.textContent.trim()) return;
         if (parseFloat(getComputedStyle(element).fontSize) < 11.95) {
           element.style.setProperty("font-size", "12px", "important");
           element.setAttribute("data-compact-floor", "");
@@ -14019,6 +14065,8 @@ var qrcode = function() {
       else renderSetup();
 
       homeButton.hidden = false;
+      const screenTitle = document.getElementById(app.querySelector(".screen[aria-labelledby]")?.getAttribute("aria-labelledby") || "");
+      if (screenTitle && screenTitle.tagName !== "H1") { screenTitle.setAttribute("role", "heading"); screenTitle.setAttribute("aria-level", "1"); }
       armBackGuard();
       enforceCompactFloor();
       bottomNav.querySelectorAll("[data-app-route]").forEach((button) => {
@@ -15014,14 +15062,30 @@ var qrcode = function() {
     // A playful vibe that has used up this couple's unseen playful questions says so, instead of quietly going warm.
     function vibeRunningLow() {
       const preset = SESSION_PRESETS.find((item) => item.id === state.sessionPreset);
-      if (!preset || preset.tone !== "light" || !state.completedRounds.some(isTonightRound)) return "";
       const seen = coupleAnsweredIds();
-      const allowed = allowedTopicsForIntensity();
-      const left = getQuestionCatalog().filter((question) => allowed.has(question.topic) && questionTone(question) === "light" && !seen.has(question.id)
-        && !state.neverQuestionIds.includes(question.id) && !state.excludedQuestionIds.includes(question.id)).length;
-      if (left >= (preset.count || state.questionCount)) return "";
-      const other = SESSION_PRESETS.find((item) => item.id === (preset.id === "date-night" ? "check-in" : "date-night"));
-      return `<p class="topic-note vibe-running-low" role="status">You’ve played nearly every ${escapeHTML(preset.label)} question — the next rounds mix in warmer ones.${other ? ` <button class="text-btn" type="button" data-vibe="${other.id}">Try ${escapeHTML(other.label)}</button>` : ""}</p>`;
+      const usable = (question) => !seen.has(question.id) && !state.neverQuestionIds.includes(question.id) && !state.excludedQuestionIds.includes(question.id);
+      if (preset && preset.tone === "light") {
+        if (!state.completedRounds.some(isTonightRound)) return "";
+        const count = preset.count || state.questionCount;
+        const sliderTarget = (preset.mode || "slider-heavy") === "sliders-only" ? count : (preset.mode || "slider-heavy") === "mixed" ? Math.ceil(count * 0.6) : Math.ceil(count * 0.8);
+        const allowed = allowedTopicsForIntensity();
+        const sliders = getQuestionCatalog().filter((question) => allowed.has(question.topic) && questionTone(question) === "light" && question.type === "slider" && usable(question)).length;
+        if (sliders >= sliderTarget) return "";
+        const other = SESSION_PRESETS.find((item) => item.id === "date-night");
+        return `<p class="topic-note vibe-running-low" role="status">You’ve played nearly every quick ${escapeHTML(preset.label)} question — the next rounds mix in warmer ones.${other ? ` <button class="text-btn" type="button" data-vibe="${other.id}">Try ${escapeHTML(other.label)}</button>` : ""}</p>`;
+      }
+      if (state.sessionPreset === "custom" && state.completedRounds.some(isTonightRound)) {
+        const topics = new Set(state.selectedTopics);
+        const fresh = getQuestionCatalog().filter((question) => topics.has(question.topic) && usable(question)).length;
+        if (fresh >= state.questionCount) return "";
+        return `<p class="topic-note vibe-running-low" role="status">Your chosen packs have only ${fresh} new question${fresh === 1 ? "" : "s"} left — add another pack below for fresh ones, or replay favourites.</p>`;
+      }
+      return "";
+    }
+
+    function resumeRevealCopy() {
+      const left = revealRemainingCopy();
+      return left ? `${left} · your scores are still hiding` : "Everything’s revealed — your scores are ready to count up";
     }
 
     function presetAfterPack() {
@@ -15053,7 +15117,7 @@ var qrcode = function() {
           <div class="resume-copy">
             <strong>${["celebration", "reveal"].includes(state.resumeScreen) ? "Back to your reveal board" : "Continue your paused round"}</strong>
             <span>${["celebration", "reveal"].includes(state.resumeScreen)
-              ? `${escapeHTML(revealRemainingCopy() || "Everything’s revealed")} · your scores are still hiding`
+              ? escapeHTML(resumeRevealCopy())
               : state.resumeScreen === "intermission"
               ? `Handoff to ${escapeHTML(state.names[state.activePlayer === 0 ? 1 : 0] || "the next player")}`
               : state.resumeScreen === "nearby-wait"
@@ -16060,7 +16124,7 @@ var qrcode = function() {
       const roundKey = state.selectedQuestionIds.join("|");
       const vibeLine = {
         "spicy-night": `Spicy round complete <span class="accent-text">🔥</span>`,
-        "road-trip": `Another lap of the <span class="accent-text">road trip.</span>`,
+        "road-trip": earlier.some((item) => item.preset === "road-trip") ? `Another lap of the <span class="accent-text">road trip.</span>` : `First lap of the <span class="accent-text">road trip.</span>`,
         "deep-dive": `That was a deep one — <span class="accent-text">well done.</span>`,
         "date-night": `Date night, round ${round} — <span class="accent-text">still sweet.</span>`,
         "check-in": `Check-in done — <span class="accent-text">nicely caught up.</span>`,
@@ -16310,19 +16374,21 @@ var qrcode = function() {
         if (softNight && tone === "warm" && tier === "close" && cardIndex % 2 === 1) pools = [PLAYFUL_WARM_CLOSE, ...pools];
         if (state.questionIntensity === "cozy" && tone === "warm" && tier === "far") pools = [DISCUSSION_PROMPTS.cozyFar, DISCUSSION_PROMPTS.warm.medium];
         const recentList = Array.isArray(state.recentPrompts) ? state.recentPrompts : [];
-        const gagFamily = (text) => /movie trailer/i.test(text) ? "trailer" : /\bact (?:out|it out)\b|ten seconds/i.test(text) ? "act" : /sports commentator|nature.documentary|narrat/i.test(text) ? "voice"
-          : /\bsong\b/i.test(text) ? "song" : /\bswap\b|\bfor (?:a|one) day\b|one-day/i.test(text) ? "swap" : /high five/i.test(text) ? "highfive" : /\bsnack/i.test(text) ? "snack" : "";
-        const usedGags = new Set([...usedPrompts].map(gagFamily).filter(Boolean));
+        const GAG_FAMILIES = [["trailer", /movie trailer/i], ["act", /\bact (?:out|it out)\b|ten seconds/i], ["voice", /sports commentator|announcer|nature.documentary|narrat/i],
+          ["song", /\bsong\b/i], ["swap", /\bswap\b|\bfor (?:a|one) day\b|one-day/i], ["highfive", /high five/i], ["snack", /\bsnack/i]];
+        const gagFamilies = (text) => GAG_FAMILIES.filter(([, pattern]) => pattern.test(text)).map(([name]) => name);
+        const usedGags = new Set([...usedPrompts].flatMap(gagFamilies));
         // First dates skip follow-ups that assume a shared past.
         const historySafe = (text) => state.questionIntensity !== "cozy" || !(HISTORY_PROMPT_PATTERN.test(text) || /\blast notice|\bled you both\b|\bin each other\b|\bpets?\b|\bnoticed? you\b|\brecently\b/i.test(text));
         const seed = [...question.id].reduce((total, character) => total + character.charCodeAt(0), 0);
         const age = (text) => recentList.lastIndexOf(text);
         const rankPool = (prompts) => prompts.map((_, index) => prompts[(seed + index) % prompts.length])
-          .filter((text) => !usedPrompts.has(text) && historySafe(text) && !(gagFamily(text) && usedGags.has(gagFamily(text))))
+          .filter((text) => !usedPrompts.has(text) && historySafe(text) && !gagFamilies(text).some((family) => usedGags.has(family)))
           .sort((a, b) => age(a) - age(b));
         const recentlyUsed = new Set(recentList);
-        const ownFirst = pools.map(rankPool).find((list) => list.length) || [];
-        chosen = ownFirst.find((text) => !recentlyUsed.has(text)) || ownFirst[0]
+        const rankedPools = pools.map(rankPool);
+        const ownFirst = rankedPools.find((list) => list.length) || [];
+        chosen = rankedPools.map((list) => list.find((text) => !recentlyUsed.has(text))).find(Boolean) || ownFirst[0]
           || pools.flat().find((text) => !usedPrompts.has(text))
           || pools[0][0];
         state.cardPrompts[question.id] = { key, text: chosen };
@@ -16384,7 +16450,7 @@ var qrcode = function() {
         return `
           <div class="topic-alignment-card">
             ${alignmentRingMarkup(item.score, "similar")}
-            <span class="topic-alignment-name"><span class="nowrap">${topic?.icon || "•"} ${escapeHTML(topic?.label || item.topic)}</span> <span class="nowrap">· ${item.fitScore}% fit</span> <span class="nowrap">· ${item.count}Q</span></span>
+            <span class="topic-alignment-name"><span class="nowrap">${topic?.icon || "•"} ${escapeHTML(topic?.label || item.topic)} ·</span> <span class="nowrap">${item.fitScore}% fit ·</span> <span class="nowrap">${item.count}Q</span></span>
           </div>
         `;
       }).join("");
@@ -16421,7 +16487,9 @@ var qrcode = function() {
       const biggestMiss = (item) => Math.max(...[0, 1].map((player) => guessHit(item.question, player)?.distance ?? -1));
       // The best surprise is a confident guess that missed; otherwise the widest gap.
       const guessSurprise = [...comparable].filter((item) => item !== closestHighlight && biggestMiss(item) >= 3).sort((a, b) => biggestMiss(b) - biggestMiss(a))[0];
-      const surpriseHighlight = guessSurprise || [...comparable].filter((item) => item !== closestHighlight && item.match.percent < (closestHighlight?.match.percent ?? 101)).sort((a, b) => a.match.percent - b.match.percent)[0];
+      // A gap both partners predicted correctly is no surprise, so it never stands in for one.
+      const bothReadIt = (item) => [0, 1].every((player) => guessHit(item.question, player)?.distance === 0);
+      const surpriseHighlight = guessSurprise || [...comparable].filter((item) => item !== closestHighlight && !bothReadIt(item) && item.match.percent < (closestHighlight?.match.percent ?? 101)).sort((a, b) => a.match.percent - b.match.percent)[0];
       const surpriseNote = (() => {
         if (!guessSurprise || surpriseHighlight !== guessSurprise) return "";
         const player = [0, 1].sort((a, b) => (guessHit(guessSurprise.question, b)?.distance ?? -1) - (guessHit(guessSurprise.question, a)?.distance ?? -1))[0];
@@ -16545,8 +16613,8 @@ var qrcode = function() {
             </details>` : ""}
           </section>
           <section class="highlight-grid ${allRevealed ? "" : "locked"}" aria-label="Round highlights" id="round-highlights">
-            ${highlightCard(closestHighlight && closestHighlight.match.percent < 60 ? "Nearest common ground" : "Closest match", closestHighlight, "Complete more scored answers to unlock this highlight.", "", "One answer lines up beautifully…")}
-            ${highlightCard(surpriseNote && surpriseHighlight?.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No big surprises this round.", surpriseNote, surpriseHighlight ? "Someone is in for a surprise…" : "Will anything surprise you? Unlocks with the scores…")}
+            ${highlightCard(closestHighlight && closestHighlight.match.percent < 60 ? "Nearest common ground" : "Closest match", closestHighlight, "Complete more scored answers to unlock this highlight.", "", closestHighlight && closestHighlight.match.percent < 60 ? "Your nearest common ground is waiting…" : "One answer lines up beautifully…")}
+            ${highlightCard(surpriseNote && surpriseHighlight?.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No big surprises this round.", surpriseNote, guessSurprise ? "Someone is in for a surprise…" : surpriseHighlight ? "The widest gap is waiting…" : "Will anything surprise you?")}
             ${conversationHighlight ? highlightCard("Best conversation starter", conversationHighlight, "", "", "There is a story waiting in one card…") : ""}
             ${tally.some((item) => item.made) ? `<article class="highlight-card mind-reader"><span>🔮 Mind-reader</span><strong class="highlight-answer">${mindReaderHeadline(tally)}<small class="highlight-note">${tally.filter((item) => item.made).map((item) => `${escapeHTML(state.names[item.player])} read ${escapeHTML(state.names[item.player === 0 ? 1 : 0])} ${item.hits}/${item.made}`).join(" · ")}</small></strong><strong class="highlight-locked">${tally.some((item) => item.hits) ? "Someone read the other’s mind… " : "Did anyone read minds tonight? "}<small>${everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"}</small></strong></article>` : ""}
           </section>
@@ -16722,7 +16790,8 @@ var qrcode = function() {
         announce(`Scores unlocked: ${ringNames}.`);
         if (motionReduced()) {
           const sinceMatch = Date.now() - (audioEngine.lastMatchAt || 0);
-          window.setTimeout(() => playSound("celebrate", { finale: true }), Math.max(0, 650 - sinceMatch));
+          const sinceReveal = Date.now() - (audioEngine.lastRevealAt || 0);
+          window.setTimeout(() => playSound("celebrate", { finale: true }), Math.max(0, 650 - sinceMatch, 300 - sinceReveal));
           window.setTimeout(() => {
             dashboard.scrollIntoView({ block: "center", behavior: "auto" });
             const heading = dashboard.querySelector("#alignment-title");
@@ -16897,8 +16966,6 @@ var qrcode = function() {
         flipCards.forEach((card) => {
           applyCardState(card, shouldReveal);
         });
-        updateRevealAllButton();
-        saveState();
         if (shouldReveal) {
           const matches = questions.filter((question) => matchInfoById.get(question.id)?.isMatch).length;
           if (matches) {
@@ -16910,6 +16977,8 @@ var qrcode = function() {
         } else {
           playSound("tap");
         }
+        updateRevealAllButton();
+        saveState();
         requestAnimationFrame(() => requestAnimationFrame(sizeAllCards));
       });
 
@@ -17084,6 +17153,7 @@ var qrcode = function() {
           state.resumeScreen = state.screen;
         }
         handledNearbyLaunch = launchSignature;
+        if (state.playStyle !== "nearby" && state.selectedQuestionIds.length) state.playStyleBeforeJoin = state.playStyle;
         state.playStyle = "nearby";
         state.screen = "nearby";
         saveState();
@@ -17091,7 +17161,8 @@ var qrcode = function() {
         render();
         prepareNearbyJoin(launchRoomId, launchJoinToken);
       };
-      const localRoundOpen = state.playStyle !== "nearby" && state.selectedQuestionIds.length > 0
+      const linkLive = Boolean(nearbyRuntime.role) && nearbyRuntime.status !== "idle";
+      const localRoundOpen = (state.playStyle !== "nearby" || !linkLive) && state.selectedQuestionIds.length > 0
         && (["question", "intermission"].includes(state.screen) || ["question", "intermission"].includes(state.resumeScreen) || revealUnfinished());
       if (!localRoundOpen) {
         join();
