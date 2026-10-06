@@ -6603,7 +6603,7 @@
     .flip-card:not(.flipped) .card-back { max-height: 100%; overflow: hidden; transition: opacity 0s linear 0.089s, visibility 0s linear 0.089s, max-height 0s linear 0.089s; }
     /* Windows High Contrast flattens the tinted selected states; mark them with the system highlight. */
     @media (forced-colors: active) {
-      body::before, body::after { display: none !important; }
+      body::before, body::after, .ambient-specks, .home-results::after, .theme-preview { display: none !important; }
       .setting-row input[type="checkbox"] { border: 2px solid ButtonText; background: Canvas; }
       .setting-row input[type="checkbox"]::before { background: ButtonText; forced-color-adjust: none; }
       .setting-row input[type="checkbox"]:checked { background: Highlight; border-color: Highlight; forced-color-adjust: none; }
@@ -6629,7 +6629,7 @@
     }
     @media (hover: hover) and (prefers-reduced-motion: reduce) { :is(.play-style-card, .preset-card, .theme-card):hover { transform: none !important; } }
     /* Phone landscape: the sticky action bar would cover the prompt itself, so it scrolls with the card. */
-    @media (orientation: landscape) and (max-height: 500px) {
+    @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
       .question-screen .question-actions { position: static !important; box-shadow: none !important; }
       .question-screen .progress-constellation { display: none; }
       .question-screen .question-header { margin-bottom: 4px; }
@@ -10794,6 +10794,7 @@ var qrcode = function() {
       return {
         type: "round-init", roundId: state.nearbyRoundId, newRound: Boolean(newRound), names: [...state.names], questionMode: state.questionMode,
         questionIntensity: state.questionIntensity, selectedTopics: [...state.selectedTopics],
+        sessionPreset: state.sessionPreset, recentHeadlines: Array.isArray(state.recentHeadlines) ? state.recentHeadlines.slice(-4) : [],
         selectedQuestionIds: [...state.selectedQuestionIds], questions: getSelectedQuestions().filter(Boolean)
       };
     }
@@ -11050,7 +11051,9 @@ var qrcode = function() {
         questionIntensity: INTENSITY_OPTIONS.some((option) => option.id === payload.questionIntensity) ? payload.questionIntensity : state.questionIntensity,
         selectedTopics: Array.isArray(payload.selectedTopics) ? payload.selectedTopics.filter((topic) => validTopics.has(topic)) : state.selectedTopics,
         selectedQuestionIds, activePlayer: 1,
-        nearbyRole: "join", nearbyRoundId: payload.roundId
+        nearbyRole: "join", nearbyRoundId: payload.roundId,
+        sessionPreset: payload.sessionPreset === "pack" || SESSION_PRESETS.some((preset) => preset.id === payload.sessionPreset) ? payload.sessionPreset : "custom",
+        recentHeadlines: Array.isArray(payload.recentHeadlines) ? payload.recentHeadlines.filter((item) => typeof item === "string").map((item) => item.slice(0, 40)).slice(-4) : settings.recentHeadlines
       };
       if (!state.selectedTopics.length) state.selectedTopics = [...DEFAULT_TOPICS];
       nearbyRuntime.role = "join";
@@ -11841,8 +11844,8 @@ var qrcode = function() {
 
     let lastModalOpenedAt = 0;
     document.addEventListener("click", (event) => {
-      if (event.target instanceof Element && event.target.matches(".modal-backdrop") && Date.now() - lastModalOpenedAt < 400) event.stopImmediatePropagation();
-      if (event.target instanceof Element && event.target.closest(".modal-backdrop button") && Date.now() - lastModalOpenedAt < 400) {
+      if (event.isTrusted && event.target instanceof Element && event.target.matches(".modal-backdrop") && Date.now() - lastModalOpenedAt < 400) event.stopImmediatePropagation();
+      if (event.isTrusted && event.target instanceof Element && event.target.closest(".modal-backdrop button") && Date.now() - lastModalOpenedAt < 400) {
         event.stopImmediatePropagation();
         event.preventDefault();
       }
@@ -12814,7 +12817,8 @@ var qrcode = function() {
         if (starting && revealUnfinished()) state.revealCelebrated = state.selectedQuestionIds.join("|");
         closeNearbyConnection({ notifyPartner: true });
         state.nearbyRole = "";
-        state.resumeScreen = null;
+        const keepReveal = !starting && revealUnfinished() && ["celebration", "reveal"].includes(state.resumeScreen);
+        if (!keepReveal) state.resumeScreen = null;
         return wasJoiner;
       };
     }
@@ -13838,6 +13842,20 @@ var qrcode = function() {
     let lastScreenSettledAt = -Infinity;
     let lastExportAt = 0;
 
+    // Compact shrinks the root, so rem-sized captions written for Standard can fall under 12 px.
+    // Rather than chase every selector, lift whatever actually renders smaller (decorative glyphs excepted).
+    function enforceCompactFloor() {
+      document.querySelectorAll("[data-compact-floor]").forEach((element) => { element.style.removeProperty("font-size"); element.removeAttribute("data-compact-floor"); });
+      if (state.textSize !== "small") return;
+      document.querySelectorAll("#app *, .topbar *, .bottom-nav *").forEach((element) => {
+        if (element.closest(".text-size-option, svg, [aria-hidden=\"true\"]") || !element.textContent.trim()) return;
+        if (parseFloat(getComputedStyle(element).fontSize) < 11.95) {
+          element.style.setProperty("font-size", "12px", "important");
+          element.setAttribute("data-compact-floor", "");
+        }
+      });
+    }
+
     function render() {
       const previousFocusKey = focusKeyFor(document.activeElement);
       if (state.screen === "nearby-wait" && state.nearbyRemote) {
@@ -13880,6 +13898,7 @@ var qrcode = function() {
 
       homeButton.hidden = false;
       armBackGuard();
+      enforceCompactFloor();
       bottomNav.querySelectorAll("[data-app-route]").forEach((button) => {
         button.classList.toggle("active", button.dataset.appRoute === state.screen || (state.screen === "setup" && button.dataset.appRoute === "setup"));
         if (button.classList.contains("active")) button.setAttribute("aria-current", "page");
@@ -13935,6 +13954,8 @@ var qrcode = function() {
     }).observe(app, { childList: true, subtree: true });
 
     // Android app shell: the hardware Back button closes dialogs first, then returns to Home.
+    // The card most recently opened by hand on the reveal board; Back closes it before leaving the board.
+    let lastOpenedCard = null;
     window.alignedHandleBack = () => {
       const overlays = document.querySelectorAll(".modal-backdrop");
       if (overlays.length) {
@@ -13944,7 +13965,10 @@ var qrcode = function() {
         else overlay.remove();
         return true;
       }
-      const openCard = state.screen === "reveal" ? document.activeElement?.closest?.(".flip-card.flipped") : null;
+      const focusedCard = document.activeElement?.closest?.(".flip-card.flipped");
+      const lastCard = lastOpenedCard && lastOpenedCard.isConnected && lastOpenedCard.classList.contains("flipped") ? lastOpenedCard : null;
+      const openCard = state.screen === "reveal" ? focusedCard || lastCard : null;
+      lastOpenedCard = null;
       if (openCard) {
         openCard.querySelector(".card-close-button")?.click();
         return true;
@@ -14869,7 +14893,8 @@ var qrcode = function() {
       const answeredCount = state.answeredQuestionIds.filter((id) => catalog.some((question) => question.id === id)).length;
       const latestRound = [...state.completedRounds].reverse().find((round) => !roundScoresHidden(round));
       const allowedTopics = allowedTopicsForIntensity();
-      const activePreset = SESSION_PRESETS.find(p => p.id === state.sessionPreset) || SESSION_PRESETS[0];
+      const shownPreset = state.sessionPreset === "pack" ? presetAfterPack() : state.sessionPreset;
+      const activePreset = SESSION_PRESETS.find(p => p.id === shownPreset) || SESSION_PRESETS[0];
       const canResume = ["question", "intermission", "nearby", "nearby-wait"].includes(state.resumeScreen)
         || (["celebration", "reveal"].includes(state.resumeScreen) && revealUnfinished());
       const resumeMarkup = canResume && state.selectedQuestionIds.length ? `
@@ -14953,7 +14978,7 @@ var qrcode = function() {
 
             <p class="setup-section-title">Pick tonight’s vibe</p>
             <div class="vibe-tiles" role="group" aria-label="Quick start presets">
-              ${["date-night", "road-trip", "check-in", "deep-dive"].map((id) => SESSION_PRESETS.find((preset) => preset.id === id)).filter(Boolean).map((preset) => `<button class="vibe-tile ${state.sessionPreset === preset.id ? "active" : ""}" type="button" data-vibe="${preset.id}" aria-pressed="${state.sessionPreset === preset.id}"><span class="vibe-icon" aria-hidden="true">${preset.icon}</span><strong>${preset.label}</strong><small>${preset.copy}</small></button>`).join("")}
+              ${["date-night", "road-trip", "check-in", "deep-dive"].map((id) => SESSION_PRESETS.find((preset) => preset.id === id)).filter(Boolean).map((preset) => `<button class="vibe-tile ${shownPreset === preset.id ? "active" : ""}" type="button" data-vibe="${preset.id}" aria-pressed="${shownPreset === preset.id}"><span class="vibe-icon" aria-hidden="true">${preset.icon}</span><strong>${preset.label}</strong><small>${preset.copy}</small></button>`).join("")}
             </div>
             ${state.customPacks.length ? `<p class="setup-section-title">Your packs</p>
             <div class="library-filters custom-pack-starts">${state.customPacks.map((pack) => {
@@ -14970,7 +14995,7 @@ var qrcode = function() {
               </button>
               <div class="session-dropdown-menu" id="session-select-menu" role="listbox">
                 ${SESSION_PRESETS.map((preset) => `
-                  <button class="session-dropdown-item ${state.sessionPreset === preset.id ? "selected" : ""}" role="option" type="button" data-session-preset="${preset.id}" aria-selected="${state.sessionPreset === preset.id ? "true" : "false"}">
+                  <button class="session-dropdown-item ${shownPreset === preset.id ? "selected" : ""}" role="option" type="button" data-session-preset="${preset.id}" aria-selected="${shownPreset === preset.id ? "true" : "false"}">
                     <span class="session-item-header"><strong>${preset.icon} ${preset.label}</strong></span>
                     <span class="session-item-copy">${preset.copy}</span>
                   </button>
@@ -15128,7 +15153,7 @@ var qrcode = function() {
         `;
       };
       
-      updatePresetInfo(state.sessionPreset);
+      updatePresetInfo(shownPreset);
 
       const dropdownContainer = document.getElementById("session-dropdown");
       const dropdownTrigger = document.getElementById("session-select-trigger");
@@ -16627,6 +16652,7 @@ var qrcode = function() {
         }
         saveState();
         updateRevealAllButton();
+        lastOpenedCard = card.classList.contains("flipped") ? card : null;
         requestAnimationFrame(() => {
           sizeCard(card);
           if (!card.classList.contains("flipped")) {
