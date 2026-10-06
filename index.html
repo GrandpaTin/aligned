@@ -6493,7 +6493,7 @@
     .quick-pick-between[open] > summary::before { transform: rotate(90deg); }
     [data-theme="pastel"] .card-close-button { color: #9f1239; }
     [data-theme="pastel"] .answer-box { background: #ffffff; border-color: rgba(148, 163, 184, 0.35); }
-    [data-theme="pastel"] .answer-box .answer-name { filter: brightness(0.62) saturate(1.3); }
+    [data-theme="pastel"] .answer-name { filter: brightness(0.5) saturate(1.3); }
     [data-theme="pastel"] .answer-box .answer-copy { color: #1e293b; }
     [data-theme="sunset"] :is(.vibe-tile, .quick-pick-option, .quick-guess-option, .pick-side):not(.active):not(.chosen) { border-color: rgba(255, 226, 191, 0.19); background: rgba(67, 21, 38, 0.48); }
     [data-theme="cosmic"] :is(.vibe-tile, .quick-pick-option, .quick-guess-option, .pick-side):not(.active):not(.chosen) { border-color: rgba(167, 139, 250, 0.22); background: rgba(10, 4, 32, 0.55); }
@@ -6664,11 +6664,14 @@
       .question-screen .quick-guess, .question-screen .guess-panel { margin-top: 8px; padding: 6px 10px; }
       .question-screen .quick-guess small, .question-screen .guess-label small { display: none; }
       .question-screen .quick-pick-option { min-height: 56px; padding: 8px 10px; }
-      /* The answer comes first in landscape; the optional guess follows it. */
-      .question-screen .question-card:has(> .quick-pick) { display: flex; flex-direction: column; }
-      .question-screen .question-card > .quick-guess { order: 1; }
-      .question-screen .question-card > .quick-guess ~ :not(.quick-pick) { order: 2; }
-      .question-screen #question-title { font-size: 1.25rem; margin-block: 6px; }
+      .question-screen #question-title { font-size: 1.2rem; margin-block: 4px; }
+      .question-screen .question-card { padding-top: 12px; }
+      .question-screen .question-meta { margin-bottom: 0; }
+      .question-screen .quick-guess { display: grid; grid-template-columns: auto 1fr 1fr; align-items: center; gap: 6px; }
+      .question-screen .quick-guess > span { font-size: 0.85rem; }
+      .question-screen .quick-guess-option { min-height: 44px; padding: 4px 8px; font-size: 0.8rem; }
+      .question-screen .quick-pick { margin: 8px 0 4px; }
+      .question-screen .quick-pick-hint { display: none; }
       .question-screen .question-actions { position: static !important; box-shadow: none !important; }
       .question-screen .progress-constellation { display: none; }
       .question-screen .question-header { margin-bottom: 4px; }
@@ -10864,6 +10867,7 @@ var qrcode = function() {
         type: "round-init", roundId: state.nearbyRoundId, newRound: Boolean(newRound), names: [...state.names], questionMode: state.questionMode,
         questionIntensity: state.questionIntensity, selectedTopics: [...state.selectedTopics],
         sessionPreset: state.sessionPreset, recentHeadlines: Array.isArray(state.recentHeadlines) ? state.recentHeadlines.slice(-5) : [],
+        recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-120) : [],
         selectedQuestionIds: [...state.selectedQuestionIds], questions: getSelectedQuestions().filter(Boolean)
       };
     }
@@ -11123,7 +11127,9 @@ var qrcode = function() {
         selectedQuestionIds, activePlayer: 1,
         nearbyRole: "join", nearbyRoundId: payload.roundId,
         sessionPreset: payload.sessionPreset === "pack" || SESSION_PRESETS.some((preset) => preset.id === payload.sessionPreset) ? payload.sessionPreset : "custom",
-        recentHeadlines: Array.isArray(payload.recentHeadlines) ? payload.recentHeadlines.filter((item) => typeof item === "string").map((item) => item.slice(0, 40)).slice(-5) : settings.recentHeadlines
+        recentPrompts: Array.isArray(payload.recentPrompts) ? payload.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-120) : settings.recentPrompts,
+        cardPrompts: {},
+        recentHeadlines: Array.isArray(payload.recentHeadlines) ? [...new Set(payload.recentHeadlines.filter((item) => ["vibe", "roll", "another", "best", "finding", "locked"].includes(item)))].slice(-5) : settings.recentHeadlines
       };
       if (!state.selectedTopics.length) state.selectedTopics = [...DEFAULT_TOPICS];
       nearbyRuntime.role = "join";
@@ -13452,7 +13458,11 @@ var qrcode = function() {
       // other topics this intensity allows, so a quick, playful night stays mostly sliders.
       {
         const seen = coupleAnsweredIds();
-        const allowed = allowedTopicsForIntensity();
+        // Custom rounds stay inside the packs the couple checked; vibes may borrow, but never from sensitive packs.
+        const SENSITIVE_TOPICS = ["spicy", "dealbreakers", "politics", "money"];
+        const allowed = state.sessionPreset === "custom" || state.sessionPreset === "pack"
+          ? new Set(selectedTopicSet)
+          : new Set([...allowedTopicsForIntensity()].filter((topic) => selectedTopicSet.has(topic) || !SENSITIVE_TOPICS.includes(topic)));
         const fitsVibe = (question) => (state.questionIntensity !== "cozy" || (questionTone(question) !== "deep" && !questionNeedsHistory(question)))
           && (activePreset?.tone !== "light" || questionTone(question) === "light")
           && !(activePreset?.id === "spicy-night" && question.topic === "spicy" && questionTone(question) === "deep");
@@ -13464,7 +13474,7 @@ var qrcode = function() {
             const unseen = pool.filter((question) => question.type === type && !seen.has(question.id)).length;
             if (unseen >= target) return;
             const extra = getQuestionCatalog().filter((question) => question.type === type && !inPool.has(question.id)
-              && (allowed.has(question.topic) || selectedTopicSet.has(question.topic)) && !excludedIds.has(question.id) && !seen.has(question.id) && fits(question));
+              && allowed.has(question.topic) && !excludedIds.has(question.id) && !seen.has(question.id) && fits(question));
             extra.forEach((question) => inPool.add(question.id));
             pool = pool.concat(extra);
           });
@@ -15006,7 +15016,8 @@ var qrcode = function() {
       const left = getQuestionCatalog().filter((question) => allowed.has(question.topic) && questionTone(question) === "light" && !seen.has(question.id)
         && !state.neverQuestionIds.includes(question.id) && !state.excludedQuestionIds.includes(question.id)).length;
       if (left >= (preset.count || state.questionCount)) return "";
-      return `<p class="topic-note vibe-running-low" role="status">You’ve played nearly every ${escapeHTML(preset.label)} question tonight — the next rounds mix in warmer ones. Fancy Date Night for a change?</p>`;
+      const other = SESSION_PRESETS.find((item) => item.id === (preset.id === "date-night" ? "check-in" : "date-night"));
+      return `<p class="topic-note vibe-running-low" role="status">You’ve played nearly every ${escapeHTML(preset.label)} question — the next rounds mix in warmer ones.${other ? ` <button class="text-btn" type="button" data-vibe="${other.id}">Try ${escapeHTML(other.label)}</button>` : ""}</p>`;
     }
 
     function presetAfterPack() {
@@ -15114,8 +15125,8 @@ var qrcode = function() {
             <p class="setup-section-title">Pick tonight’s vibe</p>
             <div class="vibe-tiles" role="group" aria-label="Quick start presets">
               ${["date-night", "road-trip", "check-in", "deep-dive"].map((id) => SESSION_PRESETS.find((preset) => preset.id === id)).filter(Boolean).map((preset) => `<button class="vibe-tile ${shownPreset === preset.id ? "active" : ""}" type="button" data-vibe="${preset.id}" aria-pressed="${shownPreset === preset.id}"><span class="vibe-icon" aria-hidden="true">${preset.icon}</span><strong>${preset.label}</strong><small>${preset.copy}</small></button>`).join("")}
-              ${vibeRunningLow()}
             </div>
+            ${vibeRunningLow()}
             ${state.customPacks.length ? `<p class="setup-section-title">Your packs</p>
             <div class="library-filters custom-pack-starts">${state.customPacks.map((pack) => {
               const playable = pack.questionIds.filter((id) => getQuestionCatalog().some((question) => question.id === id) && !state.neverQuestionIds.includes(id)).length;
@@ -16285,7 +16296,7 @@ var qrcode = function() {
       let chosen = kept && kept.key === key && typeof kept.text === "string" && !usedPrompts.has(kept.text) ? kept.text : "";
       if (!chosen) {
         // Same tier first, least recently used first; borrow only from a tier that still fits the card.
-        const fitting = { close: ["close"], medium: ["medium", "close"], far: ["far", "medium"] };
+        const fitting = { close: ["close"], medium: ["medium"], far: ["far", "medium"] };
         const unratedPools = tone === "light" ? [DISCUSSION_PROMPTS.unratedLight, DISCUSSION_PROMPTS.unrated]
           : ["flirty", "flirtyText"].includes(tone) ? [DISCUSSION_PROMPTS.unratedFlirty, DISCUSSION_PROMPTS.unrated] : [DISCUSSION_PROMPTS.unrated];
         let pools = tier === "unrated" ? unratedPools : fitting[tier].map((name) => DISCUSSION_PROMPTS[tone][name]);
@@ -16293,7 +16304,7 @@ var qrcode = function() {
         const softNight = state.sessionPreset === "date-night" || state.questionIntensity === "cozy";
         // Every other warm match on a soft night gets one of the playful celebration lines.
         if (softNight && tone === "warm" && tier === "close" && cardIndex % 2 === 1) pools = [PLAYFUL_WARM_CLOSE, ...pools];
-        if (state.questionIntensity === "cozy" && tone === "warm" && tier === "far") pools = [DISCUSSION_PROMPTS.cozyFar];
+        if (state.questionIntensity === "cozy" && tone === "warm" && tier === "far") pools = [DISCUSSION_PROMPTS.cozyFar, DISCUSSION_PROMPTS.warm.medium];
         const recentList = Array.isArray(state.recentPrompts) ? state.recentPrompts : [];
         const gagFamily = (text) => /movie trailer/i.test(text) ? "trailer" : /\bact (?:out|it out)\b|ten seconds/i.test(text) ? "act" : /sports commentator|nature.documentary|narrat/i.test(text) ? "voice"
           : /\bsong\b/i.test(text) ? "song" : /\bswap\b|\bfor (?:a|one) day\b|one-day/i.test(text) ? "swap" : /high five/i.test(text) ? "highfive" : /\bsnack/i.test(text) ? "snack" : "";
@@ -16306,9 +16317,8 @@ var qrcode = function() {
           .filter((text) => !usedPrompts.has(text) && historySafe(text) && !(gagFamily(text) && usedGags.has(gagFamily(text))))
           .sort((a, b) => age(a) - age(b));
         const recentlyUsed = new Set(recentList);
-        const ranked = pools.flatMap((pool, poolIndex) => rankPool(pool).map((text) => ({ text, poolIndex })));
-        const fresh = ranked.find((item) => !recentlyUsed.has(item.text));
-        chosen = fresh?.text || ranked.sort((a, b) => age(a.text) - age(b.text))[0]?.text
+        const ownFirst = pools.map(rankPool).find((list) => list.length) || [];
+        chosen = ownFirst.find((text) => !recentlyUsed.has(text)) || ownFirst[0]
           || pools.flat().find((text) => !usedPrompts.has(text))
           || pools[0][0];
         state.cardPrompts[question.id] = { key, text: chosen };
@@ -17064,16 +17074,42 @@ var qrcode = function() {
         prepareNearbyJoin(launchRoomId, launchJoinToken);
         return true;
       }
-      if (["question", "intermission", "nearby-wait"].includes(state.screen)) {
-        state.resumeScreen = state.screen;
+      const join = () => {
+        if (["question", "intermission", "nearby-wait"].includes(state.screen)) {
+          state.resumeScreen = state.screen;
+        }
+        handledNearbyLaunch = launchSignature;
+        state.playStyle = "nearby";
+        state.screen = "nearby";
+        saveState();
+        history.replaceState(null, "", location.href.split("#")[0]);
+        render();
+        prepareNearbyJoin(launchRoomId, launchJoinToken);
+      };
+      const localRoundOpen = state.playStyle !== "nearby" && state.selectedQuestionIds.length > 0
+        && (["question", "intermission", "celebration", "reveal"].includes(state.screen) || ["question", "intermission", "celebration", "reveal"].includes(state.resumeScreen) || revealUnfinished());
+      if (!localRoundOpen) {
+        join();
+        return true;
       }
       handledNearbyLaunch = launchSignature;
-      state.playStyle = "nearby";
-      state.screen = "nearby";
-      saveState();
       history.replaceState(null, "", location.href.split("#")[0]);
       render();
-      prepareNearbyJoin(launchRoomId, launchJoinToken);
+      const players = state.names.filter(Boolean).join(" & ") || "this round";
+      openConfirmDialog({
+        title: "Join your partner’s round?",
+        copy: `This phone has an unfinished round (${players}). Joining discards it — its answers can’t be recovered.`,
+        confirmLabel: "Discard and join",
+        cancelLabel: "Keep my round",
+        danger: true,
+        safeFirst: true
+      }).then((ok) => {
+        if (!ok) { showToast("Kept your round. Scan the QR again when you’re ready to join."); return; }
+        if (revealUnfinished()) state.revealCelebrated = state.selectedQuestionIds.join("|");
+        state.resumeScreen = null;
+        state.screen = "setup";
+        join();
+      });
       return true;
     }
 
