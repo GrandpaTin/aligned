@@ -9733,6 +9733,18 @@ var qrcode = function() {
         "Ask them for one example from real life."
       ]
     };
+    DISCUSSION_PROMPTS.lightText = {
+      close: DISCUSSION_PROMPTS.light.close,
+      medium: DISCUSSION_PROMPTS.light.medium,
+      far: [
+        "Pitch your answer like a movie trailer — the loser buys snacks.",
+        "Totally different! Act out the other answer for ten seconds.",
+        "Which answer would win a talk-show debate? Make your case.",
+        "Combine both answers into one ridiculous plan.",
+        "Rate each other’s answer out of ten — be generous.",
+        "Whose answer would your friends bet on? Argue it out."
+      ]
+    };
 
     const app = document.getElementById("app");
     const homeButton = document.getElementById("home-button");
@@ -12090,7 +12102,9 @@ var qrcode = function() {
           const gain = ctx.createGain();
           osc.type = "triangle";
           osc.frequency.value = frequency;
-          osc.detune.value = (index % 2 === 0 ? 4 : -4) + (Math.random() - 0.5) * 3;
+          // Detune follows the pitch, not the voice slot, so a note shared by two chords stays in tune with itself.
+          const noteNumber = Math.round(12 * Math.log2(frequency / 440));
+          osc.detune.value = (noteNumber % 2 === 0 ? 4 : -4) + ((noteNumber * 7) % 3 - 1);
           const lateIn = !first && rubs(frequency, previous);
           const earlyOut = rubs(frequency, next);
           if (first || lateIn) {
@@ -12441,7 +12455,8 @@ var qrcode = function() {
           const pickTap = [pentatonic(2), pentatonic(3), pentatonic(4)][Math.floor(Math.random() * 3)];
           // A slider change sounds its own value; other taps pick a nearby note for variety.
           const pick = Number.isFinite(Number(options.value)) ? pentatonic(Math.round((Math.max(1, Math.min(10, Number(options.value))) - 1) * 7 / 9)) : pickTap;
-          const capped = pick * shift > 1760 ? pick / 2 : pick;
+          // One octave for the whole slider (small tolerance for the rounded scale), so 10 never sounds below 9.
+          const capped = pick * (pentatonic(7) * shift > 1770 ? 0.5 : 1);
           end = note(capped, start, 0.1 * jitter(), { ...wobble(), decay: themeName === "dreamy" ? 0.22 : 0.06, dry: true });
           duck = 0.8;
         } else if (kind === "step") {
@@ -12455,7 +12470,7 @@ var qrcode = function() {
           const stepExtra = themeName === "dreamy" ? { ...wobble(), decay: 0.7 } : wobble();
           sequence(rung.map((d) => pentatonic(d)), 0.055, stepPeak, stepExtra);
           if (raw > 0 && rungIndex(raw - 1) === index) {
-            end = Math.max(end, note(pentatonic(ladder[Math.min(index + 1, ladder.length - 1)][1] + (index === ladder.length - 1 ? 2 : 0)), start + 2 * gap(0.055), stepPeak * 0.5, stepExtra));
+            end = Math.max(end, note(pentatonic(rung[1] + 1), start + 2 * gap(0.055), stepPeak * 0.5, stepExtra));
           }
         } else if (kind === "lock") {
           sequence([pentatonic(3), pentatonic(2), pentatonic(0)], 0.075, 0.08, themeName === "cute" ? { octaveLevel: 0.6 } : undefined);
@@ -12548,7 +12563,9 @@ var qrcode = function() {
     function armIdleSuspend() {
       window.clearTimeout(audioEngine.idleTimer);
       audioEngine.idleTimer = window.setTimeout(() => {
-        if (!ambientSoundscape.generation && audioEngine.ctx && audioEngine.ctx.state === "running") audioEngine.ctx.suspend().catch(() => {});
+        // Music at volume 0 is silence too.
+        const musicAudible = ambientSoundscape.generation && state.soundVolume > 0;
+        if (!musicAudible && audioEngine.ctx && audioEngine.ctx.state === "running") audioEngine.ctx.suspend().catch(() => {});
       }, 45000);
     }
 
@@ -13222,6 +13239,14 @@ var qrcode = function() {
         if (ordered[index].type === ordered[index - 1].type && ordered[index].type === ordered[index - 2].type) {
           const swap = ordered.findIndex((question, other) => other > index && other < last && question.type !== ordered[index].type);
           if (swap > 0) [ordered[index], ordered[swap]] = [ordered[swap], ordered[index]];
+          else {
+            const runType = ordered[index].type;
+            const fits = (other) => other >= 1 && ordered[other].type !== runType && questionTone(ordered[other]) !== "deep"
+              && ordered[other - 1]?.type !== runType && ordered[other + 1]?.type !== runType;
+            let back = index - 3;
+            while (back >= 1 && !fits(back)) back -= 1;
+            if (back >= 1) [ordered[index - 1], ordered[back]] = [ordered[back], ordered[index - 1]];
+          }
         }
       }
       return ordered.map((question) => question.id);
@@ -13235,6 +13260,14 @@ var qrcode = function() {
       promptWordCache.set(text, words);
       return words;
     }
+    // Adjacent content-word pairs ("road trip", "comfortable silence") for spotting reworded twins.
+    function promptPairs(text) {
+      const words = String(text).toLowerCase().match(/[a-z]+/g) || [];
+      const content = (word) => word.length >= 4 && promptWords(word).size === 1;
+      const pairs = new Set();
+      for (let index = 1; index < words.length; index += 1) if (content(words[index - 1]) && content(words[index])) pairs.add(`${words[index - 1]} ${words[index]}`);
+      return pairs;
+    }
     let promptWordCounts = null;
     function promptWordFrequency(word) {
       if (!promptWordCounts) {
@@ -13246,16 +13279,19 @@ var qrcode = function() {
     function playedTonightTwin(question, inRound = []) {
       const today = new Date().toDateString();
       const ids = new Set([...state.completedRounds.filter((round) => new Date(round.completedAt).toDateString() === today).flatMap((round) => round.questionIds || []), ...inRound]);
-      if (!ids.size || ids.has(question.id)) return false;
+      ids.delete(question.id);
+      if (!ids.size) return false;
       const mine = promptWords(question.prompt);
       if (mine.size < 2) return false;
+      const myPairs = promptPairs(question.prompt);
       return getQuestionCatalog().some((other) => {
         if (!ids.has(other.id)) return false;
+        if ([...promptPairs(other.prompt)].some((pair) => myPairs.has(pair))) return true;
         const theirs = promptWords(other.prompt);
         const sharedWords = [...mine].filter((word) => theirs.has(word));
         const shared = sharedWords.length;
         // A distinctive word ("affection", "jealousy") that only a couple of prompts use marks a twin on its own.
-        const rareMatch = sharedWords.some((word) => word.length >= 7 && promptWordFrequency(word) <= 2);
+        const rareMatch = sharedWords.some((word) => word.length >= 5 && promptWordFrequency(word) <= 2);
         return rareMatch || (shared >= 2 && shared / Math.min(mine.size, theirs.size) >= 0.6);
       });
     }
@@ -13270,6 +13306,13 @@ var qrcode = function() {
       let pool = getQuestionCatalog().filter(
         (question) => selectedTopicSet.has(question.topic) && !excludedIds.has(question.id)
       );
+      // Before repeating tonight's questions, borrow unseen ones from the other topics this intensity allows.
+      const unseenInPool = pool.filter((question) => !state.answeredQuestionIds.includes(question.id)).length;
+      if (unseenInPool < count) {
+        const allowed = allowedTopicsForIntensity();
+        pool = pool.concat(getQuestionCatalog().filter((question) => !selectedTopicSet.has(question.topic) && allowed.has(question.topic)
+          && !excludedIds.has(question.id) && !state.answeredQuestionIds.includes(question.id)));
+      }
       if (state.questionIntensity === "cozy") {
         // Cozy is safe for a first date: no heavy prompts and nothing that assumes a long shared history.
         const gentle = pool.filter((question) => questionTone(question) !== "deep" && !questionNeedsHistory(question));
@@ -13345,8 +13388,14 @@ var qrcode = function() {
     }
 
     function roundsPlayedToday() {
-      const today = new Date().toDateString();
-      return state.completedRounds.filter((round) => new Date(round.completedAt).toDateString() === today).length;
+      return state.completedRounds.filter(isTonightRound).length;
+    }
+
+    // A round from today played by the same two people (in either order).
+    function isTonightRound(round) {
+      if (!round || new Date(round.completedAt).toDateString() !== new Date().toDateString()) return false;
+      const couple = (names) => (Array.isArray(names) ? names : []).map((name) => String(name || "").trim().toLowerCase()).sort().join("|");
+      return !Array.isArray(round.names) || couple(round.names) === couple(state.names);
     }
 
     // Only promise "fresh" questions when none of them has been answered before.
@@ -15219,8 +15268,11 @@ var qrcode = function() {
             if (endLink()) names.reverse();
             commitLeave();
             state.sessionPreset = "pack";
+            const before = { topics: [...state.selectedTopics], count: state.questionCount, mode: state.questionMode };
+            const restoreSetup = () => { state.selectedTopics = before.topics; state.questionCount = before.count; state.questionMode = before.mode; saveState(); };
             if (sharedRound) {
               startGame({ names, questionMode: "mixed", questionCount: selectedQuestionIds.length, selectedTopics, selectedQuestionIds, playStyle: "nearby" });
+              restoreSetup();
               state.activePlayer = 0;
               state.nearbyRole = "host";
               state.nearbyRoundId = newNearbyRoundId();
@@ -15237,6 +15289,7 @@ var qrcode = function() {
               selectedTopics,
               selectedQuestionIds
             });
+            restoreSetup();
           });
         });
       });
@@ -15765,7 +15818,7 @@ var qrcode = function() {
       const preset = state.sessionPreset;
       if (round <= 1) return `You both showed up <span class="accent-text">honestly.</span>`;
       const today = new Date().toDateString();
-      const earlier = state.completedRounds.filter((item) => new Date(item.completedAt).toDateString() === today).slice(0, -1);
+      const earlier = state.completedRounds.filter(isTonightRound).slice(0, -1);
       const best = earlier.reduce((top, item) => Math.max(top, Number(item.alignment?.overall) || 0), 0);
       const roundKey = state.selectedQuestionIds.join("|");
       const vibeLine = {
@@ -15777,23 +15830,21 @@ var qrcode = function() {
         pack: `Your own pack, round ${round} — <span class="accent-text">made for you two.</span>`
       }[preset];
       const firstOfVibe = vibeLine && !earlier.some((item) => item.preset === preset);
-      const templates = [vibeLine, `Round ${round} — <span class="accent-text">you’re on a roll.</span>`, `Another round, <span class="accent-text">another few surprises.</span>`,
-        best ? `Tonight’s best is ${best}% — <span class="accent-text">can this one beat it?</span>` : "",
-        `Round ${round} — <span class="accent-text">still finding new things.</span>`, `Round ${round} locked in. <span class="accent-text">Ready?</span>`].filter(Boolean);
+      const lines = [
+        ["vibe", vibeLine],
+        ["roll", `Round ${round} — <span class="accent-text">you’re on a roll.</span>`],
+        ["another", `Another round, <span class="accent-text">another few surprises.</span>`],
+        ["best", best ? `Tonight’s best is ${best}% — <span class="accent-text">can this one beat it?</span>` : ""],
+        ["finding", `Round ${round} — <span class="accent-text">still finding new things.</span>`],
+        ["locked", `Round ${round} locked in. <span class="accent-text">Ready?</span>`]
+      ].filter(([, text]) => text);
       // Stored values come from storage or imports: only an exact match with a built-in template is reused.
-      if (state.headlineFor?.key === roundKey && templates.includes(state.headlineFor.text)) return state.headlineFor.text;
+      if (state.headlineFor?.key === roundKey && lines.some(([, text]) => text === state.headlineFor.text)) return state.headlineFor.text;
       const recentHeadlines = Array.isArray(state.recentHeadlines) ? state.recentHeadlines : [];
-      const rotation = [
-        vibeLine,
-        `Round ${round} — <span class="accent-text">you’re on a roll.</span>`,
-        `Another round, <span class="accent-text">another few surprises.</span>`,
-        best ? `Tonight’s best is ${best}% — <span class="accent-text">can this one beat it?</span>` : "",
-        `Round ${round} — <span class="accent-text">still finding new things.</span>`,
-        `Round ${round} locked in. <span class="accent-text">Ready?</span>`
-      ].filter((line) => line && !recentHeadlines.includes(line));
-      const text = firstOfVibe ? vibeLine : rotation[round % rotation.length] || `Round ${round} — <span class="accent-text">still finding new things.</span>`;
+      const fresh = lines.filter(([id]) => !recentHeadlines.includes(id));
+      const [id, text] = firstOfVibe ? ["vibe", vibeLine] : fresh[round % Math.max(1, fresh.length)] || lines.find(([lineId]) => lineId === "finding");
       state.headlineFor = { key: roundKey, text };
-      state.recentHeadlines = [...recentHeadlines.filter((line) => line !== text), text].slice(-4);
+      state.recentHeadlines = [...recentHeadlines.filter((line) => line !== id), id].slice(-4);
       saveState();
       return text;
     }
@@ -15893,14 +15944,14 @@ var qrcode = function() {
       const players = tally.filter((item) => item.made);
       const rate = (item) => item.hits / item.made;
       if (players.length === 2 && players[0].hits === players[1].hits) {
-        return players[0].hits ? `A tie — you each read ${players[0].hits === 1 ? "one" : players[0].hits} right` : "No mind reading tonight — plenty left to learn!";
+        return players[0].hits ? `A tie — you each read ${players[0].hits === 1 ? "one" : players[0].hits} right` : "No mind reading this round — plenty left to learn!";
       }
       const best = [...players].sort((a, b) => b.hits - a.hits || rate(b) - rate(a))[0];
-      if (!best.hits) return "No mind reading tonight — plenty left to learn!";
+      if (!best.hits) return "No mind reading this round — plenty left to learn!";
       const name = escapeHTML(state.names[best.player]);
-      if (rate(best) >= 0.8 && best.made >= 2) return `👑 ${name} is tonight’s mind reader — ${best.hits} of ${best.made}!`;
+      if (rate(best) >= 0.8 && best.made >= 2) return `👑 ${name} is this round’s mind reader — ${best.hits} of ${best.made}!`;
       if (rate(best) < 0.5) return `${name} edges it — ${best.hits} of ${best.made}. Plenty left to learn!`;
-      return `${name} is tonight’s mind reader — ${best.hits} of ${best.made}!`;
+      return `${name} is this round’s mind reader — ${best.hits} of ${best.made}!`;
     }
 
     function mindReaderTally(questions) {
@@ -16005,7 +16056,7 @@ var qrcode = function() {
       const tier = matchInfo.unrated ? "unrated" : matchInfo.percent >= 75 ? "close" : matchInfo.percent >= 40 ? "medium" : "far";
       // Written answers have no "sides", so a big difference there uses the warm wording.
       const spicyPlayful = question.topic === "spicy" && !SENSITIVE_SPICY.test(question.id) && questionTone(question) !== "deep";
-      const tone = spicyPlayful ? (question.type === "text" ? "flirtyText" : "flirty") : question.topic === "spicy" ? "gentle" : questionTone(question) === "light" && !(question.type === "text" && tier === "far") ? "light" : "warm";
+      const tone = spicyPlayful ? (question.type === "text" ? "flirtyText" : "flirty") : question.topic === "spicy" ? "gentle" : questionTone(question) === "light" ? (question.type === "text" ? "lightText" : "light") : "warm";
       if (!state.cardPrompts || typeof state.cardPrompts !== "object") state.cardPrompts = {};
       const key = `${tier}:${tone}`;
       const kept = state.cardPrompts[question.id];
@@ -16049,7 +16100,7 @@ var qrcode = function() {
     function tonightLine() {
       const today = new Date().toDateString();
       // The current round counts once its scores are being shown (the line is rebuilt at unlock).
-      const rounds = state.completedRounds.filter((round) => new Date(round.completedAt).toDateString() === today && (!roundScoresHidden(round) || revealUnlockedNow()));
+      const rounds = state.completedRounds.filter((round) => isTonightRound(round) && (!roundScoresHidden(round) || revealUnlockedNow()));
       if (rounds.length < 2) return "";
       const latest = state.completedRounds[state.completedRounds.length - 1];
       const scoreOf = (round) => (round === latest ? calculateAlignmentSummary(getSelectedQuestions().filter(Boolean)).overall : Number(round.alignment?.overall) || 0);
@@ -16605,6 +16656,7 @@ var qrcode = function() {
         const playStyle = state.playStyle;
         const roundWillStart = playStyle !== "nearby" || (nearbyChannelOpen() && state.nearbyRole === "host");
         if (roundWillStart && !(await confirmLeavingReveal())) return;
+        if (roundWillStart && state.sessionPreset === "pack") state.sessionPreset = "custom";
         if (playStyle === "nearby") {
           if (!nearbyChannelOpen()) {
             if (nearbyRuntime.roomId && !nearbyRoomExpired()) {
@@ -16842,7 +16894,7 @@ var qrcode = function() {
       // Resume audio on user interaction to satisfy browser autoplay policy.
       try {
         if (state.ambientMusicEnabled) ambientSoundscape.start();
-        else audioEngine.resume();
+        else { audioEngine.resume(); armIdleSuspend(); }
       } catch (e) {
         // Prevent audio issues from blocking user interaction handlers
       }
