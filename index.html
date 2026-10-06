@@ -6469,11 +6469,22 @@
     .vibe-running-low { grid-column: 1 / -1; margin: 4px 0 0; }
     @media (pointer: coarse) { .vibe-running-low .text-btn { min-height: 44px; } }
     .topic-alignment-card { justify-content: flex-start !important; }
+    /* Narrow phones keep the category name and let the answer-type chip shrink to its icon. */
     @media (max-width: 340px) {
       .question-screen .question-meta { flex-wrap: nowrap; gap: 6px; }
-      .question-screen .category-pill { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .question-screen .type-chip { padding-inline: 8px; white-space: nowrap; }
+      .question-screen .category-pill { flex-shrink: 0; white-space: nowrap; }
+      .question-screen .type-chip { padding-inline: 8px; white-space: nowrap; font-size: 0 !important; gap: 0; }
+      .question-screen .type-chip > span { font-size: max(12px, 0.8rem) !important; }
     }
+    @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+      [data-text-size="large"] .question-screen .quick-pick-option { min-height: 48px; padding-block: 6px; }
+      [data-text-size="large"] .question-screen .quick-pick { margin-top: 4px; }
+    }
+    @media (max-width: 400px) {
+      [data-text-size="large"] .question-actions .primary-btn { white-space: nowrap; flex: 1 0 auto; }
+    }
+    .vibe-running-low .text-btn { color: var(--coral); font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+    [data-theme="pastel"] .vibe-running-low .text-btn { color: #be123c; }
     /* Words break only when one can't fit a line on its own (hyphens: auto would hyphenate words that fit). */
     .quick-pick-option, .quick-guess-option { overflow-wrap: break-word; word-break: normal; hyphens: manual; -webkit-hyphens: manual; }
     @media (max-width: 380px) {
@@ -13998,7 +14009,7 @@ var qrcode = function() {
       if (state.textSize !== "small") return;
       document.documentElement.classList.add("measuring-text");
       document.querySelectorAll("#app *, .topbar *, .bottom-nav *").forEach((element) => {
-        if (element.closest(".text-size-option, svg, .reveal-buddy, .progress-star, .pass-person, .card-spark, .question-decor") || !element.textContent.trim()) return;
+        if (element.closest(".text-size-option, svg, .reveal-buddy, .progress-star, .pass-person, .card-spark, .question-decor") || (element.matches(".type-chip") && innerWidth <= 340) || !element.textContent.trim()) return;
         if (parseFloat(getComputedStyle(element).fontSize) < 11.95) {
           element.style.setProperty("font-size", "12px", "important");
           element.setAttribute("data-compact-floor", "");
@@ -16428,7 +16439,7 @@ var qrcode = function() {
         return `
           <div class="topic-alignment-card">
             ${alignmentRingMarkup(item.score, "similar")}
-            <span class="topic-alignment-name"><span class="nowrap">${topic?.icon || "•"} ${escapeHTML(topic?.label || item.topic)}</span> <span class="nowrap">· ${item.fitScore}% fit</span> <span class="nowrap">· ${item.count}Q</span></span>
+            <span class="topic-alignment-name"><span class="nowrap">${topic?.icon || "•"} ${escapeHTML(topic?.label || item.topic)} ·</span> <span class="nowrap">${item.fitScore}% fit ·</span> <span class="nowrap">${item.count}Q</span></span>
           </div>
         `;
       }).join("");
