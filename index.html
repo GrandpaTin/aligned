@@ -6200,6 +6200,8 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
+      /* The faces' instant visibility switch must stay instant or a flip focuses a still-hidden face. */
+      .flip-card .card-face { transition: none !important; }
     }
 
     /* ---- Review round fixes: layout precision, focus visibility, touch targets ---- */
@@ -6580,7 +6582,9 @@
     [data-text-size="compact"] :is(.guess-label small, .guess-label, .legend-item, .answer-name, .setting-row label, .topic-progress-top span, .question-actions .primary-btn) { font-size: max(12px, 0.7rem) !important; }
     .home-result-history-count, .home-topic-result, .count-time, .follow-through-button, .highlight-card span, .difference-score,
     .feedback-menu summary, .question-library-action, .theme-card small, .version-tag, .platform-badge, .importance-option,
-    .round-mode-copy, [data-tooltip]::after, .alignment-ring-content span { font-size: max(12px, 0.72rem) !important; }
+    .round-mode-copy, [data-tooltip]::after, .alignment-ring-content span,
+    .saved-round-date, .saved-answer-name, .saved-answer-value, .library-question-meta span, .library-answer-history summary,
+    .intensity-card small, .mini-action, .home-topic-result span, .highlight-locked small, .round-copy span { font-size: max(12px, 0.72rem) !important; }
     /* Cover the gap above the floating top bar so scrolled content never peeks out above it. */
     .topbar::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: max(8px, env(safe-area-inset-top)); background: inherit; border-radius: 18px 18px 0 0; pointer-events: none; }
     .highlight-note { display: block; margin-top: 6px; color: var(--muted); font-size: max(12px, .76rem); font-weight: 650; }
@@ -10614,7 +10618,7 @@ var qrcode = function() {
       updateNearbyBanner();
     }
 
-    const PRESSABLE_SELECTOR = ".rating-option, .follow-through-button, .library-filter, .topic-progress-card, .play-style-card, .preset-card, .importance-option, .feedback-actions .question-library-action";
+    const PRESSABLE_SELECTOR = ".rating-option, .follow-through-button, .library-filter:not(.saved-pack-chip), .topic-progress-card, .play-style-card, .preset-card, .importance-option, .feedback-actions .question-library-action";
     function syncPressedStates(root = app) {
       root.querySelectorAll(PRESSABLE_SELECTOR).forEach((button) => {
         const pressed = String(button.classList.contains("active"));
@@ -10660,6 +10664,9 @@ var qrcode = function() {
           action = '<button class="secondary-btn" type="button" data-nearby-use-tab>Use this tab</button>';
         } else if (state.screen === "question" && !linkEnded && !nearbyRuntime.partnerLeft) {
           message = `Reconnecting to ${partner}’s phone… keep answering, nothing is lost.`;
+        } else if (state.screen === "question" && nearbyRuntime.partnerLeft) {
+          message = `${partner} left the two-phone round. Keep answering — ${partner} can answer on this phone at the end.`;
+          tone = "warning";
         } else if (state.screen === "question") {
           message = `The link to ${partner}’s phone has ended. Keep answering — you can reconnect or finish on one phone at the end.`;
           tone = "warning";
@@ -10832,6 +10839,8 @@ var qrcode = function() {
     function refreshRevealFromPartner() {
       if (state.screen === "results") { render(); return; }
       if (state.screen !== "reveal") return;
+      // The partner just finished the reveal: a "scores not revealed yet" warning is now false.
+      if (!revealUnfinished()) dismissConfirmDialogs("reveal-guard");
       if (Date.now() < unlockAnimatingUntil) {
         pendingRevealRefresh = true;
         window.setTimeout(() => { if (pendingRevealRefresh) refreshRevealFromPartner(); }, unlockAnimatingUntil - Date.now() + 50);
@@ -11020,6 +11029,7 @@ var qrcode = function() {
         if (state.screen === "nearby-wait") render();
       } else if (payload.type === "leave") {
         nearbyRuntime.partnerLeft = true;
+        dismissConfirmDialogs("link");
         const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "Your partner";
         closeNearbyConnection();
         nearbyRuntime.partnerLeft = true;
@@ -11813,10 +11823,11 @@ var qrcode = function() {
     }, true);
 
     // safeFirst styles the cancel choice as the main button when staying put is the recommended path.
-    function openConfirmDialog({ eyebrow = "", title, copy = "", confirmLabel = "Continue", cancelLabel = "Cancel", danger = false, safeFirst = false }) {
+    function openConfirmDialog({ eyebrow = "", title, copy = "", confirmLabel = "Continue", cancelLabel = "Cancel", danger = false, safeFirst = false, tag = "" }) {
       return new Promise((resolve) => {
         const overlay = document.createElement("div");
         overlay.className = "modal-backdrop";
+        if (tag) overlay.dataset.confirmTag = tag;
         overlay.innerHTML = `
           <section class="exit-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-copy">
             ${eyebrow ? `<p class="eyebrow">${escapeHTML(eyebrow)}</p>` : ""}
@@ -12638,6 +12649,11 @@ var qrcode = function() {
     }
 
     // Resolves true when it is fine to leave the current round's reveal behind.
+    // Closes (as "stay") any open confirm dialog whose question the partner's phone just made moot.
+    function dismissConfirmDialogs(tag) {
+      document.querySelectorAll(`.modal-backdrop[data-confirm-tag="${tag}"] [data-modal-cancel]`).forEach((button) => button.click());
+    }
+
     async function confirmLeavingReveal(confirmLabel = "Start anyway") {
       if (!revealUnfinished()) return true;
       const left = revealRemainingCopy();
@@ -12647,7 +12663,8 @@ var qrcode = function() {
         copy: `${left ? `${left}. ` : ""}Leave now and this round’s count-up is skipped — its scores go straight to your Journal.`,
         confirmLabel,
         cancelLabel: "Keep revealing",
-        safeFirst: true
+        safeFirst: true,
+        tag: "reveal-guard"
       });
     }
 
@@ -12711,18 +12728,22 @@ var qrcode = function() {
         && !["expired", "in-use", "failed", "partner-cancelled", "unsupported", "idle"].includes(nearbyRuntime.status) && !nearbyRuntime.partnerLeft;
     }
 
-    async function confirmEndingLink() {
-      if (!nearbyLinked()) return () => {};
+    // starting: false when only the link ends (the play-style toggle) and no round starts yet.
+    // The commit function returns true when this phone was the joiner, so callers can make it Player 1.
+    async function confirmEndingLink({ starting = true } = {}) {
+      if (!nearbyLinked()) return () => false;
       const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "your partner";
-      const unfinished = revealUnfinished() ? " Your scores haven’t been revealed yet — leaving skips the count-up and its scores go straight to your Journal." : "";
+      const unfinished = starting && revealUnfinished() ? " Your scores haven’t been revealed yet — leaving skips the count-up and its scores go straight to your Journal." : "";
       const paused = ["question", "intermission", "nearby-wait"].includes(state.resumeScreen) ? " Your paused two-phone round will be discarded." : "";
-      const ok = await openConfirmDialog({ title: "End the two-phone link?", copy: `${partner}’s phone will be told you left.${unfinished}${paused}`, confirmLabel: "End link and start", cancelLabel: "Stay linked", safeFirst: true });
+      const ok = await openConfirmDialog({ title: "End the two-phone link?", copy: `${partner}’s phone will be told you left.${unfinished}${paused}`, confirmLabel: starting ? "End link and start" : "End link", cancelLabel: "Stay linked", safeFirst: true, tag: "link" });
       if (!ok) return null;
       return () => {
-        if (revealUnfinished()) state.revealCelebrated = state.selectedQuestionIds.join("|");
+        const wasJoiner = state.nearbyRole === "join";
+        if (starting && revealUnfinished()) state.revealCelebrated = state.selectedQuestionIds.join("|");
         closeNearbyConnection({ notifyPartner: true });
         state.nearbyRole = "";
         state.resumeScreen = null;
+        return wasJoiner;
       };
     }
 
@@ -14926,9 +14947,9 @@ var qrcode = function() {
           return;
         }
         if (button.dataset.playStyle !== "nearby" && state.playStyle === "nearby" && nearbyLinked()) {
-          confirmEndingLink().then((endLink) => {
+          confirmEndingLink({ starting: false }).then((endLink) => {
             if (!endLink) return;
-            endLink();
+            if (endLink()) state.names = [state.names[1], state.names[0]];
             state.playStyle = button.dataset.playStyle;
             saveState();
             playSound("tap");
@@ -15168,7 +15189,7 @@ var qrcode = function() {
           const commitLeave = nearbyLinked() && !sharedRound ? () => {} : await confirmStartingOver();
           if (!commitLeave) return;
           openSensitiveConsent(selectedTopics, () => {
-            endLink();
+            if (endLink()) names.reverse();
             commitLeave();
             state.sessionPreset = "pack";
             if (sharedRound) {
@@ -15219,7 +15240,7 @@ var qrcode = function() {
           return;
         }
         let leaveJoinedRound = false;
-        let endLocalLink = () => {};
+        let endLocalLink = () => false;
         let linkWarned = false;
         if (state.playStyle !== "nearby" && nearbyLinked()) {
           const confirmed = await confirmEndingLink();
@@ -15230,7 +15251,7 @@ var qrcode = function() {
         if (state.playStyle === "nearby" && state.nearbyRole === "join" && nearbyChannelOpen()) {
           const host = state.names[0] || "your partner";
           const unfinished = revealUnfinished() ? " Your scores haven’t been revealed yet — leaving skips the count-up and its scores go straight to your Journal." : "";
-          const leave = await openConfirmDialog({ title: "Leave the two-phone round?", copy: `${host} starts the next two-phone round from their phone.${unfinished} Leave to start your own round here?`, confirmLabel: "Leave and start", cancelLabel: "Stay", safeFirst: true });
+          const leave = await openConfirmDialog({ title: "Leave the two-phone round?", copy: `${host} starts the next two-phone round from their phone.${unfinished} Leave to start your own round here?`, confirmLabel: "Leave and start", cancelLabel: "Stay", safeFirst: true, tag: "link" });
           if (!leave) return;
           leaveJoinedRound = true;
           if (names[1] === state.names[1] && names[0] === state.names[0]) names.reverse();
@@ -15239,7 +15260,8 @@ var qrcode = function() {
         if (!commitLeave) return;
 
         openSensitiveConsent(selectedTopics, () => animateRoundSelection(form.querySelector('button[type="submit"]'), () => {
-          endLocalLink();
+          if (endLocalLink()) names.reverse();
+          if (state.sessionPreset === "pack") state.sessionPreset = "custom";
           if (leaveJoinedRound) {
             if (revealUnfinished()) state.revealCelebrated = state.selectedQuestionIds.join("|");
             closeNearbyConnection({ notifyPartner: true });
@@ -16344,6 +16366,7 @@ var qrcode = function() {
             const existing = dashboard.querySelector(".tonight-line");
             if (existing) existing.outerHTML = line;
             else if (line) dashboard.querySelector(".dual-score-dashboard")?.insertAdjacentHTML("afterend", line);
+            dismissConfirmDialogs("reveal-guard");
             celebrateScoreUnlock(dashboard);
           }
         }
@@ -16352,6 +16375,7 @@ var qrcode = function() {
       // The payoff: rings count up from zero the first time a round's scores are unlocked — on both
       // phones — and only once the dashboard is actually on screen, so nobody arrives at a finished number.
       function celebrateScoreUnlock(dashboard) {
+        dismissConfirmDialogs("reveal-guard");
         const roundKey = state.selectedQuestionIds.join("|");
         if (state.revealCelebrated === roundKey) return;
         state.revealCelebrated = roundKey;
@@ -16461,6 +16485,7 @@ var qrcode = function() {
             const back = card.querySelector(".card-back");
             if (!back.hasAttribute("tabindex")) back.setAttribute("tabindex", "-1");
             back.focus({ preventScroll: true });
+            window.setTimeout(() => { if (card.classList.contains("flipped") && !card.contains(document.activeElement)) back.focus({ preventScroll: true }); }, 120);
             if (scroll) card.scrollIntoView({ block: "nearest", behavior: motionReduced() ? "auto" : "smooth" });
           } else {
             // The front is visible (if still transparent) at once; retry once in case a busy engine applied styles late.
