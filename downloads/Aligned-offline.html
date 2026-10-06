@@ -218,21 +218,21 @@
       transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 160ms ease, border-color 160ms ease;
     }
 
-    .brand:hover {
+    @media (hover: hover) { .brand:hover {
       border-color: rgba(251, 113, 133, 0.3);
       box-shadow: 0 0 12px rgba(251, 113, 133, 0.22);
       transform: scale(1.03);
-    }
+    } }
 
     .brand:active {
       transform: scale(0.97);
     }
 
-    .brand:hover .brand-mark {
+    @media (hover: hover) { .brand:hover .brand-mark {
       color: var(--coral);
       text-shadow: 0 0 10px rgba(251, 113, 133, 0.7);
       animation: heart-beat 1.2s ease-in-out infinite;
-    }
+    } }
 
     @media (max-width: 440px) {
       .brand-text { display: none; }
@@ -272,11 +272,11 @@
       transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
     }
 
-    .home-btn:hover {
+    @media (hover: hover) { .home-btn:hover {
       border-color: color-mix(in srgb, var(--coral) 36%, transparent);
       background: color-mix(in srgb, var(--coral) 9%, transparent);
       transform: translateY(-2px);
-    }
+    } }
 
     .home-btn.active {
       border-color: var(--coral);
@@ -284,11 +284,11 @@
       box-shadow: 0 0 12px color-mix(in srgb, var(--coral) 20%, transparent);
     }
 
-    [data-theme] .home-btn:hover {
+    @media (hover: hover) { [data-theme] .home-btn:hover {
       border-color: color-mix(in srgb, var(--coral) 36%, transparent);
       background: color-mix(in srgb, var(--coral) 9%, transparent);
       transform: translateY(-2px);
-    }
+    } }
 
     [data-theme] .home-btn.active {
       border-color: var(--coral);
@@ -543,10 +543,10 @@
       transition: border-color 150ms ease, background 150ms ease;
     }
 
-    .session-dropdown-trigger:hover {
+    @media (hover: hover) { .session-dropdown-trigger:hover {
       border-color: color-mix(in srgb, var(--coral) 40%, transparent);
       background: rgba(30, 41, 59, 0.8);
-    }
+    } }
 
     .session-trigger-arrow {
       font-size: 0.8rem;
@@ -594,9 +594,9 @@
       transition: background 120ms ease;
     }
 
-    .session-dropdown-item:hover {
+    @media (hover: hover) { .session-dropdown-item:hover {
       background: rgba(255, 255, 255, 0.08);
-    }
+    } }
 
     .session-dropdown-item.selected {
       background: color-mix(in srgb, var(--coral) 15%, transparent);
@@ -676,10 +676,10 @@
       transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
     }
 
-    .mode-option:hover .mode-card {
+    @media (hover: hover) { .mode-option:hover .mode-card {
       border-color: color-mix(in srgb, var(--coral) 38%, transparent);
       transform: translateY(-2px);
-    }
+    } }
 
     .mode-option input:checked + .mode-card {
       border-color: var(--coral);
@@ -778,10 +778,10 @@
       line-height: 1.25;
     }
 
-    .count-option:hover .count-card {
+    @media (hover: hover) { .count-option:hover .count-card {
       border-color: color-mix(in srgb, var(--coral) 38%, transparent);
       transform: translateY(-2px);
-    }
+    } }
 
     .count-option input:checked + .count-card {
       border-color: var(--coral);
@@ -808,10 +808,10 @@
       font-weight: 760;
     }
 
-    .mini-action:hover {
+    @media (hover: hover) { .mini-action:hover {
       color: var(--text);
       border-color: rgba(251, 113, 133, 0.35);
-    }
+    } }
 
     .topic-picker {
       display: flex;
@@ -852,10 +852,10 @@
       font-weight: 900;
     }
 
-    .topic-option:hover .topic-chip {
+    @media (hover: hover) { .topic-option:hover .topic-chip {
       border-color: color-mix(in srgb, var(--topic-color) 48%, transparent);
       transform: translateY(-2px);
-    }
+    } }
 
     .topic-option input:checked + .topic-chip {
       border-color: color-mix(in srgb, var(--topic-color) 70%, transparent);
@@ -1018,11 +1018,11 @@
       transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
     }
 
-    .primary-btn:hover {
+    @media (hover: hover) { .primary-btn:hover {
       background: #fda4af;
       box-shadow: 0 14px 36px rgba(251, 113, 133, 0.3);
       transform: translateY(-2px);
-    }
+    } }
 
     .primary-btn:active {
       transform: translateY(0);
@@ -1037,9 +1037,9 @@
       background: rgba(148, 163, 184, 0.08);
     }
 
-    .secondary-btn:hover {
+    @media (hover: hover) { .secondary-btn:hover {
       background: rgba(148, 163, 184, 0.14);
-    }
+    } }
 
     .text-btn {
       min-height: 36px;
@@ -1048,9 +1048,9 @@
       background: transparent;
     }
 
-    .text-btn:hover {
+    @media (hover: hover) { .text-btn:hover {
       color: var(--text);
-    }
+    } }
 
     .error {
       min-height: 20px;
@@ -1960,9 +1960,9 @@
       transition: height 320ms cubic-bezier(0.22, 1, 0.36, 1), transform 180ms ease;
     }
 
-    .flip-card:hover {
+    @media (hover: hover) { .flip-card:hover {
       transform: translateY(-2px);
-    }
+    } }
 
     .card-front:focus-visible,
     .card-close-button:focus-visible {
@@ -2272,7 +2272,7 @@
       border-radius: 7px;
       color: #0f172a;
       background: var(--marker-color);
-      font-size: 0.68rem;
+      font-size: max(12px, 0.72rem);
       font-weight: 900;
       line-height: 1.2;
       transform: translateX(-50%);
@@ -2412,10 +2412,10 @@
       background: rgba(251, 113, 133, 0.08);
     }
 
-    .reveal-all-btn:hover {
+    @media (hover: hover) { .reveal-all-btn:hover {
       border-color: rgba(251, 113, 133, 0.48);
       background: rgba(251, 113, 133, 0.14);
-    }
+    } }
 
     .reveal-buddies {
       display: inline-flex;
@@ -2478,11 +2478,11 @@
       transition: transform 170ms ease, border-color 170ms ease, background 170ms ease;
     }
 
-    .library-launch:hover {
+    @media (hover: hover) { .library-launch:hover {
       border-color: rgba(167, 139, 250, 0.45);
       background: linear-gradient(135deg, rgba(167, 139, 250, 0.16), rgba(96, 165, 250, 0.09));
       transform: translateY(-2px);
-    }
+    } }
 
     .library-launch-copy {
       display: flex;
@@ -2561,17 +2561,17 @@
       transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
     }
 
-    .data-tool:hover {
+    @media (hover: hover) { .data-tool:hover {
       border-color: rgba(96, 165, 250, 0.36);
       color: var(--text);
       background: rgba(96, 165, 250, 0.08);
       transform: translateY(-2px);
-    }
+    } }
 
-    .data-tool.danger:hover {
+    @media (hover: hover) { .data-tool.danger:hover {
       border-color: rgba(251, 113, 133, 0.42);
       background: rgba(251, 113, 133, 0.09);
-    }
+    } }
 
     .data-status {
       min-height: 18px;
@@ -2676,18 +2676,27 @@
       transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
     }
 
-    .topic-progress-card:hover,
+    
     .topic-progress-card.active {
       border-color: color-mix(in srgb, var(--topic-color) 48%, transparent);
       background: color-mix(in srgb, var(--topic-color) 8%, rgba(30, 41, 59, 0.72));
       transform: translateY(-2px);
     }
+    @media (hover: hover) { .topic-progress-card:hover {
+      border-color: color-mix(in srgb, var(--topic-color) 48%, transparent);
+      background: color-mix(in srgb, var(--topic-color) 8%, rgba(30, 41, 59, 0.72));
+      transform: translateY(-2px);
+    } }
 
-    [data-theme] .topic-progress-card:hover,
+    
     [data-theme] .topic-progress-card.active {
       border-color: color-mix(in srgb, var(--topic-color) 48%, transparent);
       background-image: linear-gradient(color-mix(in srgb, var(--topic-color) 8%, transparent), color-mix(in srgb, var(--topic-color) 8%, transparent));
     }
+    @media (hover: hover) { [data-theme] .topic-progress-card:hover {
+      border-color: color-mix(in srgb, var(--topic-color) 48%, transparent);
+      background-image: linear-gradient(color-mix(in srgb, var(--topic-color) 8%, transparent), color-mix(in srgb, var(--topic-color) 8%, transparent));
+    } }
 
     .topic-progress-top {
       display: flex;
@@ -3016,10 +3025,10 @@
       font-weight: 760;
     }
 
-    .question-library-action:hover {
+    @media (hover: hover) { .question-library-action:hover {
       border-color: rgba(251, 113, 133, 0.36);
       color: var(--text);
-    }
+    } }
 
     .library-empty {
       padding: 36px 20px;
@@ -3303,14 +3312,9 @@
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
     }
 
-    .name-input:hover,
-    .answer-textarea:hover,
-    .comment-textarea:hover,
-    .custom-input:hover,
-    .custom-select:hover,
-    .library-search:hover {
+    @media (hover: hover) { .name-input:hover,.answer-textarea:hover,.comment-textarea:hover,.custom-input:hover,.custom-select:hover,.library-search:hover {
       border-color: rgba(251, 113, 133, 0.34);
-    }
+    } }
 
     .count-card,
     .mode-card,
@@ -4608,6 +4612,10 @@
 
     [data-text-size="small"] { font-size: 15px; }
     [data-text-size="large"] { font-size: 18px; }
+    @media (min-width: 900px) {
+      [data-text-size="small"] { font-size: 100%; }
+      [data-text-size="large"] { font-size: 125%; }
+    }
 
     .high-contrast {
       --text: #ffffff;
@@ -5103,13 +5111,13 @@
       font-weight: 500;
     }
 
-    .text-size-option:hover {
+    @media (hover: hover) { .text-size-option:hover {
       background: rgba(255, 255, 255, 0.05);
       color: var(--text);
-    }
-    [data-theme="pastel"] .text-size-option:hover {
+    } }
+    @media (hover: hover) { [data-theme="pastel"] .text-size-option:hover {
       background: rgba(15, 23, 42, 0.04);
-    }
+    } }
 
     .text-size-option.active {
       border-color: var(--coral);
@@ -6121,14 +6129,14 @@
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--coral) 12%, transparent), 0 10px 22px rgba(85, 74, 112, 0.08) !important;
     }
 
-    [data-theme="pastel"] .session-dropdown-trigger:hover {
+    @media (hover: hover) { [data-theme="pastel"] .session-dropdown-trigger:hover {
       border-color: color-mix(in srgb, var(--coral) 40%, transparent) !important;
       background: #fafafc !important;
-    }
+    } }
 
-    [data-theme="pastel"] .session-dropdown-item:hover {
+    @media (hover: hover) { [data-theme="pastel"] .session-dropdown-item:hover {
       background: rgba(79, 91, 120, 0.08) !important;
-    }
+    } }
 
     [data-theme="pastel"] .topic-option input:checked + .topic-chip {
       border-color: var(--topic-color) !important;
@@ -6443,7 +6451,7 @@
     .screen, .question-screen, .flip-card, .error, #setup-error { scroll-margin-top: calc(84px + env(safe-area-inset-top, 0px)); }
     .vibe-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
     .vibe-tile { display: grid; gap: 4px; min-height: 92px; padding: 14px; border: 1px solid var(--line); border-radius: 18px; color: var(--text); background: rgba(15, 23, 42, 0.5); text-align: left; cursor: pointer; transition: transform 160ms ease, border-color 160ms ease; }
-    .vibe-tile:hover { transform: translateY(-2px); border-color: var(--coral); }
+    @media (hover: hover) { .vibe-tile:hover { transform: translateY(-2px); border-color: var(--coral); } }
     .vibe-tile.active { border-color: var(--coral); background: linear-gradient(145deg, color-mix(in srgb, var(--coral) 18%, transparent), color-mix(in srgb, var(--violet) 10%, transparent)); }
     .vibe-tile small { color: var(--muted); font-size: max(12px, .74rem); line-height: 1.35; }
     .vibe-icon { font-size: 1.4rem; }
@@ -6580,7 +6588,9 @@
     .round-intro { white-space: normal; }
     [data-text-size="small"] :is(.guess-label small, .legend-item, .answer-name, .setting-row label, .topic-progress-top span, .progress-copy, .category-symbol,
       .card-spark, .type-chip, .category-pill, .eyebrow, .library-filter, .custom-label, .round-copy span, .saved-round-date, .saved-answer-name,
-      .saved-answer-value, .mini-action, .intensity-card small, .play-style-card small, .home-results-copy p:not(.eyebrow)) { font-size: max(12px, 0.72rem) !important; }
+      .saved-answer-value, .mini-action, .intensity-card small, .play-style-card small, .home-results-copy p:not(.eyebrow),
+      .data-tool, .card-number, .match-badge, .library-overall span, .topic-note, .topic-chip small, .tap-hint, .card-more summary small,
+      .settings-card .lede, .text-size-preview, .highlight-note, .difference-score, .count-time) { font-size: max(12px, 0.72rem) !important; }
     .home-result-history-count, .home-topic-result, .count-time, .follow-through-button, .highlight-card span, .difference-score,
     .feedback-menu summary, .question-library-action, .theme-card small, .version-tag, .platform-badge, .importance-option,
     .guess-label small, .home-results-copy p:not(.eyebrow), .round-mode-copy, [data-tooltip]::after, .alignment-ring-content span,
@@ -6592,24 +6602,37 @@
     /* D3: forced colors turn the faint decorative rings into solid arcs over the text. */
     @media (forced-colors: active) { .card-front::after, .card-front::before, .question-decor { display: none !important; } }
     /* D1: every clickable card, chip and button answers the pointer before it is clicked, in every theme. */
+    /* F2: a closed card's hidden back must not hang below it and stretch the page (after the 90° swap). */
+    .flip-card:not(.flipped) .card-back { max-height: 100%; overflow: hidden; transition: opacity 0s linear 0.089s, visibility 0s linear 0.089s, max-height 0s linear 0.089s; }
     /* Windows High Contrast flattens the tinted selected states; mark them with the system highlight. */
     @media (forced-colors: active) {
+      body::before, body::after, .ambient-specks, .home-results::after, .theme-preview { display: none !important; }
+      .setting-row input[type="checkbox"] { border: 2px solid ButtonText; background: Canvas; }
+      .setting-row input[type="checkbox"]::before { background: ButtonText; forced-color-adjust: none; }
+      .setting-row input[type="checkbox"]:checked { background: Highlight; border-color: Highlight; forced-color-adjust: none; }
+      .setting-row input[type="checkbox"]:checked::before { background: HighlightText; }
+      .range-input { forced-color-adjust: auto; border: 1px solid ButtonText; border-radius: 999px; }
+      .theme-option input:checked + .theme-card { outline: 3px solid Highlight !important; outline-offset: 2px; border-color: Highlight !important; }
       :is(.active, .chosen, .selected, [aria-pressed="true"], [aria-checked="true"], [aria-selected="true"]) { outline: 3px solid Highlight !important; outline-offset: 2px; border-color: Highlight !important; }
     }
     @media (hover: hover) {
       :is(.play-style-card, .preset-card, .theme-card, .library-filter, [data-favorite-question], .rating-option, .follow-through-button,
-        .importance-option, .highlight-card, .secondary-btn, .mini-action, .question-library-action):hover:not(:disabled):not([aria-disabled="true"]):not(.active):not(.chosen):not([aria-pressed="true"]):not([aria-checked="true"]) {
+        .importance-option, .secondary-btn, .mini-action, .question-library-action):hover:not(:disabled):not([aria-disabled="true"]):not(.active):not(.chosen):not([aria-pressed="true"]):not([aria-checked="true"]) {
         border-color: color-mix(in srgb, var(--coral) 55%, var(--line)) !important;
       }
+      :is(.card-close-button, .card-more > summary, .library-add > summary, .setting-row):hover { border-color: color-mix(in srgb, var(--coral) 55%, var(--line)) !important; background-image: linear-gradient(color-mix(in srgb, var(--coral) 8%, transparent), color-mix(in srgb, var(--coral) 8%, transparent)); }
+      .setting-row:hover input[type="checkbox"] { box-shadow: 0 0 0 3px color-mix(in srgb, var(--coral) 30%, transparent); }
+      [data-theme] :is(input[type="text"], input[type="search"], textarea, select, .custom-select):hover:not(:focus) { border-color: color-mix(in srgb, var(--coral) 55%, var(--line)) !important; }
+      .highlight-jump:hover { text-decoration-color: currentColor; color: var(--coral); }
       :is(.play-style-card, .preset-card, .theme-card, .library-filter, [data-favorite-question], .rating-option, .follow-through-button,
-        .importance-option, .highlight-card, .secondary-btn, .mini-action, .question-library-action):hover:not(:disabled):not([aria-disabled="true"]) {
+        .importance-option, .secondary-btn, .mini-action, .question-library-action):hover:not(:disabled):not([aria-disabled="true"]) {
         box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--coral) 8%, transparent), 0 6px 16px rgba(2, 6, 23, 0.18);
         transform: translateY(-1px);
       }
     }
-    @media (hover: hover) and (prefers-reduced-motion: reduce) { :is(.play-style-card, .preset-card, .theme-card, .highlight-card):hover { transform: none !important; } }
+    @media (hover: hover) and (prefers-reduced-motion: reduce) { :is(.play-style-card, .preset-card, .theme-card):hover { transform: none !important; } }
     /* Phone landscape: the sticky action bar would cover the prompt itself, so it scrolls with the card. */
-    @media (orientation: landscape) and (max-height: 500px) {
+    @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
       .question-screen .question-actions { position: static !important; box-shadow: none !important; }
       .question-screen .progress-constellation { display: none; }
       .question-screen .question-header { margin-bottom: 4px; }
@@ -6619,7 +6642,7 @@
     @media (prefers-reduced-motion: reduce) { .flip-card-inner { transition: none !important; } }
     .reduced-motion .flip-card-inner { transition: none !important; }
     /* Cover the gap above the floating top bar so scrolled content never peeks out above it. */
-    .topbar::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: max(8px, env(safe-area-inset-top)); background: inherit; border-radius: 18px 18px 0 0; pointer-events: none; }
+    .topbar::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: max(8px, env(safe-area-inset-top)); background: var(--midnight); border-radius: 0; pointer-events: none; }
     .highlight-note { display: block; margin-top: 6px; color: var(--muted); font-size: max(12px, .76rem); font-weight: 650; }
     .guess-panel { margin: 14px 0 4px; padding: 12px 14px; border: 1px dashed color-mix(in srgb, var(--violet) 60%, transparent); border-radius: 16px; background: color-mix(in srgb, var(--violet) 8%, transparent); }
     .guess-panel.guessed { border-style: solid; }
@@ -10012,7 +10035,8 @@ var qrcode = function() {
             ? Object.fromEntries(Object.entries(cached.cardPrompts).filter(([id, value]) => validIds.has(id) && value && typeof value.text === "string" && typeof value.key === "string").map(([id, value]) => [id, { key: value.key.slice(0, 40), text: value.text.slice(0, 300) }]))
             : {},
           recentPrompts: Array.isArray(cached.recentPrompts) ? cached.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-60) : [],
-          recentHeadlines: Array.isArray(cached.recentHeadlines) ? cached.recentHeadlines.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-4) : []
+          recentHeadlines: Array.isArray(cached.recentHeadlines) ? cached.recentHeadlines.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-4) : [],
+          packReturnPreset: typeof cached.packReturnPreset === "string" ? cached.packReturnPreset.slice(0, 40) : ""
         };
 
         if (!validScreens.includes(restored.screen)) restored.screen = "setup";
@@ -10122,7 +10146,7 @@ var qrcode = function() {
     let nearbyLastPeerMessageAt = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.2.8";
+    const APP_VERSION = "1.2.9";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -10773,6 +10797,7 @@ var qrcode = function() {
       return {
         type: "round-init", roundId: state.nearbyRoundId, newRound: Boolean(newRound), names: [...state.names], questionMode: state.questionMode,
         questionIntensity: state.questionIntensity, selectedTopics: [...state.selectedTopics],
+        sessionPreset: state.sessionPreset, recentHeadlines: Array.isArray(state.recentHeadlines) ? state.recentHeadlines.slice(-4) : [],
         selectedQuestionIds: [...state.selectedQuestionIds], questions: getSelectedQuestions().filter(Boolean)
       };
     }
@@ -11029,7 +11054,9 @@ var qrcode = function() {
         questionIntensity: INTENSITY_OPTIONS.some((option) => option.id === payload.questionIntensity) ? payload.questionIntensity : state.questionIntensity,
         selectedTopics: Array.isArray(payload.selectedTopics) ? payload.selectedTopics.filter((topic) => validTopics.has(topic)) : state.selectedTopics,
         selectedQuestionIds, activePlayer: 1,
-        nearbyRole: "join", nearbyRoundId: payload.roundId
+        nearbyRole: "join", nearbyRoundId: payload.roundId,
+        sessionPreset: payload.sessionPreset === "pack" || SESSION_PRESETS.some((preset) => preset.id === payload.sessionPreset) ? payload.sessionPreset : "custom",
+        recentHeadlines: Array.isArray(payload.recentHeadlines) ? payload.recentHeadlines.filter((item) => typeof item === "string").map((item) => item.slice(0, 40)).slice(-4) : settings.recentHeadlines
       };
       if (!state.selectedTopics.length) state.selectedTopics = [...DEFAULT_TOPICS];
       nearbyRuntime.role = "join";
@@ -11126,7 +11153,7 @@ var qrcode = function() {
           showToast(`${partner} flipped card ${number}`);
           const question = getSelectedQuestions().find((item) => item?.id === newlyRevealed[0]);
           const match = question ? revealMatchInfo(question, state.answers[0][question.id], state.answers[1][question.id]) : null;
-          playSound(match?.isMatch ? "match" : "reveal", { topic: question?.topic, exact: match?.exact, degree: number - 1 });
+          playSound("partner-flip", { topic: question?.topic, degree: number - 1, match: Boolean(match?.isMatch) });
         }
       } else if (payload.type === "text-rating") {
         if (sameRound && acceptRemoteRating(payload.questionId, payload.rating, payload.at)) {
@@ -11412,6 +11439,7 @@ var qrcode = function() {
         answeredQuestionIds: [...state.answeredQuestionIds],
         recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-60) : [],
         recentHeadlines: Array.isArray(state.recentHeadlines) ? state.recentHeadlines.filter((item) => typeof item === "string").slice(-4) : [],
+        packReturnPreset: typeof state.packReturnPreset === "string" ? state.packReturnPreset.slice(0, 40) : "",
         excludedQuestionIds: [...state.excludedQuestionIds],
         neverQuestionIds: [...state.neverQuestionIds],
         favoriteQuestionIds: [...state.favoriteQuestionIds],
@@ -11819,8 +11847,8 @@ var qrcode = function() {
 
     let lastModalOpenedAt = 0;
     document.addEventListener("click", (event) => {
-      if (event.target instanceof Element && event.target.matches(".modal-backdrop") && Date.now() - lastModalOpenedAt < 400) event.stopImmediatePropagation();
-      if (event.target instanceof Element && event.target.closest(".modal-backdrop button") && Date.now() - lastModalOpenedAt < 400) {
+      if (event.isTrusted && event.target instanceof Element && event.target.matches(".modal-backdrop") && Date.now() - lastModalOpenedAt < 400) event.stopImmediatePropagation();
+      if (event.isTrusted && event.target instanceof Element && event.target.closest(".modal-backdrop button") && Date.now() - lastModalOpenedAt < 400) {
         event.stopImmediatePropagation();
         event.preventDefault();
       }
@@ -12115,7 +12143,7 @@ var qrcode = function() {
           const earlyOut = rubs(frequency, next);
           if (first || lateIn) {
             gain.gain.setValueAtTime(0.0001, at);
-            if (lateIn) gain.gain.setValueAtTime(0.0001, at + 0.6);
+            if (lateIn) gain.gain.setValueAtTime(0.0001, at + 0.3);
             gain.gain.linearRampToValueAtTime(0.03, at + (first ? fadeIn : 1.2));
           } else {
             gain.gain.setValueCurveAtTime(curve(true), at, 1.2);
@@ -12130,6 +12158,7 @@ var qrcode = function() {
           const octave = ctx.createOscillator();
           const octaveLevel = ctx.createGain();
           octave.frequency.value = frequency * 2;
+          octave.detune.value = osc.detune.value;
           // The lowest voice gets a stronger octave so phones still hear the chord's root.
           octaveLevel.gain.value = index === 0 ? 0.6 : 0.3;
           osc.connect(gain);
@@ -12307,6 +12336,7 @@ var qrcode = function() {
       const patterns = {
         tap: 14,
         step: 14,
+        "partner-flip": 10,
         lock: [18, 35, 18],
         unlock: [10, 25, 14],
         reveal: 16,
@@ -12435,7 +12465,7 @@ var qrcode = function() {
     function playSound(kind = "tap", options = {}) {
       if (!audioAllowed()) return;
       pulseHaptic(kind);
-      if (!state.soundEnabled || !(state.soundVolume > 0) || document.hidden) return;
+      if (!state.soundEnabled || !(state.soundVolume > 0) || document.hidden) { if (audioEngine.ctx) armIdleSuspend(); return; }
       try {
         const ctx = audioEngine.ensure();
         if (!ctx) return;
@@ -12476,7 +12506,7 @@ var qrcode = function() {
           const stepExtra = themeName === "dreamy" ? { ...wobble(), decay: 0.7 } : wobble();
           sequence(rung.map((d) => pentatonic(d)), 0.055, stepPeak, stepExtra);
           if (raw > 0 && rungIndex(raw - 1) === index) {
-            end = Math.max(end, note(pentatonic(rung[1] + 1), start + 2 * gap(0.055), stepPeak * 0.5, stepExtra));
+            end = Math.max(end, note(pentatonic(Math.min(rung[1] + 1, ladder[ladder.length - 1][1] - 1)), start + 2 * gap(0.055), stepPeak * 0.5, stepExtra));
           }
         } else if (kind === "lock") {
           sequence([pentatonic(3), pentatonic(2), pentatonic(0)], 0.075, 0.08, themeName === "cute" ? { octaveLevel: 0.6 } : undefined);
@@ -12548,6 +12578,10 @@ var qrcode = function() {
           if (options.agree) sequence([pentatonic(d), pentatonic(d + 2)], 0.06, 0.08, cuteLift);
           else end = Math.max(end, note(pentatonic(d), start, 0.085, { ...cuteLift, decay: themeName === "dreamy" ? 0.6 : 0.12 }));
           duck = 0.8;
+        } else if (kind === "partner-flip") {
+          const d = (Number(options.degree) || 0) % 5;
+          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045, { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true });
+          duck = 0.9;
         } else if (kind === "open") {
           noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.11, q: 0.8 });
           sequence([pentatonic(0), pentatonic(2), pentatonic(4)], 0.08, 0.08, themeName === "cute" ? { octaveLevel: 0.6 } : undefined);
@@ -12792,7 +12826,8 @@ var qrcode = function() {
         if (starting && revealUnfinished()) state.revealCelebrated = state.selectedQuestionIds.join("|");
         closeNearbyConnection({ notifyPartner: true });
         state.nearbyRole = "";
-        state.resumeScreen = null;
+        const keepReveal = !starting && revealUnfinished() && ["celebration", "reveal"].includes(state.resumeScreen);
+        if (!keepReveal) state.resumeScreen = null;
         return wasJoiner;
       };
     }
@@ -13267,11 +13302,14 @@ var qrcode = function() {
       return words;
     }
     // Adjacent content-word pairs ("road trip", "comfortable silence") for spotting reworded twins.
+    const promptPairCache = new Map();
     function promptPairs(text) {
+      if (promptPairCache.has(text)) return promptPairCache.get(text);
       const words = String(text).toLowerCase().match(/[a-z]+/g) || [];
       const content = (word) => word.length >= 4 && promptWords(word).size === 1;
       const pairs = new Set();
       for (let index = 1; index < words.length; index += 1) if (content(words[index - 1]) && content(words[index])) pairs.add(`${words[index - 1]} ${words[index]}`);
+      promptPairCache.set(text, pairs);
       return pairs;
     }
     let promptWordCounts = null;
@@ -13372,7 +13410,13 @@ var qrcode = function() {
           const playful = freshestTier.filter((question) => PLAYFUL_SPICY.test(question.id));
           if (playful.length) freshestTier = playful;
         }
-        const unlikeTonight = freshestTier.filter((question) => !playedTonightTwin(question, selected));
+        const notTwin = (question) => !playedTonightTwin(question, selected);
+        let unlikeTonight = freshestTier.filter(notTwin);
+        if (!unlikeTonight.length) {
+          const staler = tierSource.filter(notTwin);
+          const anyLeft = staler.length ? staler : remaining.filter(notTwin);
+          if (anyLeft.length) unlikeTonight = freshestQuestionTier(anyLeft);
+        }
         if (unlikeTonight.length) freshestTier = unlikeTonight;
         let candidates = freshestTier.filter((question) => question.topic === topic);
         if (!candidates.length) candidates = freshestTier;
@@ -13400,14 +13444,21 @@ var qrcode = function() {
     // A round from today played by the same two people (in either order).
     function isTonightRound(round) {
       if (!round || new Date(round.completedAt).toDateString() !== new Date().toDateString()) return false;
+      return sameCouple(round);
+    }
+    function sameCouple(round) {
       const couple = (names) => (Array.isArray(names) ? names : []).map((name) => String(name || "").trim().toLowerCase()).sort().join("|");
       return !Array.isArray(round.names) || couple(round.names) === couple(state.names);
+    }
+    function coupleAnsweredIds() {
+      return new Set(state.completedRounds.filter(sameCouple).flatMap((round) => round.questionIds || []));
     }
 
     // Only promise "fresh" questions when none of them has been answered before.
     function roundToastCopy(roundNumber, selectedQuestionIds) {
       const total = selectedQuestionIds.length;
-      const fresh = selectedQuestionIds.filter((id) => !state.answeredQuestionIds.includes(id)).length;
+      const answered = coupleAnsweredIds();
+      const fresh = selectedQuestionIds.filter((id) => !answered.has(id)).length;
       if (fresh === total) return `Round ${roundNumber} tonight · ${total} fresh questions`;
       if (!fresh) return `Round ${roundNumber} tonight · old favorites, new answers`;
       return `Round ${roundNumber} tonight · ${fresh} new, ${total - fresh} back for another look`;
@@ -13800,6 +13851,20 @@ var qrcode = function() {
     let lastScreenSettledAt = -Infinity;
     let lastExportAt = 0;
 
+    // Compact shrinks the root, so rem-sized captions written for Standard can fall under 12 px.
+    // Rather than chase every selector, lift whatever actually renders smaller (decorative glyphs excepted).
+    function enforceCompactFloor() {
+      document.querySelectorAll("[data-compact-floor]").forEach((element) => { element.style.removeProperty("font-size"); element.removeAttribute("data-compact-floor"); });
+      if (state.textSize !== "small") return;
+      document.querySelectorAll("#app *, .topbar *, .bottom-nav *").forEach((element) => {
+        if (element.closest(".text-size-option, svg, .reveal-buddy, .progress-star, .pass-person, .card-spark, .question-decor") || !element.textContent.trim()) return;
+        if (parseFloat(getComputedStyle(element).fontSize) < 11.95) {
+          element.style.setProperty("font-size", "12px", "important");
+          element.setAttribute("data-compact-floor", "");
+        }
+      });
+    }
+
     function render() {
       const previousFocusKey = focusKeyFor(document.activeElement);
       if (state.screen === "nearby-wait" && state.nearbyRemote) {
@@ -13842,6 +13907,7 @@ var qrcode = function() {
 
       homeButton.hidden = false;
       armBackGuard();
+      enforceCompactFloor();
       bottomNav.querySelectorAll("[data-app-route]").forEach((button) => {
         button.classList.toggle("active", button.dataset.appRoute === state.screen || (state.screen === "setup" && button.dataset.appRoute === "setup"));
         if (button.classList.contains("active")) button.setAttribute("aria-current", "page");
@@ -13897,6 +13963,8 @@ var qrcode = function() {
     }).observe(app, { childList: true, subtree: true });
 
     // Android app shell: the hardware Back button closes dialogs first, then returns to Home.
+    // The card most recently opened by hand on the reveal board; Back closes it before leaving the board.
+    let lastOpenedCard = null;
     window.alignedHandleBack = () => {
       const overlays = document.querySelectorAll(".modal-backdrop");
       if (overlays.length) {
@@ -13906,7 +13974,10 @@ var qrcode = function() {
         else overlay.remove();
         return true;
       }
-      const openCard = state.screen === "reveal" ? document.activeElement?.closest?.(".flip-card.flipped") : null;
+      const focusedCard = document.activeElement?.closest?.(".flip-card.flipped");
+      const lastCard = lastOpenedCard && lastOpenedCard.isConnected && lastOpenedCard.classList.contains("flipped") ? lastOpenedCard : null;
+      const openCard = state.screen === "reveal" ? focusedCard || lastCard : null;
+      lastOpenedCard = null;
       if (openCard) {
         openCard.querySelector(".card-close-button")?.click();
         return true;
@@ -14819,12 +14890,20 @@ var qrcode = function() {
       document.getElementById("reset-game").addEventListener("click", openResetDialog);
     }
 
+    function presetAfterPack() {
+      const previous = state.packReturnPreset;
+      return SESSION_PRESETS.some((preset) => preset.id === previous) ? previous : "custom";
+    }
+
     function renderSetup() {
+      // Home after a pack round shows (and plays) the vibe the couple had before the pack.
+      if (state.sessionPreset === "pack" && state.screen === "setup" && !state.resumeScreen) state.sessionPreset = presetAfterPack();
       const catalog = getQuestionCatalog();
       const answeredCount = state.answeredQuestionIds.filter((id) => catalog.some((question) => question.id === id)).length;
       const latestRound = [...state.completedRounds].reverse().find((round) => !roundScoresHidden(round));
       const allowedTopics = allowedTopicsForIntensity();
-      const activePreset = SESSION_PRESETS.find(p => p.id === state.sessionPreset) || SESSION_PRESETS[0];
+      const shownPreset = state.sessionPreset === "pack" ? presetAfterPack() : state.sessionPreset;
+      const activePreset = SESSION_PRESETS.find(p => p.id === shownPreset) || SESSION_PRESETS[0];
       const canResume = ["question", "intermission", "nearby", "nearby-wait"].includes(state.resumeScreen)
         || (["celebration", "reveal"].includes(state.resumeScreen) && revealUnfinished());
       const resumeMarkup = canResume && state.selectedQuestionIds.length ? `
@@ -14908,7 +14987,7 @@ var qrcode = function() {
 
             <p class="setup-section-title">Pick tonight’s vibe</p>
             <div class="vibe-tiles" role="group" aria-label="Quick start presets">
-              ${["date-night", "road-trip", "check-in", "deep-dive"].map((id) => SESSION_PRESETS.find((preset) => preset.id === id)).filter(Boolean).map((preset) => `<button class="vibe-tile ${state.sessionPreset === preset.id ? "active" : ""}" type="button" data-vibe="${preset.id}" aria-pressed="${state.sessionPreset === preset.id}"><span class="vibe-icon" aria-hidden="true">${preset.icon}</span><strong>${preset.label}</strong><small>${preset.copy}</small></button>`).join("")}
+              ${["date-night", "road-trip", "check-in", "deep-dive"].map((id) => SESSION_PRESETS.find((preset) => preset.id === id)).filter(Boolean).map((preset) => `<button class="vibe-tile ${shownPreset === preset.id ? "active" : ""}" type="button" data-vibe="${preset.id}" aria-pressed="${shownPreset === preset.id}"><span class="vibe-icon" aria-hidden="true">${preset.icon}</span><strong>${preset.label}</strong><small>${preset.copy}</small></button>`).join("")}
             </div>
             ${state.customPacks.length ? `<p class="setup-section-title">Your packs</p>
             <div class="library-filters custom-pack-starts">${state.customPacks.map((pack) => {
@@ -14925,7 +15004,7 @@ var qrcode = function() {
               </button>
               <div class="session-dropdown-menu" id="session-select-menu" role="listbox">
                 ${SESSION_PRESETS.map((preset) => `
-                  <button class="session-dropdown-item ${state.sessionPreset === preset.id ? "selected" : ""}" role="option" type="button" data-session-preset="${preset.id}" aria-selected="${state.sessionPreset === preset.id ? "true" : "false"}">
+                  <button class="session-dropdown-item ${shownPreset === preset.id ? "selected" : ""}" role="option" type="button" data-session-preset="${preset.id}" aria-selected="${shownPreset === preset.id ? "true" : "false"}">
                     <span class="session-item-header"><strong>${preset.icon} ${preset.label}</strong></span>
                     <span class="session-item-copy">${preset.copy}</span>
                   </button>
@@ -15083,7 +15162,7 @@ var qrcode = function() {
         `;
       };
       
-      updatePresetInfo(state.sessionPreset);
+      updatePresetInfo(shownPreset);
 
       const dropdownContainer = document.getElementById("session-dropdown");
       const dropdownTrigger = document.getElementById("session-select-trigger");
@@ -15258,10 +15337,10 @@ var qrcode = function() {
             return;
           }
           const validIds = new Set(getQuestionCatalog().map((question) => question.id));
-          const selectedQuestionIds = selectFreshQuestionIds(
+          const selectedQuestionIds = orderRoundAsRamp(selectFreshQuestionIds(
             pack.questionIds.filter((id) => validIds.has(id) && !state.neverQuestionIds.includes(id)),
             15
-          );
+          ));
           if (!selectedQuestionIds.length) {
             playSound("error"); error.textContent = "This pack has no available questions yet.";
             return;
@@ -15278,6 +15357,7 @@ var qrcode = function() {
           openSensitiveConsent(selectedTopics, () => {
             if (endLink()) names.reverse();
             commitLeave();
+            if (state.sessionPreset !== "pack") state.packReturnPreset = state.sessionPreset;
             state.sessionPreset = "pack";
             const before = { topics: [...state.selectedTopics], count: state.questionCount, mode: state.questionMode };
             const restoreSetup = () => { state.selectedTopics = before.topics; state.questionCount = before.count; state.questionMode = before.mode; saveState(); };
@@ -15352,7 +15432,7 @@ var qrcode = function() {
 
         openSensitiveConsent(selectedTopics, () => animateRoundSelection(form.querySelector('button[type="submit"]'), () => {
           if (endLocalLink()) names.reverse();
-          if (state.sessionPreset === "pack") state.sessionPreset = "custom";
+          if (state.sessionPreset === "pack") state.sessionPreset = presetAfterPack();
           if (leaveJoinedRound) {
             if (revealUnfinished()) state.revealCelebrated = state.selectedQuestionIds.join("|");
             closeNearbyConnection({ notifyPartner: true });
@@ -15818,7 +15898,7 @@ var qrcode = function() {
         : ["…", " — who will be surprised first?", " — ready to find out?"];
       const tail = tails[Math.max(0, roundsPlayedToday() - 1) % tails.length];
       const hidden = matches === 0 ? `Some surprises are waiting in there${tail}` : `${matches === 1 ? "One match is" : `${matches} matches are`} hiding in there${tail}`;
-      const explored = new Set(state.answeredQuestionIds).size;
+      const explored = coupleAnsweredIds().size;
       const total = getQuestionCatalog().length;
       const progress = roundsPlayedToday() >= 2 && total ? ` You’ve explored ${explored} of ${total} questions together.` : "";
       return `${hidden} Sit together and flip the cards at your own pace.${progress}`;
@@ -16079,12 +16159,14 @@ var qrcode = function() {
           : ["flirty", "flirtyText"].includes(tone) ? [DISCUSSION_PROMPTS.unratedFlirty, DISCUSSION_PROMPTS.unrated] : [DISCUSSION_PROMPTS.unrated];
         const pools = tier === "unrated" ? unratedPools : fitting[tier].map((name) => DISCUSSION_PROMPTS[tone][name]);
         const recentList = Array.isArray(state.recentPrompts) ? state.recentPrompts : [];
+        const gagFamily = (text) => /movie trailer/i.test(text) ? "trailer" : /\bact (?:out|it out)\b|ten seconds/i.test(text) ? "act" : /sports commentator|nature.documentary|narrat/i.test(text) ? "voice" : "";
+        const usedGags = new Set([...usedPrompts].map(gagFamily).filter(Boolean));
         // First dates skip follow-ups that assume a shared past.
         const historySafe = (text) => state.questionIntensity !== "cozy" || !(HISTORY_PROMPT_PATTERN.test(text) || /\blast notice|\bled you both\b|\bin each other\b|\bpets?\b|\bnoticed? you\b|\brecently\b/i.test(text));
         const seed = [...question.id].reduce((total, character) => total + character.charCodeAt(0), 0);
         const age = (text) => recentList.lastIndexOf(text);
         const rankPool = (prompts) => prompts.map((_, index) => prompts[(seed + index) % prompts.length])
-          .filter((text) => !usedPrompts.has(text) && historySafe(text))
+          .filter((text) => !usedPrompts.has(text) && historySafe(text) && !(gagFamily(text) && usedGags.has(gagFamily(text))))
           .sort((a, b) => age(a) - age(b));
         chosen = pools.map(rankPool).find((list) => list.length)?.[0]
           || pools.flat().find((text) => !usedPrompts.has(text))
@@ -16310,7 +16392,7 @@ var qrcode = function() {
           </section>
           <section class="highlight-grid ${allRevealed ? "" : "locked"}" aria-label="Round highlights" id="round-highlights">
             ${highlightCard(closestHighlight && closestHighlight.match.percent < 60 ? "Nearest common ground" : "Closest match", closestHighlight, "Complete more scored answers to unlock this highlight.", "", "One answer lines up beautifully…")}
-            ${highlightCard(surpriseNote && surpriseHighlight?.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No scored surprise yet.", surpriseNote, "Someone is in for a surprise…")}
+            ${highlightCard(surpriseNote && surpriseHighlight?.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No surprises — you read each other well.", surpriseNote, "Someone is in for a surprise…")}
             ${conversationHighlight ? highlightCard("Best conversation starter", conversationHighlight, "", "", "There is a story waiting in one card…") : ""}
             ${tally.some((item) => item.made) ? `<article class="highlight-card mind-reader"><span>🔮 Mind-reader</span><strong class="highlight-answer">${mindReaderHeadline(tally)}<small class="highlight-note">${tally.filter((item) => item.made).map((item) => `${escapeHTML(state.names[item.player])} read ${escapeHTML(state.names[item.player === 0 ? 1 : 0])} ${item.hits}/${item.made}`).join(" · ")}</small></strong><strong class="highlight-locked">${tally.some((item) => item.hits) ? "Someone read the other’s mind… " : "Did anyone read minds tonight? "}<small>${everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"}</small></strong></article>` : ""}
           </section>
@@ -16579,6 +16661,7 @@ var qrcode = function() {
         }
         saveState();
         updateRevealAllButton();
+        lastOpenedCard = card.classList.contains("flipped") ? card : null;
         requestAnimationFrame(() => {
           sizeCard(card);
           if (!card.classList.contains("flipped")) {
@@ -16672,7 +16755,7 @@ var qrcode = function() {
         const playStyle = state.playStyle;
         const roundWillStart = playStyle !== "nearby" || (nearbyChannelOpen() && state.nearbyRole === "host");
         if (roundWillStart && !(await confirmLeavingReveal())) return;
-        if (roundWillStart && state.sessionPreset === "pack") state.sessionPreset = "custom";
+        if (roundWillStart && state.sessionPreset === "pack") state.sessionPreset = presetAfterPack();
         if (playStyle === "nearby") {
           if (!nearbyChannelOpen()) {
             if (nearbyRuntime.roomId && !nearbyRoomExpired()) {
@@ -16910,7 +16993,8 @@ var qrcode = function() {
       // Resume audio on user interaction to satisfy browser autoplay policy.
       try {
         if (state.ambientMusicEnabled) ambientSoundscape.start();
-        else { audioEngine.resume(); armIdleSuspend(); }
+        else audioEngine.resume();
+        armIdleSuspend();
       } catch (e) {
         // Prevent audio issues from blocking user interaction handlers
       }
