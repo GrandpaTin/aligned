@@ -101,15 +101,15 @@ behave well? Recommend concrete synthesis changes (notes, envelopes, layering, p
 
 ## Score history
 
-| Reviewer | R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | R11 | R12 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Mobile | 7.0–8.2 | 8.4–9.2 | 8.6–9.3 | 8.6–9.3 | 8.3–9.2 | 8.7–9.3 | 8.4–9.3 | 8.5–9.3 | 8.8–9.3 | 9.0–9.3 | 9.2–9.4 | 9.3–9.4 |
-| Desktop | 7.5–8.8 | 7.9–9.2 | 8.0–9.1 | 8.5–9.3 | 7.8–9.0 | 8.4–9.1 | 8.3–9.2 | 8.6–9.3 | 8.8–9.3 | 8.8–9.3 | 9.1–9.3 | 9.1–9.4 |
-| Multiplayer/QR | 5.0–7.0 | 7.6–8.8 | 8.3–9.0 | 8.5–9.2 | 8.3–9.0 | 8.7–9.2 | 8.8–9.2 | 8.9–9.3 | 9.0–9.3 | 8.8–9.3 | 9.1–9.3 | 9.0–9.3 |
-| QA/accessibility | 6.6–8.6 | 8.0–8.9 | 8.5–9.2 | 8.6–9.3 | 8.6–9.3 | 8.7–9.2 | 8.0–9.2 | 8.6–9.2 | 8.9–9.3 | — (API outage) | 9.2–9.3 | 9.1–9.4 |
-| Cross-platform/offline | — | 8.0–9.2 | 8.7–9.5 | 9.3–9.5 | 8.6–9.3 | 9.2–9.5 | 8.5–9.5 | 8.9–9.5 | 9.0–9.5 | 9.2–9.5 | 9.2–9.5 | 9.2–9.5 |
-| Fun & engagement | — | — | — | — | 7.6–9.1 (fun 7.6) | 8.6–9.1 (fun 8.6) | 8.9–9.3 (fun 8.9) | 8.7–9.3 (fun 9.1) | 8.8–9.3 (fun 9.1) | 9.0–9.3 (fun 9.1/9.2) | 9.2–9.3 (fun 9.3) | 9.2–9.4 (fun 9.2/9.3) |
-| Sound design | — | — | — | — | 5.8 mobile / 6.0 desktop | 7.4 mobile / 7.8 desktop | 8.3 mobile / 8.6 desktop | 8.7 mobile / 8.9 desktop | 9.0 mobile / 9.2 desktop | 9.2 mobile / 9.3 desktop | 9.3 mobile / 9.4 desktop | 9.4 mobile / 9.5 desktop |
+| Reviewer | R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | R11 | R12 | R13 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Mobile | 7.0–8.2 | 8.4–9.2 | 8.6–9.3 | 8.6–9.3 | 8.3–9.2 | 8.7–9.3 | 8.4–9.3 | 8.5–9.3 | 8.8–9.3 | 9.0–9.3 | 9.2–9.4 | 9.3–9.4 | 9.3–9.4 |
+| Desktop | 7.5–8.8 | 7.9–9.2 | 8.0–9.1 | 8.5–9.3 | 7.8–9.0 | 8.4–9.1 | 8.3–9.2 | 8.6–9.3 | 8.8–9.3 | 8.8–9.3 | 9.1–9.3 | 9.1–9.4 | 9.1–9.4 |
+| Multiplayer/QR | 5.0–7.0 | 7.6–8.8 | 8.3–9.0 | 8.5–9.2 | 8.3–9.0 | 8.7–9.2 | 8.8–9.2 | 8.9–9.3 | 9.0–9.3 | 8.8–9.3 | 9.1–9.3 | 9.0–9.3 | 9.2–9.4 |
+| QA/accessibility | 6.6–8.6 | 8.0–8.9 | 8.5–9.2 | 8.6–9.3 | 8.6–9.3 | 8.7–9.2 | 8.0–9.2 | 8.6–9.2 | 8.9–9.3 | — (API outage) | 9.2–9.3 | 9.1–9.4 | 9.1–9.4 |
+| Cross-platform/offline | — | 8.0–9.2 | 8.7–9.5 | 9.3–9.5 | 8.6–9.3 | 9.2–9.5 | 8.5–9.5 | 8.9–9.5 | 9.0–9.5 | 9.2–9.5 | 9.2–9.5 | 9.2–9.5 | 9.2–9.5 |
+| Fun & engagement | — | — | — | — | 7.6–9.1 (fun 7.6) | 8.6–9.1 (fun 8.6) | 8.9–9.3 (fun 8.9) | 8.7–9.3 (fun 9.1) | 8.8–9.3 (fun 9.1) | 9.0–9.3 (fun 9.1/9.2) | 9.2–9.3 (fun 9.3) | 9.2–9.4 (fun 9.2/9.3) | 9.1–9.4 (fun 9.1/9.2) |
+| Sound design | — | — | — | — | 5.8 mobile / 6.0 desktop | 7.4 mobile / 7.8 desktop | 8.3 mobile / 8.6 desktop | 8.7 mobile / 8.9 desktop | 9.0 mobile / 9.2 desktop | 9.2 mobile / 9.3 desktop | 9.3 mobile / 9.4 desktop | 9.4 mobile / 9.5 desktop | 9.3 mobile / 9.4 desktop |
 
 R5 reviewed round 5's game-feel branch (commit 0ec3741). Its fixes ship as **1.2.0**: a rebuilt audio engine
 (mix bus, compressor + limiter, ducked generative F-major ambient that suspends in the background, in-key
@@ -194,6 +194,17 @@ the closer stays last; rotating teaser tails; card faces swap at the real 90° p
 sliver) and the front takes focus at once; audio idle suspend at 45 s, re-armed on music stop and on return; staggered
 pad voices at semitone rubs with equal-power crossfades; long-round step repeats gain a third note; cute's phone lift
 via its octave partial; slider taps capped at A6; 12 px floor on remaining desktop meta text.
+
+R13 reviewed 1.2.7 (commits 529283a–285d8be, reviewers in pairs; fixes landed between pairs). Its fixes ship
+as **1.2.8** (+ cross-platform follow-ups): OS reduced-motion flips keep focus and swap in one frame; sticky pack
+preset cleared; pack chips not toggles; Compact text-size floor (selector never matched) and 15 px root; 12 px floors on
+desktop meta and the guess label; phone-landscape question layout; hover states for every clickable in all themes
+(selected look kept on hover); forced-colors selected outlines and hidden decorative rings; row-aligned face-down
+cards that stay put during a flip; Back closes an open card first; partner-made-moot dialogs close (reveal guard,
+joiner leave); End link label; partner-left banner; former joiner becomes Player 1; slider octave per slider;
+pitch-based pad detune; ladder repeats lift a step; idle re-armed on silent clicks; headline recency by template;
+pack restores setup; unseen allowed topics before repeats; stronger twin detection; playful far prompts for light
+written answers; tonight scoped to the couple; peak format variety; per-round mind-reader copy.
 
 Round 4 is on `main` (tested, deployed). Round 5's game-design changes are on branch
 **`wip/round5-game-feel`** and are **not yet tested** — they address the Fun findings:

@@ -6593,10 +6593,17 @@
     /* D3: forced colors turn the faint decorative rings into solid arcs over the text. */
     @media (forced-colors: active) { .card-front::after, .card-front::before, .question-decor { display: none !important; } }
     /* D1: every clickable card, chip and button answers the pointer before it is clicked, in every theme. */
+    /* Windows High Contrast flattens the tinted selected states; mark them with the system highlight. */
+    @media (forced-colors: active) {
+      :is(.active, .chosen, .selected, [aria-pressed="true"], [aria-checked="true"], [aria-selected="true"]) { outline: 3px solid Highlight !important; outline-offset: 2px; border-color: Highlight !important; }
+    }
     @media (hover: hover) {
       :is(.play-style-card, .preset-card, .theme-card, .library-filter, [data-favorite-question], .rating-option, .follow-through-button,
-        .importance-option, .highlight-card, .secondary-btn, .mini-action, .question-library-action):hover:not(:disabled):not([aria-disabled="true"]) {
+        .importance-option, .highlight-card, .secondary-btn, .mini-action, .question-library-action):hover:not(:disabled):not([aria-disabled="true"]):not(.active):not(.chosen):not([aria-pressed="true"]):not([aria-checked="true"]) {
         border-color: color-mix(in srgb, var(--coral) 55%, var(--line)) !important;
+      }
+      :is(.play-style-card, .preset-card, .theme-card, .library-filter, [data-favorite-question], .rating-option, .follow-through-button,
+        .importance-option, .highlight-card, .secondary-btn, .mini-action, .question-library-action):hover:not(:disabled):not([aria-disabled="true"]) {
         box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--coral) 8%, transparent), 0 6px 16px rgba(2, 6, 23, 0.18);
         transform: translateY(-1px);
       }
@@ -13900,6 +13907,11 @@ var qrcode = function() {
         else overlay.remove();
         return true;
       }
+      const openCard = state.screen === "reveal" ? document.activeElement?.closest?.(".flip-card.flipped") : null;
+      if (openCard) {
+        openCard.querySelector(".card-close-button")?.click();
+        return true;
+      }
       if (state.screen !== "setup") {
         navigateToScreen("setup");
         return true;
@@ -16569,19 +16581,24 @@ var qrcode = function() {
         saveState();
         updateRevealAllButton();
         requestAnimationFrame(() => {
-          sizeAllCards();
+          sizeCard(card);
+          if (!card.classList.contains("flipped")) {
+            const neighbours = flipCards.filter((other) => other !== card && !other.classList.contains("flipped") && other.offsetTop === card.offsetTop);
+            const tallest = Math.max(parseFloat(card.style.height) || 0, ...neighbours.map((other) => parseFloat(other.style.height) || 0));
+            card.style.height = `${tallest}px`;
+          }
           if (!focus) return;
           if (shouldReveal) {
             const back = card.querySelector(".card-back");
             if (!back.hasAttribute("tabindex")) back.setAttribute("tabindex", "-1");
             back.focus({ preventScroll: true });
-            window.setTimeout(() => { if (card.classList.contains("flipped") && !card.contains(document.activeElement)) back.focus({ preventScroll: true }); }, 120);
+            window.setTimeout(() => { if (card.classList.contains("flipped") && document.activeElement !== back && !back.contains(document.activeElement)) back.focus({ preventScroll: true }); }, 120);
             if (scroll) card.scrollIntoView({ block: "nearest", behavior: motionReduced() ? "auto" : "smooth" });
           } else {
             // The front is visible (if still transparent) at once; retry once in case a busy engine applied styles late.
             const refocusFront = () => { if (!card.classList.contains("flipped")) card.querySelector(".card-front")?.focus({ preventScroll: true }); };
             refocusFront();
-            window.setTimeout(() => { if (!card.classList.contains("flipped") && !card.contains(document.activeElement)) refocusFront(); }, 120);
+            window.setTimeout(() => { if (!card.classList.contains("flipped") && document.activeElement !== card.querySelector(".card-front")) refocusFront(); }, 120);
           }
         });
       }
