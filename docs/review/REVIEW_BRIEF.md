@@ -88,6 +88,8 @@ behave well? Recommend concrete synthesis changes (notes, envelopes, layering, p
 - Scores unlock once every card has been face up **and** every written answer has been rated together; the
   progress line shows "· N to rate". Reveal progress is one-way: closing a card or "Hide all" never re-locks
   the scores. The count-up starts when the dashboard is on screen (both phones get it).
+- Leaving a reveal board whose scores haven't unlocked (Start your round, Play another round, Switch vibe or
+  players) asks "Your scores haven't been revealed yet" first; Home mid-reveal offers "Back to your reveal board".
 - A quick pick needs a side (or the "Somewhere in between?" slider) before Next; there is no silent 5.
 - Browser/PWA Back closes a dialog, then returns Home, then leaves (mirrors the Android shell).
 - Effects and music share one AudioContext: effects → compressor → master → limiter, music on its own bus
