@@ -4609,6 +4609,10 @@
 
     [data-text-size="small"] { font-size: 15px; }
     [data-text-size="large"] { font-size: 18px; }
+    @media (min-width: 900px) {
+      [data-text-size="small"] { font-size: 100%; }
+      [data-text-size="large"] { font-size: 125%; }
+    }
 
     .high-contrast {
       --text: #ffffff;
@@ -6581,7 +6585,9 @@
     .round-intro { white-space: normal; }
     [data-text-size="small"] :is(.guess-label small, .legend-item, .answer-name, .setting-row label, .topic-progress-top span, .progress-copy, .category-symbol,
       .card-spark, .type-chip, .category-pill, .eyebrow, .library-filter, .custom-label, .round-copy span, .saved-round-date, .saved-answer-name,
-      .saved-answer-value, .mini-action, .intensity-card small, .play-style-card small, .home-results-copy p:not(.eyebrow)) { font-size: max(12px, 0.72rem) !important; }
+      .saved-answer-value, .mini-action, .intensity-card small, .play-style-card small, .home-results-copy p:not(.eyebrow),
+      .data-tool, .card-number, .match-badge, .library-overall span, .topic-note, .topic-chip small, .tap-hint, .card-more summary small,
+      .settings-card .lede, .text-size-preview, .highlight-note, .difference-score, .count-time) { font-size: max(12px, 0.72rem) !important; }
     .home-result-history-count, .home-topic-result, .count-time, .follow-through-button, .highlight-card span, .difference-score,
     .feedback-menu summary, .question-library-action, .theme-card small, .version-tag, .platform-badge, .importance-option,
     .guess-label small, .home-results-copy p:not(.eyebrow), .round-mode-copy, [data-tooltip]::after, .alignment-ring-content span,
@@ -6593,22 +6599,35 @@
     /* D3: forced colors turn the faint decorative rings into solid arcs over the text. */
     @media (forced-colors: active) { .card-front::after, .card-front::before, .question-decor { display: none !important; } }
     /* D1: every clickable card, chip and button answers the pointer before it is clicked, in every theme. */
+    /* F2: a closed card's hidden back must not hang below it and stretch the page (after the 90° swap). */
+    .flip-card:not(.flipped) .card-back { max-height: 100%; overflow: hidden; transition: opacity 0s linear 0.089s, visibility 0s linear 0.089s, max-height 0s linear 0.089s; }
     /* Windows High Contrast flattens the tinted selected states; mark them with the system highlight. */
     @media (forced-colors: active) {
+      body::before, body::after { display: none !important; }
+      .setting-row input[type="checkbox"] { border: 2px solid ButtonText; background: Canvas; }
+      .setting-row input[type="checkbox"]::before { background: ButtonText; forced-color-adjust: none; }
+      .setting-row input[type="checkbox"]:checked { background: Highlight; border-color: Highlight; forced-color-adjust: none; }
+      .setting-row input[type="checkbox"]:checked::before { background: HighlightText; }
+      .range-input { forced-color-adjust: auto; border: 1px solid ButtonText; border-radius: 999px; }
+      .theme-option input:checked + .theme-card { outline: 3px solid Highlight !important; outline-offset: 2px; border-color: Highlight !important; }
       :is(.active, .chosen, .selected, [aria-pressed="true"], [aria-checked="true"], [aria-selected="true"]) { outline: 3px solid Highlight !important; outline-offset: 2px; border-color: Highlight !important; }
     }
     @media (hover: hover) {
       :is(.play-style-card, .preset-card, .theme-card, .library-filter, [data-favorite-question], .rating-option, .follow-through-button,
-        .importance-option, .highlight-card, .secondary-btn, .mini-action, .question-library-action):hover:not(:disabled):not([aria-disabled="true"]):not(.active):not(.chosen):not([aria-pressed="true"]):not([aria-checked="true"]) {
+        .importance-option, .secondary-btn, .mini-action, .question-library-action):hover:not(:disabled):not([aria-disabled="true"]):not(.active):not(.chosen):not([aria-pressed="true"]):not([aria-checked="true"]) {
         border-color: color-mix(in srgb, var(--coral) 55%, var(--line)) !important;
       }
+      :is(.card-close-button, .card-more > summary, .library-add > summary, .setting-row):hover { border-color: color-mix(in srgb, var(--coral) 55%, var(--line)) !important; background-image: linear-gradient(color-mix(in srgb, var(--coral) 8%, transparent), color-mix(in srgb, var(--coral) 8%, transparent)); }
+      .setting-row:hover input[type="checkbox"] { box-shadow: 0 0 0 3px color-mix(in srgb, var(--coral) 30%, transparent); }
+      [data-theme] :is(input[type="text"], input[type="search"], textarea, select, .custom-select):hover:not(:focus) { border-color: color-mix(in srgb, var(--coral) 55%, var(--line)) !important; }
+      .highlight-jump:hover { text-decoration-color: currentColor; color: var(--coral); }
       :is(.play-style-card, .preset-card, .theme-card, .library-filter, [data-favorite-question], .rating-option, .follow-through-button,
-        .importance-option, .highlight-card, .secondary-btn, .mini-action, .question-library-action):hover:not(:disabled):not([aria-disabled="true"]) {
+        .importance-option, .secondary-btn, .mini-action, .question-library-action):hover:not(:disabled):not([aria-disabled="true"]) {
         box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--coral) 8%, transparent), 0 6px 16px rgba(2, 6, 23, 0.18);
         transform: translateY(-1px);
       }
     }
-    @media (hover: hover) and (prefers-reduced-motion: reduce) { :is(.play-style-card, .preset-card, .theme-card, .highlight-card):hover { transform: none !important; } }
+    @media (hover: hover) and (prefers-reduced-motion: reduce) { :is(.play-style-card, .preset-card, .theme-card):hover { transform: none !important; } }
     /* Phone landscape: the sticky action bar would cover the prompt itself, so it scrolls with the card. */
     @media (orientation: landscape) and (max-height: 500px) {
       .question-screen .question-actions { position: static !important; box-shadow: none !important; }
@@ -6620,7 +6639,7 @@
     @media (prefers-reduced-motion: reduce) { .flip-card-inner { transition: none !important; } }
     .reduced-motion .flip-card-inner { transition: none !important; }
     /* Cover the gap above the floating top bar so scrolled content never peeks out above it. */
-    .topbar::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: max(8px, env(safe-area-inset-top)); background: inherit; border-radius: 18px 18px 0 0; pointer-events: none; }
+    .topbar::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: max(8px, env(safe-area-inset-top)); background: var(--midnight); border-radius: 0; pointer-events: none; }
     .highlight-note { display: block; margin-top: 6px; color: var(--muted); font-size: max(12px, .76rem); font-weight: 650; }
     .guess-panel { margin: 14px 0 4px; padding: 12px 14px; border: 1px dashed color-mix(in srgb, var(--violet) 60%, transparent); border-radius: 16px; background: color-mix(in srgb, var(--violet) 8%, transparent); }
     .guess-panel.guessed { border-style: solid; }
@@ -10013,7 +10032,8 @@ var qrcode = function() {
             ? Object.fromEntries(Object.entries(cached.cardPrompts).filter(([id, value]) => validIds.has(id) && value && typeof value.text === "string" && typeof value.key === "string").map(([id, value]) => [id, { key: value.key.slice(0, 40), text: value.text.slice(0, 300) }]))
             : {},
           recentPrompts: Array.isArray(cached.recentPrompts) ? cached.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-60) : [],
-          recentHeadlines: Array.isArray(cached.recentHeadlines) ? cached.recentHeadlines.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-4) : []
+          recentHeadlines: Array.isArray(cached.recentHeadlines) ? cached.recentHeadlines.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-4) : [],
+          packReturnPreset: typeof cached.packReturnPreset === "string" ? cached.packReturnPreset.slice(0, 40) : ""
         };
 
         if (!validScreens.includes(restored.screen)) restored.screen = "setup";
@@ -11413,6 +11433,7 @@ var qrcode = function() {
         answeredQuestionIds: [...state.answeredQuestionIds],
         recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-60) : [],
         recentHeadlines: Array.isArray(state.recentHeadlines) ? state.recentHeadlines.filter((item) => typeof item === "string").slice(-4) : [],
+        packReturnPreset: typeof state.packReturnPreset === "string" ? state.packReturnPreset.slice(0, 40) : "",
         excludedQuestionIds: [...state.excludedQuestionIds],
         neverQuestionIds: [...state.neverQuestionIds],
         favoriteQuestionIds: [...state.favoriteQuestionIds],
@@ -13268,11 +13289,14 @@ var qrcode = function() {
       return words;
     }
     // Adjacent content-word pairs ("road trip", "comfortable silence") for spotting reworded twins.
+    const promptPairCache = new Map();
     function promptPairs(text) {
+      if (promptPairCache.has(text)) return promptPairCache.get(text);
       const words = String(text).toLowerCase().match(/[a-z]+/g) || [];
       const content = (word) => word.length >= 4 && promptWords(word).size === 1;
       const pairs = new Set();
       for (let index = 1; index < words.length; index += 1) if (content(words[index - 1]) && content(words[index])) pairs.add(`${words[index - 1]} ${words[index]}`);
+      promptPairCache.set(text, pairs);
       return pairs;
     }
     let promptWordCounts = null;
@@ -13373,7 +13397,13 @@ var qrcode = function() {
           const playful = freshestTier.filter((question) => PLAYFUL_SPICY.test(question.id));
           if (playful.length) freshestTier = playful;
         }
-        const unlikeTonight = freshestTier.filter((question) => !playedTonightTwin(question, selected));
+        const notTwin = (question) => !playedTonightTwin(question, selected);
+        let unlikeTonight = freshestTier.filter(notTwin);
+        if (!unlikeTonight.length) {
+          const staler = tierSource.filter(notTwin);
+          const anyLeft = staler.length ? staler : remaining.filter(notTwin);
+          if (anyLeft.length) unlikeTonight = freshestQuestionTier(anyLeft);
+        }
         if (unlikeTonight.length) freshestTier = unlikeTonight;
         let candidates = freshestTier.filter((question) => question.topic === topic);
         if (!candidates.length) candidates = freshestTier;
@@ -13401,14 +13431,21 @@ var qrcode = function() {
     // A round from today played by the same two people (in either order).
     function isTonightRound(round) {
       if (!round || new Date(round.completedAt).toDateString() !== new Date().toDateString()) return false;
+      return sameCouple(round);
+    }
+    function sameCouple(round) {
       const couple = (names) => (Array.isArray(names) ? names : []).map((name) => String(name || "").trim().toLowerCase()).sort().join("|");
       return !Array.isArray(round.names) || couple(round.names) === couple(state.names);
+    }
+    function coupleAnsweredIds() {
+      return new Set(state.completedRounds.filter(sameCouple).flatMap((round) => round.questionIds || []));
     }
 
     // Only promise "fresh" questions when none of them has been answered before.
     function roundToastCopy(roundNumber, selectedQuestionIds) {
       const total = selectedQuestionIds.length;
-      const fresh = selectedQuestionIds.filter((id) => !state.answeredQuestionIds.includes(id)).length;
+      const answered = coupleAnsweredIds();
+      const fresh = selectedQuestionIds.filter((id) => !answered.has(id)).length;
       if (fresh === total) return `Round ${roundNumber} tonight · ${total} fresh questions`;
       if (!fresh) return `Round ${roundNumber} tonight · old favorites, new answers`;
       return `Round ${roundNumber} tonight · ${fresh} new, ${total - fresh} back for another look`;
@@ -14820,7 +14857,14 @@ var qrcode = function() {
       document.getElementById("reset-game").addEventListener("click", openResetDialog);
     }
 
+    function presetAfterPack() {
+      const previous = state.packReturnPreset;
+      return SESSION_PRESETS.some((preset) => preset.id === previous) ? previous : "custom";
+    }
+
     function renderSetup() {
+      // Home after a pack round shows (and plays) the vibe the couple had before the pack.
+      if (state.sessionPreset === "pack" && state.screen === "setup" && !state.resumeScreen) state.sessionPreset = presetAfterPack();
       const catalog = getQuestionCatalog();
       const answeredCount = state.answeredQuestionIds.filter((id) => catalog.some((question) => question.id === id)).length;
       const latestRound = [...state.completedRounds].reverse().find((round) => !roundScoresHidden(round));
@@ -15259,10 +15303,10 @@ var qrcode = function() {
             return;
           }
           const validIds = new Set(getQuestionCatalog().map((question) => question.id));
-          const selectedQuestionIds = selectFreshQuestionIds(
+          const selectedQuestionIds = orderRoundAsRamp(selectFreshQuestionIds(
             pack.questionIds.filter((id) => validIds.has(id) && !state.neverQuestionIds.includes(id)),
             15
-          );
+          ));
           if (!selectedQuestionIds.length) {
             playSound("error"); error.textContent = "This pack has no available questions yet.";
             return;
@@ -15279,6 +15323,7 @@ var qrcode = function() {
           openSensitiveConsent(selectedTopics, () => {
             if (endLink()) names.reverse();
             commitLeave();
+            if (state.sessionPreset !== "pack") state.packReturnPreset = state.sessionPreset;
             state.sessionPreset = "pack";
             const before = { topics: [...state.selectedTopics], count: state.questionCount, mode: state.questionMode };
             const restoreSetup = () => { state.selectedTopics = before.topics; state.questionCount = before.count; state.questionMode = before.mode; saveState(); };
@@ -15353,7 +15398,7 @@ var qrcode = function() {
 
         openSensitiveConsent(selectedTopics, () => animateRoundSelection(form.querySelector('button[type="submit"]'), () => {
           if (endLocalLink()) names.reverse();
-          if (state.sessionPreset === "pack") state.sessionPreset = "custom";
+          if (state.sessionPreset === "pack") state.sessionPreset = presetAfterPack();
           if (leaveJoinedRound) {
             if (revealUnfinished()) state.revealCelebrated = state.selectedQuestionIds.join("|");
             closeNearbyConnection({ notifyPartner: true });
@@ -15819,7 +15864,7 @@ var qrcode = function() {
         : ["…", " — who will be surprised first?", " — ready to find out?"];
       const tail = tails[Math.max(0, roundsPlayedToday() - 1) % tails.length];
       const hidden = matches === 0 ? `Some surprises are waiting in there${tail}` : `${matches === 1 ? "One match is" : `${matches} matches are`} hiding in there${tail}`;
-      const explored = new Set(state.answeredQuestionIds).size;
+      const explored = coupleAnsweredIds().size;
       const total = getQuestionCatalog().length;
       const progress = roundsPlayedToday() >= 2 && total ? ` You’ve explored ${explored} of ${total} questions together.` : "";
       return `${hidden} Sit together and flip the cards at your own pace.${progress}`;
@@ -16080,12 +16125,14 @@ var qrcode = function() {
           : ["flirty", "flirtyText"].includes(tone) ? [DISCUSSION_PROMPTS.unratedFlirty, DISCUSSION_PROMPTS.unrated] : [DISCUSSION_PROMPTS.unrated];
         const pools = tier === "unrated" ? unratedPools : fitting[tier].map((name) => DISCUSSION_PROMPTS[tone][name]);
         const recentList = Array.isArray(state.recentPrompts) ? state.recentPrompts : [];
+        const gagFamily = (text) => /movie trailer/i.test(text) ? "trailer" : /\bact (?:out|it out)\b|ten seconds/i.test(text) ? "act" : /sports commentator|nature.documentary|narrat/i.test(text) ? "voice" : "";
+        const usedGags = new Set([...usedPrompts].map(gagFamily).filter(Boolean));
         // First dates skip follow-ups that assume a shared past.
         const historySafe = (text) => state.questionIntensity !== "cozy" || !(HISTORY_PROMPT_PATTERN.test(text) || /\blast notice|\bled you both\b|\bin each other\b|\bpets?\b|\bnoticed? you\b|\brecently\b/i.test(text));
         const seed = [...question.id].reduce((total, character) => total + character.charCodeAt(0), 0);
         const age = (text) => recentList.lastIndexOf(text);
         const rankPool = (prompts) => prompts.map((_, index) => prompts[(seed + index) % prompts.length])
-          .filter((text) => !usedPrompts.has(text) && historySafe(text))
+          .filter((text) => !usedPrompts.has(text) && historySafe(text) && !(gagFamily(text) && usedGags.has(gagFamily(text))))
           .sort((a, b) => age(a) - age(b));
         chosen = pools.map(rankPool).find((list) => list.length)?.[0]
           || pools.flat().find((text) => !usedPrompts.has(text))
@@ -16311,7 +16358,7 @@ var qrcode = function() {
           </section>
           <section class="highlight-grid ${allRevealed ? "" : "locked"}" aria-label="Round highlights" id="round-highlights">
             ${highlightCard(closestHighlight && closestHighlight.match.percent < 60 ? "Nearest common ground" : "Closest match", closestHighlight, "Complete more scored answers to unlock this highlight.", "", "One answer lines up beautifully…")}
-            ${highlightCard(surpriseNote && surpriseHighlight?.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No scored surprise yet.", surpriseNote, "Someone is in for a surprise…")}
+            ${highlightCard(surpriseNote && surpriseHighlight?.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No surprises — you read each other well.", surpriseNote, "Someone is in for a surprise…")}
             ${conversationHighlight ? highlightCard("Best conversation starter", conversationHighlight, "", "", "There is a story waiting in one card…") : ""}
             ${tally.some((item) => item.made) ? `<article class="highlight-card mind-reader"><span>🔮 Mind-reader</span><strong class="highlight-answer">${mindReaderHeadline(tally)}<small class="highlight-note">${tally.filter((item) => item.made).map((item) => `${escapeHTML(state.names[item.player])} read ${escapeHTML(state.names[item.player === 0 ? 1 : 0])} ${item.hits}/${item.made}`).join(" · ")}</small></strong><strong class="highlight-locked">${tally.some((item) => item.hits) ? "Someone read the other’s mind… " : "Did anyone read minds tonight? "}<small>${everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"}</small></strong></article>` : ""}
           </section>
@@ -16673,7 +16720,7 @@ var qrcode = function() {
         const playStyle = state.playStyle;
         const roundWillStart = playStyle !== "nearby" || (nearbyChannelOpen() && state.nearbyRole === "host");
         if (roundWillStart && !(await confirmLeavingReveal())) return;
-        if (roundWillStart && state.sessionPreset === "pack") state.sessionPreset = "custom";
+        if (roundWillStart && state.sessionPreset === "pack") state.sessionPreset = presetAfterPack();
         if (playStyle === "nearby") {
           if (!nearbyChannelOpen()) {
             if (nearbyRuntime.roomId && !nearbyRoomExpired()) {
