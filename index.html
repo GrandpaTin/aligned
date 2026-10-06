@@ -6466,6 +6466,13 @@
     .quick-pick-option.active { border-color: var(--question-color, var(--coral)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--question-color, var(--coral)) 22%, transparent); transform: translateY(-2px); }
     [data-theme="pastel"] .quick-pick-option { background: #ffffff; color: #1e293b; }
     .nowrap { white-space: nowrap; }
+    .vibe-running-low { grid-column: 1 / -1; margin: 4px 0 0; }
+    .topic-alignment-card { justify-content: flex-start !important; }
+    @media (max-width: 340px) {
+      .question-screen .question-meta { flex-wrap: nowrap; gap: 6px; }
+      .question-screen .category-pill { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .question-screen .type-chip { padding-inline: 8px; white-space: nowrap; }
+    }
     /* Words break only when one can't fit a line on its own (hyphens: auto would hyphenate words that fit). */
     .quick-pick-option, .quick-guess-option { overflow-wrap: break-word; word-break: normal; hyphens: manual; -webkit-hyphens: manual; }
     @media (max-width: 380px) {
@@ -6657,6 +6664,11 @@
       .question-screen .quick-guess, .question-screen .guess-panel { margin-top: 8px; padding: 6px 10px; }
       .question-screen .quick-guess small, .question-screen .guess-label small { display: none; }
       .question-screen .quick-pick-option { min-height: 56px; padding: 8px 10px; }
+      /* The answer comes first in landscape; the optional guess follows it. */
+      .question-screen .question-card:has(> .quick-pick) { display: flex; flex-direction: column; }
+      .question-screen .question-card > .quick-guess { order: 1; }
+      .question-screen .question-card > .quick-guess ~ :not(.quick-pick) { order: 2; }
+      .question-screen #question-title { font-size: 1.25rem; margin-block: 6px; }
       .question-screen .question-actions { position: static !important; box-shadow: none !important; }
       .question-screen .progress-constellation { display: none; }
       .question-screen .question-header { margin-bottom: 4px; }
@@ -9580,6 +9592,16 @@ var qrcode = function() {
         ],
         far: [
           "Opposite ends! Each of you pitch your side like a movie trailer.",
+          "Name one thing you’d each happily try from the other side.",
+          "If this were a reality show, what would the episode be called?",
+          "Draw your answer in the air — can the other guess it?",
+          "Which side would a toddler pick, and why?",
+          "Make the other side sound irresistible in one sentence.",
+          "Give your answer a fake award and a speech.",
+          "What snack represents each side?",
+          "Which side would win in a game of rock-paper-scissors?",
+          "Turn this difference into a team cheer.",
+          "What would your pet (or dream pet) vote for?",
           "Who would win this debate at a dinner party?",
           "Act out what your side looks like in ten seconds.",
           "Would you swap answers for one day? What would it feel like?",
@@ -9791,6 +9813,18 @@ var qrcode = function() {
         "Ask them for one example from real life."
       ]
     };
+    // The playful lines at the end of warm.close, offered first on every other match of a soft night.
+    const PLAYFUL_WARM_CLOSE = DISCUSSION_PROMPTS.warm.close.slice(-5);
+    DISCUSSION_PROMPTS.cozyFar = [
+      "What’s the story behind your answer?",
+      "Give one compliment about the other side.",
+      "What would make the other side fun to try once?",
+      "Which part of the other answer surprised you most?",
+      "What would a perfect evening look like with a bit of both?",
+      "Ask one curious question about the other answer.",
+      "What did you learn about each other just now?",
+      "Where would you each be happy to meet in the middle?"
+    ];
     DISCUSSION_PROMPTS.lightText = {
       close: DISCUSSION_PROMPTS.light.close,
       medium: DISCUSSION_PROMPTS.light.medium,
@@ -10063,7 +10097,7 @@ var qrcode = function() {
           cardPrompts: cached.cardPrompts && typeof cached.cardPrompts === "object"
             ? Object.fromEntries(Object.entries(cached.cardPrompts).filter(([id, value]) => validIds.has(id) && value && typeof value.text === "string" && typeof value.key === "string").map(([id, value]) => [id, { key: value.key.slice(0, 40), text: value.text.slice(0, 300) }]))
             : {},
-          recentPrompts: Array.isArray(cached.recentPrompts) ? cached.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-60) : [],
+          recentPrompts: Array.isArray(cached.recentPrompts) ? cached.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-120) : [],
           recentHeadlines: Array.isArray(cached.recentHeadlines) ? [...new Set(cached.recentHeadlines.filter((text) => ["vibe", "roll", "another", "best", "finding", "locked"].includes(text)))].slice(-5) : [],
           packReturnPreset: typeof cached.packReturnPreset === "string" ? cached.packReturnPreset.slice(0, 40) : ""
         };
@@ -11475,7 +11509,7 @@ var qrcode = function() {
         privatePinHash: state.privatePinHash,
         tutorialSeen: state.tutorialSeen,
         answeredQuestionIds: [...state.answeredQuestionIds],
-        recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-60) : [],
+        recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-120) : [],
         recentHeadlines: Array.isArray(state.recentHeadlines) ? state.recentHeadlines.filter((item) => typeof item === "string").slice(-5) : [],
         packReturnPreset: typeof state.packReturnPreset === "string" ? state.packReturnPreset.slice(0, 40) : "",
         excludedQuestionIds: [...state.excludedQuestionIds],
@@ -13392,13 +13426,6 @@ var qrcode = function() {
       let pool = getQuestionCatalog().filter(
         (question) => selectedTopicSet.has(question.topic) && !excludedIds.has(question.id)
       );
-      // Before repeating tonight's questions, borrow unseen ones from the other topics this intensity allows.
-      const unseenInPool = pool.filter((question) => !state.answeredQuestionIds.includes(question.id)).length;
-      if (unseenInPool < count) {
-        const allowed = allowedTopicsForIntensity();
-        pool = pool.concat(getQuestionCatalog().filter((question) => !selectedTopicSet.has(question.topic) && allowed.has(question.topic)
-          && !excludedIds.has(question.id) && !state.answeredQuestionIds.includes(question.id)));
-      }
       if (state.questionIntensity === "cozy") {
         // Cozy is safe for a first date: no heavy prompts and nothing that assumes a long shared history.
         const gentle = pool.filter((question) => questionTone(question) !== "deep" && !questionNeedsHistory(question));
@@ -13421,6 +13448,28 @@ var qrcode = function() {
           ? Math.ceil(count * 0.6)
           : Math.ceil(count * 0.8);
       const textTarget = count - sliderTarget;
+      // Before repeating questions, borrow unseen ones of the same format (and the same vibe filters) from the
+      // other topics this intensity allows, so a quick, playful night stays mostly sliders.
+      {
+        const seen = coupleAnsweredIds();
+        const allowed = allowedTopicsForIntensity();
+        const fitsVibe = (question) => (state.questionIntensity !== "cozy" || (questionTone(question) !== "deep" && !questionNeedsHistory(question)))
+          && (activePreset?.tone !== "light" || questionTone(question) === "light")
+          && !(activePreset?.id === "spicy-night" && question.topic === "spicy" && questionTone(question) === "deep");
+        const inPool = new Set(pool.map((question) => question.id));
+        // If even the borrowed playful ones run out, warm (never deep) questions keep the format before anything repeats.
+        const fitsLoosely = (question) => questionTone(question) !== "deep" && (state.questionIntensity !== "cozy" || !questionNeedsHistory(question));
+        [["slider", sliderTarget], ["text", textTarget]].forEach(([type, target]) => {
+          [fitsVibe, fitsLoosely].forEach((fits) => {
+            const unseen = pool.filter((question) => question.type === type && !seen.has(question.id)).length;
+            if (unseen >= target) return;
+            const extra = getQuestionCatalog().filter((question) => question.type === type && !inPool.has(question.id)
+              && (allowed.has(question.topic) || selectedTopicSet.has(question.topic)) && !excludedIds.has(question.id) && !seen.has(question.id) && fits(question));
+            extra.forEach((question) => inPool.add(question.id));
+            pool = pool.concat(extra);
+          });
+        });
+      }
       const availableTopics = topics.filter((topic) => pool.some((question) => question.topic === topic));
       const topicSequence = [];
       if (focusTopic && availableTopics.includes(focusTopic)) {
@@ -14948,6 +14997,18 @@ var qrcode = function() {
       document.getElementById("reset-game").addEventListener("click", openResetDialog);
     }
 
+    // A playful vibe that has used up this couple's unseen playful questions says so, instead of quietly going warm.
+    function vibeRunningLow() {
+      const preset = SESSION_PRESETS.find((item) => item.id === state.sessionPreset);
+      if (!preset || preset.tone !== "light" || !state.completedRounds.some(isTonightRound)) return "";
+      const seen = coupleAnsweredIds();
+      const allowed = allowedTopicsForIntensity();
+      const left = getQuestionCatalog().filter((question) => allowed.has(question.topic) && questionTone(question) === "light" && !seen.has(question.id)
+        && !state.neverQuestionIds.includes(question.id) && !state.excludedQuestionIds.includes(question.id)).length;
+      if (left >= (preset.count || state.questionCount)) return "";
+      return `<p class="topic-note vibe-running-low" role="status">You’ve played nearly every ${escapeHTML(preset.label)} question tonight — the next rounds mix in warmer ones. Fancy Date Night for a change?</p>`;
+    }
+
     function presetAfterPack() {
       const previous = state.packReturnPreset;
       return SESSION_PRESETS.some((preset) => preset.id === previous) ? previous : "custom";
@@ -15053,6 +15114,7 @@ var qrcode = function() {
             <p class="setup-section-title">Pick tonight’s vibe</p>
             <div class="vibe-tiles" role="group" aria-label="Quick start presets">
               ${["date-night", "road-trip", "check-in", "deep-dive"].map((id) => SESSION_PRESETS.find((preset) => preset.id === id)).filter(Boolean).map((preset) => `<button class="vibe-tile ${shownPreset === preset.id ? "active" : ""}" type="button" data-vibe="${preset.id}" aria-pressed="${shownPreset === preset.id}"><span class="vibe-icon" aria-hidden="true">${preset.icon}</span><strong>${preset.label}</strong><small>${preset.copy}</small></button>`).join("")}
+              ${vibeRunningLow()}
             </div>
             ${state.customPacks.length ? `<p class="setup-section-title">Your packs</p>
             <div class="library-filters custom-pack-starts">${state.customPacks.map((pack) => {
@@ -16226,9 +16288,15 @@ var qrcode = function() {
         const fitting = { close: ["close"], medium: ["medium", "close"], far: ["far", "medium"] };
         const unratedPools = tone === "light" ? [DISCUSSION_PROMPTS.unratedLight, DISCUSSION_PROMPTS.unrated]
           : ["flirty", "flirtyText"].includes(tone) ? [DISCUSSION_PROMPTS.unratedFlirty, DISCUSSION_PROMPTS.unrated] : [DISCUSSION_PROMPTS.unrated];
-        const pools = tier === "unrated" ? unratedPools : fitting[tier].map((name) => DISCUSSION_PROMPTS[tone][name]);
+        let pools = tier === "unrated" ? unratedPools : fitting[tier].map((name) => DISCUSSION_PROMPTS[tone][name]);
+        const cardIndex = state.selectedQuestionIds.indexOf(question.id);
+        const softNight = state.sessionPreset === "date-night" || state.questionIntensity === "cozy";
+        // Every other warm match on a soft night gets one of the playful celebration lines.
+        if (softNight && tone === "warm" && tier === "close" && cardIndex % 2 === 1) pools = [PLAYFUL_WARM_CLOSE, ...pools];
+        if (state.questionIntensity === "cozy" && tone === "warm" && tier === "far") pools = [DISCUSSION_PROMPTS.cozyFar];
         const recentList = Array.isArray(state.recentPrompts) ? state.recentPrompts : [];
-        const gagFamily = (text) => /movie trailer/i.test(text) ? "trailer" : /\bact (?:out|it out)\b|ten seconds/i.test(text) ? "act" : /sports commentator|nature.documentary|narrat/i.test(text) ? "voice" : "";
+        const gagFamily = (text) => /movie trailer/i.test(text) ? "trailer" : /\bact (?:out|it out)\b|ten seconds/i.test(text) ? "act" : /sports commentator|nature.documentary|narrat/i.test(text) ? "voice"
+          : /\bsong\b/i.test(text) ? "song" : /\bswap\b|\bfor (?:a|one) day\b|one-day/i.test(text) ? "swap" : /high five/i.test(text) ? "highfive" : /\bsnack/i.test(text) ? "snack" : "";
         const usedGags = new Set([...usedPrompts].map(gagFamily).filter(Boolean));
         // First dates skip follow-ups that assume a shared past.
         const historySafe = (text) => state.questionIntensity !== "cozy" || !(HISTORY_PROMPT_PATTERN.test(text) || /\blast notice|\bled you both\b|\bin each other\b|\bpets?\b|\bnoticed? you\b|\brecently\b/i.test(text));
@@ -16237,11 +16305,14 @@ var qrcode = function() {
         const rankPool = (prompts) => prompts.map((_, index) => prompts[(seed + index) % prompts.length])
           .filter((text) => !usedPrompts.has(text) && historySafe(text) && !(gagFamily(text) && usedGags.has(gagFamily(text))))
           .sort((a, b) => age(a) - age(b));
-        chosen = pools.map(rankPool).find((list) => list.length)?.[0]
+        const recentlyUsed = new Set(recentList);
+        const ranked = pools.flatMap((pool, poolIndex) => rankPool(pool).map((text) => ({ text, poolIndex })));
+        const fresh = ranked.find((item) => !recentlyUsed.has(item.text));
+        chosen = fresh?.text || ranked.sort((a, b) => age(a.text) - age(b.text))[0]?.text
           || pools.flat().find((text) => !usedPrompts.has(text))
           || pools[0][0];
         state.cardPrompts[question.id] = { key, text: chosen };
-        state.recentPrompts = [...(Array.isArray(state.recentPrompts) ? state.recentPrompts : []).filter((text) => text !== chosen), chosen].slice(-60);
+        state.recentPrompts = [...(Array.isArray(state.recentPrompts) ? state.recentPrompts : []).filter((text) => text !== chosen), chosen].slice(-120);
       }
       usedPrompts.add(chosen);
       return `
