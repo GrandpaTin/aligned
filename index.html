@@ -4607,7 +4607,7 @@
       --shadow: 0 24px 65px rgba(85, 74, 112, 0.15);
     }
 
-    [data-text-size="small"] { font-size: 14px; }
+    [data-text-size="small"] { font-size: 15px; }
     [data-text-size="large"] { font-size: 18px; }
 
     .high-contrast {
@@ -6579,12 +6579,39 @@
     [data-empty-pack] { display: inline-flex; align-items: center; opacity: .6; border-style: dashed; cursor: default; }
     @media (max-width: 340px) { .topbar .brand { display: none !important; } }
     .round-intro { white-space: normal; }
-    [data-text-size="compact"] :is(.guess-label small, .guess-label, .legend-item, .answer-name, .setting-row label, .topic-progress-top span, .question-actions .primary-btn) { font-size: max(12px, 0.7rem) !important; }
+    [data-text-size="small"] :is(.guess-label small, .legend-item, .answer-name, .setting-row label, .topic-progress-top span, .progress-copy, .category-symbol,
+      .card-spark, .type-chip, .category-pill, .eyebrow, .library-filter, .custom-label, .round-copy span, .saved-round-date, .saved-answer-name,
+      .saved-answer-value, .mini-action, .intensity-card small, .play-style-card small, .home-results-copy p:not(.eyebrow)) { font-size: max(12px, 0.72rem) !important; }
     .home-result-history-count, .home-topic-result, .count-time, .follow-through-button, .highlight-card span, .difference-score,
     .feedback-menu summary, .question-library-action, .theme-card small, .version-tag, .platform-badge, .importance-option,
-    .round-mode-copy, [data-tooltip]::after, .alignment-ring-content span,
+    .guess-label small, .home-results-copy p:not(.eyebrow), .round-mode-copy, [data-tooltip]::after, .alignment-ring-content span,
     .saved-round-date, .saved-answer-name, .saved-answer-value, .library-question-meta span, .library-answer-history summary,
     .intensity-card small, .mini-action, .home-topic-result span, .highlight-locked small, .round-copy span { font-size: max(12px, 0.72rem) !important; }
+    @media (max-width: 600px) { .guess-label { font-size: max(12px, .78rem) !important; } }
+    /* D5: Large text never makes the ring captions smaller than Standard. */
+    [data-text-size="large"] .alignment-dashboard .alignment-ring-content span { font-size: 12px !important; }
+    /* D3: forced colors turn the faint decorative rings into solid arcs over the text. */
+    @media (forced-colors: active) { .card-front::after, .card-front::before, .question-decor { display: none !important; } }
+    /* D1: every clickable card, chip and button answers the pointer before it is clicked, in every theme. */
+    @media (hover: hover) {
+      :is(.play-style-card, .preset-card, .theme-card, .library-filter, [data-favorite-question], .rating-option, .follow-through-button,
+        .importance-option, .highlight-card, .secondary-btn, .mini-action, .question-library-action):hover:not(:disabled):not([aria-disabled="true"]) {
+        border-color: color-mix(in srgb, var(--coral) 55%, var(--line)) !important;
+        box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--coral) 8%, transparent), 0 6px 16px rgba(2, 6, 23, 0.18);
+        transform: translateY(-1px);
+      }
+    }
+    @media (hover: hover) and (prefers-reduced-motion: reduce) { :is(.play-style-card, .preset-card, .theme-card, .highlight-card):hover { transform: none !important; } }
+    /* Phone landscape: the sticky action bar would cover the prompt itself, so it scrolls with the card. */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .question-screen .question-actions { position: static !important; box-shadow: none !important; }
+      .question-screen .progress-constellation { display: none; }
+      .question-screen .question-header { margin-bottom: 4px; }
+      .question-screen .turn-name { margin: 0; }
+    }
+    /* Reduced motion: rotate and swap faces in the same frame, so no frame shows the hidden side. */
+    @media (prefers-reduced-motion: reduce) { .flip-card-inner { transition: none !important; } }
+    .reduced-motion .flip-card-inner { transition: none !important; }
     /* Cover the gap above the floating top bar so scrolled content never peeks out above it. */
     .topbar::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: max(8px, env(safe-area-inset-top)); background: inherit; border-radius: 18px 18px 0 0; pointer-events: none; }
     .highlight-note { display: block; margin-top: 6px; color: var(--muted); font-size: max(12px, .76rem); font-weight: 650; }
@@ -16332,6 +16359,18 @@ var qrcode = function() {
 
       function sizeAllCards() {
         flipCards.forEach(sizeCard);
+        const rows = new Map();
+        flipCards.forEach((card) => {
+          if (card.classList.contains("flipped")) return;
+          const top = card.offsetTop;
+          if (!rows.has(top)) rows.set(top, []);
+          rows.get(top).push(card);
+        });
+        rows.forEach((row) => {
+          if (row.length < 2) return;
+          const tallest = Math.max(...row.map((card) => parseFloat(card.style.height) || 0));
+          row.forEach((card) => { card.style.height = `${tallest}px`; });
+        });
       }
 
       function updateRevealAllButton() {
@@ -16479,7 +16518,7 @@ var qrcode = function() {
         saveState();
         updateRevealAllButton();
         requestAnimationFrame(() => {
-          sizeCard(card);
+          sizeAllCards();
           if (!focus) return;
           if (shouldReveal) {
             const back = card.querySelector(".card-back");
