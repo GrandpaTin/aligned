@@ -85,6 +85,13 @@ behave well? Recommend concrete synthesis changes (notes, envelopes, layering, p
 - A silent partner phone is treated as disconnected after ~15 s (keepalive over the data channel); the
   waiting screen offers "Let X answer here" / "Pair again" after ~25 s more.
 - In the file:// offline copy the Two-phones card is `aria-disabled` and explains why on tap.
+- Scores unlock once every card has been face up **and** every written answer has been rated together; the
+  progress line shows "· N to rate". Reveal progress is one-way: closing a card or "Hide all" never re-locks
+  the scores. The count-up starts when the dashboard is on screen (both phones get it).
+- A quick pick needs a side (or the "Somewhere in between?" slider) before Next; there is no silent 5.
+- Browser/PWA Back closes a dialog, then returns Home, then leaves (mirrors the Android shell).
+- Effects and music share one AudioContext: effects → compressor → master → limiter, music on its own bus
+  ducked under each effect; the first sound after the context starts is delayed ~80 ms while it warms up.
 - TURN relay is not configured yet (STUN only): phones on different restrictive networks may not link; the
   app says so and suggests the same Wi-Fi. Owner action: create a Cloudflare Realtime TURN key and run
   `npx wrangler@4 secret put TURN_KEY_ID --config worker/wrangler.jsonc` and the same for
@@ -92,15 +99,25 @@ behave well? Recommend concrete synthesis changes (notes, envelopes, layering, p
 
 ## Score history
 
-| Reviewer | R1 | R2 | R3 | R4 | R5 (partial) |
+| Reviewer | R1 | R2 | R3 | R4 | R5 |
 | --- | --- | --- | --- | --- | --- |
-| Mobile | 7.0–8.2 | 8.4–9.2 | 8.6–9.3 | 8.6–9.3 | — |
-| Desktop | 7.5–8.8 | 7.9–9.2 | 8.0–9.1 | 8.5–9.3 | — |
-| Multiplayer/QR | 5.0–7.0 | 7.6–8.8 | 8.3–9.0 | 8.5–9.2 | — |
-| QA/accessibility | 6.6–8.6 | 8.0–8.9 | 8.5–9.2 | 8.6–9.3 | — |
-| Cross-platform/offline | — | 8.0–9.2 | 8.7–9.5 | 9.3–9.5 | — |
-| Fun & engagement | — | — | — | — | 6.9 mobile / 7.0 desktop |
-| Sound design | — | — | — | — | not yet reviewed |
+| Mobile | 7.0–8.2 | 8.4–9.2 | 8.6–9.3 | 8.6–9.3 | 8.3–9.2 |
+| Desktop | 7.5–8.8 | 7.9–9.2 | 8.0–9.1 | 8.5–9.3 | 7.8–9.0 |
+| Multiplayer/QR | 5.0–7.0 | 7.6–8.8 | 8.3–9.0 | 8.5–9.2 | 8.3–9.0 |
+| QA/accessibility | 6.6–8.6 | 8.0–8.9 | 8.5–9.2 | 8.6–9.3 | 8.6–9.3 |
+| Cross-platform/offline | — | 8.0–9.2 | 8.7–9.5 | 9.3–9.5 | 8.6–9.3 |
+| Fun & engagement | — | — | — | — | 7.6–9.1 (fun 7.6) |
+| Sound design | — | — | — | — | 5.8 mobile / 6.0 desktop |
+
+R5 reviewed round 5's game-feel branch (commit 0ec3741). Its fixes ship as **1.2.0**: a rebuilt audio engine
+(mix bus, compressor + limiter, ducked generative F-major ambient that suspends in the background, in-key
+FM-bell / pulse-glide themes, count-up ticks that land on a layered celebrate, delete/error/whoosh cues);
+written answers rated before unlock; one-way reveal progress; unlock moment on both phones and only when
+visible; quick picks revealed as sides with side guesses and a crowned mind reader; tone-aware, non-repeating
+discussion prompts; guess-driven "Biggest surprise"; honest "Round N" toasts (joiner too); "Play another
+round" through the normal round start; joiner can never become host; pastel answer boxes and contrast;
+locked scores hidden from screen readers; OS reduce-motion honoured in JS; stricter import sanitising;
+browser Back guard.
 
 Round 4 is on `main` (tested, deployed). Round 5's game-design changes are on branch
 **`wip/round5-game-feel`** and are **not yet tested** — they address the Fun findings:
@@ -115,5 +132,5 @@ Round 4 is on `main` (tested, deployed). Round 5's game-design changes are on br
 7. Partner flips announced with a toast and sound; vibe tiles on setup; 15 playful Spicy prompts;
    Spicy Night draws ≥ half from its pack; "Round N tonight" toast.
 
-Remaining Fun ideas not yet built: take-turns flipping in two-phone mode; a "while you wait" guessing
+Remaining Fun ideas not yet built (R5 fun review: lower value than the R5 fixes): take-turns flipping in two-phone mode; a "while you wait" guessing
 activity on the waiting screen; a round-2 interstitial with library progress.

@@ -4584,7 +4584,7 @@
       --card: #ffffff;
       --card-light: #f3f7ff;
       --text: #26344a;
-      --muted: #68748a;
+      --muted: #5b667c;
       --line: rgba(79, 91, 120, 0.17);
       --coral: #e96782;
       --coral-dark: #cf4968;
@@ -6435,9 +6435,49 @@
 
     .quick-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0 8px; }
     .quick-pick-option { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 96px; padding: 16px; border: 2px solid var(--line); border-radius: 20px; color: var(--text); background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)); font: inherit; font-size: 1.05rem; font-weight: 800; text-align: center; cursor: pointer; transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease; }
-    .quick-pick-option:hover, .quick-pick-option.active { border-color: var(--question-color, var(--coral)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--question-color, var(--coral)) 22%, transparent); transform: translateY(-2px); }
+    @media (hover: hover) { .quick-pick-option:hover { border-color: color-mix(in srgb, var(--question-color, var(--coral)) 45%, var(--line)); } }
+    .quick-pick-option.active { border-color: var(--question-color, var(--coral)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--question-color, var(--coral)) 22%, transparent); transform: translateY(-2px); }
     [data-theme="pastel"] .quick-pick-option { background: #ffffff; color: #1e293b; }
     .quick-pick-between > summary { cursor: pointer; color: var(--muted); }
+    [data-theme="pastel"] .card-close-button { color: #9f1239; }
+    [data-theme="pastel"] .answer-box { background: #ffffff; border-color: rgba(148, 163, 184, 0.35); }
+    [data-theme="pastel"] .answer-box .answer-name { filter: brightness(0.62) saturate(1.3); }
+    [data-theme="pastel"] .answer-box .answer-copy { color: #1e293b; }
+    [data-theme="sunset"] :is(.vibe-tile, .quick-pick-option, .quick-guess-option, .pick-side) { border-color: rgba(255, 226, 191, 0.19); background: rgba(67, 21, 38, 0.48); }
+    [data-theme="cosmic"] :is(.vibe-tile, .quick-pick-option, .quick-guess-option, .pick-side) { border-color: rgba(167, 139, 250, 0.22); background: rgba(10, 4, 32, 0.55); }
+    [data-theme="pastel"] :is(.vibe-tile, .quick-guess-option, .pick-side) { background: #ffffff; color: #1e293b; }
+    .answer-extras > summary, .card-more > summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; }
+    .answer-extras > summary::before, .card-more > summary::before { content: "▸"; color: var(--muted); }
+    .answer-extras[open] > summary::before, .card-more[open] > summary::before { content: "▾"; }
+    .answer-extras > summary::-webkit-details-marker, .card-more > summary::-webkit-details-marker { display: none; }
+    .answer-extras > summary, .card-more > summary { list-style: none; }
+    .summary-title { white-space: nowrap; }
+    .answer-extras > summary small, .card-more > summary small { flex-basis: 100%; margin-left: 0 !important; }
+    .card-number-tail { white-space: nowrap; }
+    .next-card-button, .answer-label { font-size: max(12px, 0.8rem) !important; }
+    .guess-panel .guess-input { margin-top: 8px; }
+    .dual-score-dashboard { align-items: start; }
+    .guess-input::-moz-range-thumb { background: var(--violet); }
+    .guess-panel.guessed .guess-input::-moz-range-progress { background: var(--violet); }
+    .guess-panel:not(.guessed) .guess-input::-moz-range-progress { background: transparent; }
+    .guess-panel:not(.guessed) .guess-input::-moz-range-thumb { opacity: .7; }
+    .quick-guess { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; padding: 10px 12px; border: 1px dashed color-mix(in srgb, var(--violet) 60%, transparent); border-radius: 16px; background: color-mix(in srgb, var(--violet) 8%, transparent); }
+    .quick-guess > span { flex: 1 1 100%; font-weight: 800; }
+    .quick-guess small { color: var(--muted); font-weight: 600; }
+    .quick-guess.guessed { border-style: solid; }
+    .quick-guess-option { flex: 1 1 0; min-height: 44px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; color: var(--text); background: transparent; font: inherit; font-size: max(12px, .82rem); font-weight: 750; cursor: pointer; }
+    .quick-guess-option.active { border-color: var(--violet); background: color-mix(in srgb, var(--violet) 24%, transparent); }
+    .pick-reveal { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .pick-side { display: grid; gap: 8px; align-content: start; padding: 12px; border: 1px solid var(--line); border-radius: 16px; opacity: .55; }
+    .pick-side.chosen { opacity: 1; border-color: color-mix(in srgb, var(--question-color, var(--coral)) 60%, var(--line)); }
+    .pick-label { font-weight: 800; }
+    .pick-names { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pick-name { padding: 3px 10px; border-radius: 999px; border: 1px solid var(--player-color); color: var(--text); font-size: max(12px, .8rem); font-weight: 750; }
+    .pick-empty { color: var(--muted); }
+    .pick-verdict { margin: 10px 0 0; font-weight: 850; text-align: center; }
+    .pick-verdict.same { color: var(--gold); }
+    .highlight-jump, .highlight-answers span, .turn-name, .answer-copy, .card-question { overflow-wrap: anywhere; }
+    .highlight-note { display: block; margin-top: 6px; color: var(--muted); font-size: max(12px, .76rem); font-weight: 650; }
     .guess-panel { margin: 14px 0 4px; padding: 12px 14px; border: 1px dashed color-mix(in srgb, var(--violet) 60%, transparent); border-radius: 16px; background: color-mix(in srgb, var(--violet) 8%, transparent); }
     .guess-panel.guessed { border-style: solid; }
     .guess-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; font-weight: 800; }
@@ -9247,7 +9287,7 @@ var qrcode = function() {
       { id: "future-planning", label: "Future Planning", icon: "↗", copy: "Dreams, logistics, and shared direction", count: 10, intensity: "deep", mode: "mixed", topics: ["future", "lifestyle", "money"] },
       { id: "repair", label: "Conflict Repair", icon: "☂", copy: "Slow, caring prompts for reconnection", count: 5, intensity: "deep", mode: "mixed", topics: ["connection", "love"] },
       { id: "dealbreakers", label: "Dealbreaker Check", icon: "!", copy: "Direct questions about essential boundaries", count: 10, intensity: "no-filter", mode: "slider-heavy", topics: ["dealbreakers", "politics", "money"] },
-      { id: "road-trip", label: "Silly Road Trip", icon: "✺", copy: "Fast, funny, and delightfully random", count: 15, intensity: "cozy", mode: "slider-heavy", topics: ["fun", "lifestyle"] }
+      { id: "road-trip", label: "Silly Road Trip", icon: "✺", copy: "Fast, funny, and delightfully random", count: 10, intensity: "cozy", mode: "mixed", topics: ["fun", "lifestyle"] }
     ];
     const IMPORTANCE_LEVELS = [
       { value: 0, label: "Not important", icon: "○" },
@@ -9261,21 +9301,64 @@ var qrcode = function() {
       ["career", /career|work|job|ambition/i], ["travel", /travel|trip|country|vacation/i],
       ["home", /home|live|move|house/i], ["communication", /talk|listen|conversation|communicat/i]
     ];
+    // Follow-ups speak the question's language: playful for silly prompts, warmer for heart-to-hearts.
     const DISCUSSION_PROMPTS = {
-      close: [
-        "What shared experience do you think led you both here?",
-        "What is one small way you could celebrate this common ground?",
-        "Was this match expected, or did it surprise you?"
-      ],
-      medium: [
-        "Where do your answers overlap, even if the numbers or wording differ?",
-        "What context would help your partner understand your answer better?",
-        "Could both preferences fit into your relationship at different times?"
-      ],
-      far: [
-        "What experience or value shaped your answer?",
-        "What would feeling respected around this difference look like?",
-        "Is this a preference, a need, or a boundary for each of you?"
+      light: {
+        close: [
+          "High five — who would have predicted this one?",
+          "Plan the moment you two actually do this together.",
+          "Was this an easy pick or did you both hesitate?",
+          "Quick: name a time this showed up in real life.",
+          "What would your friends say about this match?",
+          "Is there a bonus answer you both secretly considered?"
+        ],
+        medium: [
+          "Meet in the middle: what would the compromise look like?",
+          "Defend your answer in ten seconds — go!",
+          "What tiny detail would change your answer?",
+          "Who is more likely to change their mind by next year?",
+          "Describe the ideal version of this that works for both of you.",
+          "What would a third friend pick, and who would they side with?"
+        ],
+        far: [
+          "Opposite ends! Each of you pitch your side like a movie trailer.",
+          "Who would win this debate at a dinner party?",
+          "Act out what your side looks like in ten seconds.",
+          "Would you swap answers for one day? What would it feel like?",
+          "Which of you is secretly a little bit right about the other side?",
+          "Invent a rule that lets both answers happily coexist."
+        ]
+      },
+      warm: {
+        close: [
+          "What shared experience do you think led you both here?",
+          "What is one small way you could celebrate this common ground?",
+          "Was this match expected, or did it surprise you?",
+          "How could you protect this shared value when life gets busy?",
+          "When did you last notice this in each other?",
+          "What does this match say about what you both need?"
+        ],
+        medium: [
+          "Where do your answers overlap, even if the numbers or wording differ?",
+          "What context would help your partner understand your answer better?",
+          "Could both preferences fit into your relationship at different times?",
+          "What would make the other answer feel easier to live with?",
+          "Which part of their answer would you like to hear more about?",
+          "What is one small experiment you could try together?"
+        ],
+        far: [
+          "What experience or value shaped your answer?",
+          "What would feeling respected around this difference look like?",
+          "Is this a preference, a need, or a boundary for each of you?",
+          "What would you want your partner to understand before deciding anything?",
+          "What is the most generous reading of the other answer?",
+          "Where might this difference actually help you as a pair?"
+        ]
+      },
+      unrated: [
+        "Read both answers aloud, then rate them together.",
+        "Take turns: what surprised you in the other answer?",
+        "Ask one curious question about their answer before you rate it."
       ]
     };
 
@@ -9318,6 +9401,7 @@ var qrcode = function() {
         conversationStatus: {},
         sharedIntentions: [],
         revealedIds: [],
+        seenIds: [],
         answeredQuestionIds: [],
         excludedQuestionIds: [],
         neverQuestionIds: [],
@@ -9348,6 +9432,29 @@ var qrcode = function() {
       }));
     }
 
+    // Stored and imported data is user-editable: keep only known rating values and plain, bounded text.
+    function cleanRatings(source) {
+      const allowed = ["aligned", "nuanced", "discuss", "different"];
+      if (!source || typeof source !== "object") return {};
+      return Object.fromEntries(Object.entries(source).filter(([id, value]) => /^[\w-]{1,80}$/.test(id) && allowed.includes(value)));
+    }
+
+    function cleanTextMaps(source, limit) {
+      const pair = Array.isArray(source) ? source : [];
+      return [0, 1].map((player) => {
+        const map = pair[player] && typeof pair[player] === "object" ? pair[player] : {};
+        return Object.fromEntries(Object.entries(map).filter(([id, value]) => /^[\w-]{1,80}$/.test(id) && typeof value === "string").map(([id, value]) => [id, value.slice(0, limit)]));
+      });
+    }
+
+    function cleanImportanceMaps(source) {
+      const pair = Array.isArray(source) ? source : [];
+      return [0, 1].map((player) => {
+        const map = pair[player] && typeof pair[player] === "object" ? pair[player] : {};
+        return Object.fromEntries(Object.entries(map).filter(([id, value]) => /^[\w-]{1,80}$/.test(id) && [0, 1, 2].includes(Number(value))).map(([id, value]) => [id, Number(value)]));
+      });
+    }
+
     function sanitizeCompletedRounds(rounds, validIds) {
       if (!Array.isArray(rounds)) return [];
       return rounds
@@ -9376,21 +9483,17 @@ var qrcode = function() {
             id: /^[\w-]{1,80}$/.test(String(round.id || "")) ? String(round.id) : `round_restored_${roundIndex}`,
             completedAt: String(round.completedAt || new Date(0).toISOString()),
             names: Array.isArray(round.names)
-              ? [String(round.names[0] || "Player 1"), String(round.names[1] || "Player 2")]
+              ? [String(round.names[0] || "Player 1").slice(0, 40), String(round.names[1] || "Player 2").slice(0, 40)]
               : ["Player 1", "Player 2"],
             questionIds,
             answers,
-            comments,
-            privateNotes: Array.isArray(round.privateNotes)
-              ? [round.privateNotes[0] || {}, round.privateNotes[1] || {}]
-              : [{}, {}],
-            importance: Array.isArray(round.importance)
-              ? [round.importance[0] || {}, round.importance[1] || {}]
-              : [{}, {}],
+            comments: cleanTextMaps(comments, 400),
+            privateNotes: cleanTextMaps(round.privateNotes, 500),
+            importance: cleanImportanceMaps(round.importance),
             notReady: Array.isArray(round.notReady)
               ? [round.notReady[0] || {}, round.notReady[1] || {}]
               : [{}, {}],
-            textRatings: round.textRatings && typeof round.textRatings === "object" ? round.textRatings : {},
+            textRatings: cleanRatings(round.textRatings),
             conversationStatus: round.conversationStatus && typeof round.conversationStatus === "object" ? round.conversationStatus : {},
             sharedIntentions: Array.isArray(round.sharedIntentions) ? round.sharedIntentions : [],
             intensity: String(round.intensity || "curious"),
@@ -9460,19 +9563,13 @@ var qrcode = function() {
           answers: Array.isArray(cached.answers)
             ? [cleanAnswerMap(cached.answers[0]), cleanAnswerMap(cached.answers[1])]
             : [{}, {}],
-          comments: Array.isArray(cached.comments)
-            ? [cached.comments[0] || {}, cached.comments[1] || {}]
-            : [{}, {}],
-          privateNotes: Array.isArray(cached.privateNotes)
-            ? [cached.privateNotes[0] || {}, cached.privateNotes[1] || {}]
-            : [{}, {}],
-          importance: Array.isArray(cached.importance)
-            ? [cached.importance[0] || {}, cached.importance[1] || {}]
-            : [{}, {}],
+          comments: cleanTextMaps(cached.comments, 400),
+          privateNotes: cleanTextMaps(cached.privateNotes, 500),
+          importance: cleanImportanceMaps(cached.importance),
           notReady: Array.isArray(cached.notReady)
             ? [cached.notReady[0] || {}, cached.notReady[1] || {}]
             : [{}, {}],
-          textRatings: cached.textRatings && typeof cached.textRatings === "object" ? cached.textRatings : {},
+          textRatings: cleanRatings(cached.textRatings),
           conversationStatus: cached.conversationStatus && typeof cached.conversationStatus === "object" ? cached.conversationStatus : {},
           sharedIntentions: Array.isArray(cached.sharedIntentions) ? cached.sharedIntentions.filter((item) => item && typeof item === "object").map((item, index) => ({ ...item, id: /^[\w-]{1,80}$/.test(String(item.id || "")) ? String(item.id) : `intention_restored_${index}`, questionId: String(item.questionId || ""), text: String(item.text || "").slice(0, 180) })) : [],
           questionEdits: Object.fromEntries(Object.entries(cached.questionEdits && typeof cached.questionEdits === "object" ? cached.questionEdits : {}).filter(([id, edit]) => validIds.has(id) && edit && typeof edit === "object").map(([id, edit]) => [id, { prompt: String(edit.prompt || "").slice(0, 500), ...(Array.isArray(edit.labels) ? { labels: [String(edit.labels[0] || "Low").slice(0, 60), String(edit.labels[1] || "High").slice(0, 60)] } : {}) }])),
@@ -9503,6 +9600,9 @@ var qrcode = function() {
           completedRounds: sanitizeCompletedRounds(cached.completedRounds, validIds),
           revealedIds: Array.isArray(cached.revealedIds)
             ? cached.revealedIds.filter((id) => validIds.has(id))
+            : [],
+          seenIds: Array.isArray(cached.seenIds)
+            ? cached.seenIds.filter((id) => validIds.has(id))
             : []
         };
 
@@ -9514,7 +9614,7 @@ var qrcode = function() {
         restored.soundEnabled = restored.soundEnabled !== false;
         if (!INTENSITY_OPTIONS.some((option) => option.id === restored.questionIntensity)) restored.questionIntensity = "curious";
         if (!["cute", "dreamy", "arcade"].includes(restored.soundTheme)) restored.soundTheme = "cute";
-        restored.soundVolume = Math.max(0, Math.min(1, Number(restored.soundVolume) || 0.7));
+        restored.soundVolume = Number.isFinite(Number(restored.soundVolume)) && restored.soundVolume !== null && restored.soundVolume !== "" ? Math.max(0, Math.min(1, Number(restored.soundVolume))) : 0.7;
         restored.ambientMusicEnabled = restored.ambientMusicEnabled !== false; // Default on; audio context still requires user gesture
         restored.hapticsEnabled = restored.hapticsEnabled !== false;
         if (!["midnight", "sunset", "cosmic", "pastel"].includes(restored.visualTheme)) restored.visualTheme = "midnight";
@@ -9613,7 +9713,7 @@ var qrcode = function() {
     let nearbyLastPeerMessageAt = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.1.0";
+    const APP_VERSION = "1.2.0";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -10165,6 +10265,18 @@ var qrcode = function() {
       if (mutations.some((mutation) => mutation.target instanceof Element && mutation.target.matches(PRESSABLE_SELECTOR))) syncPressedStates();
     }).observe(app, { subtree: true, attributes: true, attributeFilter: ["class"] });
 
+    // The joiner's "Play another round" follows the link live instead of waiting for a re-render.
+    function updateRevealNewRoundButton() {
+      const button = state.screen === "reveal" ? document.getElementById("new-round") : null;
+      if (!button || state.playStyle !== "nearby" || state.nearbyRole !== "join") return;
+      const waiting = nearbyChannelOpen();
+      const host = state.names[0] || "your partner";
+      button.disabled = waiting;
+      button.style.opacity = waiting ? "0.6" : "";
+      button.style.cursor = waiting ? "not-allowed" : "";
+      button.textContent = waiting ? `Waiting for ${host} to start…` : "Play another round";
+    }
+
     function updateNearbyBanner() {
       const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "your partner";
       let message = "";
@@ -10191,8 +10303,14 @@ var qrcode = function() {
         } else if (state.screen === "question") {
           message = `The link to ${partner}’s phone has ended. Keep answering — you can reconnect or finish on one phone at the end.`;
           tone = "warning";
+        } else if (state.screen === "reveal" && !linkEnded && !nearbyRuntime.partnerLeft) {
+          message = `${partner}’s phone disconnected — reconnecting… your results are saved here.`;
+        } else if (state.screen === "reveal") {
+          message = `The link to ${partner}’s phone has ended. Your results are saved on this phone.`;
+          tone = "warning";
         }
       }
+      updateRevealNewRoundButton();
       let banner = document.getElementById("nearby-banner");
       if (!message) {
         banner?.remove();
@@ -10323,6 +10441,7 @@ var qrcode = function() {
       state.answeredQuestionIds = [...new Set([...state.answeredQuestionIds, ...state.selectedQuestionIds])];
       state.screen = "celebration";
       state.revealedIds = [];
+      state.seenIds = [];
       saveState();
       playSound("celebrate");
       render();
@@ -10383,6 +10502,10 @@ var qrcode = function() {
       const selectedQuestionIds = payload.selectedQuestionIds.filter((id) => typeof id === "string" && catalogIds.has(id));
       if (!selectedQuestionIds.length) return;
       const names = Array.isArray(payload.names) ? [String(payload.names[0] || "Player 1").slice(0, 40), String(payload.names[1] || "Player 2").slice(0, 40)] : ["Player 1", "Player 2"];
+      if (payload.newRound) {
+        const message = `${names[0]} started a new round · ${roundToastCopy(roundsPlayedToday() + 1, selectedQuestionIds).replace(/^Round \d+ tonight · /, "")}`;
+        window.setTimeout(() => showToast(message), 250);
+      }
       const settings = persistentSetupState();
       state = {
         ...initialState(), ...settings,
@@ -10479,13 +10602,17 @@ var qrcode = function() {
         state.revealedIds = next;
         saveState();
         refreshRevealFromPartner();
-        if (state.screen === "reveal" && newlyRevealed.length === 1) {
+        if (state.screen === "reveal" && (payload.all === true || payload.all === false)) {
+          const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "Your partner";
+          showToast(payload.all ? `${partner} revealed every card` : `${partner} hid every card`);
+          playSound(payload.all ? "reveal" : "tap");
+        } else if (state.screen === "reveal" && newlyRevealed.length === 1) {
           const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "Your partner";
           const number = state.selectedQuestionIds.indexOf(newlyRevealed[0]) + 1;
           showToast(`${partner} flipped card ${number}`);
           const question = getSelectedQuestions().find((item) => item?.id === newlyRevealed[0]);
           const match = question ? revealMatchInfo(question, state.answers[0][question.id], state.answers[1][question.id]) : null;
-          playSound(match?.isMatch ? "match" : "reveal");
+          playSound(match?.isMatch ? "match" : "reveal", { topic: question?.topic, exact: match?.exact });
         }
       } else if (payload.type === "text-rating") {
         if (sameRound && state.selectedQuestionIds.includes(payload.questionId) && ["aligned", "nuanced", "discuss", "different"].includes(payload.rating)) {
@@ -10990,6 +11117,12 @@ var qrcode = function() {
 
     async function decryptBackupWrapper(wrapper) {
       if (!window.crypto?.subtle) throw new Error("This browser cannot decrypt the backup without a secure connection.");
+      try {
+        if (![wrapper.salt, wrapper.iv, wrapper.data].every((part) => typeof part === "string" && part.length)) throw new Error();
+        [wrapper.salt, wrapper.iv, wrapper.data].forEach((part) => base64ToBytes(part));
+      } catch {
+        throw new Error("This encrypted backup is damaged, so it can’t be opened. Try another copy.");
+      }
       for (let attempt = 0; attempt < 5; attempt += 1) {
         const passphrase = await requestSecret({
           title: "Unlock encrypted backup",
@@ -11096,6 +11229,7 @@ var qrcode = function() {
         child.inert = Boolean(top);
       });
       if (top) {
+        armBackGuard();
         if (modalWasOpen && !top.contains(document.activeElement)) {
           (top.querySelector("[data-modal-cancel], .primary-btn, button") || top.querySelector("[tabindex]"))?.focus({ preventScroll: true });
         }
@@ -11199,132 +11333,235 @@ var qrcode = function() {
       });
     }
 
+    // One shared context and mix: effects → compressor → master → limiter, with music on its own bus
+    // under the effects so every chime stays audible and nothing can clip when sounds overlap.
+    const MUSIC_LEVEL = 0.4;
+    const audioEngine = {
+      ctx: null,
+      readyAt: 0,
+      master: null,
+      fxBus: null,
+      musicBus: null,
+      echoSend: null,
+      pulseWave: null,
+      noise: null,
+      ensure() {
+        if (this.ctx) return this.ctx;
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return null;
+        const ctx = new AudioContextClass();
+        const compressor = (threshold, knee, ratio, attack, release) => {
+          const node = ctx.createDynamicsCompressor();
+          node.threshold.value = threshold; node.knee.value = knee; node.ratio.value = ratio;
+          node.attack.value = attack; node.release.value = release;
+          return node;
+        };
+        const limiter = compressor(-3, 0, 20, 0.001, 0.1);
+        this.master = ctx.createGain();
+        this.master.gain.value = state.soundVolume;
+        const fxCompressor = compressor(-18, 12, 4, 0.003, 0.15);
+        this.fxBus = ctx.createGain();
+        this.musicBus = ctx.createGain();
+        this.musicBus.gain.value = MUSIC_LEVEL;
+        this.fxBus.connect(fxCompressor);
+        fxCompressor.connect(this.master);
+        this.musicBus.connect(this.master);
+        this.master.connect(limiter);
+        limiter.connect(ctx.destination);
+        // The dreamy theme's echo: a short filtered feedback delay shared by every note.
+        this.echoSend = ctx.createGain();
+        const delay = ctx.createDelay(1);
+        const feedback = ctx.createGain();
+        const tone = ctx.createBiquadFilter();
+        const wet = ctx.createGain();
+        delay.delayTime.value = 0.28; feedback.gain.value = 0.3;
+        tone.type = "lowpass"; tone.frequency.value = 2500; wet.gain.value = 0.32;
+        this.echoSend.connect(delay); delay.connect(tone); tone.connect(feedback); feedback.connect(delay); tone.connect(wet); wet.connect(this.fxBus);
+        const harmonics = 24;
+        const real = new Float32Array(harmonics);
+        const imag = new Float32Array(harmonics);
+        for (let n = 1; n < harmonics; n++) imag[n] = (2 / (n * Math.PI)) * Math.sin(n * Math.PI * 0.25);
+        this.pulseWave = ctx.createPeriodicWave(real, imag);
+        this.noise = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.4), ctx.sampleRate);
+        const samples = this.noise.getChannelData(0);
+        for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
+        this.ctx = ctx;
+        // Compressors open up over their first few milliseconds; the first sound waits until they have.
+        this.readyAt = ctx.currentTime + 0.08;
+        return ctx;
+      },
+      resume() {
+        if (this.ctx && this.ctx.state === "suspended") this.ctx.resume().catch(() => {});
+      },
+      setVolume(value) {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        this.master.gain.cancelScheduledValues(now);
+        this.master.gain.setTargetAtTime(value, now, 0.05);
+      },
+      // Music dips under each effect and swells back once it has finished.
+      duck(depth, holdSeconds) {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const level = this.musicBus.gain;
+        level.cancelScheduledValues(now);
+        level.setValueAtTime(level.value, now);
+        level.setTargetAtTime(MUSIC_LEVEL * depth, now, 0.03);
+        level.setTargetAtTime(MUSIC_LEVEL, now + holdSeconds, 0.4);
+      },
+      panner(pan) {
+        if (!this.ctx.createStereoPanner || !pan) return null;
+        const node = this.ctx.createStereoPanner();
+        node.pan.value = Math.max(-1, Math.min(1, pan));
+        return node;
+      }
+    };
+
     let ambientSoundscape = null;
+
+    // Generative background music in F major: a slow four-chord pad cycle plus a sparse, panned
+    // music-box melody, so it never loops audibly. Each start builds a fresh generation of nodes
+    // that its own stop tears down, so quick on/off toggles cannot orphan oscillators.
+    const AMBIENT_CHORDS = [
+      [174.61, 220.0, 261.63, 329.63, 392.0],
+      [146.83, 174.61, 220.0, 261.63, 329.63],
+      [116.54, 146.83, 174.61, 220.0, 293.66],
+      [130.81, 164.81, 196.0, 220.0, 293.66]
+    ];
+    const AMBIENT_MELODY = [698.46, 783.99, 880.0, 1046.5, 1174.66];
+    const CHORD_SECONDS = 8;
 
     class ProceduralAmbient {
       constructor() {
-        this.ctx = null;
-        this.oscillators = [];
-        this.gainNodes = [];
-        this.filter = null;
-        this.isPlaying = false;
-        this.lfo = null;
-        this.lfoGain = null;
-        this.masterGain = null;
+        this.generation = null;
       }
 
-      init() {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextClass) return;
-        this.ctx = new AudioContextClass();
+      get ctx() {
+        return audioEngine.ctx;
+      }
+
+      get isPlaying() {
+        return Boolean(this.generation);
       }
 
       start() {
-        if (this.isPlaying) {
-          if (this.ctx && this.ctx.state === "suspended") {
-            this.ctx.resume().catch(() => {});
+        const ctx = audioEngine.ensure();
+        if (!ctx) return;
+        audioEngine.resume();
+        if (this.generation) return;
+        const now = ctx.currentTime;
+        const out = ctx.createGain();
+        out.gain.setValueAtTime(0.0001, now);
+        out.gain.exponentialRampToValueAtTime(1, now + 3);
+        const filter = ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.value = 1400;
+        filter.Q.value = 0.7;
+        const lfo = ctx.createOscillator();
+        const lfoDepth = ctx.createGain();
+        lfo.frequency.value = 0.05;
+        lfoDepth.gain.value = 400;
+        lfo.connect(lfoDepth);
+        lfoDepth.connect(filter.frequency);
+        lfo.start(now);
+        filter.connect(out);
+        out.connect(audioEngine.musicBus);
+        const generation = { out, filter, lfo, lfoDepth, chord: 0, nextChordAt: now + 0.05, nextNoteAt: now + 2.5, timer: 0 };
+        this.generation = generation;
+        const schedule = () => {
+          if (this.generation !== generation) return;
+          if (ctx.state === "running") {
+            const horizon = ctx.currentTime + 1.5;
+            if (generation.nextChordAt < ctx.currentTime) generation.nextChordAt = ctx.currentTime + 0.05;
+            if (generation.nextNoteAt < ctx.currentTime) generation.nextNoteAt = ctx.currentTime + 0.5;
+            while (generation.nextChordAt < horizon) {
+              this.playChord(generation, AMBIENT_CHORDS[generation.chord % AMBIENT_CHORDS.length], generation.nextChordAt);
+              generation.chord += 1;
+              generation.nextChordAt += CHORD_SECONDS;
+            }
+            while (generation.nextNoteAt < horizon) {
+              this.playNote(generation, generation.nextNoteAt);
+              generation.nextNoteAt += 2 + Math.random() * 3;
+            }
           }
-          return;
-        }
-        if (!this.ctx) this.init();
-        if (!this.ctx) return;
+          generation.timer = window.setTimeout(schedule, 500);
+        };
+        schedule();
+      }
 
-        if (this.ctx.state === "suspended") {
-          this.ctx.resume().catch(() => {});
-        }
-
-        this.isPlaying = true;
-        const freqs = [87.31, 130.81, 164.81, 196.00, 220.00, 261.63];
-        
-        this.filter = this.ctx.createBiquadFilter();
-        this.filter.type = "lowpass";
-        this.filter.frequency.setValueAtTime(450, this.ctx.currentTime);
-        this.filter.Q.setValueAtTime(1.5, this.ctx.currentTime);
-        
-        this.masterGain = this.ctx.createGain();
-        this.masterGain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
-        this.masterGain.gain.linearRampToValueAtTime(state.soundVolume * 0.65, this.ctx.currentTime + 3.0);
-
-        this.filter.connect(this.masterGain);
-        this.masterGain.connect(this.ctx.destination);
-
-        this.lfo = this.ctx.createOscillator();
-        this.lfo.type = "sine";
-        this.lfo.frequency.setValueAtTime(0.08, this.ctx.currentTime);
-        
-        this.lfoGain = this.ctx.createGain();
-        this.lfoGain.gain.setValueAtTime(150, this.ctx.currentTime);
-        
-        this.lfo.connect(this.lfoGain);
-        this.lfoGain.connect(this.filter.frequency);
-        this.lfo.start();
-
-        freqs.forEach((freq, index) => {
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          
+      // Pad voices fade in over 2 s and out over 2 s, overlapping the next chord for a crossfade.
+      playChord(generation, frequencies, at) {
+        const ctx = audioEngine.ctx;
+        const end = at + CHORD_SECONDS + 2;
+        frequencies.forEach((frequency, index) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
           osc.type = "triangle";
-          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-          osc.detune.setValueAtTime((index % 2 === 0 ? 4 : -4) + (Math.random() - 0.5) * 2, this.ctx.currentTime);
-          gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
-          
-          const voiceLfo = this.ctx.createOscillator();
-          voiceLfo.type = "sine";
-          voiceLfo.frequency.setValueAtTime(0.05 + index * 0.015, this.ctx.currentTime);
-          
-          const voiceLfoGain = this.ctx.createGain();
-          voiceLfoGain.gain.setValueAtTime(0.015, this.ctx.currentTime);
-          
-          voiceLfo.connect(voiceLfoGain);
-          voiceLfoGain.connect(gain.gain);
-          
-          voiceLfo.start();
-          
+          osc.frequency.value = frequency;
+          osc.detune.value = (index % 2 === 0 ? 4 : -4) + (Math.random() - 0.5) * 3;
+          gain.gain.setValueAtTime(0.0001, at);
+          gain.gain.linearRampToValueAtTime(0.03, at + 2);
+          gain.gain.setValueAtTime(0.03, end - 2);
+          gain.gain.linearRampToValueAtTime(0.0001, end);
           osc.connect(gain);
-          gain.connect(this.filter);
-          
-          osc.start();
-          
-          this.oscillators.push(osc);
-          this.oscillators.push(voiceLfo);
-          this.gainNodes.push(gain);
-          this.gainNodes.push(voiceLfoGain);
+          gain.connect(generation.filter);
+          osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+          osc.start(at);
+          osc.stop(end + 0.05);
+        });
+      }
+
+      playNote(generation, at) {
+        const ctx = audioEngine.ctx;
+        const frequency = AMBIENT_MELODY[Math.floor(Math.random() * AMBIENT_MELODY.length)];
+        const gain = ctx.createGain();
+        const panner = audioEngine.panner((Math.random() - 0.5) * 1);
+        gain.gain.setValueAtTime(0.0001, at);
+        gain.gain.exponentialRampToValueAtTime(0.05, at + 0.005);
+        gain.gain.exponentialRampToValueAtTime(0.0001, at + 1.2);
+        if (panner) { gain.connect(panner); panner.connect(generation.out); } else gain.connect(generation.out);
+        [[1, 1], [3, 0.2]].forEach(([multiple, level]) => {
+          const osc = ctx.createOscillator();
+          const partial = ctx.createGain();
+          osc.frequency.value = frequency * multiple;
+          partial.gain.value = level;
+          osc.connect(partial);
+          partial.connect(gain);
+          osc.onended = () => { osc.disconnect(); partial.disconnect(); if (multiple === 1) { gain.disconnect(); panner?.disconnect(); } };
+          osc.start(at);
+          osc.stop(at + 1.25);
         });
       }
 
       stop() {
-        if (!this.isPlaying) return;
-        this.isPlaying = false;
-        const now = this.ctx.currentTime;
-        if (this.masterGain) {
-          this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
-          this.masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
-        }
-        
-        const oscs = this.oscillators;
-        this.oscillators = [];
-        this.gainNodes = [];
-        this.filter = null;
-        
-        setTimeout(() => {
-          if (this.isPlaying) return;
-          oscs.forEach(osc => { try { osc.stop(); } catch {} });
+        const generation = this.generation;
+        if (!generation) return;
+        this.generation = null;
+        window.clearTimeout(generation.timer);
+        const ctx = audioEngine.ctx;
+        const now = ctx.currentTime;
+        generation.out.gain.cancelScheduledValues(now);
+        generation.out.gain.setValueAtTime(Math.max(0.0001, generation.out.gain.value), now);
+        generation.out.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
+        window.setTimeout(() => {
+          try { generation.lfo.stop(); } catch {}
+          [generation.lfo, generation.lfoDepth, generation.filter, generation.out].forEach((node) => node.disconnect());
         }, 1600);
       }
 
       updateVolume() {
-        if (this.masterGain && this.ctx) {
-          const now = this.ctx.currentTime;
-          this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
-          this.masterGain.gain.linearRampToValueAtTime(state.soundVolume * 0.65, now + 0.5);
-        }
+        audioEngine.setVolume(state.soundVolume);
       }
     }
 
     ambientSoundscape = new ProceduralAmbient();
 
+    function motionReduced() {
+      return Boolean(state.reducedMotion) || Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+    }
+
     function triggerSparkles(x, y, amount = 10, distance = 45) {
-      if (state.reducedMotion) return;
+      if (motionReduced()) return;
       const colors = ["var(--coral)", "var(--blue)", "var(--lavender)", "var(--gold)", "var(--sun)", "#38bdf8", "#a78bfa"];
       for (let i = 0; i < amount; i++) {
         const spark = document.createElement("span");
@@ -11348,6 +11585,10 @@ var qrcode = function() {
     }
 
     function saveState() {
+      if (Array.isArray(state.revealedIds) && state.revealedIds.length) {
+        const round = new Set(state.selectedQuestionIds);
+        state.seenIds = [...new Set([...(Array.isArray(state.seenIds) ? state.seenIds : []), ...state.revealedIds])].filter((id) => round.has(id));
+      }
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       } catch {
@@ -11412,85 +11653,212 @@ var qrcode = function() {
     function pulseHaptic(kind = "tap") {
       if (!state.hapticsEnabled || !navigator.vibrate) return;
       const patterns = {
-        tap: 8,
-        step: 12,
+        tap: 14,
+        step: 14,
         lock: [18, 35, 18],
         unlock: [10, 25, 14],
         reveal: 16,
         celebrate: [18, 30, 18, 30, 32],
-        match: [20, 24, 20]
+        match: [20, 24, 20],
+        error: [24, 40, 24],
+        delete: 30,
+        whoosh: 12
       };
-      navigator.vibrate(patterns[kind] || 8);
+      if (!(kind in patterns)) return;
+      navigator.vibrate(patterns[kind]);
     }
-
-    let audioContext;
 
     // Browsers block audio and vibration until the person has interacted with the page.
     function audioAllowed() {
       return navigator.userActivation ? navigator.userActivation.hasBeenActive : true;
     }
 
-    function playSound(kind = "tap") {
+    // Every melodic sound uses the C-major pentatonic (C D E G A). Themes and question packs only
+    // transpose by fourths/fifths, which keeps every note inside the F-major ambient music.
+    const SOUND_SCALE = [261.63, 293.66, 329.63, 392.0, 440.0];
+    const pentatonic = (degree, octave = 5) => {
+      const index = ((degree % 5) + 5) % 5;
+      return SOUND_SCALE[index] * 2 ** (octave - 4 + Math.floor(degree / 5));
+    };
+    const SOUND_THEMES = {
+      cute: { semitones: 0, spacing: 1 },
+      dreamy: { semitones: -7, spacing: 1.5 },
+      arcade: { semitones: 5, spacing: 0.85 }
+    };
+    const TOPIC_SEMITONES = { love: 5, future: 5, spicy: 5, money: 5 };
+
+    function soundNote(ctx, destination, frequency, at, peak, options = {}) {
+      const theme = options.theme || "cute";
+      const voice = ctx.createGain();
+      const panner = audioEngine.panner(options.pan);
+      if (panner) { voice.connect(panner); panner.connect(destination); } else voice.connect(destination);
+      const nodes = [voice, panner].filter(Boolean);
+      const oscillators = [];
+      let end;
+      if (theme === "dreamy") {
+        // FM bell: the modulator's brightness dies away quickly while the tone rings on.
+        const attack = options.attack ?? 0.025;
+        const decay = options.decay ?? 1.2;
+        end = at + decay;
+        const carrier = ctx.createOscillator();
+        const modulator = ctx.createOscillator();
+        const depth = ctx.createGain();
+        carrier.frequency.value = frequency;
+        modulator.frequency.value = frequency * 3.5;
+        depth.gain.setValueAtTime(frequency * 2, at);
+        depth.gain.exponentialRampToValueAtTime(0.01, at + 0.3);
+        modulator.connect(depth); depth.connect(carrier.frequency); carrier.connect(voice);
+        voice.gain.setValueAtTime(0.0001, at);
+        voice.gain.exponentialRampToValueAtTime(peak * 0.7, at + attack);
+        voice.gain.exponentialRampToValueAtTime(0.0001, end);
+        if (audioEngine.echoSend) voice.connect(audioEngine.echoSend);
+        oscillators.push(carrier, modulator); nodes.push(depth);
+      } else if (theme === "arcade") {
+        const attack = options.attack ?? 0.002;
+        const decay = options.decay ?? 0.09;
+        end = at + decay;
+        const osc = ctx.createOscillator();
+        const tone = ctx.createBiquadFilter();
+        osc.setPeriodicWave(audioEngine.pulseWave);
+        osc.frequency.setValueAtTime(frequency / 2 ** (1 / 12), at);
+        osc.frequency.exponentialRampToValueAtTime(frequency, at + 0.02);
+        tone.type = "lowpass"; tone.frequency.value = 4500;
+        osc.connect(tone); tone.connect(voice);
+        voice.gain.setValueAtTime(0.0001, at);
+        voice.gain.exponentialRampToValueAtTime(peak, at + attack);
+        voice.gain.exponentialRampToValueAtTime(0.0001, end);
+        oscillators.push(osc); nodes.push(tone);
+      } else {
+        const attack = options.attack ?? 0.006;
+        const decay = options.decay ?? 0.18;
+        end = at + decay;
+        const osc = ctx.createOscillator();
+        const octave = ctx.createOscillator();
+        const octaveLevel = ctx.createGain();
+        osc.frequency.value = frequency;
+        octave.type = "triangle";
+        octave.frequency.value = frequency * 2;
+        octaveLevel.gain.value = 0.18;
+        osc.connect(voice); octave.connect(octaveLevel); octaveLevel.connect(voice);
+        voice.gain.setValueAtTime(0.0001, at);
+        voice.gain.exponentialRampToValueAtTime(peak, at + attack);
+        voice.gain.exponentialRampToValueAtTime(0.0001, end);
+        oscillators.push(osc, octave); nodes.push(octaveLevel);
+      }
+      if (options.detune) oscillators.forEach((osc) => { osc.detune.value = options.detune; });
+      oscillators.forEach((osc) => { osc.start(at); osc.stop(end + 0.03); });
+      oscillators[0].onended = () => { oscillators.forEach((osc) => osc.disconnect()); nodes.forEach((node) => node.disconnect()); };
+      return end;
+    }
+
+    function noiseSweep(ctx, at, { from = 900, to = 2600, duration = 0.22, peak = 0.05, q = 1 } = {}) {
+      const source = ctx.createBufferSource();
+      const band = ctx.createBiquadFilter();
+      const gain = ctx.createGain();
+      source.buffer = audioEngine.noise;
+      band.type = "bandpass"; band.Q.value = q;
+      band.frequency.setValueAtTime(from, at);
+      band.frequency.exponentialRampToValueAtTime(to, at + duration);
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(peak, at + duration * 0.35);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + duration);
+      source.connect(band); band.connect(gain); gain.connect(audioEngine.fxBus);
+      source.onended = () => { source.disconnect(); band.disconnect(); gain.disconnect(); };
+      source.start(at);
+      source.stop(at + duration + 0.02);
+      return at + duration;
+    }
+
+    // playSound(kind, { degree, pan, topic, exact }) — degree drives the climbing step, pan places
+    // a card flip where the card is, topic transposes into the question pack's key.
+    function playSound(kind = "tap", options = {}) {
       if (!audioAllowed()) return;
       pulseHaptic(kind);
-      if (!state.soundEnabled) return;
+      if (!state.soundEnabled || !(state.soundVolume > 0)) return;
       try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextClass) return;
-        audioContext ||= new AudioContextClass();
-        if (audioContext.state === "suspended") audioContext.resume();
-
-        const patterns = {
-          tap: { notes: [659, 880], spacing: 0.045, volume: 0.038 },
-          step: { notes: [523, 659, 784], spacing: 0.055, volume: 0.045 },
-          lock: { notes: [523, 440, 349], spacing: 0.075, volume: 0.04 },
-          unlock: { notes: [392, 523, 659, 784], spacing: 0.06, volume: 0.05 },
-          reveal: { notes: [659, 784, 1047], spacing: 0.045, volume: 0.052 },
-          celebrate: { notes: [523, 659, 784, 1047, 1319], spacing: 0.055, volume: 0.055 },
-          match: { notes: [784, 988, 1175, 1568], spacing: 0.07, volume: 0.065 }
-        };
-        const pattern = patterns[kind] || patterns.tap;
-        const soundStyle = {
-          cute: { ratio: 1, oscillator: "sine", shimmer: "triangle" },
-          dreamy: { ratio: 0.76, oscillator: "sine", shimmer: "sine" },
-          arcade: { ratio: 1.18, oscillator: "square", shimmer: "triangle" }
-        }[state.soundTheme] || { ratio: 1, oscillator: "sine", shimmer: "triangle" };
-        const currentTopic = getSelectedQuestions?.()?.[state.questionIndex]?.topic;
-        const categoryRatio = { connection: 1, lifestyle: 0.94, future: 1.08, love: 1.16, fun: 1.25, spicy: 0.88, money: 0.8, politics: 0.74, dealbreakers: 0.68 }[currentTopic] || 1;
-        const start = audioContext.currentTime;
-        pattern.notes.forEach((frequency, index) => {
-          const noteStart = start + index * pattern.spacing;
-          const oscillator = audioContext.createOscillator();
-          const shimmer = audioContext.createOscillator();
-          const gain = audioContext.createGain();
-          const shimmerGain = audioContext.createGain();
-          oscillator.type = soundStyle.oscillator;
-          shimmer.type = soundStyle.shimmer;
-          oscillator.frequency.value = frequency * soundStyle.ratio * categoryRatio;
-          shimmer.frequency.value = frequency * soundStyle.ratio * categoryRatio * 2;
-          gain.gain.setValueAtTime(0.0001, noteStart);
-          gain.gain.exponentialRampToValueAtTime(pattern.volume * state.soundVolume, noteStart + 0.012);
-          gain.gain.exponentialRampToValueAtTime(0.0001, noteStart + 0.24);
-          shimmerGain.gain.setValueAtTime(0.0001, noteStart);
-          shimmerGain.gain.exponentialRampToValueAtTime(pattern.volume * state.soundVolume * 0.18, noteStart + 0.02);
-          shimmerGain.gain.exponentialRampToValueAtTime(0.0001, noteStart + 0.16);
-          oscillator.connect(gain);
-          shimmer.connect(shimmerGain);
-          gain.connect(audioContext.destination);
-          shimmerGain.connect(audioContext.destination);
-          oscillator.onended = () => {
-            gain.disconnect();
-            oscillator.disconnect();
-          };
-          shimmer.onended = () => {
-            shimmerGain.disconnect();
-            shimmer.disconnect();
-          };
-          oscillator.start(noteStart);
-          shimmer.start(noteStart);
-          oscillator.stop(noteStart + 0.25);
-          shimmer.stop(noteStart + 0.18);
+        const ctx = audioEngine.ensure();
+        if (!ctx) return;
+        audioEngine.resume();
+        const themeName = SOUND_THEMES[state.soundTheme] ? state.soundTheme : "cute";
+        const theme = SOUND_THEMES[themeName];
+        const topic = options.topic || getSelectedQuestions?.()?.[state.questionIndex]?.topic;
+        let semitones = theme.semitones + (TOPIC_SEMITONES[topic] || 0);
+        if (semitones > 6) semitones -= 12;
+        const shift = 2 ** (semitones / 12);
+        const out = audioEngine.fxBus;
+        const start = Math.max(ctx.currentTime + 0.005, audioEngine.readyAt);
+        const gap = (seconds) => seconds * theme.spacing;
+        const note = (frequency, at, peak, extra = {}) => soundNote(ctx, out, frequency * shift, at, peak, { theme: themeName, pan: options.pan, ...extra });
+        const wobble = () => ({ detune: (Math.random() - 0.5) * 16 });
+        const jitter = () => 10 ** (((Math.random() - 0.5) * 3) / 20);
+        let end = start;
+        let duck = 0.5;
+        const sequence = (frequencies, spacing, peak, extra) => frequencies.forEach((frequency, index) => {
+          end = Math.max(end, note(frequency, start + index * gap(spacing), peak, extra));
         });
+
+        if (kind === "tap") {
+          const pick = [pentatonic(2), pentatonic(3), pentatonic(4)][Math.floor(Math.random() * 3)];
+          end = note(pick, start, 0.07 * jitter(), { ...wobble(), decay: themeName === "dreamy" ? 0.45 : 0.06 });
+          duck = 0.75;
+        } else if (kind === "step") {
+          const degree = Math.max(0, Math.min(9, Number(options.degree) || 0));
+          sequence([pentatonic(degree), pentatonic(degree + 2)], 0.055, 0.08 * jitter(), wobble());
+        } else if (kind === "lock") {
+          sequence([pentatonic(3), pentatonic(2), pentatonic(0)], 0.075, 0.08);
+        } else if (kind === "unlock") {
+          sequence([pentatonic(3, 4), pentatonic(0), pentatonic(2), pentatonic(3)], 0.06, 0.09);
+        } else if (kind === "reveal") {
+          noiseSweep(ctx, start, { from: 1400, to: 2800, duration: 0.07, peak: 0.04 });
+          sequence([pentatonic(0), pentatonic(3)], 0.06, 0.09);
+        } else if (kind === "match") {
+          noiseSweep(ctx, start, { from: 1400, to: 2800, duration: 0.07, peak: 0.035 });
+          const melody = [pentatonic(0), pentatonic(2), pentatonic(3), pentatonic(5)];
+          const harmony = [pentatonic(2), pentatonic(3), pentatonic(5), pentatonic(7)];
+          sequence(melody, 0.07, 0.11);
+          harmony.forEach((frequency, index) => { end = Math.max(end, note(frequency, start + index * gap(0.07) + 0.01, 0.045)); });
+          if (options.exact) end = Math.max(end, note(pentatonic(10), start + gap(0.3), 0.05, { decay: 0.5 }));
+          duck = 0.27;
+        } else if (kind === "celebrate") {
+          sequence([pentatonic(0), pentatonic(2), pentatonic(3), pentatonic(5), pentatonic(7)], 0.06, 0.11);
+          [pentatonic(0, 4), pentatonic(2, 4), pentatonic(3, 4), pentatonic(0)].forEach((frequency) => {
+            end = Math.max(end, note(frequency, start, 0.028, { attack: 0.04, decay: 1.4 }));
+          });
+          for (let i = 0; i < 8; i++) {
+            const at = start + Math.random() * 0.9;
+            end = Math.max(end, soundNote(ctx, out, pentatonic(Math.floor(Math.random() * 5), 7) * shift, at, 0.014, { theme: "cute", pan: (Math.random() - 0.5) * 1.2, attack: 0.004, decay: 0.12 }));
+          }
+          duck = 0.27;
+        } else if (kind === "countup") {
+          // Ease-out ticks that climb an octave in step with the score rings (1.1 s).
+          for (let i = 0; i < 12; i++) {
+            const progress = 1 - (1 - (i + 1) / 12) ** 0.5;
+            end = Math.max(end, soundNote(ctx, out, pentatonic(Math.round((i / 11) * 5)) * shift, start + progress * 1.05, 0.03, { theme: "cute", attack: 0.003, decay: 0.025 }));
+          }
+          duck = 0.4;
+        } else if (kind === "error") {
+          [440, 349.23].forEach((frequency, index) => {
+            end = Math.max(end, soundNote(ctx, out, frequency, start + index * 0.12, 0.06, { theme: "cute", attack: 0.015, decay: 0.12 }));
+          });
+        } else if (kind === "delete") {
+          const osc = ctx.createOscillator();
+          const tone = ctx.createBiquadFilter();
+          const gain = ctx.createGain();
+          osc.frequency.setValueAtTime(330, start);
+          osc.frequency.exponentialRampToValueAtTime(165, start + 0.2);
+          tone.type = "lowpass"; tone.frequency.value = 1500;
+          gain.gain.setValueAtTime(0.0001, start);
+          gain.gain.exponentialRampToValueAtTime(0.06, start + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.22);
+          osc.connect(tone); tone.connect(gain); gain.connect(out);
+          osc.onended = () => { osc.disconnect(); tone.disconnect(); gain.disconnect(); };
+          osc.start(start); osc.stop(start + 0.25);
+          end = start + 0.25;
+        } else if (kind === "whoosh") {
+          end = noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.05, q: 0.8 });
+          duck = 0.7;
+        }
+        audioEngine.duck(duck, Math.max(0.1, end - ctx.currentTime));
       } catch {
         // Sound is an enhancement; gameplay remains available without it.
       }
@@ -11535,7 +11903,7 @@ var qrcode = function() {
         saveState();
         document.removeEventListener("keydown", handleKeydown);
         overlay.remove();
-        playSound("lock");
+        playSound("delete");
         render();
       });
       overlay.querySelector("#discard-round").addEventListener("click", () => {
@@ -11587,7 +11955,7 @@ var qrcode = function() {
         libraryView = { filter: "all", topic: "all", search: "", limit: 40 };
         document.removeEventListener("keydown", onKeydown);
         overlay.remove();
-        playSound("lock");
+        playSound("delete");
         render();
         showToast("Everything was reset on this browser.");
       });
@@ -11740,6 +12108,14 @@ var qrcode = function() {
       return { isMatch: info.isMatch, exact: rating === "aligned", percent: ratingScore(rating), label: info.label, color: info.color, rated: true };
     }
 
+    // Written answers are scored by the couple's own rating, so scores stay locked until those are rated.
+    function unratedWrittenIds(questions) {
+      return questions.filter((question) => question.type === "text"
+        && !state.notReady[0]?.[question.id] && !state.notReady[1]?.[question.id]
+        && hasComparableAnswer(question, state.answers[0][question.id]) && hasComparableAnswer(question, state.answers[1][question.id])
+        && !TEXT_RATING_INFO[state.textRatings[question.id]]).map((question) => question.id);
+    }
+
     function differenceMarkup(matchInfo, question) {
       if (matchInfo.unrated) return "";
       const scoreCopy = matchInfo.missing
@@ -11872,6 +12248,7 @@ var qrcode = function() {
     }
 
     function burstConfetti(element, amount = 22) {
+      if (motionReduced()) return;
       const rect = element?.getBoundingClientRect?.();
       const originX = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
       const originY = rect ? rect.top + Math.min(rect.height / 2, 180) : window.innerHeight / 2;
@@ -11902,7 +12279,7 @@ var qrcode = function() {
         button.textContent = original;
         button.classList.remove("selecting-round");
         onReady();
-      }, state.reducedMotion ? 20 : 620);
+      }, motionReduced() ? 20 : 620);
     }
 
     function randomIndex(length) {
@@ -11979,9 +12356,9 @@ var qrcode = function() {
       return selected;
     }
 
-    const DEEP_PROMPT_PATTERN = /emotional safety|vulnerab|insecur|trauma|forgiv|jealous|regret|lonel|grief|hurt|betray|resent|conflict|argument|fight|fear|boundar|trust|apolog|repair|deal ?breaker|walk away/i;
+    const DEEP_PROMPT_PATTERN = /emotional safety|vulnerab|insecur|trauma|forgiv|jealous|regret|lonel|grief|hurt|betray|resent|conflict|argument|fight|fear|boundar|trust|apolog|repair|deal ?breaker|walk away|not in the mood|consent/i;
     const LIGHT_PROMPT_PATTERN = /karaoke|superpower|movie|film|song|snack|pizza|vacation|holiday|weekend|zombie|game|sitcom|pet|dessert|playlist|road trip|festival|dance|costume|emoji|lottery|island|breakfast|coffee|ice cream|theme park/i;
-    const HISTORY_PROMPT_PATTERN = /\bour relationship\b|\bthe relationship we\b|\bfrom me\b|\bwe have built\b|\bsince we met\b|\bour history\b|\bwhen we first\b|\bin our home\b|\babout me that\b/i;
+    const HISTORY_PROMPT_PATTERN = /\bour relationship\b|\bthe relationship we\b|\bfrom me\b|\bwe have built\b|\bsince we met\b|\bour history\b|\bwhen we first\b|\bin our home\b|\babout me that\b|\bour friendship\b|\bhabit of mine\b|\bmoment between us\b|\bfelt unexpectedly\b|\bwhat should I do\b|\bcheck-in\b|\bnicknames between us\b/i;
 
     function questionTone(question) {
       if (["dealbreakers", "politics", "money"].includes(question.topic) || DEEP_PROMPT_PATTERN.test(question.prompt)) return "deep";
@@ -12001,7 +12378,9 @@ var qrcode = function() {
       if (items.length < 3) return questionIds;
       const weight = { light: 0, warm: 1, deep: 2 };
       const sorted = [...items].sort((a, b) => weight[questionTone(a)] - weight[questionTone(b)]);
-      const opener = sorted.shift();
+      // Open on a tap-and-go slider or quick pick rather than a blank text box.
+      const opener = sorted.find((question) => question.type === "slider" && questionTone(question) !== "deep") || sorted[0];
+      sorted.splice(sorted.indexOf(opener), 1);
       const closer = sorted.find((question) => questionTone(question) !== "deep") || sorted[0];
       sorted.splice(sorted.indexOf(closer), 1);
       const middle = sorted;
@@ -12077,7 +12456,7 @@ var qrcode = function() {
     }
 
     function allowedTopicsForIntensity(intensity = state.questionIntensity) {
-      if (intensity === "cozy") return new Set(["connection", "love", "fun"]);
+      if (intensity === "cozy") return new Set(["connection", "love", "fun", "lifestyle"]);
       if (intensity === "curious") return new Set(DEFAULT_TOPICS);
       if (intensity === "deep") return new Set([...DEFAULT_TOPICS, "money", "politics"]);
       if (intensity === "spicy") return new Set([...DEFAULT_TOPICS, "spicy", "money", "politics"]);
@@ -12089,9 +12468,21 @@ var qrcode = function() {
       return state.completedRounds.filter((round) => new Date(round.completedAt).toDateString() === today).length;
     }
 
+    // Only promise "fresh" questions when none of them has been answered before.
+    function roundToastCopy(roundNumber, selectedQuestionIds) {
+      const total = selectedQuestionIds.length;
+      const fresh = selectedQuestionIds.filter((id) => !state.answeredQuestionIds.includes(id)).length;
+      if (fresh === total) return `Round ${roundNumber} tonight · ${total} fresh questions`;
+      if (!fresh) return `Round ${roundNumber} tonight · old favorites, new answers`;
+      return `Round ${roundNumber} tonight · ${fresh} new, ${total - fresh} back for another look`;
+    }
+
     function startGame({ names, questionMode, questionCount, selectedTopics, selectedQuestionIds, playStyle = "pass-and-play" }) {
       const roundNumber = roundsPlayedToday() + 1;
-      if (roundNumber > 1) window.setTimeout(() => showToast(`Round ${roundNumber} tonight · ${selectedQuestionIds.length} fresh questions`), 200);
+      if (roundNumber > 1) {
+        const message = roundToastCopy(roundNumber, selectedQuestionIds);
+        window.setTimeout(() => showToast(message), 200);
+      }
       const settings = persistentSetupState();
       state = {
         ...initialState(),
@@ -12168,6 +12559,14 @@ var qrcode = function() {
       });
       document.body.appendChild(overlay);
       overlay.querySelector("#tutorial-finish").focus();
+    }
+
+    function roundMixSummary(questions) {
+      const picks = questions.filter((question) => isQuickPickQuestion(question)).length;
+      const sliders = questions.filter((question) => question.type === "slider").length - picks;
+      const written = questions.filter((question) => question.type === "text").length;
+      const plural = (count, one, many) => `${count} ${count === 1 ? one : many}`;
+      return [picks && plural(picks, "pick", "picks"), sliders && plural(sliders, "slider", "sliders"), written && `${written} written`].filter(Boolean).join(" · ");
     }
 
     function modeSummary(mode, count = state.questionCount) {
@@ -12499,6 +12898,7 @@ var qrcode = function() {
       else renderSetup();
 
       homeButton.hidden = false;
+      armBackGuard();
       bottomNav.querySelectorAll("[data-app-route]").forEach((button) => {
         button.classList.toggle("active", button.dataset.appRoute === state.screen || (state.screen === "setup" && button.dataset.appRoute === "setup"));
         if (button.classList.contains("active")) button.setAttribute("aria-current", "page");
@@ -12516,7 +12916,7 @@ var qrcode = function() {
       // A new question starts at the top of the card so the progress header and prompt are visible.
       const questionKey = state.screen === "question" ? `${state.activePlayer}:${state.questionIndex}` : "";
       if (questionKey && questionKey !== lastRenderedQuestionKey && !screenChanged) {
-        app.querySelector(".question-screen")?.scrollIntoView({ block: "start", behavior: state.reducedMotion ? "auto" : "smooth" });
+        app.querySelector(".question-screen")?.scrollIntoView({ block: "start", behavior: motionReduced() ? "auto" : "smooth" });
       }
       if (screenChanged || (questionKey && questionKey !== lastRenderedQuestionKey)) {
         lastScreenSettledAt = performance.now();
@@ -12566,6 +12966,25 @@ var qrcode = function() {
       }
       return false;
     };
+
+    // Browser and installed-PWA Back mirrors the Android shell: close a dialog, then return Home,
+    // and only then leave. One guard entry sits on the history stack while there is somewhere to go back to.
+    let backGuardArmed = false;
+    function armBackGuard() {
+      if (window.AlignedAndroid || backGuardArmed) return;
+      if (state.screen === "setup" && !document.querySelector(".modal-backdrop")) return;
+      try {
+        history.pushState({ alignedBack: true }, "", location.href);
+        backGuardArmed = true;
+      } catch {}
+    }
+    window.addEventListener("popstate", () => {
+      if (!backGuardArmed) return;
+      backGuardArmed = false;
+      // Opening a join link in an open app is a hash navigation, not Back; the hashchange handler owns it.
+      if (location.hash.includes("join=")) return;
+      if (window.alignedHandleBack()) armBackGuard();
+    });
 
     function savedQuestionAnswersMarkup(question, round) {
       const playerColors = state.visualTheme === "pastel" ? ["#1d4ed8", "#15803d"] : ["#60a5fa", "#4ade80"];
@@ -12833,7 +13252,7 @@ var qrcode = function() {
               state.excludedQuestionIds = state.excludedQuestionIds.filter((questionId) => questionId !== id);
               excludedIds.delete(id);
             }
-            saveState(); playSound("lock"); renderQuestionList();
+            saveState(); playSound("delete"); renderQuestionList();
           });
         });
 
@@ -12860,7 +13279,7 @@ var qrcode = function() {
             state.customPacks = state.customPacks.map((pack) => ({ ...pack, questionIds: pack.questionIds.filter((questionId) => questionId !== id) }));
             state.answeredQuestionIds = state.answeredQuestionIds.filter((questionId) => questionId !== id);
             saveState();
-            playSound("lock");
+            playSound("delete");
             renderLibrary();
           });
         });
@@ -12919,14 +13338,14 @@ var qrcode = function() {
         const rightLabel = document.getElementById("custom-right-label").value.trim();
         const error = document.getElementById("custom-error");
         if (!prompt) {
-          error.textContent = "Add a question prompt first.";
+          playSound("error"); error.textContent = "Add a question prompt first.";
           const promptField = document.getElementById("custom-prompt");
           promptField.addEventListener("input", () => { error.textContent = ""; }, { once: true });
           promptField.focus();
           return;
         }
         if (type === "slider" && (!leftLabel || !rightLabel)) {
-          error.textContent = "Add both slider endpoint labels.";
+          playSound("error"); error.textContent = "Add both slider endpoint labels.";
           (leftLabel ? document.getElementById("custom-right-label") : document.getElementById("custom-left-label")).focus();
           return;
         }
@@ -12940,7 +13359,7 @@ var qrcode = function() {
           ...(type === "slider" ? { labels: [leftLabel, rightLabel] } : {})
         });
         saveState();
-        playSound("celebrate");
+        playSound("unlock");
         libraryView = { ...libraryView, filter: "all", topic: "all", search: prompt.slice(0, 60) };
         renderLibrary();
         showToast("Added to your library. It’s shown below — clear the search to see everything.");
@@ -12949,16 +13368,16 @@ var qrcode = function() {
       document.getElementById("save-favorite-pack").addEventListener("click", () => {
         const name = document.getElementById("pack-name").value.trim();
         const error = document.getElementById("pack-error");
-        if (!name) { error.textContent = "Give this pack a name first."; return; }
-        if (!state.favoriteQuestionIds.length) { error.textContent = "Favorite at least one question first."; return; }
+        if (!name) { playSound("error"); error.textContent = "Give this pack a name first."; return; }
+        if (!state.favoriteQuestionIds.length) { playSound("error"); error.textContent = "Favorite at least one question first."; return; }
         state.customPacks.push({ id: `pack_${Date.now()}_${randomIndex(100000)}`, name, questionIds: [...state.favoriteQuestionIds] });
-        saveState(); playSound("celebrate"); renderLibrary();
+        saveState(); playSound("unlock"); renderLibrary();
       });
 
       document.querySelectorAll("[data-delete-pack]").forEach((button) => {
         button.addEventListener("click", () => {
           state.customPacks = state.customPacks.filter((pack) => pack.id !== button.dataset.deletePack);
-          saveState(); playSound("lock"); renderLibrary();
+          saveState(); playSound("delete"); renderLibrary();
         });
       });
 
@@ -13064,7 +13483,7 @@ var qrcode = function() {
 
           <div class="journal-overview">
             <article class="journal-card" style="display:grid;place-items:center;text-align:center">
-              <div class="dual-score-dashboard">${alignmentRingMarkup(average, "similarity")}${alignmentRingMarkup(averageFit, "fit")}</div>
+              <div class="dual-score-dashboard">${alignmentRingMarkup(average, "similar")}${alignmentRingMarkup(averageFit, "fit")}</div>
               <h3 style="margin-top:14px">${rounds.length} completed ${rounds.length === 1 ? "round" : "rounds"}</h3>
               <p>Average answer similarity and relationship fit across your saved history</p>
             </article>
@@ -13265,7 +13684,7 @@ var qrcode = function() {
       document.querySelectorAll('input[name="visual-theme"]').forEach((input) => input.addEventListener("change", () => {
         state.visualTheme = input.value; saveState(); applyPreferences(); playSound("tap");
       }));
-      document.getElementById("settings-sound").addEventListener("change", (event) => { state.soundEnabled = event.currentTarget.checked; saveState(); });
+      document.getElementById("settings-sound").addEventListener("change", (event) => { state.soundEnabled = event.currentTarget.checked; saveState(); applyPreferences(); playSound("tap"); });
       document.getElementById("settings-ambient").addEventListener("change", (event) => {
         requestGyroPermission();
         state.ambientMusicEnabled = event.currentTarget.checked;
@@ -13277,10 +13696,9 @@ var qrcode = function() {
         event.currentTarget.style.setProperty("--range-progress", `${Math.round(Number(event.currentTarget.value) * 100)}%`);
         state.soundVolume = Number(event.currentTarget.value);
         saveState();
-        if (state.ambientMusicEnabled) {
-          ambientSoundscape.updateVolume();
-        }
+        audioEngine.setVolume(state.soundVolume);
       });
+      document.getElementById("sound-volume").addEventListener("change", () => playSound("tap"));
       document.getElementById("settings-haptics").addEventListener("change", (event) => { state.hapticsEnabled = event.currentTarget.checked; saveState(); pulseHaptic("tap"); });
       document.getElementById("text-size-toggle").addEventListener("click", (event) => {
         const btn = event.target.closest(".text-size-option");
@@ -13473,7 +13891,7 @@ var qrcode = function() {
 
             <p class="setup-section-title">Pick tonight’s vibe</p>
             <div class="vibe-tiles" role="group" aria-label="Quick start presets">
-              ${["date-night", "road-trip", "check-in", "deep-dive"].map((id) => SESSION_PRESETS.find((preset) => preset.id === id)).filter(Boolean).map((preset) => `<button class="vibe-tile ${state.sessionPreset === preset.id ? "active" : ""}" type="button" data-vibe="${preset.id}"><span class="vibe-icon" aria-hidden="true">${preset.icon}</span><strong>${preset.label}</strong><small>${preset.copy}</small></button>`).join("")}
+              ${["date-night", "road-trip", "check-in", "deep-dive"].map((id) => SESSION_PRESETS.find((preset) => preset.id === id)).filter(Boolean).map((preset) => `<button class="vibe-tile ${state.sessionPreset === preset.id ? "active" : ""}" type="button" data-vibe="${preset.id}" aria-pressed="${state.sessionPreset === preset.id}"><span class="vibe-icon" aria-hidden="true">${preset.icon}</span><strong>${preset.label}</strong><small>${preset.copy}</small></button>`).join("")}
             </div>
             <p class="setup-section-title">Or choose any preset</p>
             <div class="session-dropdown-container" id="session-dropdown">
@@ -13636,7 +14054,9 @@ var qrcode = function() {
       
       const dropdownItems = [...dropdownContainer.querySelectorAll("[data-session-preset]")];
       document.querySelectorAll("[data-vibe]").forEach((tile) => tile.addEventListener("click", () => {
-        dropdownContainer.querySelector(`[data-session-preset="${CSS.escape(tile.dataset.vibe)}"]`)?.click();
+        const vibe = tile.dataset.vibe;
+        dropdownContainer.querySelector(`[data-session-preset="${CSS.escape(vibe)}"]`)?.click();
+        requestAnimationFrame(() => document.querySelector(`[data-vibe="${CSS.escape(vibe)}"]`)?.focus({ preventScroll: true }));
       }));
       const setDropdownOpen = (open, { focusItem = false } = {}) => {
         dropdownContainer.classList.toggle("open", open);
@@ -13789,7 +14209,7 @@ var qrcode = function() {
           const pack = state.customPacks.find((item) => item.id === button.dataset.startPack);
           const names = [playerOne.value.trim(), playerTwo.value.trim()];
           if (!pack || names.some((name) => !name)) {
-            error.textContent = "Add both names before starting a custom pack.";
+            playSound("error"); error.textContent = "Add both names before starting a custom pack.";
             return;
           }
           const validIds = new Set(getQuestionCatalog().map((question) => question.id));
@@ -13798,7 +14218,7 @@ var qrcode = function() {
             15
           );
           if (!selectedQuestionIds.length) {
-            error.textContent = "This pack has no available questions yet.";
+            playSound("error"); error.textContent = "This pack has no available questions yet.";
             return;
           }
           const selectedTopics = [...new Set(selectedQuestionIds.map((id) => getQuestionCatalog().find((question) => question.id === id)?.topic).filter(Boolean))];
@@ -13835,20 +14255,20 @@ var qrcode = function() {
         const questionCount = Number(form.elements["question-count"].value);
         const selectedTopics = topicInputs.filter((input) => input.checked && !input.disabled).map((input) => input.value);
         if (names.some((name) => !name)) {
-          error.textContent = "Add both names to begin.";
+          playSound("error"); error.textContent = "Add both names to begin.";
           (names[0] ? playerTwo : playerOne).focus();
           return;
         }
         if (!selectedTopics.length) {
-          error.textContent = "Choose at least one question pack.";
-          window.setTimeout(() => error.scrollIntoView({ block: "center", behavior: state.reducedMotion ? "auto" : "smooth" }), 450);
+          playSound("error"); error.textContent = "Choose at least one question pack.";
+          window.setTimeout(() => error.scrollIntoView({ block: "center", behavior: motionReduced() ? "auto" : "smooth" }), 450);
           document.querySelector(".topic-picker").scrollIntoView({ behavior: "smooth", block: "center" });
           return;
         }
 
         const selectedQuestionIds = chooseRoundQuestions(questionMode, questionCount, selectedTopics);
         if (selectedQuestionIds.length !== questionCount) {
-          error.textContent = "That combination needs more questions. Add another pack or choose a shorter round.";
+          playSound("error"); error.textContent = "That combination needs more questions. Add another pack or choose a shorter round.";
           return;
         }
 
@@ -13896,10 +14316,13 @@ var qrcode = function() {
 
       if (question.type === "slider" && !Number.isFinite(Number(savedAnswer))) savedAnswer = undefined;
       if (question.type === "slider" && savedAnswer !== undefined) savedAnswer = Math.max(1, Math.min(10, Math.round(Number(savedAnswer))));
-      if (question.type === "slider" && (savedAnswer === undefined || savedAnswer === null)) {
+      const quickPickChosen = savedAnswer !== undefined && savedAnswer !== null;
+      if (question.type === "slider" && !quickPickChosen) {
         savedAnswer = 5;
-        state.answers[state.activePlayer][question.id] = savedAnswer;
-        saveState();
+        if (!isQuickPickQuestion(question)) {
+          state.answers[state.activePlayer][question.id] = savedAnswer;
+          saveState();
+        }
       }
 
       const otherPlayerIndex = state.activePlayer === 0 ? 1 : 0;
@@ -13909,7 +14332,7 @@ var qrcode = function() {
       const quickPick = isQuickPickQuestion(question);
       const guessMarkup = question.type === "slider" ? `
           <div class="guess-panel ${savedGuess ? "guessed" : ""}">
-            <label class="guess-label" for="guess-input"><span aria-hidden="true">🔮</span> Guess where ${escapeHTML(partnerName)} lands <small>${savedGuess ? `Your guess: ${savedGuess}` : "optional · scores mind-reader points"}</small></label>
+            <label class="guess-label" for="guess-input"><span aria-hidden="true">🔮</span> Guess where ${escapeHTML(partnerName)} lands <small>${savedGuess ? `Your guess: ${savedGuess}` : "optional · move it to score mind-reader points"}</small></label>
             <input class="range-input guess-input" id="guess-input" type="range" min="1" max="10" step="1" value="${savedGuess || 5}" style="--range-progress: ${(((savedGuess || 5) - 1) / 9) * 100}%" aria-valuetext="${savedGuess ? `Guess ${savedGuess} out of 10` : "No guess yet"}">
           </div>` : "";
       const inputMarkup = question.type === "text"
@@ -13918,9 +14341,14 @@ var qrcode = function() {
           <textarea class="answer-textarea" id="answer-input" maxlength="600" placeholder="Write what feels true to you…" aria-describedby="answer-error">${escapeHTML(savedAnswer || "")}</textarea>
         `
         : `
-          ${quickPick ? `<div class="quick-pick" role="group" aria-label="Quick pick">
-            <button class="quick-pick-option" type="button" data-quick-pick="2"><span aria-hidden="true">◀</span>${escapeHTML(question.labels[0])}</button>
-            <button class="quick-pick-option" type="button" data-quick-pick="9">${escapeHTML(question.labels[1])}<span aria-hidden="true">▶</span></button>
+          ${quickPick ? `<div class="quick-guess ${savedGuess ? "guessed" : ""}" role="group" aria-label="Guess which side ${escapeHTML(partnerName)} picks">
+            <span><span aria-hidden="true">🔮</span> First, guess ${escapeHTML(partnerName)}’s side <small>optional</small></span>
+            <button class="quick-guess-option ${savedGuess === 2 ? "active" : ""}" type="button" data-quick-guess="2" aria-pressed="${savedGuess === 2}">◀ ${escapeHTML(question.labels[0])}</button>
+            <button class="quick-guess-option ${savedGuess === 9 ? "active" : ""}" type="button" data-quick-guess="9" aria-pressed="${savedGuess === 9}">${escapeHTML(question.labels[1])} ▶</button>
+          </div>
+          <div class="quick-pick" role="group" aria-label="Your pick">
+            <button class="quick-pick-option ${quickPickChosen && Number(savedAnswer) === 2 ? "active" : ""}" type="button" data-quick-pick="2"><span aria-hidden="true">◀</span>${escapeHTML(question.labels[0])}</button>
+            <button class="quick-pick-option ${quickPickChosen && Number(savedAnswer) === 9 ? "active" : ""}" type="button" data-quick-pick="9">${escapeHTML(question.labels[1])}<span aria-hidden="true">▶</span></button>
           </div>
           <details class="quick-pick-between"><summary>Somewhere in between?</summary>` : ""}
           <div class="slider-panel">
@@ -13945,8 +14373,8 @@ var qrcode = function() {
           ${quickPick ? "</details>" : ""}
           ${quickPick ? "" : guessMarkup}
           <details class="comment-details" ${savedComment ? "open" : ""}>
-            <summary>Add context to your slider answer <span aria-hidden="true">(optional)</span></summary>
-            <textarea class="comment-textarea" id="comment-input" aria-label="Optional context for your slider answer" maxlength="400" placeholder="Why did you choose that number?">${escapeHTML(savedComment)}</textarea>
+            <summary>Add context to your answer <span aria-hidden="true">(optional)</span></summary>
+            <textarea class="comment-textarea" id="comment-input" aria-label="Optional context for your answer" maxlength="400" placeholder="Why did you choose that number?">${escapeHTML(savedComment)}</textarea>
           </details>
         `;
 
@@ -13958,7 +14386,7 @@ var qrcode = function() {
               <p class="turn-name">${escapeHTML(playerName)}</p>
             </div>
             <div class="progress-copy">
-              <span class="round-mode-copy">${escapeHTML(modeSummary(state.questionMode, totalQuestions))}</span>
+              <span class="round-mode-copy">${escapeHTML(roundMixSummary(questions))}</span>
               ${state.questionIndex + 1} / ${totalQuestions}
             </div>
           </div>
@@ -13984,7 +14412,7 @@ var qrcode = function() {
             <h2 class="prompt" id="question-title">${escapeHTML(question.prompt)}</h2>
             ${inputMarkup}
             <details class="answer-extras" ${isNotReady || savedPrivateNote || savedImportance !== 1 ? "open" : ""}>
-            <summary><span aria-hidden="true">⋯</span> More options <small>how much it matters · pass · private note</small></summary>
+            <summary><span class="summary-title">More options</span> <small>how much it matters · pass · private note</small></summary>
             <div class="importance-panel">
               <strong>How much does this topic matter to you?</strong>
               <div class="importance-options" role="group" aria-label="Importance of this question">
@@ -14012,6 +14440,25 @@ var qrcode = function() {
       const input = document.getElementById("answer-input");
       const error = document.getElementById("answer-error");
       const guessInput = document.getElementById("guess-input");
+      document.querySelectorAll("[data-quick-guess]").forEach((button) => button.addEventListener("click", () => {
+        const value = Number(button.dataset.quickGuess);
+        const current = state.guesses[state.activePlayer]?.[question.id];
+        const next = { ...(state.guesses[state.activePlayer] || {}) };
+        if (current === value) delete next[question.id]; else next[question.id] = value;
+        state.guesses[state.activePlayer] = next;
+        document.querySelectorAll("[data-quick-guess]").forEach((item) => {
+          const active = next[question.id] === Number(item.dataset.quickGuess);
+          item.classList.toggle("active", active);
+          item.setAttribute("aria-pressed", String(active));
+        });
+        button.closest(".quick-guess")?.classList.toggle("guessed", question.id in next);
+        saveState();
+        playSound("tap");
+      }));
+      // A tap that leaves the thumb on 5 fires no input event, but it is still a deliberate guess.
+      ["change", "pointerup"].forEach((type) => guessInput?.addEventListener(type, () => {
+        if (state.guesses[state.activePlayer]?.[question.id] === undefined) guessInput.dispatchEvent(new Event("input"));
+      }));
       guessInput?.addEventListener("input", () => {
         const value = Number(guessInput.value);
         state.guesses[state.activePlayer] = { ...(state.guesses[state.activePlayer] || {}), [question.id]: value };
@@ -14028,7 +14475,7 @@ var qrcode = function() {
         input.dispatchEvent(new Event("input", { bubbles: true }));
         document.querySelectorAll("[data-quick-pick]").forEach((item) => item.classList.toggle("active", item === button));
         playSound("tap");
-        window.setTimeout(() => form.requestSubmit(), 260);
+        window.setTimeout(() => (form.requestSubmit ? form.requestSubmit() : form.querySelector('button[type="submit"]')?.click()), 260);
       }));
 
       document.getElementById("favorite-current").addEventListener("click", (event) => {
@@ -14068,7 +14515,7 @@ var qrcode = function() {
         error.className = active ? "not-ready-note" : "error";
         error.textContent = active ? "That’s completely okay. This question will stay private and unscored." : "";
         saveState();
-        playSound("lock");
+        playSound("tap");
       });
 
       document.getElementById("skip-question")?.addEventListener("click", () => {
@@ -14081,13 +14528,13 @@ var qrcode = function() {
         let replacements = freshestTier.filter((item) => item.topic === question.topic);
         if (!replacements.length) replacements = freshestTier;
         if (!replacements.length) {
-          error.textContent = "No replacement question is available for this round.";
+          playSound("error"); error.textContent = "No replacement question is available for this round.";
           return;
         }
         const replacement = replacements[randomIndex(replacements.length)];
         state.selectedQuestionIds[state.questionIndex] = replacement.id;
         saveState();
-        playSound("step");
+        playSound("whoosh");
         render();
       });
 
@@ -14126,8 +14573,13 @@ var qrcode = function() {
         lastQuestionAdvanceAt = Date.now();
         const value = question.type === "slider" ? Number(input.value) : input.value.trim();
         const notReady = state.notReady[state.activePlayer][question.id] === true;
+        if (quickPick && !notReady && state.answers[state.activePlayer][question.id] === undefined) {
+          playSound("error"); error.textContent = "Pick a side — or open “Somewhere in between?”";
+          document.querySelector("[data-quick-pick]")?.focus();
+          return;
+        }
         if (question.type === "text" && !value && !notReady) {
-          error.textContent = "Add an answer before continuing.";
+          playSound("error"); error.textContent = "Add an answer before continuing.";
           input.focus();
           return;
         }
@@ -14136,7 +14588,7 @@ var qrcode = function() {
         const otherPlayer = state.activePlayer === 0 ? 1 : 0;
         if (state.questionIndex < totalQuestions - 1) {
           state.questionIndex += 1;
-          playSound("step");
+          playSound("step", { degree: state.questionIndex });
           if (state.playStyle === "nearby") sendNearbyMessage({ type: "progress", roundId: state.nearbyRoundId, answered: state.questionIndex, total: totalQuestions });
         } else if (state.playStyle === "nearby") {
           state.completedPlayers[state.activePlayer] = true;
@@ -14156,6 +14608,7 @@ var qrcode = function() {
           state.completedRounds = [...state.completedRounds, createCompletedRoundSnapshot()];
           state.screen = "celebration";
           state.revealedIds = [];
+          state.seenIds = [];
           state.answeredQuestionIds = [
             ...new Set([...state.answeredQuestionIds, ...state.selectedQuestionIds])
           ];
@@ -14212,6 +14665,14 @@ var qrcode = function() {
       });
     }
 
+    function celebrationTeaser() {
+      const questions = getSelectedQuestions();
+      const matches = questions.filter((question) => !state.notReady[0]?.[question.id] && !state.notReady[1]?.[question.id]
+        && question.type === "slider" && revealMatchInfo(question, state.answers[0][question.id], state.answers[1][question.id]).isMatch).length;
+      const hidden = matches === 0 ? "Some surprises are waiting in there." : matches === 1 ? "At least one match is hiding in there…" : `${matches} matches are hiding in there…`;
+      return `${hidden} Sit together and flip the cards at your own pace.`;
+    }
+
     function renderCelebration() {
       app.innerHTML = `
         <section class="screen celebration-screen" aria-labelledby="celebration-title">
@@ -14219,18 +14680,18 @@ var qrcode = function() {
             <div class="celebration-orb" aria-hidden="true">♡</div>
             <p class="eyebrow">Answers complete</p>
             <h2 id="celebration-title">You both showed up <span class="accent-text">honestly.</span></h2>
-            <p class="lock-copy">The answers are locked and ready. Take a breath, sit together, and reveal them at your own pace.</p>
+            <p class="lock-copy">${celebrationTeaser()}</p>
             <div class="actions lock-actions">
               <button class="primary-btn" id="open-reveal-board" type="button">Open the reveal board</button>
             </div>
           </div>
         </section>
       `;
-      requestAnimationFrame(() => burstConfetti(document.querySelector(".celebration-orb"), 34));
+      requestAnimationFrame(() => burstConfetti(document.querySelector(".celebration-orb"), 14));
       document.getElementById("open-reveal-board").addEventListener("click", () => {
         state.screen = "reveal";
         saveState();
-        playSound("celebrate");
+        playSound("whoosh");
         render();
       });
     }
@@ -14253,7 +14714,7 @@ var qrcode = function() {
       const escapedQuestionId = escapeHTML(question.id);
       return `
         <details class="card-more" ${status ? "open" : ""}>
-        <summary><span aria-hidden="true">⋯</span> Save for later <small>next steps · how much it matters · rate the question</small></summary>
+        <summary><span class="summary-title">Save for later</span> <small>next steps · how much it matters · rate the question</small></summary>
         ${importanceMarkup(question)}
         <div class="follow-through">
           <strong>What should happen next?</strong>
@@ -14271,7 +14732,20 @@ var qrcode = function() {
       const guess = state.guesses?.[playerIndex]?.[question.id];
       const actual = Number(state.answers?.[playerIndex === 0 ? 1 : 0]?.[question.id]);
       if (typeof guess !== "number" || !Number.isFinite(actual)) return null;
+      if (isQuickPickQuestion(question)) {
+        const sameSide = (guess <= 5) === (actual <= 5);
+        return { guess, actual, distance: sameSide ? 0 : 7, hit: sameSide, side: true };
+      }
       return { guess, actual, distance: Math.abs(guess - actual), hit: Math.abs(guess - actual) <= 1 };
+    }
+
+    // Quick picks are shown by the side someone chose, never as a number nobody saw.
+    function pickLabel(question, value) {
+      const number = Number(value);
+      if (!isQuickPickQuestion(question) || !Number.isFinite(number)) return null;
+      if (number === 2) return question.labels[0];
+      if (number === 9) return question.labels[1];
+      return null;
     }
 
     function guessRevealMarkup(question) {
@@ -14279,10 +14753,25 @@ var qrcode = function() {
         const result = guessHit(question, player);
         if (!result) return "";
         const other = state.names[player === 0 ? 1 : 0];
-        const verdict = result.distance === 0 ? "nailed it ★" : result.hit ? "within 1 — mind reader!" : `off by ${result.distance}`;
+        if (result.side) {
+          const side = result.guess <= 5 ? question.labels[0] : question.labels[1];
+          return `<span class="guess-line ${result.hit ? "hit" : ""}">🔮 ${escapeHTML(state.names[player])} guessed ${escapeHTML(other)} would pick “${escapeHTML(side)}” · ${result.hit ? "read them right ★" : "not this time"}</span>`;
+        }
+        const verdict = result.distance === 0 ? "nailed it ★" : result.hit ? "within 1 — mind reader!" : `off by\u00a0${result.distance}`;
         return `<span class="guess-line ${result.hit ? "hit" : ""}">🔮 ${escapeHTML(state.names[player])} guessed ${escapeHTML(other)} would say ${result.guess} · ${verdict}</span>`;
       }).filter(Boolean);
       return lines.length ? `<div class="guess-results">${lines.join("")}</div>` : "";
+    }
+
+    function mindReaderHeadline(tally) {
+      const players = tally.filter((item) => item.made);
+      const rate = (item) => item.hits / item.made;
+      if (players.length === 2 && rate(players[0]) === rate(players[1])) {
+        return players[0].hits ? "A tie — you read each other equally well" : "No mind reading tonight — plenty left to learn!";
+      }
+      const best = [...players].sort((a, b) => rate(b) - rate(a) || b.hits - a.hits)[0];
+      if (!best.hits) return "No mind reading tonight — plenty left to learn!";
+      return `${escapeHTML(state.names[best.player])} is tonight’s mind reader — ${best.hits} of ${best.made}!`;
     }
 
     function mindReaderTally(questions) {
@@ -14292,9 +14781,24 @@ var qrcode = function() {
       });
     }
 
+    function quickPickReveal(question, firstAnswer, secondAnswer) {
+      const sides = [0, 1].map((side) => {
+        const value = side === 0 ? 2 : 9;
+        const names = [0, 1].filter((player) => Number(player === 0 ? firstAnswer : secondAnswer) === value);
+        return `<div class="pick-side ${names.length ? "chosen" : ""}">
+          <span class="pick-label">${side === 0 ? "◀ " : ""}${escapeHTML(question.labels[side])}${side === 1 ? " ▶" : ""}</span>
+          <span class="pick-names">${names.map((player) => `<span class="pick-name" style="--player-color: var(${player === 0 ? "--blue" : "--green"})">${escapeHTML(state.names[player])}</span>`).join("") || "<span class=\"pick-empty\">—</span>"}</span>
+        </div>`;
+      }).join("");
+      const same = Number(firstAnswer) === Number(secondAnswer);
+      return `<div class="pick-reveal">${sides}</div>
+        <p class="pick-verdict ${same ? "same" : "split"}">${same ? "★ Same side" : "Split decision!"}</p>`;
+    }
+
     function sliderReveal(question, firstAnswer, secondAnswer, matchInfo) {
       const p1 = ((Number(firstAnswer) - 1) / 9) * 100;
       const p2 = ((Number(secondAnswer) - 1) / 9) * 100;
+      const nudge = Math.abs(p1 - p2) < 8 ? 2 : 0;
       const firstComment = String(state.comments[0][question.id] || "").trim();
       const secondComment = String(state.comments[1][question.id] || "").trim();
       const commentsMarkup = firstComment || secondComment
@@ -14305,6 +14809,9 @@ var qrcode = function() {
           </div>
         `
         : "";
+      if (pickLabel(question, firstAnswer) && pickLabel(question, secondAnswer)) {
+        return `<div class="comparison-wrap">${quickPickReveal(question, firstAnswer, secondAnswer)}${guessRevealMarkup(question)}${commentsMarkup}</div>`;
+      }
       return `
         <div class="comparison-wrap">
           <div class="comparison-scale">
@@ -14313,10 +14820,10 @@ var qrcode = function() {
           </div>
           <div class="comparison-track" style="--p1-pos: ${p1}%; --p2-pos: ${p2}%">
             <div class="comparison-gap" aria-hidden="true"></div>
-            <div class="marker marker-one" style="--marker-pos: ${p1}%; --marker-color: var(--blue); --marker-offset: -2px" aria-hidden="true">
+            <div class="marker marker-one" style="--marker-pos: ${p1}%; --marker-color: var(--blue); --marker-offset: -${nudge}px" aria-hidden="true">
               <span class="marker-value">${sliderDisplay(firstAnswer)}</span>
             </div>
-            <div class="marker marker-two" style="--marker-pos: ${p2}%; --marker-color: var(--green); --marker-offset: 2px" aria-hidden="true">
+            <div class="marker marker-two" style="--marker-pos: ${p2}%; --marker-color: var(--green); --marker-offset: ${nudge}px" aria-hidden="true">
               <span class="marker-value">${sliderDisplay(secondAnswer)}</span>
             </div>
           </div>
@@ -14341,12 +14848,6 @@ var qrcode = function() {
       ];
       const rating = state.textRatings[question.id];
       return `
-        <div class="alignment-rating ${rating ? "rated" : "unrated"}">
-          <strong>${rating ? "You rated this together" : "Read both answers, then rate them together"}</strong>
-          <div class="rating-options">
-            ${ratings.map(([value, label, color]) => `<button class="rating-option ${rating === value ? "active" : ""}" style="--rating-color:${color}" type="button" data-text-rating="${value}" data-rating-question="${escapedQuestionId}">${label}</button>`).join("")}
-          </div>
-        </div>
         <div class="answer-stack">
           <div class="answer-box" style="--player-color: var(--blue)">
             <span class="answer-name">${escapeHTML(state.names[0])}</span>
@@ -14357,20 +14858,51 @@ var qrcode = function() {
             <p class="answer-copy">${escapeHTML(secondAnswer)}</p>
           </div>
         </div>
+        <div class="alignment-rating ${rating ? "rated" : "unrated"}">
+          <strong>${rating ? "You rated this together" : "Now rate them together"}</strong>
+          <div class="rating-options">
+            ${ratings.map(([value, label, color]) => `<button class="rating-option ${rating === value ? "active" : ""}" style="--rating-color:${color}" type="button" data-text-rating="${value}" data-rating-question="${escapedQuestionId}">${label}</button>`).join("")}
+          </div>
+        </div>
         ${differenceMarkup(matchInfo, question)}
       `;
     }
 
-    function discussionPromptMarkup(question, matchInfo) {
+    // usedPrompts is shared across one board so no follow-up repeats within a round.
+    function discussionPromptMarkup(question, matchInfo, usedPrompts = new Set()) {
       const tier = matchInfo.percent >= 75 ? "close" : matchInfo.percent >= 48 ? "medium" : "far";
-      const prompts = DISCUSSION_PROMPTS[tier];
+      const prompts = matchInfo.unrated
+        ? DISCUSSION_PROMPTS.unrated
+        : DISCUSSION_PROMPTS[questionTone(question) === "light" ? "light" : "warm"][tier];
       const seed = [...question.id].reduce((total, character) => total + character.charCodeAt(0), 0);
+      const offset = prompts.findIndex((_, index) => !usedPrompts.has(prompts[(seed + index) % prompts.length]));
+      const chosen = prompts[(seed + Math.max(0, offset)) % prompts.length];
+      usedPrompts.add(chosen);
       return `
         <div class="discussion-card">
           <strong>Keep the conversation going</strong>
-          <p>${escapeHTML(prompts[seed % prompts.length])}</p>
+          <p>${escapeHTML(chosen)}</p>
         </div>
       `;
+    }
+
+    // Progress is one-way: a card counts once it has been face up, and unlocked scores stay unlocked.
+    function cardSeen(id) {
+      return state.revealedIds.includes(id) || (Array.isArray(state.seenIds) && state.seenIds.includes(id))
+        || state.revealCelebrated === state.selectedQuestionIds.join("|");
+    }
+
+    function revealProgressCopy(questions) {
+      const revealed = questions.filter((question) => cardSeen(question.id)).length;
+      const pending = unratedWrittenIds(questions).filter((id) => cardSeen(id)).length;
+      return `${revealed} of ${questions.length} revealed${pending ? ` · ${pending} to rate` : ""}`;
+    }
+
+    function scoreLockHint(questions) {
+      const everyCardUp = questions.every((question) => cardSeen(question.id));
+      const pending = unratedWrittenIds(questions).length;
+      if (everyCardUp && pending) return `Rate ${pending === 1 ? "the last written answer" : `${pending} written answers`} together to unlock how in sync you are.`;
+      return "Flip every card to unlock how in sync you are.";
     }
 
     function renderReveal() {
@@ -14395,25 +14927,44 @@ var qrcode = function() {
       }));
       // Each highlight names a different question; a highlight is left empty rather than repeating one.
       const comparable = scoredHighlights.filter((item) => !item.match.missing && !item.match.unrated);
-      const allRevealed = state.revealedIds.length === questions.length && questions.length > 0;
+      const pendingRatings = unratedWrittenIds(questions);
+      const everyCardUp = questions.length > 0 && questions.every((question) => cardSeen(question.id));
+      const allRevealed = everyCardUp && !pendingRatings.length;
       const tally = mindReaderTally(questions);
       const highlightAnswers = (item) => {
         if (!item) return "";
         const [first, second] = [state.answers[0][item.question.id], state.answers[1][item.question.id]];
         const short = (value) => {
-          const text = item.question.type === "slider" ? sliderDisplay(value) : String(value ?? "").trim();
+          const text = item.question.type === "slider" ? (pickLabel(item.question, value) || sliderDisplay(value)) : String(value ?? "").trim();
           return text.length > 42 ? `${text.slice(0, 40)}…` : text;
         };
         return `<span class="highlight-answers"><span style="--player-color: var(--blue)">${escapeHTML(state.names[0])}: ${escapeHTML(short(first))}</span><span style="--player-color: var(--green)">${escapeHTML(state.names[1])}: ${escapeHTML(short(second))}</span></span>`;
       };
-      const highlightCard = (title, item, empty) => `<article class="highlight-card">
+      const highlightCard = (title, item, empty, note = "") => `<article class="highlight-card">
         <span>${title}</span>
-        <strong class="highlight-answer">${item ? `<button class="highlight-jump" type="button" data-jump-card="${escapeHTML(item.question.id)}">${escapeHTML(item.question.prompt)}</button>${highlightAnswers(item)}` : escapeHTML(empty)}</strong>
-        <strong class="highlight-locked">Flip every card to unlock</strong>
+        <strong class="highlight-answer">${item ? `<button class="highlight-jump" type="button" data-jump-card="${escapeHTML(item.question.id)}">${escapeHTML(item.question.prompt)}</button>${highlightAnswers(item)}${note ? `<small class="highlight-note">${escapeHTML(note)}</small>` : ""}` : escapeHTML(empty)}</strong>
+        <strong class="highlight-locked">${everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"}</strong>
       </article>`;
       const closestHighlight = [...comparable].sort((a, b) => b.match.percent - a.match.percent)[0];
-      const surpriseHighlight = [...comparable].filter((item) => item !== closestHighlight && item.match.percent < (closestHighlight?.match.percent ?? 101)).sort((a, b) => a.match.percent - b.match.percent)[0];
-      const conversationHighlight = [...comparable].filter((item) => item !== closestHighlight && item !== surpriseHighlight && item.match.percent < 100).sort((a, b) => (b.importance * (100 - b.match.percent)) - (a.importance * (100 - a.match.percent)))[0];
+      const biggestMiss = (item) => Math.max(...[0, 1].map((player) => guessHit(item.question, player)?.distance ?? -1));
+      // The best surprise is a confident guess that missed; otherwise the widest gap.
+      const guessSurprise = [...comparable].filter((item) => item !== closestHighlight && biggestMiss(item) >= 3).sort((a, b) => biggestMiss(b) - biggestMiss(a))[0];
+      const surpriseHighlight = guessSurprise || [...comparable].filter((item) => item !== closestHighlight && item.match.percent < (closestHighlight?.match.percent ?? 101)).sort((a, b) => a.match.percent - b.match.percent)[0];
+      const surpriseNote = (() => {
+        if (!guessSurprise || surpriseHighlight !== guessSurprise) return "";
+        const player = [0, 1].sort((a, b) => (guessHit(guessSurprise.question, b)?.distance ?? -1) - (guessHit(guessSurprise.question, a)?.distance ?? -1))[0];
+        const result = guessHit(guessSurprise.question, player);
+        const other = state.names[player === 0 ? 1 : 0];
+        const shown = (value) => pickLabel(guessSurprise.question, value) || value;
+        return `${state.names[player]} guessed ${shown(result.guess)}; ${other} said ${shown(result.actual)}.`;
+      })();
+      const talkWeight = (item) => {
+        const rating = state.textRatings[item.question.id];
+        const hasComment = [0, 1].some((player) => String(state.comments[player]?.[item.question.id] || "").trim());
+        return (rating === "different" ? 3 : rating === "discuss" ? 2.5 : 1) * item.importance * (hasComment ? 1.4 : 1) * (100 - item.match.percent);
+      };
+      const conversationHighlight = [...comparable].filter((item) => item !== closestHighlight && item !== surpriseHighlight && item.match.percent < 100 && !isQuickPickQuestion(item.question)).sort((a, b) => talkWeight(b) - talkWeight(a))[0];
+      const usedPrompts = new Set();
       const cards = questions.map((question, index) => {
         const isFlipped = state.revealedIds.includes(question.id);
         const escapedQuestionId = escapeHTML(question.id);
@@ -14446,7 +14997,7 @@ var qrcode = function() {
                 ${isFlipped ? "inert" : ""}
               >
                 <span>
-                  <span class="card-number"><span class="card-spark">${categorySymbol(question.category)}</span>${escapeHTML(question.category)} · ${index + 1} of ${questions.length}</span>
+                  <span class="card-number"><span class="card-spark">${categorySymbol(question.category)}</span>${escapeHTML(question.category)} <span class="card-number-tail">· ${index + 1} of ${questions.length}</span></span>
                   <span class="card-question">${escapeHTML(question.prompt)}</span>
                 </span>
                 <span class="tap-hint">${POINTER_VERB} to reveal</span>
@@ -14460,11 +15011,11 @@ var qrcode = function() {
                 aria-hidden="${!isFlipped}"
                 ${isFlipped ? "" : "inert"}
               >
-                <span class="card-number"><span class="card-spark">${categorySymbol(question.category)}</span>${escapeHTML(question.category)} · Your answers</span>
+                <span class="card-number"><span class="card-spark">${categorySymbol(question.category)}</span>${escapeHTML(question.category)} <span class="card-number-tail">· Your answers</span></span>
                 <span class="card-question">${escapeHTML(question.prompt)}</span>
                 ${!answerHeld && matchInfo.isMatch ? `<span class="match-badge"><span class="match-star" aria-hidden="true">★</span>${matchInfo.exact ? "Exact match" : "Close match"}</span>` : ""}
                 ${answers}
-                ${answerHeld ? `<div class="discussion-card"><strong>Gentle next step</strong><p>Would revisiting this later feel supportive, or is leaving it unanswered the right boundary?</p></div>` : discussionPromptMarkup(question, matchInfo)}
+                ${answerHeld ? `<div class="discussion-card"><strong>Gentle next step</strong><p>Would revisiting this later feel supportive, or is leaving it unanswered the right boundary?</p></div>` : discussionPromptMarkup(question, matchInfo, usedPrompts)}
                 ${followThroughMarkup(question)}
                 <div class="card-back-actions">
                   <button class="tap-hint card-close-button" type="button">${POINTER_VERB} to close</button>
@@ -14487,14 +15038,14 @@ var qrcode = function() {
               <p class="eyebrow">The reveal board</p>
               <h2 id="reveal-title">Compare, connect, <span class="accent-text">talk.</span></h2>
               <p class="lede">${POINTER_VERB} each card when you’re ready. Your scores unlock when every card is face up.</p>
-              <div class="reveal-progress" aria-live="polite"><span class="reveal-count" id="reveal-count">${state.revealedIds.length} of ${questions.length} revealed</span><span class="reveal-dots" aria-hidden="true">${questions.map((question) => `<span class="reveal-dot ${state.revealedIds.includes(question.id) ? "on" : ""}" data-dot="${escapeHTML(question.id)}"></span>`).join("")}</span></div>
+              <div class="reveal-progress" aria-live="polite"><span class="reveal-count" id="reveal-count">${revealProgressCopy(questions)}</span><span class="reveal-dots" aria-hidden="true">${questions.map((question) => `<span class="reveal-dot ${cardSeen(question.id) ? "on" : ""}" data-dot="${escapeHTML(question.id)}"></span>`).join("")}</span></div>
             </div>
             <button class="secondary-btn reveal-all-btn" id="reveal-all" type="button"><span aria-hidden="true">✦</span><span>${state.revealedIds.length === questions.length ? "Hide all" : "Reveal all"}</span></button>
           </div>
           <div class="reveal-grid">${cards}</div>
-          <section class="alignment-dashboard ${allRevealed ? "" : "locked"}" id="alignment-dashboard" style="--overall-color: ${overallColor}" aria-labelledby="alignment-title">
-            <div class="score-lock" aria-hidden="${allRevealed}"><span aria-hidden="true">✦</span><strong>Your scores are hiding</strong><small>Flip every card to unlock how in sync you are.</small></div>
-            <div class="dual-score-dashboard">
+          <section class="alignment-dashboard ${allRevealed ? "" : "locked"}" id="alignment-dashboard" style="--overall-color: ${overallColor}" aria-label="Your scores">
+            <div class="score-lock" aria-hidden="${allRevealed}"><span aria-hidden="true">✦</span><strong>Your scores are hiding</strong><small id="score-lock-hint">${scoreLockHint(questions)}</small></div>
+            <div class="dual-score-dashboard" ${allRevealed ? "" : 'aria-hidden="true" inert'}>
               <div class="overall-alignment">
                 ${alignmentRingMarkup(alignment.overall, "similar")}
                 <div class="alignment-summary-copy">
@@ -14512,36 +15063,43 @@ var qrcode = function() {
                 </div>
               </div>
             </div>
-            ${topicAlignmentCards ? `<details class="topic-alignment-area" ${window.innerWidth > 600 ? "open" : ""}>
+            ${topicAlignmentCards ? `<details class="topic-alignment-area" ${window.innerWidth > 600 ? "open" : ""} ${allRevealed ? "" : 'aria-hidden="true" inert'}>
               <summary class="topic-alignment-title">Alignment by question pack</summary>
               <div class="topic-alignment-grid">${topicAlignmentCards}</div>
               <div class="alignment-legend"><span>Less aligned</span><span class="heat-gradient"></span><span>More aligned</span></div>
             </details>` : ""}
           </section>
           <section class="highlight-grid ${allRevealed ? "" : "locked"}" aria-label="Round highlights" id="round-highlights">
-            ${highlightCard("Closest match", closestHighlight, "Complete more scored answers to unlock this highlight.")}
-            ${highlightCard("Biggest surprise", surpriseHighlight, "No scored surprise yet.")}
+            ${highlightCard(closestHighlight && closestHighlight.match.percent < 60 ? "Nearest common ground" : "Closest match", closestHighlight, "Complete more scored answers to unlock this highlight.")}
+            ${highlightCard("Biggest surprise", surpriseHighlight, "No scored surprise yet.", surpriseNote)}
             ${highlightCard("Best conversation starter", conversationHighlight, "No conversation pick yet.")}
-            ${tally.some((item) => item.made) ? `<article class="highlight-card mind-reader"><span>🔮 Mind-reader</span><strong class="highlight-answer">${tally.filter((item) => item.made).map((item) => `${escapeHTML(state.names[item.player])} read ${escapeHTML(state.names[item.player === 0 ? 1 : 0])} ${item.hits}/${item.made}`).join(" · ")}</strong><strong class="highlight-locked">Flip every card to unlock</strong></article>` : ""}
+            ${tally.some((item) => item.made) ? `<article class="highlight-card mind-reader"><span>🔮 Mind-reader</span><strong class="highlight-answer">${mindReaderHeadline(tally)}<small class="highlight-note">${tally.filter((item) => item.made).map((item) => `${escapeHTML(state.names[item.player])} read ${escapeHTML(state.names[item.player === 0 ? 1 : 0])} ${item.hits}/${item.made}`).join(" · ")}</small></strong><strong class="highlight-locked">Flip every card to unlock</strong></article>` : ""}
           </section>
           <div class="actions reveal-actions">
             ${state.playStyle === "nearby" && state.nearbyRole === "join" && nearbyChannelOpen()
-              ? `<button class="primary-btn" id="new-round" type="button" disabled style="opacity:0.6;cursor:not-allowed">Waiting for host...</button>`
+              ? `<button class="primary-btn" id="new-round" type="button" disabled style="opacity:0.6;cursor:not-allowed">Waiting for ${escapeHTML(state.names[0] || "your partner")} to start…</button>`
               : `<button class="primary-btn" id="new-round" type="button">Play another round</button>`
             }
-            <button class="text-btn" id="start-over" type="button">Change players</button>
+            <button class="text-btn" id="start-over" type="button">Switch vibe or players</button>
           </div>
           <p class="footer-note">There are no right answers—only new things to learn about each other.</p>
         </section>
       `;
 
       const flipCards = [...document.querySelectorAll(".flip-card")];
+      // Scores unlocked by the partner's phone, by a rating, or before a reload still get their moment.
+      if (allRevealed && state.revealCelebrated !== state.selectedQuestionIds.join("|")) {
+        requestAnimationFrame(() => {
+          const dashboard = document.getElementById("alignment-dashboard");
+          if (dashboard) celebrateScoreUnlock(dashboard);
+        });
+      }
 
       document.querySelectorAll("[data-text-rating]").forEach((button) => {
         button.addEventListener("click", (event) => {
           event.stopPropagation();
           state.textRatings[button.dataset.ratingQuestion] = button.dataset.textRating;
-          if (state.playStyle === "nearby") sendNearbyMessage({ type: "text-rating", questionId: button.dataset.ratingQuestion, rating: button.dataset.textRating });
+          if (state.playStyle === "nearby") sendNearbyMessage({ type: "text-rating", roundId: state.nearbyRoundId, questionId: button.dataset.ratingQuestion, rating: button.dataset.textRating });
           syncLatestRoundSnapshot();
           saveState();
           playSound("tap");
@@ -14555,7 +15113,7 @@ var qrcode = function() {
         event.stopPropagation();
         const questionId = button.dataset.followQuestion;
         state.conversationStatus[questionId] = button.dataset.followThrough;
-        if (state.playStyle === "nearby") sendNearbyMessage({ type: "follow-through", questionId, status: button.dataset.followThrough });
+        if (state.playStyle === "nearby") sendNearbyMessage({ type: "follow-through", roundId: state.nearbyRoundId, questionId, status: button.dataset.followThrough });
         syncLatestRoundSnapshot();
         saveState();
         playSound("tap");
@@ -14601,46 +15159,89 @@ var qrcode = function() {
 
       function updateRevealAllButton() {
         const label = document.querySelector("#reveal-all span:last-child");
-        const everything = state.revealedIds.length === questions.length;
-        label.textContent = everything ? "Hide all" : "Reveal all";
+        const everyCardUp = questions.every((question) => cardSeen(question.id));
+        const everything = everyCardUp && !unratedWrittenIds(questions).length;
+        label.textContent = questions.every((question) => state.revealedIds.includes(question.id)) ? "Hide all" : "Reveal all";
         document.getElementById("round-highlights")?.classList.toggle("locked", !everything);
+        document.querySelectorAll("#round-highlights .highlight-locked").forEach((item) => { item.textContent = everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"; });
         const count = document.getElementById("reveal-count");
-        if (count) count.textContent = `${state.revealedIds.length} of ${questions.length} revealed`;
-        document.querySelectorAll("[data-dot]").forEach((dot) => dot.classList.toggle("on", state.revealedIds.includes(dot.dataset.dot)));
+        if (count) count.textContent = revealProgressCopy(questions);
+        const hint = document.getElementById("score-lock-hint");
+        if (hint) hint.textContent = scoreLockHint(questions);
+        document.querySelectorAll("[data-dot]").forEach((dot) => dot.classList.toggle("on", cardSeen(dot.dataset.dot)));
         const dashboard = document.getElementById("alignment-dashboard");
         if (dashboard) {
           const wasLocked = dashboard.classList.contains("locked");
           dashboard.classList.toggle("locked", !everything);
           dashboard.querySelector(".score-lock")?.setAttribute("aria-hidden", String(everything));
+          dashboard.querySelectorAll(".dual-score-dashboard, .topic-alignment-area").forEach((part) => {
+            part.inert = !everything;
+            if (everything) part.removeAttribute("aria-hidden"); else part.setAttribute("aria-hidden", "true");
+          });
+          if (everything && wasLocked && count) {
+            const rings = [...dashboard.querySelectorAll(".dual-score-dashboard .alignment-ring")].map((ring) => ring.getAttribute("aria-label")).join(", ");
+            count.textContent = `${revealProgressCopy(questions)} · scores unlocked: ${rings}`;
+          }
           if (everything && wasLocked) celebrateScoreUnlock(dashboard);
         }
       }
 
-      // The payoff: rings count up from zero the first time a round's scores are unlocked.
+      // The payoff: rings count up from zero the first time a round's scores are unlocked — on both
+      // phones — and only once the dashboard is actually on screen, so nobody arrives at a finished number.
       function celebrateScoreUnlock(dashboard) {
         const roundKey = state.selectedQuestionIds.join("|");
-        const firstTime = state.revealCelebrated !== roundKey;
+        if (state.revealCelebrated === roundKey) return;
         state.revealCelebrated = roundKey;
         saveState();
-        if (!firstTime || state.reducedMotion) return;
-        dashboard.querySelectorAll(".alignment-ring").forEach((ring) => {
+        if (motionReduced()) {
+          playSound("celebrate");
+          window.setTimeout(() => dashboard.scrollIntoView({ block: "nearest", behavior: "auto" }), 150);
+          return;
+        }
+        const rings = [...dashboard.querySelectorAll(".dual-score-dashboard .alignment-ring")].map((ring) => {
           const target = Number(getComputedStyle(ring).getPropertyValue("--ring-score")) || 0;
           const label = ring.querySelector("strong");
-          const started = performance.now();
+          ring.style.setProperty("--ring-score", "0");
+          if (label) label.textContent = "0%";
+          return { ring, target, label };
+        });
+        let started = false;
+        let observer = null;
+        const run = () => {
+          if (started || !dashboard.isConnected) return;
+          started = true;
+          observer?.disconnect();
+          playSound("countup");
+          const begin = performance.now();
           const step = (now) => {
-            const progress = Math.min(1, (now - started) / 1100);
-            const value = Math.round(target * (1 - Math.pow(1 - progress, 3)));
-            ring.style.setProperty("--ring-score", String(value));
-            if (label) label.textContent = `${value}%`;
+            const progress = Math.max(0, Math.min(1, (now - begin) / 1100));
+            const eased = 1 - Math.pow(1 - progress, 3);
+            rings.forEach(({ ring, target, label }) => {
+              const value = Math.round(target * eased);
+              ring.style.setProperty("--ring-score", String(value));
+              if (label) label.textContent = `${value}%`;
+            });
             if (progress < 1) requestAnimationFrame(step);
           };
           requestAnimationFrame(step);
-        });
+          window.setTimeout(() => {
+            if (!dashboard.isConnected) return;
+            burstConfetti(dashboard, 40);
+            playSound("celebrate");
+          }, 1100);
+        };
+        if ("IntersectionObserver" in window) {
+          observer = new IntersectionObserver((entries) => {
+            if (entries.some((entry) => entry.intersectionRatio >= 0.55)) window.setTimeout(run, 120);
+          }, { threshold: [0.55] });
+        }
+        // Let a partner-triggered re-render restore its scroll position before moving the page.
         window.setTimeout(() => {
-          burstConfetti(dashboard, 40);
-          playSound("celebrate");
-          dashboard.scrollIntoView({ block: "nearest", behavior: "smooth" });
-        }, 350);
+          if (!dashboard.isConnected) return;
+          dashboard.scrollIntoView({ block: "center", behavior: "smooth" });
+          observer?.observe(dashboard);
+        }, 160);
+        window.setTimeout(run, observer ? 2200 : 700);
       }
 
       function applyCardState(card, shouldReveal) {
@@ -14663,11 +15264,13 @@ var qrcode = function() {
           : state.revealedIds.filter((revealedId) => revealedId !== id);
         if (state.playStyle === "nearby") sendNearbyMessage({ type: "reveal-state", roundId: state.nearbyRoundId, change: { id, revealed: shouldReveal } });
         const matchInfo = matchInfoById.get(id);
+        const rect = card.getBoundingClientRect();
+        const soundPlace = { pan: ((rect.left + rect.width / 2) / window.innerWidth - 0.5) * 0.8, topic: questions.find((item) => item.id === id)?.topic };
         if (shouldReveal && matchInfo?.isMatch) {
-          playSound("match");
+          playSound("match", { ...soundPlace, exact: matchInfo.exact });
           burstConfetti(card, 26);
         } else {
-          playSound(shouldReveal ? "reveal" : "tap");
+          playSound(shouldReveal ? "reveal" : "tap", soundPlace);
         }
         saveState();
         updateRevealAllButton();
@@ -14677,7 +15280,7 @@ var qrcode = function() {
             const back = card.querySelector(".card-back");
             if (!back.hasAttribute("tabindex")) back.setAttribute("tabindex", "-1");
             back.focus({ preventScroll: true });
-            card.scrollIntoView({ block: "nearest", behavior: state.reducedMotion ? "auto" : "smooth" });
+            card.scrollIntoView({ block: "nearest", behavior: motionReduced() ? "auto" : "smooth" });
           } else {
             card.querySelector(".card-front")?.focus({ preventScroll: true });
           }
@@ -14691,13 +15294,16 @@ var qrcode = function() {
           const next = flipCards[Number(event.currentTarget.dataset.nextCard)];
           if (!next) return;
           if (!next.classList.contains("flipped")) toggleCard(next);
-          next.scrollIntoView({ block: "start", behavior: state.reducedMotion ? "auto" : "smooth" });
+          next.scrollIntoView({ block: "start", behavior: motionReduced() ? "auto" : "smooth" });
         });
       });
       document.querySelectorAll("[data-jump-card]").forEach((button) => button.addEventListener("click", () => {
         const card = flipCards.find((item) => item.dataset.questionId === button.dataset.jumpCard);
-        card?.scrollIntoView({ block: "start", behavior: state.reducedMotion ? "auto" : "smooth" });
-        card?.querySelector(".card-back")?.focus?.({ preventScroll: true });
+        if (!card) return;
+        card.scrollIntoView({ block: "start", behavior: motionReduced() ? "auto" : "smooth" });
+        const face = card.classList.contains("flipped") ? card.querySelector(".card-back") : card.querySelector(".card-front");
+        if (face && !face.hasAttribute("tabindex") && face.classList.contains("card-back")) face.setAttribute("tabindex", "-1");
+        face?.focus({ preventScroll: true });
       }));
 
       let lastRevealAllAt = 0;
@@ -14733,6 +15339,9 @@ var qrcode = function() {
             if (nearbyRuntime.roomId && !nearbyRoomExpired()) {
               retryNearbyConnection();
               showToast("The other phone isn't connected. Reconnecting… try again in a moment.", { tone: "warning" });
+            } else if (state.nearbyRole === "join") {
+              const host = state.names[0] || "Your partner";
+              showToast(`${host}’s phone isn’t connected. Ask ${host} to tap “Play another round” and scan the new QR — or use “Switch vibe or players” to play on this phone.`, { tone: "warning" });
             } else {
               closeNearbyConnection();
               state.screen = "nearby";
@@ -14764,34 +15373,29 @@ var qrcode = function() {
             sendNearbyMessage(nearbyRoundInitPayload({ newRound: true }));
             return;
           } else {
-            showToast("Waiting for the host to start the next round...");
+            showToast(`Waiting for ${state.names[0] || "your partner"} to start the next round…`);
             return;
           }
         }
 
-        const settings = persistentSetupState();
         const questionMode = state.questionMode;
         const questionCount = state.questionCount;
         const selectedTopics = [...state.selectedTopics];
-        const soundEnabled = state.soundEnabled;
-        state = {
-          ...initialState(),
-          ...settings,
-          screen: "question",
-          playStyle: "pass-and-play",
-          questionMode,
-          questionCount,
-          selectedTopics,
-          soundEnabled,
-          selectedQuestionIds: chooseRoundQuestions(questionMode, questionCount, selectedTopics)
-        };
-        saveState();
-        playSound("unlock");
-        render();
+        const selectedQuestionIds = chooseRoundQuestions(questionMode, questionCount, selectedTopics);
+        if (!selectedQuestionIds.length) {
+          showToast("Not enough questions to start another round with these settings.");
+          return;
+        }
+        startGame({ names: state.names, questionMode, questionCount, selectedTopics, selectedQuestionIds, playStyle: "pass-and-play" });
       });
 
-      document.getElementById("start-over").addEventListener("click", () => {
-        closeNearbyConnection();
+      document.getElementById("start-over").addEventListener("click", async () => {
+        if (state.playStyle === "nearby" && nearbyChannelOpen()) {
+          const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "your partner";
+          const leave = await openConfirmDialog({ title: "Leave the two-phone round?", copy: `${partner}’s phone will be told you left. Your results stay saved on both phones.`, confirmLabel: "Leave round", cancelLabel: "Stay" });
+          if (!leave) return;
+        }
+        closeNearbyConnection({ notifyPartner: state.playStyle === "nearby" });
         state = {
           ...initialState(),
           ...persistentSetupState()
@@ -14911,7 +15515,7 @@ var qrcode = function() {
 
     document.addEventListener("mousemove", (event) => {
       const card = event.target.closest(".card-face");
-      if (!card || state.reducedMotion) return;
+      if (!card || motionReduced()) return;
       const rect = card.getBoundingClientRect();
       const x = ((event.clientX - rect.left) / rect.width) * 100;
       const y = ((event.clientY - rect.top) / rect.height) * 100;
@@ -14928,7 +15532,7 @@ var qrcode = function() {
     }, { passive: true });
 
     document.addEventListener("touchmove", (event) => {
-      if (!event.touches.length || state.reducedMotion) return;
+      if (!event.touches.length || motionReduced()) return;
       const touch = event.touches[0];
       const card = document.elementFromPoint(touch.clientX, touch.clientY)?.closest(".card-face");
       if (!card) return;
@@ -14947,7 +15551,7 @@ var qrcode = function() {
     }, { passive: true });
 
     window.addEventListener("deviceorientation", (event) => {
-      if (state.reducedMotion) return;
+      if (motionReduced()) return;
       const beta = event.beta;
       const gamma = event.gamma;
       if (beta === null || gamma === null) return;
@@ -14961,20 +15565,10 @@ var qrcode = function() {
     }, { passive: true });
 
     document.addEventListener("click", (event) => {
-      // Resume audio contexts on user interaction to satisfy browser autoplay policy
+      // Resume audio on user interaction to satisfy browser autoplay policy.
       try {
-        if (ambientSoundscape) {
-          if (!ambientSoundscape.ctx) {
-            if (state.ambientMusicEnabled) {
-              ambientSoundscape.start();
-            }
-          } else if (ambientSoundscape.ctx.state === "suspended" && state.ambientMusicEnabled) {
-            ambientSoundscape.ctx.resume().catch(() => {});
-          }
-        }
-        if (audioContext && audioContext.state === "suspended") {
-          audioContext.resume().catch(() => {});
-        }
+        if (state.ambientMusicEnabled) ambientSoundscape.start();
+        else audioEngine.resume();
       } catch (e) {
         // Prevent audio issues from blocking user interaction handlers
       }
@@ -15005,7 +15599,21 @@ var qrcode = function() {
       connectNearbySignaling(nearbyRuntime.role, nearbyRuntime.roomId, token).catch(() => {});
     }
     window.addEventListener("online", reconnectNearbyNow);
-    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reconnectNearbyNow(); });
+    document.addEventListener("visibilitychange", () => {
+      // Silence music and effects while the app is in the background; fade music back in on return.
+      if (audioEngine.ctx) {
+        if (document.visibilityState === "hidden") audioEngine.ctx.suspend().catch(() => {});
+        else if (audioAllowed()) {
+          const level = audioEngine.musicBus.gain;
+          const now = audioEngine.ctx.currentTime;
+          level.cancelScheduledValues(now);
+          level.setValueAtTime(0.0001, now);
+          level.linearRampToValueAtTime(MUSIC_LEVEL, now + 0.8);
+          audioEngine.ctx.resume().catch(() => {});
+        }
+      }
+      if (document.visibilityState === "visible") reconnectNearbyNow();
+    });
     window.addEventListener("hashchange", handleNearbyJoinLaunch);
     window.addEventListener("pageshow", (event) => {
       if (event.persisted) handleNearbyJoinLaunch();
