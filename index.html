@@ -11124,6 +11124,39 @@ var qrcode = function() {
       payload.roundId = payload.roundId.slice(0, 80);
       if (payload.roundId === state.nearbyRoundId && state.playStyle === "nearby" && state.screen !== "nearby") return;
       if (state.playStyle !== "nearby" && ["question", "intermission", "celebration", "reveal"].includes(state.screen)) return;
+      // A different host's round arriving over this phone's own unfinished two-phone round asks first.
+      const localUnfinished = state.selectedQuestionIds.length > 0 && payload.roundId !== state.nearbyRoundId
+        && (["question", "intermission", "nearby-wait"].includes(state.screen) || ["question", "intermission", "nearby-wait"].includes(state.resumeScreen) || revealUnfinished());
+      const hostName = (names) => String(Array.isArray(names) ? names[0] || "" : "").trim().toLowerCase();
+      if (localUnfinished && hostName(payload.names) !== hostName(state.names) && !nearbyRuntime.initConfirmed) {
+        if (nearbyRuntime.initPending) return;
+        nearbyRuntime.initPending = true;
+        const onlyReveal = revealUnfinished() && !["question", "intermission", "nearby-wait"].includes(state.screen) && !["question", "intermission", "nearby-wait"].includes(state.resumeScreen);
+        const newHost = String(payload.names?.[0] || "your partner").slice(0, 40);
+        openConfirmDialog({
+          title: `Join ${newHost}’s round?`,
+          copy: onlyReveal
+            ? "This phone has a round whose scores aren’t revealed yet. Joining skips the count-up — its scores go straight to your Journal."
+            : "This phone has an unfinished round. Joining discards it — its answers can’t be recovered.",
+          confirmLabel: onlyReveal ? "Save to Journal and join" : "Discard and join",
+          cancelLabel: "Keep my round",
+          danger: !onlyReveal,
+          safeFirst: true
+        }).then((ok) => {
+          nearbyRuntime.initPending = false;
+          if (!ok) {
+            closeNearbyConnection({ notifyPartner: true });
+            if (["question", "intermission", "nearby-wait", "celebration", "reveal"].includes(state.screen)) { state.resumeScreen = state.screen; state.screen = "setup"; }
+            saveState(); render();
+            showToast("Kept your round. You can finish it on this phone.");
+            return;
+          }
+          nearbyRuntime.initConfirmed = true;
+          applyNearbyRoundInit(payload);
+          nearbyRuntime.initConfirmed = false;
+        });
+        return;
+      }
       // Any leave/start-over question still open is about a round that has just been replaced.
       document.querySelectorAll(".modal-backdrop [data-modal-cancel]").forEach((button) => button.click());
       const answersInProgress = state.playStyle === "nearby" && state.nearbyRoundId && ["question", "nearby-wait"].includes(state.screen)
@@ -11203,6 +11236,7 @@ var qrcode = function() {
       if (!state.selectedTopics.length) state.selectedTopics = [...DEFAULT_TOPICS];
       nearbyRuntime.role = "join";
       nearbyRuntime.partnerProgress = null;
+      nearbyRuntime.initConfirmed = false;
       saveState(); render(); playSound("unlock");
     }
 
@@ -12274,6 +12308,12 @@ var qrcode = function() {
           const distance = Math.min(cents, 1200 - cents);
           return (distance > 50 && distance < 150) || (Math.max(frequency, other) < 300 && distance >= 150 && distance < 250);
         });
+        // Mid-register whole steps (C5/D5, Bb4/C5) fade out a little early, without a late entry, to trim the shimmer.
+        const midRub = (frequency, chord) => chord.some((other) => {
+          const cents = Math.abs(1200 * Math.log2(frequency / other)) % 1200;
+          const distance = Math.min(cents, 1200 - cents);
+          return Math.max(frequency, other) < 700 && distance >= 150 && distance < 250;
+        });
         const curve = (rising) => Float32Array.from({ length: 32 }, (_, step) => {
           const phase = (step / 31) * Math.PI / 2;
           return Math.max(0.0001, 0.03 * (rising ? Math.sin(phase) : Math.cos(phase)));
@@ -12299,6 +12339,8 @@ var qrcode = function() {
           }
           if (earlyOut) {
             gain.gain.setValueCurveAtTime(curve(false), at + CHORD_SECONDS, 0.6);
+          } else if (midRub(frequency, next)) {
+            gain.gain.setValueCurveAtTime(curve(false), at + CHORD_SECONDS, 0.9);
           } else {
             gain.gain.setValueCurveAtTime(curve(false), at + CHORD_SECONDS, 1.2);
           }
@@ -12732,7 +12774,7 @@ var qrcode = function() {
           duck = 0.8;
         } else if (kind === "partner-flip") {
           const d = (Number(options.degree) || 0) % 5;
-          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 1.4 : themeName === "cute" ? 1.2 : 1), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true, ...(themeName === "cute" ? { octaveLevel: 0.6 } : {}) });
+          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 1.55 : themeName === "cute" ? 1.2 : 1), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true, ...(themeName === "cute" ? { octaveLevel: 0.6 } : {}) });
           duck = 0.8;
         } else if (kind === "open") {
           noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.11, q: 0.8 });
@@ -17218,7 +17260,8 @@ var qrcode = function() {
         render();
         prepareNearbyJoin(launchRoomId, launchJoinToken);
       };
-      const linkLive = Boolean(nearbyRuntime.role) && nearbyRuntime.status !== "idle";
+      // Only an open data channel is a live partner; a room still retrying is an orphaned local round.
+      const linkLive = nearbyChannelOpen();
       const localRoundOpen = (state.playStyle !== "nearby" || !linkLive) && state.selectedQuestionIds.length > 0
         && (["question", "intermission", "nearby-wait"].includes(state.screen) || ["question", "intermission", "nearby-wait"].includes(state.resumeScreen) || revealUnfinished());
       if (!localRoundOpen) {
@@ -17241,7 +17284,9 @@ var qrcode = function() {
         safeFirst: true
       }).then((ok) => {
         if (!ok) { showToast(`Kept your round. ${POINTER_VERB === "Tap" ? "Scan the QR" : "Open the join link"} again when you’re ready to join.`); return; }
-        // The local round stays resumable until the partner's round really starts (round-init replaces it then).
+        // The local round stays resumable until the partner's round really starts (round-init replaces it then);
+        // the person has already agreed, so that round-init doesn't ask again.
+        nearbyRuntime.initConfirmed = true;
         if (["celebration", "reveal"].includes(state.screen)) state.resumeScreen = state.screen;
         join();
       });
