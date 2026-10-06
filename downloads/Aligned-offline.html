@@ -6465,7 +6465,8 @@
     .quick-pick-option.active { border-color: var(--question-color, var(--coral)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--question-color, var(--coral)) 22%, transparent); transform: translateY(-2px); }
     [data-theme="pastel"] .quick-pick-option { background: #ffffff; color: #1e293b; }
     .nowrap { white-space: nowrap; }
-    .quick-pick-option, .quick-guess-option { overflow-wrap: normal; word-break: normal; hyphens: auto; -webkit-hyphens: auto; }
+    /* Words break only when one can't fit a line on its own (hyphens: auto would hyphenate words that fit). */
+    .quick-pick-option, .quick-guess-option { overflow-wrap: break-word; word-break: normal; hyphens: manual; -webkit-hyphens: manual; }
     @media (max-width: 380px) {
       .quick-pick-option { flex-direction: column; gap: 4px; padding: 12px 10px; min-height: 84px; }
       .quick-guess-option { flex: 1 1 100%; }
