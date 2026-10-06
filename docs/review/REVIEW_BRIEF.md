@@ -99,15 +99,15 @@ behave well? Recommend concrete synthesis changes (notes, envelopes, layering, p
 
 ## Score history
 
-| Reviewer | R1 | R2 | R3 | R4 | R5 |
-| --- | --- | --- | --- | --- | --- |
-| Mobile | 7.0–8.2 | 8.4–9.2 | 8.6–9.3 | 8.6–9.3 | 8.3–9.2 |
-| Desktop | 7.5–8.8 | 7.9–9.2 | 8.0–9.1 | 8.5–9.3 | 7.8–9.0 |
-| Multiplayer/QR | 5.0–7.0 | 7.6–8.8 | 8.3–9.0 | 8.5–9.2 | 8.3–9.0 |
-| QA/accessibility | 6.6–8.6 | 8.0–8.9 | 8.5–9.2 | 8.6–9.3 | 8.6–9.3 |
-| Cross-platform/offline | — | 8.0–9.2 | 8.7–9.5 | 9.3–9.5 | 8.6–9.3 |
-| Fun & engagement | — | — | — | — | 7.6–9.1 (fun 7.6) |
-| Sound design | — | — | — | — | 5.8 mobile / 6.0 desktop |
+| Reviewer | R1 | R2 | R3 | R4 | R5 | R6 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Mobile | 7.0–8.2 | 8.4–9.2 | 8.6–9.3 | 8.6–9.3 | 8.3–9.2 | 8.7–9.3 |
+| Desktop | 7.5–8.8 | 7.9–9.2 | 8.0–9.1 | 8.5–9.3 | 7.8–9.0 | 8.4–9.1 |
+| Multiplayer/QR | 5.0–7.0 | 7.6–8.8 | 8.3–9.0 | 8.5–9.2 | 8.3–9.0 | 8.7–9.2 |
+| QA/accessibility | 6.6–8.6 | 8.0–8.9 | 8.5–9.2 | 8.6–9.3 | 8.6–9.3 | 8.7–9.2 |
+| Cross-platform/offline | — | 8.0–9.2 | 8.7–9.5 | 9.3–9.5 | 8.6–9.3 | 9.2–9.5 |
+| Fun & engagement | — | — | — | — | 7.6–9.1 (fun 7.6) | 8.6–9.1 (fun 8.6) |
+| Sound design | — | — | — | — | 5.8 mobile / 6.0 desktop | 7.4 mobile / 7.8 desktop |
 
 R5 reviewed round 5's game-feel branch (commit 0ec3741). Its fixes ship as **1.2.0**: a rebuilt audio engine
 (mix bus, compressor + limiter, ducked generative F-major ambient that suspends in the background, in-key
@@ -118,6 +118,17 @@ discussion prompts; guess-driven "Biggest surprise"; honest "Round N" toasts (jo
 round" through the normal round start; joiner can never become host; pastel answer boxes and contrast;
 locked scores hidden from screen readers; OS reduce-motion honoured in JS; stricter import sanitising;
 browser Back guard.
+
+R6 reviewed 1.2.0 (commit 0088bab). Its fixes ship as **1.2.1**: level-matched themes, audible theme-voiced
+count-up, phone-audible ambient (pad ≥ 220 Hz + octave partial), no audio while hidden, gentler ducks that only
+extend, climbing flip pitches, audible delete cue, v² volume taper, closed/interrupted context recovery and a
+fail-safe audio setup; unfinished reveals resumable from Home with scores hidden in Home/Journal until unlocked;
+partner reveal state applied off-board; rating conflicts resolved (newest wins, ties to host) plus a reconnect
+resync of seen cards and ratings; not-ready answers excluded from the mind reader; Road Trip light-only;
+Cozy history filter widened; prompt pools doubled, stable per card and fresh across rounds; "Rate the next
+one →"; "Saved for later" in the Journal; phone toasts at the top and non-blocking; theme selected states;
+no mid-word breaks; Esc closes a card; unlock announced to screen readers; quick-pick sides in Library and
+Journal; Back leaves Home in one press (`tests/e2e/back.mjs`).
 
 Round 4 is on `main` (tested, deployed). Round 5's game-design changes are on branch
 **`wip/round5-game-feel`** and are **not yet tested** — they address the Fun findings:
