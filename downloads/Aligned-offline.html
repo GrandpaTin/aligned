@@ -1888,7 +1888,7 @@
     }
 
     .topic-alignment-card .alignment-ring {
-      --ring-size: 70px;
+      --ring-size: 84px;
     }
 
     .topic-alignment-card .alignment-ring::before {
@@ -1903,6 +1903,7 @@
     .topic-alignment-card .alignment-ring-content span {
       margin-top: 2px;
       font-size: 0.52rem;
+      letter-spacing: 0.02em !important;
     }
 
     .topic-alignment-name {
@@ -6463,6 +6464,20 @@
     @media (hover: hover) { .quick-pick-option:hover { border-color: color-mix(in srgb, var(--question-color, var(--coral)) 45%, var(--line)); } }
     .quick-pick-option.active { border-color: var(--question-color, var(--coral)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--question-color, var(--coral)) 22%, transparent); transform: translateY(-2px); }
     [data-theme="pastel"] .quick-pick-option { background: #ffffff; color: #1e293b; }
+    .nowrap { white-space: nowrap; }
+    .quick-pick-option, .quick-guess-option { overflow-wrap: normal; word-break: normal; hyphens: auto; -webkit-hyphens: auto; }
+    @media (max-width: 380px) {
+      .quick-pick-option { flex-direction: column; gap: 4px; padding: 12px 10px; min-height: 84px; }
+      .quick-guess-option { flex: 1 1 100%; }
+    }
+    @media (max-width: 340px) { .quick-pick { grid-template-columns: 1fr; } .quick-pick-option { min-height: 64px; flex-direction: row; } }
+    @media (max-width: 420px) {
+      [data-text-size="large"] .quick-pick { grid-template-columns: 1fr; }
+      [data-text-size="large"] .quick-pick-option { min-height: 64px; flex-direction: row; }
+      [data-text-size="large"] .quick-guess-option { flex: 1 1 100%; }
+    }
+    /* M2: the light theme's category label needs a darker mix to stay readable on its tint. */
+    [data-theme="pastel"] .question-card .category-pill { color: color-mix(in srgb, var(--question-color, #7c3aed) 50%, #1e293b) !important; }
     .quick-pick-between > summary { cursor: pointer; color: var(--muted); list-style: none; }
     .quick-pick-between > summary::-webkit-details-marker { display: none; }
     .quick-pick-between > summary::before { content: "▸"; display: inline-block; margin-right: 6px; color: var(--coral); transition: transform 160ms ease; }
@@ -6624,7 +6639,7 @@
       }
       :is(.card-close-button, .card-more > summary, .library-add > summary, .setting-row):hover { border-color: color-mix(in srgb, var(--coral) 55%, var(--line)) !important; background-image: linear-gradient(color-mix(in srgb, var(--coral) 8%, transparent), color-mix(in srgb, var(--coral) 8%, transparent)); }
       .setting-row:hover input[type="checkbox"] { box-shadow: 0 0 0 3px color-mix(in srgb, var(--coral) 30%, transparent); }
-      [data-theme] :is(input[type="text"], input[type="search"], textarea, select, .custom-select):hover:not(:focus) { border-color: color-mix(in srgb, var(--coral) 55%, var(--line)) !important; }
+      [data-theme] :is(input:not([type]), input[type="text"], input[type="search"], textarea, select, .custom-select):hover:not(:focus) { border-color: color-mix(in srgb, var(--coral) 55%, var(--line)) !important; }
       .highlight-jump:hover { text-decoration-color: currentColor; color: var(--coral); }
       :is(.play-style-card, .preset-card, .theme-card, .library-filter, [data-favorite-question], .rating-option, .follow-through-button,
         .importance-option, .secondary-btn, .mini-action, .question-library-action):hover:not(:disabled):not([aria-disabled="true"]) {
@@ -6635,6 +6650,11 @@
     @media (hover: hover) and (prefers-reduced-motion: reduce) { :is(.play-style-card, .preset-card, .theme-card):hover { transform: none !important; } }
     /* Phone landscape: the sticky action bar would cover the prompt itself, so it scrolls with the card. */
     @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+      .question-screen .turn-name { font-size: 1.15rem !important; line-height: 1.2; }
+      .question-screen .question-header .eyebrow { margin-bottom: 0; }
+      .question-screen .quick-guess, .question-screen .guess-panel { margin-top: 8px; padding: 6px 10px; }
+      .question-screen .quick-guess small, .question-screen .guess-label small { display: none; }
+      .question-screen .quick-pick-option { min-height: 56px; padding: 8px 10px; }
       .question-screen .question-actions { position: static !important; box-shadow: none !important; }
       .question-screen .progress-constellation { display: none; }
       .question-screen .question-header { margin-bottom: 4px; }
@@ -6644,7 +6664,7 @@
     @media (prefers-reduced-motion: reduce) { .flip-card-inner { transition: none !important; } }
     .reduced-motion .flip-card-inner { transition: none !important; }
     /* Cover the gap above the floating top bar so scrolled content never peeks out above it. */
-    .topbar::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: max(8px, env(safe-area-inset-top)); background: var(--midnight); border-radius: 0; pointer-events: none; }
+    .topbar::before { content: ""; position: absolute; left: 50%; width: 100vw; transform: translateX(-50%); bottom: 100%; height: max(8px, env(safe-area-inset-top)); background: color-mix(in srgb, var(--midnight) 82%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); pointer-events: none; }
     .highlight-note { display: block; margin-top: 6px; color: var(--muted); font-size: max(12px, .76rem); font-weight: 650; }
     .guess-panel { margin: 14px 0 4px; padding: 12px 14px; border: 1px dashed color-mix(in srgb, var(--violet) 60%, transparent); border-radius: 16px; background: color-mix(in srgb, var(--violet) 8%, transparent); }
     .guess-panel.guessed { border-style: solid; }
@@ -9596,7 +9616,12 @@ var qrcode = function() {
           "What would you like to protect about this?",
           "How would you celebrate this in a small way?",
           "What does this say about how you fit together?",
-          "Name one moment this showed up recently."
+          "Name one moment this showed up recently.",
+          "High five — then name the song that suits this match.",
+          "What tiny tradition could celebrate this one?",
+          "Who said it first in your heads? Be honest.",
+          "Give this match a nickname you’ll both remember.",
+          "What would your future selves toast to here?"
         ],
         medium: [
           "Where do your answers overlap, even if the numbers or wording differ?",
@@ -10037,7 +10062,7 @@ var qrcode = function() {
             ? Object.fromEntries(Object.entries(cached.cardPrompts).filter(([id, value]) => validIds.has(id) && value && typeof value.text === "string" && typeof value.key === "string").map(([id, value]) => [id, { key: value.key.slice(0, 40), text: value.text.slice(0, 300) }]))
             : {},
           recentPrompts: Array.isArray(cached.recentPrompts) ? cached.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-60) : [],
-          recentHeadlines: Array.isArray(cached.recentHeadlines) ? cached.recentHeadlines.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-4) : [],
+          recentHeadlines: Array.isArray(cached.recentHeadlines) ? [...new Set(cached.recentHeadlines.filter((text) => ["vibe", "roll", "another", "best", "finding", "locked"].includes(text)))].slice(-5) : [],
           packReturnPreset: typeof cached.packReturnPreset === "string" ? cached.packReturnPreset.slice(0, 40) : ""
         };
 
@@ -10114,7 +10139,7 @@ var qrcode = function() {
         restored.nearbyRemote = restored.nearbyRemote && typeof restored.nearbyRemote === "object" && restored.nearbyRemote.roundId === restored.nearbyRoundId ? restored.nearbyRemote : null;
         restored.nearbyRepairScreen = ["question", "nearby-wait", "celebration", "reveal"].includes(restored.nearbyRepairScreen) ? restored.nearbyRepairScreen : "";
         restored.nearbyDelivered = typeof restored.nearbyDelivered === "string" ? restored.nearbyDelivered.slice(0, 80) : "";
-        if (isRoundScreen && idsAreValid) {
+        if (isRoundScreen && idsAreValid && restored.sessionPreset !== "pack") {
           restored.questionCount = restored.selectedQuestionIds.length;
         }
         restored.questionIndex = Math.max(
@@ -10123,9 +10148,11 @@ var qrcode = function() {
         );
         return restored;
       } catch {
+        loadStateFailed = true;
         return initialState();
       }
     }
+    let loadStateFailed = false;
 
     let state = loadState();
     let lastRenderedScreen = null;
@@ -10148,7 +10175,7 @@ var qrcode = function() {
     let nearbyLastPeerMessageAt = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.2.9";
+    const APP_VERSION = "1.3.0";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -10296,12 +10323,13 @@ var qrcode = function() {
     async function updateOfflineReadiness() {
       const line = document.getElementById("offline-ready");
       if (!line) return;
-      const ready = (text) => { line.innerHTML = `<span aria-hidden="true">✓</span> ${text}`; line.classList.add("ready"); };
+      const ready = (text) => { line.innerHTML = `<span aria-hidden="true">✓</span> ${text}`; line.classList.add("ready"); enforceCompactFloor(); };
       if (IN_ANDROID_APP || IS_OFFLINE_FILE) return ready("Ready to play offline on this device.");
       const registration = await navigator.serviceWorker?.getRegistration?.().catch(() => null);
       if (registration?.active) ready("Ready to play offline on this device.");
       else if (!("serviceWorker" in navigator)) line.textContent = "This window can’t store the game for offline use (private browsing?). Install the app or download the offline copy instead.";
       else line.textContent = "Offline mode finishes setting up after this page has loaded once with internet.";
+      enforceCompactFloor();
     }
 
     function pairingJoinURL(roomId, joinToken) {
@@ -10799,7 +10827,7 @@ var qrcode = function() {
       return {
         type: "round-init", roundId: state.nearbyRoundId, newRound: Boolean(newRound), names: [...state.names], questionMode: state.questionMode,
         questionIntensity: state.questionIntensity, selectedTopics: [...state.selectedTopics],
-        sessionPreset: state.sessionPreset, recentHeadlines: Array.isArray(state.recentHeadlines) ? state.recentHeadlines.slice(-4) : [],
+        sessionPreset: state.sessionPreset, recentHeadlines: Array.isArray(state.recentHeadlines) ? state.recentHeadlines.slice(-5) : [],
         selectedQuestionIds: [...state.selectedQuestionIds], questions: getSelectedQuestions().filter(Boolean)
       };
     }
@@ -10983,7 +11011,8 @@ var qrcode = function() {
     }
 
     function applyNearbyRoundInit(payload) {
-      if (!payload.roundId || !Array.isArray(payload.selectedQuestionIds) || !payload.selectedQuestionIds.length) return;
+      if (typeof payload.roundId !== "string" || !payload.roundId || !Array.isArray(payload.selectedQuestionIds) || !payload.selectedQuestionIds.length) return;
+      payload.roundId = payload.roundId.slice(0, 80);
       if (payload.roundId === state.nearbyRoundId && state.playStyle === "nearby" && state.screen !== "nearby") return;
       if (state.playStyle !== "nearby" && ["question", "intermission", "celebration", "reveal"].includes(state.screen)) return;
       // Any leave/start-over question still open is about a round that has just been replaced.
@@ -11037,7 +11066,7 @@ var qrcode = function() {
         }
       });
       const catalogIds = new Set(getQuestionCatalog().map((question) => question.id));
-      const selectedQuestionIds = payload.selectedQuestionIds.filter((id) => typeof id === "string" && catalogIds.has(id));
+      const selectedQuestionIds = [...new Set(payload.selectedQuestionIds.filter((id) => typeof id === "string" && catalogIds.has(id)))].slice(0, 30);
       if (!selectedQuestionIds.length) return;
       const names = Array.isArray(payload.names) ? [String(payload.names[0] || "Player 1").slice(0, 40), String(payload.names[1] || "Player 2").slice(0, 40)] : ["Player 1", "Player 2"];
       if (payload.newRound && state.playStyle === "nearby" && state.nearbyRoundId && state.nearbyRoundId !== payload.roundId && nearbyRoundFinished()) {
@@ -11058,7 +11087,7 @@ var qrcode = function() {
         selectedQuestionIds, activePlayer: 1,
         nearbyRole: "join", nearbyRoundId: payload.roundId,
         sessionPreset: payload.sessionPreset === "pack" || SESSION_PRESETS.some((preset) => preset.id === payload.sessionPreset) ? payload.sessionPreset : "custom",
-        recentHeadlines: Array.isArray(payload.recentHeadlines) ? payload.recentHeadlines.filter((item) => typeof item === "string").map((item) => item.slice(0, 40)).slice(-4) : settings.recentHeadlines
+        recentHeadlines: Array.isArray(payload.recentHeadlines) ? payload.recentHeadlines.filter((item) => typeof item === "string").map((item) => item.slice(0, 40)).slice(-5) : settings.recentHeadlines
       };
       if (!state.selectedTopics.length) state.selectedTopics = [...DEFAULT_TOPICS];
       nearbyRuntime.role = "join";
@@ -11075,6 +11104,8 @@ var qrcode = function() {
         nearbyRuntime.partnerLeft = false;
         if (typeof payload.appVersion === "string" && payload.appVersion !== APP_VERSION && compareVersions(payload.appVersion, APP_VERSION) > 0) {
           showToast(`The other phone has a newer Aligned (${payload.appVersion.slice(0, 12)}). Everything still works; update this one when you can.`);
+        } else if (typeof payload.appVersion === "string" && payload.appVersion !== APP_VERSION && compareVersions(payload.appVersion, APP_VERSION) < 0) {
+          showToast(`The other phone has an older Aligned (${payload.appVersion.slice(0, 12)}). Everything still works; a few touches may differ until it updates.`);
         }
         const roundInProgress = state.playStyle === "nearby" && state.nearbyRoundId && ["question", "nearby-wait"].includes(state.screen);
         if (nearbyRuntime.role === "host" && roundInProgress && payload.roundId !== state.nearbyRoundId) sendNearbyMessage(nearbyRoundInitPayload());
@@ -11148,7 +11179,10 @@ var qrcode = function() {
         if (state.screen === "reveal" && (payload.all === true || payload.all === false)) {
           const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "Your partner";
           showToast(payload.all ? `${partner} revealed every card` : `${partner} hid every card`);
-          playSound(payload.all ? "reveal" : "tap");
+          if (payload.all) {
+            const anyMatch = getSelectedQuestions().filter(Boolean).some((question) => revealMatchInfo(question, state.answers[0][question.id], state.answers[1][question.id])?.isMatch);
+            playSound("partner-flip", { match: anyMatch, degree: 0 });
+          }
         } else if (state.screen === "reveal" && newlyRevealed.length === 1) {
           const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "Your partner";
           const number = state.selectedQuestionIds.indexOf(newlyRevealed[0]) + 1;
@@ -11440,7 +11474,7 @@ var qrcode = function() {
         tutorialSeen: state.tutorialSeen,
         answeredQuestionIds: [...state.answeredQuestionIds],
         recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-60) : [],
-        recentHeadlines: Array.isArray(state.recentHeadlines) ? state.recentHeadlines.filter((item) => typeof item === "string").slice(-4) : [],
+        recentHeadlines: Array.isArray(state.recentHeadlines) ? state.recentHeadlines.filter((item) => typeof item === "string").slice(-5) : [],
         packReturnPreset: typeof state.packReturnPreset === "string" ? state.packReturnPreset.slice(0, 40) : "",
         excludedQuestionIds: [...state.excludedQuestionIds],
         neverQuestionIds: [...state.neverQuestionIds],
@@ -12139,20 +12173,21 @@ var qrcode = function() {
           osc.type = "triangle";
           osc.frequency.value = frequency;
           // Detune follows the pitch, not the voice slot, so a note shared by two chords stays in tune with itself.
-          const noteNumber = Math.round(12 * Math.log2(frequency / 440));
-          osc.detune.value = (noteNumber % 2 === 0 ? 4 : -4) + ((noteNumber * 7) % 3 - 1);
+          const pitchClass = ((Math.round(12 * Math.log2(frequency / 440)) % 12) + 12) % 12;
+          osc.detune.value = (pitchClass % 2 === 0 ? 4 : -4) + ((pitchClass * 7) % 3 - 1);
           const lateIn = !first && rubs(frequency, previous);
           const earlyOut = rubs(frequency, next);
-          if (first || lateIn) {
+          if (first) {
             gain.gain.setValueAtTime(0.0001, at);
-            if (lateIn) gain.gain.setValueAtTime(0.0001, at + 0.3);
-            gain.gain.linearRampToValueAtTime(0.03, at + (first ? fadeIn : 1.2));
+            gain.gain.linearRampToValueAtTime(0.03, at + fadeIn);
+          } else if (lateIn) {
+            gain.gain.setValueAtTime(0.0001, at);
+            gain.gain.setValueCurveAtTime(curve(true), at + 0.3, 0.9);
           } else {
             gain.gain.setValueCurveAtTime(curve(true), at, 1.2);
           }
           if (earlyOut) {
-            gain.gain.setValueAtTime(0.03, at + CHORD_SECONDS);
-            gain.gain.linearRampToValueAtTime(0.0001, at + CHORD_SECONDS + 0.6);
+            gain.gain.setValueCurveAtTime(curve(false), at + CHORD_SECONDS, 0.6);
           } else {
             gain.gain.setValueCurveAtTime(curve(false), at + CHORD_SECONDS, 1.2);
           }
@@ -12507,8 +12542,8 @@ var qrcode = function() {
           const stepPeak = 0.08 * jitter() * (themeName === "dreamy" ? 0.85 : 1);
           const stepExtra = themeName === "dreamy" ? { ...wobble(), decay: 0.7 } : wobble();
           sequence(rung.map((d) => pentatonic(d)), 0.055, stepPeak, stepExtra);
-          if (raw > 0 && rungIndex(raw - 1) === index) {
-            end = Math.max(end, note(pentatonic(Math.min(rung[1] + 1, ladder[ladder.length - 1][1] - 1)), start + 2 * gap(0.055), stepPeak * 0.5, stepExtra));
+          if (raw > 0 && rungIndex(raw - 1) === index && rung[1] + 1 < ladder[ladder.length - 1][1]) {
+            end = Math.max(end, note(pentatonic(rung[1] + 1), start + 2 * gap(0.055), stepPeak * 0.5, stepExtra));
           }
         } else if (kind === "lock") {
           sequence([pentatonic(3), pentatonic(2), pentatonic(0)], 0.075, 0.08, themeName === "cute" ? { octaveLevel: 0.6 } : undefined);
@@ -12582,8 +12617,8 @@ var qrcode = function() {
           duck = 0.8;
         } else if (kind === "partner-flip") {
           const d = (Number(options.degree) || 0) % 5;
-          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045, { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true });
-          duck = 0.9;
+          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 1.4 : 1), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true });
+          duck = 0.8;
         } else if (kind === "open") {
           noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.11, q: 0.8 });
           sequence([pentatonic(0), pentatonic(2), pentatonic(4)], 0.08, 0.08, themeName === "cute" ? { octaveLevel: 0.6 } : undefined);
@@ -13322,24 +13357,27 @@ var qrcode = function() {
       }
       return promptWordCounts.get(word) || 0;
     }
-    function playedTonightTwin(question, inRound = []) {
-      const today = new Date().toDateString();
-      const ids = new Set([...state.completedRounds.filter((round) => new Date(round.completedAt).toDateString() === today).flatMap((round) => round.questionIds || []), ...inRound]);
-      ids.delete(question.id);
-      if (!ids.size) return false;
+    // Two prompts count as the same question when they share a two-word phrase, a distinctive rare word,
+    // or most of their content words.
+    function promptsAreTwins(question, other) {
+      if (!question || !other || question.id === other.id) return false;
       const mine = promptWords(question.prompt);
       if (mine.size < 2) return false;
       const myPairs = promptPairs(question.prompt);
-      return getQuestionCatalog().some((other) => {
-        if (!ids.has(other.id)) return false;
-        if ([...promptPairs(other.prompt)].some((pair) => myPairs.has(pair))) return true;
-        const theirs = promptWords(other.prompt);
-        const sharedWords = [...mine].filter((word) => theirs.has(word));
-        const shared = sharedWords.length;
-        // A distinctive word ("affection", "jealousy") that only a couple of prompts use marks a twin on its own.
-        const rareMatch = sharedWords.some((word) => word.length >= 5 && promptWordFrequency(word) <= 2);
-        return rareMatch || (shared >= 2 && shared / Math.min(mine.size, theirs.size) >= 0.6);
-      });
+      for (const pair of promptPairs(other.prompt)) if (myPairs.has(pair)) return true;
+      const theirs = promptWords(other.prompt);
+      const sharedWords = [...mine].filter((word) => theirs.has(word));
+      const shared = sharedWords.length;
+      // A distinctive word ("affection", "jealousy") that only a couple of prompts use marks a twin on its own.
+      const rareMatch = sharedWords.some((word) => word.length >= 5 && promptWordFrequency(word) <= 2);
+      return rareMatch || (shared >= 2 && shared / Math.min(mine.size, theirs.size) >= 0.6);
+    }
+
+    function playedTonightTwin(question, inRound = []) {
+      const catalogById = new Map(getQuestionCatalog().map((item) => [item.id, item]));
+      const ids = new Set([...state.completedRounds.filter(isTonightRound).flatMap((round) => round.questionIds || []), ...inRound]);
+      ids.delete(question.id);
+      return [...ids].some((id) => promptsAreTwins(question, catalogById.get(id)));
     }
 
     function chooseRoundQuestions(
@@ -13398,31 +13436,37 @@ var qrcode = function() {
       const selected = [];
       const selectedIds = new Set();
 
+      // Freshness is about this couple: tonight's questions come back only when nothing else is left.
+      const tonightIds = new Set(state.completedRounds.filter(isTonightRound).flatMap((round) => round.questionIds || []));
+      const coupleSeen = coupleAnsweredIds();
+      const lastUsed = questionLastUsedMap();
+      const catalogById = new Map(getQuestionCatalog().map((item) => [item.id, item]));
+      const tonightQuestions = [...tonightIds].map((id) => catalogById.get(id)).filter(Boolean);
+      const tonightTwin = new Map();
+      const isTwin = (question) => {
+        if (!tonightTwin.has(question.id)) tonightTwin.set(question.id, tonightQuestions.some((other) => promptsAreTwins(question, other)));
+        return tonightTwin.get(question.id) || selected.some((id) => promptsAreTwins(question, catalogById.get(id)));
+      };
       for (let index = 0; index < count; index += 1) {
         const topic = topicSequence[index];
         const type = typeSequence[index];
         const remaining = pool.filter((question) => !selectedIds.has(question.id));
-        const typeCompatible = remaining.filter((question) => question.type === type);
-        const unseen = (question) => !state.answeredQuestionIds.includes(question.id);
-        let tierSource = typeCompatible.length ? typeCompatible : remaining;
-        if (!tierSource.some(unseen) && remaining.some(unseen)) tierSource = remaining;
-        let freshestTier = freshestQuestionTier(tierSource);
-        // Spicy Night leads with its flirty prompts before the frank ones.
-        if (topic === "spicy" && activePreset?.id === "spicy-night" && selected.filter((id) => PLAYFUL_SPICY.test(id)).length < 3) {
-          const playful = freshestTier.filter((question) => PLAYFUL_SPICY.test(question.id));
-          if (playful.length) freshestTier = playful;
-        }
-        const notTwin = (question) => !playedTonightTwin(question, selected);
-        let unlikeTonight = freshestTier.filter(notTwin);
-        if (!unlikeTonight.length) {
-          const staler = tierSource.filter(notTwin);
-          const anyLeft = staler.length ? staler : remaining.filter(notTwin);
-          if (anyLeft.length) unlikeTonight = freshestQuestionTier(anyLeft);
-        }
-        if (unlikeTonight.length) freshestTier = unlikeTonight;
-        let candidates = freshestTier.filter((question) => question.topic === topic);
-        if (!candidates.length) candidates = freshestTier;
-        if (!candidates.length) break;
+        if (!remaining.length) break;
+        const wantPlayful = topic === "spicy" && activePreset?.id === "spicy-night" && selected.filter((id) => PLAYFUL_SPICY.test(id)).length < 3;
+        const rank = (question) => [
+          tonightIds.has(question.id) ? 1 : 0,
+          question.type === type ? 0 : 1,
+          coupleSeen.has(question.id) ? 1 : 0,
+          isTwin(question) ? 1 : 0,
+          wantPlayful && !PLAYFUL_SPICY.test(question.id) ? 1 : 0,
+          question.topic === topic ? 0 : 1,
+          coupleSeen.has(question.id) ? lastUsed.get(question.id) ?? -Infinity : 0
+        ];
+        const ranked = remaining.map((question) => ({ question, key: rank(question) }));
+        const better = (a, b) => { for (let i = 0; i < a.length; i += 1) if (a[i] !== b[i]) return a[i] < b[i]; return false; };
+        let best = ranked[0].key;
+        ranked.forEach((item) => { if (better(item.key, best)) best = item.key; });
+        const candidates = ranked.filter((item) => item.key.every((value, i) => value === best[i])).map((item) => item.question);
         const chosen = candidates[randomIndex(candidates.length)];
         selected.push(chosen.id);
         selectedIds.add(chosen.id);
@@ -13967,8 +14011,8 @@ var qrcode = function() {
     }).observe(app, { childList: true, subtree: true });
 
     // Android app shell: the hardware Back button closes dialogs first, then returns to Home.
-    // The card most recently opened by hand on the reveal board; Back closes it before leaving the board.
-    let lastOpenedCard = null;
+    // Cards opened by hand on the reveal board, oldest first; Back closes the newest before leaving the board.
+    let openedCards = [];
     window.alignedHandleBack = () => {
       const overlays = document.querySelectorAll(".modal-backdrop");
       if (overlays.length) {
@@ -13979,9 +14023,10 @@ var qrcode = function() {
         return true;
       }
       const focusedCard = document.activeElement?.closest?.(".flip-card.flipped");
-      const lastCard = lastOpenedCard && lastOpenedCard.isConnected && lastOpenedCard.classList.contains("flipped") ? lastOpenedCard : null;
+      openedCards = openedCards.filter((card) => card.isConnected && card.classList.contains("flipped"));
+      const lastCard = openedCards.pop() || null;
+      // Cards opened by hand close one Back at a time (newest first); "Reveal all" cards don't hold Back hostage.
       const openCard = state.screen === "reveal" ? focusedCard || lastCard : null;
-      lastOpenedCard = null;
       if (openCard) {
         openCard.querySelector(".card-close-button")?.click();
         return true;
@@ -14732,9 +14777,9 @@ var qrcode = function() {
               <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px">
                 <span style="font-size:0.78rem;font-weight:700;color:var(--text)">Text size</span>
                 <div class="text-size-toggle" id="text-size-toggle" role="group" aria-label="Text size">
-                  <button type="button" class="text-size-option ${state.textSize === "small" ? "active" : ""}" data-size="small" aria-pressed="${state.textSize === "small"}"><span style="font-size:0.68rem">A</span><span style="font-size:0.74rem">Compact</span></button>
-                  <button type="button" class="text-size-option ${state.textSize === "normal" ? "active" : ""}" data-size="normal" aria-pressed="${state.textSize === "normal"}"><span style="font-size:0.88rem">A</span><span style="font-size:0.74rem">Standard</span></button>
-                  <button type="button" class="text-size-option ${state.textSize === "large" ? "active" : ""}" data-size="large" aria-pressed="${state.textSize === "large"}"><span style="font-size:1.15rem">A</span><span style="font-size:0.74rem">Large</span></button>
+                  <button type="button" class="text-size-option ${state.textSize === "small" ? "active" : ""}" data-size="small" aria-pressed="${state.textSize === "small"}"><span style="font-size:0.68rem">A</span><span style="font-size:max(12px, 0.74rem)">Compact</span></button>
+                  <button type="button" class="text-size-option ${state.textSize === "normal" ? "active" : ""}" data-size="normal" aria-pressed="${state.textSize === "normal"}"><span style="font-size:0.88rem">A</span><span style="font-size:max(12px, 0.74rem)">Standard</span></button>
+                  <button type="button" class="text-size-option ${state.textSize === "large" ? "active" : ""}" data-size="large" aria-pressed="${state.textSize === "large"}"><span style="font-size:1.15rem">A</span><span style="font-size:max(12px, 0.74rem)">Large</span></button>
                 </div>
                 <p class="text-size-preview">The quick brown fox jumps over the lazy dog.</p>
               </div>
@@ -14868,8 +14913,15 @@ var qrcode = function() {
               return;
             }
           }
+          const previousSave = localStorage.getItem(STORAGE_KEY);
           localStorage.setItem(STORAGE_KEY, JSON.stringify(importedState));
-          state = loadState();
+          loadStateFailed = false;
+          const importedLoaded = loadState();
+          if (loadStateFailed) {
+            if (previousSave === null) localStorage.removeItem(STORAGE_KEY); else localStorage.setItem(STORAGE_KEY, previousSave);
+            throw new Error("This backup has data Aligned can’t read safely. Nothing was changed.");
+          }
+          state = importedLoaded;
           libraryView = { filter: "all", topic: "all", search: "", limit: 40 };
           playSound("match");
           render();
@@ -14900,6 +14952,13 @@ var qrcode = function() {
     }
 
     function renderSetup() {
+      // A joiner whose host ended the link is back on their own phone: they become Player 1 here.
+      if (state.screen === "setup" && state.nearbyRole === "join" && !nearbyLinked() && !state.resumeScreen) {
+        state.names = [state.names[1], state.names[0]];
+        state.nearbyRole = "";
+        state.activePlayer = 0;
+        saveState();
+      }
       // Home after a pack round shows (and plays) the vibe the couple had before the pack.
       if (state.sessionPreset === "pack" && state.screen === "setup" && !state.resumeScreen) state.sessionPreset = presetAfterPack();
       const catalog = getQuestionCatalog();
@@ -15411,7 +15470,11 @@ var qrcode = function() {
 
         const selectedQuestionIds = chooseRoundQuestions(questionMode, questionCount, selectedTopics);
         if (selectedQuestionIds.length !== questionCount) {
-          playSound("error"); error.textContent = "That combination needs more questions. Add another pack or choose a shorter round.";
+          const topicSet = new Set(selectedTopics);
+          const hidden = getQuestionCatalog().filter((question) => topicSet.has(question.topic) && (state.neverQuestionIds.includes(question.id) || state.excludedQuestionIds.includes(question.id))).length;
+          playSound("error");
+          error.textContent = `Only ${selectedQuestionIds.length} question${selectedQuestionIds.length === 1 ? " is" : "s are"} available in these packs${hidden ? ` — ${hidden} ${hidden === 1 ? "is" : "are"} hidden in your Library` : ""}. Add another pack${hidden ? ", allow hidden questions again" : ""} or choose a shorter round.`;
+          window.setTimeout(() => error.scrollIntoView({ block: "center", behavior: motionReduced() ? "auto" : "smooth" }), 50);
           return;
         }
         let leaveJoinedRound = false;
@@ -15939,7 +16002,7 @@ var qrcode = function() {
       const fresh = lines.filter(([id]) => !recentHeadlines.includes(id));
       const [id, text] = firstOfVibe ? ["vibe", vibeLine] : fresh[round % Math.max(1, fresh.length)] || lines.find(([lineId]) => lineId === "finding");
       state.headlineFor = { key: roundKey, text };
-      state.recentHeadlines = [...recentHeadlines.filter((line) => line !== id), id].slice(-4);
+      state.recentHeadlines = [...recentHeadlines.filter((line) => line !== id), id].slice(-5);
       saveState();
       return text;
     }
@@ -16234,7 +16297,7 @@ var qrcode = function() {
         return `
           <div class="topic-alignment-card">
             ${alignmentRingMarkup(item.score, "similar")}
-            <span class="topic-alignment-name">${topic?.icon || "•"} ${escapeHTML(topic?.label || item.topic)} · ${item.fitScore}% fit · ${item.count}Q</span>
+            <span class="topic-alignment-name"><span class="nowrap">${topic?.icon || "•"} ${escapeHTML(topic?.label || item.topic)}</span> <span class="nowrap">· ${item.fitScore}% fit</span> <span class="nowrap">· ${item.count}Q</span></span>
           </div>
         `;
       }).join("");
@@ -16396,7 +16459,7 @@ var qrcode = function() {
           </section>
           <section class="highlight-grid ${allRevealed ? "" : "locked"}" aria-label="Round highlights" id="round-highlights">
             ${highlightCard(closestHighlight && closestHighlight.match.percent < 60 ? "Nearest common ground" : "Closest match", closestHighlight, "Complete more scored answers to unlock this highlight.", "", "One answer lines up beautifully…")}
-            ${highlightCard(surpriseNote && surpriseHighlight?.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No surprises — you read each other well.", surpriseNote, "Someone is in for a surprise…")}
+            ${highlightCard(surpriseNote && surpriseHighlight?.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No big surprises this round.", surpriseNote, surpriseHighlight ? "Someone is in for a surprise…" : "Your biggest surprise unlocks with the scores…")}
             ${conversationHighlight ? highlightCard("Best conversation starter", conversationHighlight, "", "", "There is a story waiting in one card…") : ""}
             ${tally.some((item) => item.made) ? `<article class="highlight-card mind-reader"><span>🔮 Mind-reader</span><strong class="highlight-answer">${mindReaderHeadline(tally)}<small class="highlight-note">${tally.filter((item) => item.made).map((item) => `${escapeHTML(state.names[item.player])} read ${escapeHTML(state.names[item.player === 0 ? 1 : 0])} ${item.hits}/${item.made}`).join(" · ")}</small></strong><strong class="highlight-locked">${tally.some((item) => item.hits) ? "Someone read the other’s mind… " : "Did anyone read minds tonight? "}<small>${everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"}</small></strong></article>` : ""}
           </section>
@@ -16598,6 +16661,11 @@ var qrcode = function() {
           if (sinceMatch < 600) { window.setTimeout(run, 650 - sinceMatch); return; }
           started = true;
           observer?.disconnect();
+          const heading = dashboard.querySelector("#alignment-title");
+          if (heading && document.activeElement && document.activeElement !== document.body && app.contains(document.activeElement)) {
+            heading.setAttribute("tabindex", "-1");
+            heading.focus({ preventScroll: true });
+          }
           playSound("countup");
           const begin = performance.now();
           const step = (now) => {
@@ -16666,7 +16734,8 @@ var qrcode = function() {
         }
         saveState();
         updateRevealAllButton();
-        lastOpenedCard = card.classList.contains("flipped") ? card : null;
+        openedCards = openedCards.filter((other) => other !== card);
+        if (card.classList.contains("flipped")) openedCards.push(card);
         requestAnimationFrame(() => {
           sizeCard(card);
           if (!card.classList.contains("flipped")) {
