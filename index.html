@@ -6269,7 +6269,7 @@
     details.topic-alignment-area > summary::after { content: " ▾"; color: var(--muted); }
     details.topic-alignment-area:not([open]) > summary::after { content: " ▸"; }
     @media (max-width: 600px) {
-      .alignment-dashboard .dual-score-dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
+      .alignment-dashboard .dual-score-dashboard { grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)) !important; gap: 10px !important; }
       .alignment-dashboard .overall-alignment { flex-direction: column; text-align: center; gap: 8px; }
       .alignment-dashboard .alignment-ring { width: 96px !important; height: 96px !important; }
       .alignment-dashboard .score-explainer { font-size: .7rem; line-height: 1.35; }
@@ -6319,7 +6319,9 @@
     }
     .nearby-banner.warning { border-color: rgba(251, 191, 36, 0.45); color: #fef3c7; background: rgba(120, 53, 15, 0.95); }
     @media (pointer: coarse) {
-      input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), textarea, select { font-size: max(16px, 1rem) !important; }
+      input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), textarea, select,
+      .question-screen textarea, textarea.answer-textarea, textarea.comment-textarea, textarea.private-note-input,
+      .name-input, #custom-prompt, .custom-input, .intention-input { font-size: max(16px, 1rem) !important; }
     }
     .sr-only { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
     [data-theme="pastel"] .type-chip { color: #1e40af; background: rgba(219, 234, 254, 0.9); }
@@ -6331,6 +6333,54 @@
     .question-header { flex-wrap: wrap; row-gap: 4px; }
     .question-header .progress-copy { min-width: 0; }
     [data-text-size="large"] .alignment-ring-content span { font-size: .5rem; letter-spacing: .03em; }
+    .ios-share-glyph { display: inline-block; vertical-align: -3px; margin: 0 2px; }
+    .nearby-banner.inline { position: static; transform: none; width: auto; margin: 10px 0 12px; box-shadow: none; }
+    .nearby-banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 12px; }
+    .nearby-banner .secondary-btn { min-height: 36px; padding: 6px 14px; }
+    details > summary { gap: 6px; }
+    .private-reflection > summary, .feedback-menu > summary { list-style: none; }
+    .private-reflection > summary::-webkit-details-marker, .feedback-menu > summary::-webkit-details-marker { display: none; }
+    .private-reflection > summary::before, .feedback-menu > summary::before { content: "▸"; display: inline-block; margin-right: 6px; color: var(--coral); transition: transform 160ms ease; }
+    .private-reflection[open] > summary::before, .feedback-menu[open] > summary::before { transform: rotate(90deg); }
+    #custom-error, .custom-form .error { margin: 10px 0; }
+    @media (max-width: 600px) {
+      .play-style-card small, .mode-description, .mode-card small, .count-time, .intensity-card small, .preset-card small,
+      .importance-option, .not-ready-button, .range-labels span, .mini-action, .topic-chip small, .session-item-copy { font-size: max(12px, .75rem) !important; }
+      .lock-card { padding-top: 34px !important; }
+      .lock-card .pass-visual { margin-bottom: 18px !important; }
+      .intensity-card strong, .mode-card strong { hyphens: none; }
+    }
+    @media (pointer: coarse) {
+      .name-input, .library-search, select, .custom-select, .count-card, .intensity-card, .library-filter, .question-library-action { min-height: 44px !important; }
+      .library-filter, .question-library-action { min-width: 44px; }
+    }
+    .question-card { overflow: clip; }
+    .play-style-card.unavailable { opacity: .62; }
+    [data-theme="pastel"] .flip-card:nth-child(n) .card-front {
+      background:
+        radial-gradient(circle at 92% 12%, color-mix(in srgb, var(--card-accent, #fb7185) 18%, transparent), transparent 10rem),
+        linear-gradient(145deg, #ffffff, #fff4f2);
+      color: #1e293b;
+    }
+    [data-theme="pastel"] .flip-card:nth-child(5n + 2) .card-front { --card-accent: #60a5fa; }
+    [data-theme="pastel"] .flip-card:nth-child(5n + 3) .card-front { --card-accent: #a78bfa; }
+    [data-theme="pastel"] .flip-card:nth-child(5n + 4) .card-front { --card-accent: #4ade80; }
+    [data-theme="pastel"] .flip-card:nth-child(5n + 5) .card-front { --card-accent: #fbbf24; }
+    [data-theme="pastel"] .card-front .card-number, [data-theme="pastel"] .card-front .tap-hint { color: #9f1239; }
+    [data-theme="pastel"] .match-badge { color: #92400e; background: #fef3c7; border-color: #f59e0b; }
+    [data-theme="pastel"] .difference-panel { background: #ffffff; border-color: rgba(148, 163, 184, 0.45); color: #1e293b; }
+    [data-theme="pastel"] .difference-score, [data-theme="pastel"] .difference-label { color: #334155; }
+    [data-theme="pastel"] .alignment-dashboard .alignment-ring-content span, [data-theme="pastel"] .home-results .alignment-ring-content span, [data-theme="pastel"] .alignment-ring-content span { color: #475569; }
+    [data-theme="pastel"] .alignment-ring-content strong { color: #1e293b; -webkit-text-fill-color: #1e293b; }
+    [data-theme="pastel"] .alignment-ring::before { background: linear-gradient(145deg, #ffffff, #fff1f2); border-color: rgba(148, 163, 184, 0.3); box-shadow: inset 0 4px 12px rgba(148, 163, 184, 0.25); }
+    .theme-picker { grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)) !important; }
+    .footer-note { color: #a8b4c6 !important; }
+    [data-theme="pastel"] .footer-note { color: #475569 !important; }
+    [data-theme="pastel"] .platform-badge { color: #9f1239; background: #ffe4e6; }
+    [data-theme="pastel"] .lede { color: #334155; }
+    [data-theme="pastel"] .library-answer-history, [data-theme="pastel"] .library-answer-history summary { color: #334155; background: rgba(255, 255, 255, 0.85); }
+    .high-contrast .footer-note { color: #f8fafc !important; }
+    .high-contrast[data-theme="pastel"] .footer-note, .high-contrast[data-theme="pastel"] .platform-badge { color: #0f172a !important; }
     .not-ready-note { color: var(--muted); font-size: .78rem; line-height: 1.45; }
     .danger-btn { border-color: rgba(248, 113, 113, 0.5) !important; color: #fecaca !important; background: rgba(127, 29, 29, 0.35) !important; }
     [data-theme="pastel"] .danger-btn { color: #991b1b !important; background: #fee2e2 !important; }
@@ -9079,7 +9129,7 @@ var qrcode = function() {
       { id: "curious", label: "Curious", icon: "✦", copy: "Balanced and meaningful" },
       { id: "deep", label: "Deep", icon: "◇", copy: "Vulnerable, honest conversations" },
       { id: "spicy", label: "Spicy", icon: "♨", copy: "Flirty and more intimate" },
-      { id: "no-filter", label: "No-filter", icon: "!", copy: "Bold topics and dealbreakers" }
+      { id: "no-filter", label: "No‑filter", icon: "!", copy: "Bold topics and dealbreakers" }
     ];
     const SENSITIVE_TOPICS = new Set(["spicy", "money", "politics", "dealbreakers"]);
     const SESSION_PRESETS = [
@@ -9176,7 +9226,9 @@ var qrcode = function() {
         completedPlayers: [false, false],
         nearbyRole: "",
         nearbyRoundId: "",
-        nearbyRemote: null
+        nearbyRemote: null,
+        nearbyRepairScreen: "",
+        nearbyDelivered: ""
       };
     }
 
@@ -9415,6 +9467,8 @@ var qrcode = function() {
         restored.nearbyRole = ["host", "join"].includes(restored.nearbyRole) ? restored.nearbyRole : "";
         restored.nearbyRoundId = typeof restored.nearbyRoundId === "string" ? restored.nearbyRoundId.slice(0, 80) : "";
         restored.nearbyRemote = restored.nearbyRemote && typeof restored.nearbyRemote === "object" && restored.nearbyRemote.roundId === restored.nearbyRoundId ? restored.nearbyRemote : null;
+        restored.nearbyRepairScreen = ["question", "nearby-wait", "celebration", "reveal"].includes(restored.nearbyRepairScreen) ? restored.nearbyRepairScreen : "";
+        restored.nearbyDelivered = typeof restored.nearbyDelivered === "string" ? restored.nearbyDelivered.slice(0, 80) : "";
         if (isRoundScreen && idsAreValid) {
           restored.questionCount = restored.selectedQuestionIds.length;
         }
@@ -9455,7 +9509,9 @@ var qrcode = function() {
     const freshNearbyRuntime = () => ({ role: null, status: "idle", errorReason: "", roomId: "", hostToken: "", joinToken: "", joinURL: "", expiresAt: 0, reconnectAttempts: 0, negotiating: false, roundStarted: false, partnerProgress: null, partnerLeft: false });
     let nearbyRuntime = freshNearbyRuntime();
     // Keep this deployed infrastructure URL stable so existing TURN secrets and installed clients continue to work.
-    const SIGNALING_SERVICE_URL = new URLSearchParams(location.search).get("signal") || "https://are-we-compatible-signal.bdaytin.workers.dev";
+    // Local development may point at a test pairing service; the published (https) app never accepts one from a link.
+    const SIGNALING_OVERRIDE = location.protocol === "http:" ? new URLSearchParams(location.search).get("signal") : null;
+    const SIGNALING_SERVICE_URL = SIGNALING_OVERRIDE || "https://are-we-compatible-signal.bdaytin.workers.dev";
     // Where a scanned QR should open when this copy is not served from the web (offline file, installed wrappers).
     const PUBLIC_APP_URL = "https://grandpatin.github.io/aligned/";
     const NEARBY_PLAY_SUPPORTED = /^https?:$/.test(location.protocol) && typeof window.RTCPeerConnection === "function" && typeof window.WebSocket === "function";
@@ -9502,6 +9558,7 @@ var qrcode = function() {
       const bytes = new TextEncoder().encode(text);
       let binary = "";
       for (let index = 0; index < bytes.length; index += 0x8000) binary += String.fromCharCode(...bytes.subarray(index, index + 0x8000));
+      // The app shows its own "Saved…" / "Could not save" message once the file is really written.
       window.AlignedAndroid.saveFile(fileName, mimeType, btoa(binary));
       return true;
     }
@@ -9549,7 +9606,7 @@ var qrcode = function() {
       const dataNote = "Saved games live in the browser or app you play in. To move them, use Export backup here, then Import in the other one.";
       const platformRows = [
         { id: "android", title: "Android phones & tablets", copy: `Download and open the APK (allow your browser to install apps if Android asks), or use your browser menu › Add to Home screen. ${dataNote}`, actions: downloads ? apk : "" },
-        { id: "ios", title: "iPhone & iPad", copy: `Open this page in Safari, tap Share <span aria-hidden="true">⎋</span>, then “Add to Home Screen”. It opens full-screen and works offline. ${dataNote}`, actions: "" },
+        { id: "ios", title: "iPhone & iPad", copy: `Open this page in Safari, tap Share <svg class="ios-share-glyph" viewBox="0 0 20 24" width="14" height="17" aria-hidden="true"><path d="M10 2v13M5.5 6.5 10 2l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10H3.5v12h13V10H14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg> (the square with an arrow), then “Add to Home Screen”. It opens full-screen and works offline. ${dataNote}`, actions: "" },
         { id: "desktop", title: "Windows, Mac, Linux & Chromebook", copy: `In Chrome or Edge use the install icon in the address bar; on a Mac in Safari choose File › Add to Dock.${downloads ? " Prefer a file? Download the offline copy and open it in any browser." : ""}`, actions: downloads ? htmlCopy : "" }
       ];
       const current = IS_IOS ? "ios" : IS_ANDROID ? "android" : "desktop";
@@ -9570,7 +9627,7 @@ var qrcode = function() {
         <p>${intro}</p>
         <p class="offline-ready" id="offline-ready" role="status"></p>
         ${installButton || updateButton ? `<div class="actions" style="margin-top:0">${!IN_ANDROID_APP && !IS_OFFLINE_FILE && !isStandalone() && current !== "ios" ? installButton : ""}${updateButton}</div>` : ""}
-        <p class="topic-note" id="install-status" role="status">${!IN_ANDROID_APP && !IS_OFFLINE_FILE && !isStandalone() ? escapeHTML(installInstructions()) : ""}</p>
+        <p class="topic-note" id="install-status" role="status"></p>
         ${IN_ANDROID_APP ? "" : `<div class="platform-list">${ordered.map((row, index) => `
           <details class="platform-row" ${index === 0 ? "open" : ""}>
             <summary>${row.title}${row.id === current ? ' <span class="platform-badge">This device</span>' : ""}</summary>
@@ -9586,6 +9643,7 @@ var qrcode = function() {
       if (IN_ANDROID_APP || IS_OFFLINE_FILE) return ready("Ready to play offline on this device.");
       const registration = await navigator.serviceWorker?.getRegistration?.().catch(() => null);
       if (registration?.active) ready("Ready to play offline on this device.");
+      else if (!("serviceWorker" in navigator)) line.textContent = "This window can’t store the game for offline use (private browsing?). Install the app or download the offline copy instead.";
       else line.textContent = "Offline mode finishes setting up after this page has loaded once with internet.";
     }
 
@@ -9962,11 +10020,20 @@ var qrcode = function() {
       const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "your partner";
       let message = "";
       let tone = "info";
+      let action = "";
+      const linkEnded = !nearbyRuntime.role || ["expired", "in-use", "failed", "partner-cancelled", "unsupported"].includes(nearbyRuntime.status);
+      const undelivered = ["celebration", "reveal"].includes(state.screen) && state.completedPlayers?.[nearbyLocalPlayer()] && state.nearbyDelivered !== state.nearbyRoundId;
       if (state.playStyle === "nearby" && state.nearbyRoundId && !nearbyChannelOpen()) {
-        if (["celebration", "reveal"].includes(state.screen) && nearbyOutbox.some((item) => item.payload.type === "player-complete")) {
+        if (undelivered && !linkEnded) {
           message = `Sending your answers to ${partner}… keep Aligned open until this disappears.`;
           tone = "warning";
-        } else if (state.screen === "question" && nearbyRuntime.role && !nearbyRuntime.partnerLeft) {
+        } else if (undelivered && linkEnded && !nearbyRuntime.partnerLeft) {
+          message = state.nearbyRole === "join"
+            ? `Your answers haven’t reached ${partner} yet — the pairing link closed. Ask ${partner} to tap “Pair again”, then scan the new QR.`
+            : `Your answers haven’t reached ${partner} yet — the pairing link closed. Show a new QR to deliver them.`;
+          tone = "warning";
+          if (state.nearbyRole !== "join") action = '<button class="secondary-btn" type="button" data-nearby-banner-repair>Pair again</button>';
+        } else if (state.screen === "question" && !linkEnded && !nearbyRuntime.partnerLeft) {
           message = `Reconnecting to ${partner}’s phone… keep answering, nothing is lost.`;
         } else if (state.screen === "question") {
           message = `The link to ${partner}’s phone has ended. Keep answering — you can reconnect or finish on one phone at the end.`;
@@ -9982,10 +10049,23 @@ var qrcode = function() {
         banner = document.createElement("div");
         banner.id = "nearby-banner";
         banner.setAttribute("role", "status");
+      }
+      const anchor = state.screen === "question" ? app.querySelector(".question-screen .progress-track") : null;
+      const screenElement = app.querySelector(".screen");
+      if (anchor) {
+        if (banner.previousElementSibling !== anchor) anchor.after(banner);
+      } else if (screenElement) {
+        if (banner.parentElement !== screenElement || screenElement.firstElementChild !== banner) screenElement.prepend(banner);
+      } else if (banner.parentElement !== document.body) {
         document.body.appendChild(banner);
       }
-      banner.className = `nearby-banner ${tone === "warning" ? "warning" : ""}`;
-      if (banner.textContent !== message) banner.textContent = message;
+      banner.className = `nearby-banner ${anchor || screenElement ? "inline" : ""} ${tone === "warning" ? "warning" : ""}`;
+      const signature = message + action;
+      if (banner.dataset.signature !== signature) {
+        banner.dataset.signature = signature;
+        banner.innerHTML = `<span>${escapeHTML(message)}</span>${action}`;
+        banner.querySelector("[data-nearby-banner-repair]")?.addEventListener("click", repairNearbyRound);
+      }
     }
 
     function nearbyPlayerPayload(player = state.activePlayer) {
@@ -10004,9 +10084,9 @@ var qrcode = function() {
       return state.nearbyRole === "join" ? 1 : 0;
     }
 
-    function nearbyRoundInitPayload() {
+    function nearbyRoundInitPayload({ newRound = false } = {}) {
       return {
-        type: "round-init", roundId: state.nearbyRoundId, names: [...state.names], questionMode: state.questionMode,
+        type: "round-init", roundId: state.nearbyRoundId, newRound: Boolean(newRound), names: [...state.names], questionMode: state.questionMode,
         questionIntensity: state.questionIntensity, selectedTopics: [...state.selectedTopics],
         selectedQuestionIds: [...state.selectedQuestionIds], questions: getSelectedQuestions().filter(Boolean)
       };
@@ -10046,10 +10126,19 @@ var qrcode = function() {
         return;
       }
       pendingRevealRefresh = false;
+      const cards = [...app.querySelectorAll(".flip-card[data-question-id]")];
+      const anchorCard = cards.find((card) => card.getBoundingClientRect().bottom > 80);
+      const anchorId = anchorCard?.dataset.questionId;
+      const anchorTop = anchorCard?.getBoundingClientRect().top ?? 0;
       const scrollY = window.scrollY;
+      const restore = () => {
+        const card = anchorId ? app.querySelector(`.flip-card[data-question-id="${CSS.escape(anchorId)}"]`) : null;
+        if (card) window.scrollBy(0, card.getBoundingClientRect().top - anchorTop);
+        else window.scrollTo(0, scrollY);
+      };
       render();
-      window.scrollTo(0, scrollY);
-      requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, scrollY)));
+      restore();
+      requestAnimationFrame(() => requestAnimationFrame(restore));
     }
 
     function finishNearbyRoundIfReady() {
@@ -10058,11 +10147,19 @@ var qrcode = function() {
       const player = remote.player === 0 ? 0 : 1;
       if (player === nearbyLocalPlayer()) return;
       const keep = (source) => Object.fromEntries(Object.entries(source && typeof source === "object" ? source : {}).filter(([id]) => state.selectedQuestionIds.includes(id)));
-      state.answers[player] = cleanAnswerMap(keep(remote.answers));
-      state.comments[player] = keep(remote.comments);
+      const catalogById = new Map(getQuestionCatalog().map((question) => [question.id, question]));
+      state.answers[player] = Object.fromEntries(Object.entries(cleanAnswerMap(keep(remote.answers))).flatMap(([id, value]) => {
+        const question = catalogById.get(id);
+        if (question?.type === "slider") {
+          const number = Number(value);
+          return Number.isFinite(number) ? [[id, Math.max(1, Math.min(10, Math.round(number)))]] : [];
+        }
+        return typeof value === "string" ? [[id, value]] : [];
+      }));
+      state.comments[player] = Object.fromEntries(Object.entries(keep(remote.comments)).filter(([, value]) => typeof value === "string").map(([id, value]) => [id, value.slice(0, 400)]));
       state.privateNotes[player] = {};
-      state.importance[player] = keep(remote.importance);
-      state.notReady[player] = keep(remote.notReady);
+      state.importance[player] = Object.fromEntries(Object.entries(keep(remote.importance)).filter(([, value]) => [0, 1, 2].includes(Number(value))).map(([id, value]) => [id, Number(value)]));
+      state.notReady[player] = Object.fromEntries(Object.entries(keep(remote.notReady)).filter(([, value]) => value === true));
       state.completedPlayers = [true, true];
       state.nearbyRemote = null;
       state.completedRounds = [...state.completedRounds, createCompletedRoundSnapshot()];
@@ -10077,6 +10174,9 @@ var qrcode = function() {
     function applyNearbyRoundInit(payload) {
       if (!payload.roundId || !Array.isArray(payload.selectedQuestionIds) || !payload.selectedQuestionIds.length) return;
       if (payload.roundId === state.nearbyRoundId && state.playStyle === "nearby" && state.screen !== "nearby") return;
+      const answersInProgress = state.playStyle === "nearby" && state.nearbyRoundId && ["question", "nearby-wait"].includes(state.screen)
+        && Object.keys(state.answers[1] || {}).length > 0;
+      if (answersInProgress && !payload.newRound) return;
       const validTopics = new Set(TOPIC_OPTIONS.map((topic) => topic.id));
       (payload.questions || []).forEach((remoteQuestion) => {
         if (!remoteQuestion || typeof remoteQuestion !== "object" || typeof remoteQuestion.id !== "string") return;
@@ -10157,7 +10257,14 @@ var qrcode = function() {
         if (nearbyRuntime.role === "host" && roundInProgress && payload.roundId !== state.nearbyRoundId) sendNearbyMessage(nearbyRoundInitPayload());
       } else if (payload.type === "round-init") {
         applyNearbyRoundInit(payload);
+      } else if (payload.type === "delivered") {
+        if (payload.roundId && payload.roundId === state.nearbyRoundId) {
+          state.nearbyDelivered = payload.roundId;
+          saveState();
+          updateNearbyBanner();
+        }
       } else if (payload.type === "player-complete") {
+        if (payload.roundId && payload.roundId === state.nearbyRoundId) sendNearbyMessage({ type: "delivered", roundId: payload.roundId }, { queue: false });
         if (!payload.roundId || payload.roundId !== state.nearbyRoundId || nearbyRoundFinished()) return;
         state.nearbyRemote = {
           roundId: payload.roundId,
@@ -10229,9 +10336,9 @@ var qrcode = function() {
         if (nearbyDataChannel !== channel) return;
         nearbyNegotiationFailures = 0;
         nearbyRuntime.partnerLeft = false;
-        if (nearbyRuntime.role === "host" && state.screen === "nearby" && nearbyRepairScreen) {
-          state.screen = nearbyRepairScreen;
-          nearbyRepairScreen = "";
+        if (nearbyRuntime.role === "host" && state.screen === "nearby" && state.nearbyRepairScreen) {
+          state.screen = state.nearbyRepairScreen;
+          state.nearbyRepairScreen = "";
           nearbyRuntime.roundStarted = true;
           saveNearbySession();
           saveState();
@@ -10241,7 +10348,7 @@ var qrcode = function() {
         playSound("match");
         sendNearbyHello();
         flushNearbyOutbox();
-        if (nearbyRuntime.role === "host" && state.screen === "nearby" && !nearbyRuntime.roundStarted) {
+        if (nearbyRuntime.role === "host" && state.screen === "nearby" && !nearbyRuntime.roundStarted && !state.nearbyRepairScreen) {
           clearTimeout(nearbyAutoStartTimer);
           nearbyAutoStartTimer = window.setTimeout(startNearbyRound, 650);
         }
@@ -10250,7 +10357,7 @@ var qrcode = function() {
       channel.addEventListener("close", () => {
         if (channel.__manualClose || nearbyDataChannel !== channel) return;
         setNearbyStatus("reconnecting");
-        if (["question", "nearby-wait", "celebration", "reveal"].includes(state.screen)) showToast("Connection to the other phone dropped. Reconnecting… answers are saved here.", { tone: "warning" });
+        updateNearbyBanner();
         if (nearbyRuntime.role === "host") {
           window.setTimeout(() => {
             if (nearbyDataChannel === channel && nearbySignalingSocket?.readyState === WebSocket.OPEN) negotiateNearbyHost();
@@ -10331,7 +10438,10 @@ var qrcode = function() {
       }
       try {
         closeNearbyConnection();
-        nearbyRuntime = { ...nearbyRuntime, role: "join", roomId, joinToken };
+        nearbyRuntime = { ...nearbyRuntime, role: "join", roomId, joinToken, expiresAt: Date.now() + 15 * 60 * 1000 };
+        state.nearbyRole = "join";
+        saveState();
+        saveNearbySession();
         setNearbyStatus("joining");
         const room = await signalingRequest(`/api/rooms/${encodeURIComponent(roomId)}/join`, {
           method: "POST",
@@ -10395,10 +10505,8 @@ var qrcode = function() {
     }
 
     // When the old room has ended, the host shows a fresh QR; scanning it reconnects the same round.
-    let nearbyRepairScreen = "";
-
     function repairNearbyRound() {
-      nearbyRepairScreen = state.screen;
+      state.nearbyRepairScreen = state.screen;
       closeNearbyConnection();
       state.screen = "nearby";
       saveState();
@@ -10555,7 +10663,7 @@ var qrcode = function() {
           highContrast: payload.settings?.highContrast,
           reducedMotion: payload.settings?.reducedMotion,
           privatePinHash: payload.settings?.privatePinHash,
-          tutorialSeen: payload.settings?.tutorialSeen,
+          tutorialSeen: true,
           selectedQuestionIds: payload.currentGame?.selectedQuestionIds || [],
           activePlayer: payload.currentGame?.activePlayer || 0,
           questionIndex: payload.currentGame?.questionIndex || 0,
@@ -10644,7 +10752,11 @@ var qrcode = function() {
           finish(value);
         });
         overlay.querySelector("#secret-input").addEventListener("keydown", (event) => {
-          if (event.key === "Enter") overlay.querySelector("#secret-confirm").click();
+          if (event.key === "Enter") {
+            event.preventDefault();
+            event.stopPropagation();
+            overlay.querySelector("#secret-confirm").click();
+          }
         });
         document.body.appendChild(overlay);
         overlay.querySelector("#secret-input").focus();
@@ -10678,7 +10790,7 @@ var qrcode = function() {
       const blob = new Blob([JSON.stringify(wrapper)], { type: "application/json" });
       if (saveWithAndroidBridge(`aligned-private-${new Date().toISOString().slice(0, 10)}.aligned`, "application/octet-stream", JSON.stringify(wrapper))) {
         playSound("lock");
-        showToast("Encrypted backup saved to Downloads. Keep its passphrase somewhere safe.");
+        showToast("Keep the backup’s passphrase somewhere safe — it can’t be recovered.");
         return;
       }
       const url = URL.createObjectURL(blob);
@@ -10724,7 +10836,7 @@ var qrcode = function() {
         if (!current) return;
         if (await hashPin(current) !== state.privatePinHash) { showToast("That PIN did not match."); return; }
         state.privatePinHash = "";
-        saveState(); renderSettings(); showToast("Private-notes PIN removed.");
+        saveState(); renderSettings(); document.getElementById("configure-pin")?.focus(); showToast("Private-notes PIN removed.");
         return;
       }
       const pin = await requestSecret({ title: "Protect private reflections", copy: "Set one PIN for this device. It locks both players' private notes, not the shared reveal board.", confirmLabel: "Next", minimum: 4, creating: true });
@@ -10733,7 +10845,7 @@ var qrcode = function() {
       if (!repeat) return;
       if (repeat !== pin) { showToast("Those PINs didn't match. No PIN was set.", { tone: "warning" }); return; }
       state.privatePinHash = await hashPin(pin);
-      saveState(); renderSettings(); showToast("Private reflections are now PIN protected.");
+      saveState(); renderSettings(); document.getElementById("configure-pin")?.focus(); showToast("Private reflections are now PIN protected.");
     }
 
     function showToast(message, { tone = "info" } = {}) {
@@ -10762,9 +10874,15 @@ var qrcode = function() {
     // behaviour: the page behind becomes inert, Tab stays inside, Escape cancels, and focus returns afterwards.
     const MODAL_CANCEL_SELECTOR = "[data-modal-cancel], #stay-in-round, #cancel-reset, #sensitive-cancel, #secret-cancel, #cancel-question-edit, #close-reflections, #tutorial-finish";
     let modalReturnFocus = null;
+    let modalReturnKey = "";
+    let modalWasOpen = false;
     let lastFocusOutsideModal = null;
+    let lastFocusKey = "";
     document.addEventListener("focusin", (event) => {
-      if (event.target instanceof Element && !event.target.closest(".modal-backdrop")) lastFocusOutsideModal = event.target;
+      if (event.target instanceof Element && !event.target.closest(".modal-backdrop")) {
+        lastFocusOutsideModal = event.target;
+        lastFocusKey = focusKeyFor(event.target) || lastFocusKey;
+      }
     });
 
     function focusScreenHeading() {
@@ -10786,13 +10904,25 @@ var qrcode = function() {
         if (child.matches(".modal-backdrop, .app-toast, #toast-live, #nearby-banner, script")) return;
         child.inert = Boolean(top);
       });
-      if (!top && modalReturnFocus) {
+      if (top) modalWasOpen = true;
+      if (!top && modalWasOpen) {
         const target = modalReturnFocus;
+        const key = modalReturnKey;
         modalReturnFocus = null;
+        modalReturnKey = "";
+        modalWasOpen = false;
         const focusLost = !document.activeElement || document.activeElement === document.body || !document.contains(document.activeElement);
         if (focusLost) {
-          if (target && document.contains(target) && !target.closest(".modal-backdrop")) target.focus({ preventScroll: true });
-          else focusScreenHeading();
+          let destination = target && document.contains(target) && !target.closest(".modal-backdrop") ? target : null;
+          if (!destination && key) {
+            try { destination = app.querySelector(key); } catch {}
+          }
+          if (destination) {
+            destination.focus({ preventScroll: true });
+            destination.scrollIntoView?.({ block: "nearest" });
+          } else {
+            focusScreenHeading();
+          }
         }
       }
     }
@@ -10804,7 +10934,7 @@ var qrcode = function() {
         event.stopImmediatePropagation();
         event.preventDefault();
       }
-      if (event.target instanceof Element && event.target.closest(".card-front") && Date.now() - lastScreenChangeAt < 450) {
+      if (event.target instanceof Element && app.contains(event.target) && event.timeStamp < lastScreenSettledAt + 400) {
         event.stopImmediatePropagation();
         event.preventDefault();
       }
@@ -10813,7 +10943,10 @@ var qrcode = function() {
     new MutationObserver((mutations) => {
       if (mutations.some((mutation) => [...mutation.addedNodes].some((node) => node.nodeType === 1 && node.matches(".modal-backdrop")))) lastModalOpenedAt = Date.now();
       const opened = mutations.some((mutation) => [...mutation.addedNodes].some((node) => node.nodeType === 1 && node.matches(".modal-backdrop")));
-      if (opened && !modalReturnFocus) modalReturnFocus = lastFocusOutsideModal && document.contains(lastFocusOutsideModal) ? lastFocusOutsideModal : null;
+      if (opened && !modalReturnFocus) {
+        modalReturnFocus = lastFocusOutsideModal && document.contains(lastFocusOutsideModal) ? lastFocusOutsideModal : null;
+        modalReturnKey = modalReturnFocus ? focusKeyFor(modalReturnFocus) : lastFocusKey;
+      }
       syncModalState();
     }).observe(document.body, { childList: true });
 
@@ -11271,8 +11404,8 @@ var qrcode = function() {
       if (state.screen === "nearby") {
         // Nothing is in progress on the pairing screen; leaving it closes the room so a late scan can't hang.
         closeNearbyConnection({ notifyPartner: true });
-        state.resumeScreen = nearbyRepairScreen || null;
-        nearbyRepairScreen = "";
+        state.resumeScreen = state.nearbyRepairScreen || null;
+        state.nearbyRepairScreen = "";
         state.screen = screen;
         saveState();
         render();
@@ -11290,6 +11423,7 @@ var qrcode = function() {
       saveState();
       playSound("tap");
       render();
+      focusScreenHeading();
     }
 
     document.getElementById("home-button")?.addEventListener("click", () => navigateToScreen("setup"));
@@ -11354,6 +11488,11 @@ var qrcode = function() {
       return Math.max(characterScore, tokenScore * 0.92);
     }
 
+    function sliderDisplay(value) {
+      const number = Number(value);
+      return Number.isFinite(number) && value !== "" && value !== null ? String(Math.max(1, Math.min(10, Math.round(number)))) : "—";
+    }
+
     function hasComparableAnswer(question, value) {
       if (question.type === "slider") return value !== "" && value !== null && value !== undefined && Number.isFinite(Number(value));
       return typeof value === "string" ? value.trim().length > 0 : value !== null && value !== undefined && String(value).trim().length > 0;
@@ -11403,7 +11542,7 @@ var qrcode = function() {
 
     function alignmentColor(percent) {
       const score = Math.max(0, Math.min(100, Number(percent) || 0));
-      return state.visualTheme === "pastel" ? `hsl(${Math.round(score * 1.2)} 80% 34%)` : `hsl(${Math.round(score * 1.2)} 76% 56%)`;
+      return state.visualTheme === "pastel" ? `hsl(${Math.round(score * 1.2)} 85% 28%)` : `hsl(${Math.round(score * 1.2)} 76% 56%)`;
     }
 
     function alignmentDescriptor(percent) {
@@ -11816,7 +11955,7 @@ var qrcode = function() {
     }
 
     function startNearbyRound() {
-      if (nearbyRuntime.role !== "host" || nearbyRuntime.roundStarted || state.screen !== "nearby") return;
+      if (nearbyRuntime.role !== "host" || nearbyRuntime.roundStarted || state.screen !== "nearby" || state.nearbyRepairScreen) return;
       if (!nearbyChannelOpen()) {
         showToast("The second phone isn't connected yet.", { tone: "warning" });
         return;
@@ -11830,7 +11969,7 @@ var qrcode = function() {
       nearbyRuntime.roundStarted = true;
       nearbyRuntime.partnerProgress = null;
       saveNearbySession();
-      sendNearbyMessage(nearbyRoundInitPayload());
+      sendNearbyMessage(nearbyRoundInitPayload({ newRound: true }));
     }
 
     function nearbyStatusPill() {
@@ -11925,7 +12064,7 @@ var qrcode = function() {
           <div class="nearby-card">
             <p class="eyebrow">Two phones · one scan</p>
             <h2 id="nearby-title">${isJoin ? `Joining your <span class="accent-text">partner’s round.</span>` : `Scan once, <span class="accent-text">connect automatically.</span>`}</h2>
-            <p class="lede">${isJoin ? "Your partner’s phone sends the questions. You’ll each answer privately, then reveal together." : nearbyRepairScreen ? `Reconnecting your round: ${partnerName} scans this new QR and you carry on where you left off.` : "Each person answers privately on their own phone, then you reveal together. No account needed."}</p>
+            <p class="lede">${isJoin ? "Your partner’s phone sends the questions. You’ll each answer privately, then reveal together." : state.nearbyRepairScreen ? `Reconnecting your round: ${partnerName} scans this new QR and you carry on where you left off.` : "Each person answers privately on their own phone, then you reveal together. No account needed."}</p>
             ${["blocked", "expired", "in-use", "failed", "unsupported", "host-missing", "partner-cancelled"].includes(status) ? "" : nearbyStatusPill()}
             ${initial ? `
               <div class="nearby-choice-grid" style="grid-template-columns:1fr">
@@ -11942,7 +12081,7 @@ var qrcode = function() {
             ${isJoin && !connected && !["blocked", "expired", "in-use", "failed", "host-missing", "unsupported", "partner-cancelled"].includes(status) ? `<div class="nearby-join-state"><div class="celebration-orb" aria-hidden="true">⌁</div><h3>You’re joining automatically</h3><p class="topic-note">Keep this screen open. Nothing needs to be scanned or typed on this phone.</p></div>` : ""}
             ${nearbyProblemPanel()}
             ${connected ? isHost ? `<p class="topic-note">Connected! ${hostName} answers here; ${partnerName} answers on the other phone. The questions are opening…</p><div class="actions"><button class="primary-btn" id="start-nearby-round" type="button">Start now</button></div>` : `<p class="topic-note">Connected. Your private questions are opening…</p>` : ""}
-            ${!initial && !connected ? `<button class="text-btn" id="${isHost ? "restart-nearby" : "leave-nearby"}" type="button" style="margin-top:18px">${isHost ? "Cancel and start over" : "Leave"}</button>` : ""}
+            ${!initial && !connected ? `<button class="text-btn" id="${isHost ? "restart-nearby" : "leave-nearby"}" type="button" style="margin-top:18px">${isHost ? (state.nearbyRepairScreen ? "Back to the round" : "Cancel and start over") : "Leave"}</button>` : ""}
             <p class="privacy-note" style="margin-top:20px"><span aria-hidden="true">⌁</span><span>${relayCopy}</span></p>
           </div>
         </section>`;
@@ -11952,7 +12091,15 @@ var qrcode = function() {
       document.getElementById("share-join-link")?.addEventListener("click", async () => {
         try { await navigator.share({ title: "Join our Aligned round", text: "Open this private link to join automatically.", url: nearbyRuntime.joinURL }); } catch {}
       });
-      document.getElementById("restart-nearby")?.addEventListener("click", () => { closeNearbyConnection({ notifyPartner: true }); render(); });
+      document.getElementById("restart-nearby")?.addEventListener("click", () => {
+        closeNearbyConnection({ notifyPartner: true });
+        if (state.nearbyRepairScreen) {
+          state.screen = state.nearbyRepairScreen;
+          state.nearbyRepairScreen = "";
+          saveState();
+        }
+        render();
+      });
       document.getElementById("leave-nearby")?.addEventListener("click", () => {
         closeNearbyConnection({ notifyPartner: true });
         state.screen = "setup";
@@ -12005,7 +12152,9 @@ var qrcode = function() {
           : "The phones lost their connection";
       const lede = connected || !showFallback
         ? `The reveal board opens on both phones as soon as ${partner} finishes.`
-        : "Your answers are saved on this phone. Choose how to finish below.";
+        : canReconnect && !nearbyRuntime.partnerLeft
+          ? "Your answers are saved on this phone. The phones keep trying to reconnect by themselves — or choose how to finish below."
+          : "Your answers are saved on this phone. Choose how to finish below.";
       app.innerHTML = `<section class="screen nearby-screen" aria-labelledby="nearby-wait-title"><div class="nearby-card" style="text-align:center"><div class="celebration-orb" aria-hidden="true">⌁</div><p class="eyebrow">Your answers are locked in</p><h2 id="nearby-wait-title">${heading}</h2><p class="lede">${lede}</p>
         ${answered !== null ? `<div class="partner-progress"><div class="partner-progress-label"><span>${partner}</span><span>${answered} of ${total} answered</span></div><div class="partner-progress-bar" role="progressbar" aria-label="${partner}’s progress" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${answered}"><span style="width:${(answered / Math.max(1, total)) * 100}%"></span></div></div>` : ""}
         ${showFallback ? "" : statusBlock}${fallback}</div></section>`;
@@ -12025,6 +12174,7 @@ var qrcode = function() {
 
     let lastRenderedQuestionKey = "";
     let lastScreenChangeAt = 0;
+    let lastScreenSettledAt = -Infinity;
     let lastExportAt = 0;
 
     function render() {
@@ -12042,11 +12192,17 @@ var qrcode = function() {
       cleanupResponsiveRender();
       cleanupResponsiveRender = () => {};
       applyPreferences();
-      document.title = state.screen === "reveal"
-        ? "Your Reveal Board — Aligned"
-        : state.screen === "library"
-          ? "Question Library — Aligned"
-          : "Aligned — Discover How Well You Align";
+      document.title = {
+        reveal: "Your Reveal Board — Aligned",
+        library: "Question Library — Aligned",
+        results: "Results Journal — Aligned",
+        settings: "Settings — Aligned",
+        question: "Answering — Aligned",
+        intermission: "Pass the device — Aligned",
+        celebration: "Round complete — Aligned",
+        nearby: "Two phones — Aligned",
+        "nearby-wait": "Waiting for your partner — Aligned"
+      }[state.screen] || "Aligned — Discover How Well You Align";
 
       if (state.screen === "question") renderQuestion();
       else if (state.screen === "intermission") renderIntermission();
@@ -12079,6 +12235,10 @@ var qrcode = function() {
       if (questionKey && questionKey !== lastRenderedQuestionKey && !screenChanged) {
         app.querySelector(".question-screen")?.scrollIntoView({ block: "start", behavior: state.reducedMotion ? "auto" : "smooth" });
       }
+      if (screenChanged || (questionKey && questionKey !== lastRenderedQuestionKey)) {
+        lastScreenSettledAt = performance.now();
+        requestAnimationFrame(() => { lastScreenSettledAt = performance.now(); });
+      }
       lastRenderedQuestionKey = questionKey;
       const focusLost = !document.activeElement || document.activeElement === document.body || !document.contains(document.activeElement);
       if (hasRenderedOnce && focusLost && !document.querySelector(".modal-backdrop")) {
@@ -12095,6 +12255,16 @@ var qrcode = function() {
     }
 
     let hasRenderedOnce = false;
+
+    // Partial re-renders (library list, settings sections) replace the focused control; put focus back on its
+    // equivalent so keyboard users keep their place.
+    new MutationObserver(() => {
+      if (!hasRenderedOnce || !lastFocusKey || document.querySelector(".modal-backdrop")) return;
+      if (document.activeElement && document.activeElement !== document.body) return;
+      let element = null;
+      try { element = app.querySelector(lastFocusKey); } catch {}
+      element?.focus({ preventScroll: true });
+    }).observe(app, { childList: true, subtree: true });
 
     // Android app shell: the hardware Back button closes dialogs first, then returns to Home.
     window.alignedHandleBack = () => {
@@ -12114,7 +12284,7 @@ var qrcode = function() {
     };
 
     function savedQuestionAnswersMarkup(question, round) {
-      const playerColors = ["#60a5fa", "#4ade80"];
+      const playerColors = state.visualTheme === "pastel" ? ["#1d4ed8", "#15803d"] : ["#60a5fa", "#4ade80"];
       const answers = [0, 1].map((playerIndex) => {
         const rawAnswer = round.answers?.[playerIndex]?.[question.id];
         const rawComment = round.comments?.[playerIndex]?.[question.id];
@@ -12387,8 +12557,17 @@ var qrcode = function() {
         });
 
         list.querySelectorAll("[data-delete-question]").forEach((button) => {
-          button.addEventListener("click", () => {
+          button.addEventListener("click", async () => {
             const id = button.dataset.deleteQuestion;
+            const confirmed = await openConfirmDialog({
+              eyebrow: "Custom question",
+              title: "Delete this question?",
+              copy: "It will be removed from your library and future rounds. Saved round history keeps its answers.",
+              confirmLabel: "Delete question",
+              cancelLabel: "Keep it",
+              danger: true
+            });
+            if (!confirmed) return;
             state.customQuestions = state.customQuestions.filter((question) => question.id !== id);
             state.excludedQuestionIds = state.excludedQuestionIds.filter((questionId) => questionId !== id);
             state.neverQuestionIds = state.neverQuestionIds.filter((questionId) => questionId !== id);
@@ -12459,7 +12638,9 @@ var qrcode = function() {
         const error = document.getElementById("custom-error");
         if (!prompt) {
           error.textContent = "Add a question prompt first.";
-          document.getElementById("custom-prompt").focus();
+          const promptField = document.getElementById("custom-prompt");
+          promptField.addEventListener("input", () => { error.textContent = ""; }, { once: true });
+          promptField.focus();
           return;
         }
         if (type === "slider" && (!leftLabel || !rightLabel)) {
@@ -12538,7 +12719,9 @@ var qrcode = function() {
         saveState(); overlay.remove(); renderLibrary(); playSound("match");
       });
       document.body.appendChild(overlay);
-      overlay.querySelector("#edit-question-prompt").focus();
+      const promptEditor = overlay.querySelector("#edit-question-prompt");
+      promptEditor.focus();
+      promptEditor.setSelectionRange?.(promptEditor.value.length, promptEditor.value.length);
     }
 
     function renderResults() {
@@ -12772,7 +12955,7 @@ var qrcode = function() {
               <button class="secondary-btn" id="configure-pin" type="button" style="margin-top:12px">${state.privatePinHash ? "Remove or change PIN" : "Set a private-notes PIN"}</button>
             </article>
             <article class="settings-card full">
-              <h3>Save & transfer game data</h3><p>Readable JSON · stored locally in this browser. Keep backups or transfer your progress to another device.</p>
+              <h3>Save & transfer game data</h3><p>Readable JSON · stored locally ${IN_ANDROID_APP ? "on this device" : "in this browser"}. Keep backups or transfer your progress to another device.</p>
               <div class="data-tools" style="margin-top:10px">
                 <button class="data-tool" id="export-data" type="button"><span aria-hidden="true">↓</span>Export backup</button>
                 <button class="data-tool" id="export-encrypted" type="button"><span aria-hidden="true">◇</span>Encrypted backup</button>
@@ -12989,7 +13172,7 @@ var qrcode = function() {
             <p class="setup-section-title">How are you playing?</p>
             <div class="play-style-grid" aria-label="Play style">
               <button class="play-style-card ${state.playStyle === "pass-and-play" ? "active" : ""}" type="button" data-play-style="pass-and-play"><strong>▣ One device</strong><small>Pass the phone and keep answers locked between turns.</small></button>
-              <button class="play-style-card ${state.playStyle === "nearby" ? "active" : ""}" type="button" data-play-style="nearby"><strong>⌁ Two phones · one scan</strong><small>Scan once, connect automatically, and answer privately on separate phones.</small></button>
+              <button class="play-style-card ${state.playStyle === "nearby" ? "active" : ""} ${NEARBY_PLAY_SUPPORTED ? "" : "unavailable"}" type="button" data-play-style="nearby" ${NEARBY_PLAY_SUPPORTED ? "" : 'aria-disabled="true"'}><strong>⌁ Two phones · one scan</strong><small>${NEARBY_PLAY_SUPPORTED ? "Scan once, connect automatically, and answer privately on separate phones." : IS_OFFLINE_FILE ? "Needs the installed or online app — this offline copy plays on one device." : "Not available in this browser — play on one device."}</small></button>
             </div>
 
             <p class="setup-section-title">Session preset</p>
@@ -13045,7 +13228,7 @@ var qrcode = function() {
               <label class="mode-option">
                 <input type="radio" name="question-mode" value="slider-heavy" ${state.questionMode === "slider-heavy" ? "checked" : ""}>
                 <span class="mode-card">
-                  <span class="mode-topline"><span>Slider-heavy</span><span class="mode-icon">≋</span></span>
+                  <span class="mode-topline"><span>Slider‑heavy</span><span class="mode-icon">≋</span></span>
                   <span class="mode-description" data-mode-summary="slider-heavy">${modeSummary("slider-heavy", state.questionCount)}</span>
                 </span>
               </label>
@@ -13103,6 +13286,10 @@ var qrcode = function() {
       playerTwo.addEventListener("input", rememberNames);
       document.querySelectorAll("[data-play-style]").forEach((button) => button.addEventListener("click", () => {
         rememberNames();
+        if (button.dataset.playStyle === "nearby" && !NEARBY_PLAY_SUPPORTED) {
+          showToast(IS_OFFLINE_FILE ? "Two-phone play needs the installed or online app. This copy plays on one device." : "This browser can’t pair two phones. One-device play works fully.", { tone: "warning" });
+          return;
+        }
         state.playStyle = button.dataset.playStyle;
         state.sessionPreset = state.sessionPreset || "custom";
         saveState();
@@ -13225,9 +13412,22 @@ var qrcode = function() {
           render();
         });
       });
+      const markPresetCustom = () => {
+        if (state.sessionPreset === "custom") return;
+        state.sessionPreset = "custom";
+        const custom = SESSION_PRESETS.find((preset) => preset.id === "custom");
+        const label = document.querySelector("#session-select-trigger .session-trigger-val");
+        if (custom && label) label.textContent = `${custom.icon} ${custom.label}`;
+        document.querySelectorAll("[data-session-preset]").forEach((item) => {
+          const selected = item.dataset.sessionPreset === "custom";
+          item.classList.toggle("selected", selected);
+          item.setAttribute("aria-selected", String(selected));
+        });
+        updatePresetInfo("custom");
+      };
       document.querySelectorAll('input[name="question-count"]').forEach((input) => {
         input.addEventListener("change", () => {
-          state.sessionPreset = "custom";
+          markPresetCustom();
           state.questionCount = Number(input.value);
           document.querySelectorAll("[data-mode-summary]").forEach((summary) => {
             summary.textContent = modeSummary(summary.dataset.modeSummary, state.questionCount);
@@ -13238,7 +13438,7 @@ var qrcode = function() {
       });
       document.querySelectorAll('input[name="question-mode"]').forEach((input) => {
         input.addEventListener("change", () => {
-          state.sessionPreset = "custom";
+          markPresetCustom();
           state.questionMode = input.value;
           playSound("tap");
           saveState();
@@ -13247,7 +13447,7 @@ var qrcode = function() {
 
       const topicInputs = [...document.querySelectorAll('input[name="topics"]')];
       const rememberTopics = () => {
-        state.sessionPreset = "custom";
+        markPresetCustom();
         state.selectedTopics = topicInputs.filter((input) => input.checked && !input.disabled).map((input) => input.value);
         saveState();
       };
@@ -13338,6 +13538,7 @@ var qrcode = function() {
         }
         if (!selectedTopics.length) {
           error.textContent = "Choose at least one question pack.";
+          window.setTimeout(() => error.scrollIntoView({ block: "center", behavior: state.reducedMotion ? "auto" : "smooth" }), 450);
           document.querySelector(".topic-picker").scrollIntoView({ behavior: "smooth", block: "center" });
           return;
         }
@@ -13569,7 +13770,7 @@ var qrcode = function() {
       form.addEventListener("submit", (event) => {
         event.preventDefault();
         // A fast double tap must not skip the next (unseen) question.
-        if (Date.now() - lastQuestionAdvanceAt < 350) return;
+        if (Date.now() - lastQuestionAdvanceAt < 650) return;
         lastQuestionAdvanceAt = Date.now();
         const value = question.type === "slider" ? Number(input.value) : input.value.trim();
         const notReady = state.notReady[state.activePlayer][question.id] === true;
@@ -13732,15 +13933,15 @@ var qrcode = function() {
           <div class="comparison-track" style="--p1-pos: ${p1}%; --p2-pos: ${p2}%">
             <div class="comparison-gap" aria-hidden="true"></div>
             <div class="marker marker-one" style="--marker-pos: ${p1}%; --marker-color: var(--blue); --marker-offset: -2px" aria-hidden="true">
-              <span class="marker-value">${Number(firstAnswer)}</span>
+              <span class="marker-value">${sliderDisplay(firstAnswer)}</span>
             </div>
             <div class="marker marker-two" style="--marker-pos: ${p2}%; --marker-color: var(--green); --marker-offset: 2px" aria-hidden="true">
-              <span class="marker-value">${Number(secondAnswer)}</span>
+              <span class="marker-value">${sliderDisplay(secondAnswer)}</span>
             </div>
           </div>
           <div class="comparison-legend">
-            <span class="legend-item"><span class="legend-dot" style="--dot-color: var(--blue)"></span>${escapeHTML(state.names[0])}: ${Number(firstAnswer)}</span>
-            <span class="legend-item"><span class="legend-dot" style="--dot-color: var(--green)"></span>${escapeHTML(state.names[1])}: ${Number(secondAnswer)}</span>
+            <span class="legend-item"><span class="legend-dot" style="--dot-color: var(--blue)"></span>${escapeHTML(state.names[0])}: ${sliderDisplay(firstAnswer)}</span>
+            <span class="legend-item"><span class="legend-dot" style="--dot-color: var(--green)"></span>${escapeHTML(state.names[1])}: ${sliderDisplay(secondAnswer)}</span>
           </div>
           ${differenceMarkup(matchInfo, question)}
           ${importanceMarkup(question)}
@@ -14108,7 +14309,7 @@ var qrcode = function() {
             saveState();
             nearbyRuntime.roundStarted = true;
             nearbyRuntime.partnerProgress = null;
-            sendNearbyMessage(nearbyRoundInitPayload());
+            sendNearbyMessage(nearbyRoundInitPayload({ newRound: true }));
             return;
           } else {
             showToast("Waiting for the host to start the next round...");

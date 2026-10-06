@@ -173,7 +173,7 @@ export class PairingRoom {
     // same join link is refused, so a third device can never take over a room.
     const device = (url.searchParams.get("device") || "").slice(0, 64);
     const existing = this.ctx.getWebSockets().filter((socket) => socket.deserializeAttachment()?.role === role);
-    if (role === "join" && device && configuration.joinDevice && configuration.joinDevice !== device && existing.length) {
+    if (role === "join" && device && configuration.joinDevice && configuration.joinDevice !== device) {
       this.ctx.acceptWebSocket(server);
       server.serializeAttachment({ role: "rejected" });
       server.close(4009, "This link is already in use");
@@ -227,6 +227,13 @@ export class PairingRoom {
     const recipientRole = senderRole === "host" ? "join" : "host";
     for (const recipient of this.socketsByRole()[recipientRole]) {
       try { recipient.send(text); } catch {}
+    }
+    if (payload.type === "leave" && senderRole === "host") {
+      // The host cancelled: close the room so a late scan is told straight away instead of waiting.
+      for (const open of this.ctx.getWebSockets()) {
+        try { open.close(4000, "Pairing room closed"); } catch {}
+      }
+      await this.ctx.storage.deleteAll();
     }
   }
 
