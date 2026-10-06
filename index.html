@@ -6277,6 +6277,7 @@
       .alignment-dashboard .alignment-ring-content strong { font-size: 1.35rem; }
     }
     html { overflow-x: clip; }
+    @supports (overflow: clip) { body { overflow-x: visible; } }
     @supports not (overflow: clip) { html, body { overflow-x: hidden; } }
     .slider-comment, .answer-copy, .card-back, .round-copy, .library-question { overflow-wrap: anywhere; }
     .question-library-actions { flex-wrap: wrap; min-width: 0; }
@@ -6374,13 +6375,55 @@
     [data-theme="pastel"] .alignment-ring-content strong { color: #1e293b; -webkit-text-fill-color: #1e293b; }
     [data-theme="pastel"] .alignment-ring::before { background: linear-gradient(145deg, #ffffff, #fff1f2); border-color: rgba(148, 163, 184, 0.3); box-shadow: inset 0 4px 12px rgba(148, 163, 184, 0.25); }
     .theme-picker { grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)) !important; }
-    .footer-note { color: #a8b4c6 !important; }
+    .theme-option, .theme-card { min-width: 0; max-width: 100%; }
+    [data-theme="midnight"] .footer-note, [data-theme="cosmic"] .footer-note { color: #a8b4c6 !important; }
+    [data-theme="sunset"] .footer-note { width: fit-content; margin-inline: auto; padding: 6px 14px; border-radius: 999px; color: #fff7ed !important; background: rgba(69, 10, 26, 0.62); }
     [data-theme="pastel"] .footer-note { color: #475569 !important; }
     [data-theme="pastel"] .platform-badge { color: #9f1239; background: #ffe4e6; }
     [data-theme="pastel"] .lede { color: #334155; }
     [data-theme="pastel"] .library-answer-history, [data-theme="pastel"] .library-answer-history summary { color: #334155; background: rgba(255, 255, 255, 0.85); }
     .high-contrast .footer-note { color: #f8fafc !important; }
     .high-contrast[data-theme="pastel"] .footer-note, .high-contrast[data-theme="pastel"] .platform-badge { color: #0f172a !important; }
+    .question-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .question-meta-actions { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+    .question-meta-actions .favorite-button { order: 2; }
+    .range-input { min-height: 44px; background-clip: content-box; }
+    .volume-input { width: min(48%, 190px); }
+    @media (max-width: 600px) {
+      .field-grid label, .play-style-card strong, .preset-info-copy, .preset-config-summary span, .intensity-card strong,
+      .mode-topline span, .topic-chip, .topic-note, .topic-note strong, .round-mode-copy, .category-pill, .type-chip,
+      .comment-details summary, .importance-panel strong, .private-reflection summary, .eyebrow, .reveal-all-btn span,
+      .score-explainer, .topic-alignment-title, .topic-alignment-name, .alignment-legend span, .card-number, .match-badge,
+      .comparison-scale span, .difference-label, .difference-score, .discussion-card strong, .follow-through-button,
+      .feedback-menu summary, .question-library-action, .alignment-rating strong, .rating-option, .highlight-card span,
+      .lede, .journal-card p, .trend-card p, .trend-row span, .trend-row strong, .round-score small, .round-copy span,
+      .library-overall span, .topic-progress-top span, .custom-label, .library-filter, .library-question-meta span,
+      .question-tag, .library-answer-history summary, .saved-round-date, .saved-answer-name, .saved-answer-value,
+      .library-load-more .secondary-btn, .settings-card p, .theme-card small, .setting-row label, .settings-card .secondary-btn,
+      .text-size-option span:last-child, .data-tool, .version-tag, .offline-ready, .platform-badge, .download-link,
+      .actions .secondary-btn, .alignment-ring-content span, .nearby-banner, .connection-pill, .nearby-track li,
+      .partner-progress-label { font-size: max(12px, 0.75rem) !important; }
+      .alignment-ring { width: 124px !important; height: 124px !important; }
+      .alignment-ring-content span { letter-spacing: 0.02em !important; }
+      .alignment-ring-content strong { font-size: 1.5rem !important; }
+      .alignment-dashboard .dual-score-dashboard { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)) !important; }
+      .setup-title-row { flex-direction: column; align-items: stretch !important; gap: 10px; }
+      .setup-title-row .topic-toolbar { width: 100%; }
+    }
+    [data-theme="pastel"] .play-style-card small, [data-theme="pastel"] .count-time, [data-theme="pastel"] .mode-description,
+    [data-theme="pastel"] .preset-card small, [data-theme="pastel"] .intensity-card small, [data-theme="pastel"] .topic-note { color: #556178; }
+    @media (display-mode: standalone) {
+      [data-theme="pastel"] body::before {
+        content: "";
+        position: fixed;
+        inset: 0 0 auto;
+        z-index: 1000;
+        height: env(safe-area-inset-top, 0px);
+        background: #9f1239;
+        pointer-events: none;
+      }
+    }
+    .screen, .question-screen, .flip-card, .error, #setup-error { scroll-margin-top: calc(84px + env(safe-area-inset-top, 0px)); }
     .not-ready-note { color: var(--muted); font-size: .78rem; line-height: 1.45; }
     .danger-btn { border-color: rgba(248, 113, 113, 0.5) !important; color: #fecaca !important; background: rgba(127, 29, 29, 0.35) !important; }
     [data-theme="pastel"] .danger-btn { color: #991b1b !important; background: #fee2e2 !important; }
@@ -9348,7 +9391,7 @@ var qrcode = function() {
           ...cached,
           version: 2,
           names: Array.isArray(cached.names)
-            ? [String(cached.names[0] || ""), String(cached.names[1] || "")]
+            ? [typeof cached.names[0] === "string" ? cached.names[0].slice(0, 40) : "", typeof cached.names[1] === "string" ? cached.names[1].slice(0, 40) : ""]
             : ["", ""],
           answers: Array.isArray(cached.answers)
             ? [cleanAnswerMap(cached.answers[0]), cleanAnswerMap(cached.answers[1])]
@@ -9499,6 +9542,9 @@ var qrcode = function() {
     let nearbyPendingCandidates = [];
     let nearbyOutbox = [];
     let nearbyNegotiationFailures = 0;
+    let nearbyPeerWatchTimer = 0;
+    let nearbyLastPeerMessageAt = 0;
+    const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
     const APP_VERSION = "1.1.0";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
@@ -9588,6 +9634,15 @@ var qrcode = function() {
       }
     }
 
+    let updateReadyToUse = false;
+
+    function showUpdateReady(status) {
+      if (!status) return;
+      updateReadyToUse = true;
+      status.innerHTML = 'Update ready. <button class="text-btn" type="button" id="apply-update">Refresh to use it</button>';
+      status.querySelector("#apply-update")?.addEventListener("click", () => location.reload());
+    }
+
     function installInstructions() {
       if (IS_IOS) return "On iPhone or iPad: open this page in Safari, tap Share, then “Add to Home Screen”.";
       if (IS_ANDROID) return "Open your browser’s menu and choose “Add to Home screen” or “Install app” — or download the Android app below.";
@@ -9611,7 +9666,7 @@ var qrcode = function() {
       ];
       const current = IS_IOS ? "ios" : IS_ANDROID ? "android" : "desktop";
       if (IS_OFFLINE_FILE) platformRows.forEach((row) => {
-        row.copy = `To install Aligned on this device, open <strong>${escapeHTML(PUBLIC_APP_URL.replace(/^https:\/\//, ""))}</strong> while online and follow the steps there.`;
+        row.copy = `To install Aligned on this device, open <a href="${PUBLIC_APP_URL}" target="_blank" rel="noopener">${escapeHTML(PUBLIC_APP_URL.replace(/^https:\/\//, ""))}</a> while online and follow the steps there. Keep this file in the same place — some browsers save games per file location.`;
         row.actions = "";
       });
       const ordered = [...platformRows.filter((row) => row.id === current), ...platformRows.filter((row) => row.id !== current)];
@@ -9683,7 +9738,7 @@ var qrcode = function() {
       if (!response.ok) {
         const reason = response.status === 410 ? "expired" : response.status === 403 ? "invalid" : response.status === 429 ? "busy" : "service";
         const message = {
-          expired: "This QR has expired or is no longer valid. Ask your partner to create a new one.",
+          expired: "This QR is no longer active — your partner may have cancelled it, or it timed out. Ask for a new QR.",
           invalid: "This join link isn't valid. Ask your partner to show a fresh QR.",
           busy: "Too many rooms were created just now. Wait a minute and try again.",
           service: payload.error || "The connection service is unavailable right now. Try again in a moment."
@@ -9745,7 +9800,26 @@ var qrcode = function() {
     }
 
     function nearbyChannelOpen() {
-      return nearbyDataChannel?.readyState === "open";
+      return nearbyDataChannel?.readyState === "open" && !nearbyDataChannel.__lost;
+    }
+
+    let nearbyPeerLostTimer = 0;
+
+    function handleNearbyChannelLost(channel) {
+      if (!channel || channel.__lost || channel.__manualClose || nearbyDataChannel !== channel) return;
+      channel.__lost = true;
+      clearInterval(nearbyPeerWatchTimer);
+      setNearbyStatus("reconnecting");
+      updateNearbyBanner();
+      clearTimeout(nearbyPeerLostTimer);
+      nearbyPeerLostTimer = window.setTimeout(() => {
+        if (!nearbyChannelOpen() && nearbyRuntime.role && ["reconnecting", "waiting-host", "room-ready", "connecting"].includes(nearbyRuntime.status)) setNearbyStatus("peer-lost");
+      }, 25000);
+      if (nearbyRuntime.role === "host") {
+        window.setTimeout(() => {
+          if (nearbyDataChannel === channel && nearbySignalingSocket?.readyState === WebSocket.OPEN) negotiateNearbyHost();
+        }, 800);
+      }
     }
 
     function nearbyRoomExpired() {
@@ -9920,8 +9994,14 @@ var qrcode = function() {
           if (socket.__manualClose) return;
           nearbySignalingSocket = null;
           const channelOpen = nearbyChannelOpen();
-          if (event.code === 4001 || event.code === 4009) {
-            // Another phone opened the same link (or this phone opened it twice); never fight over the room.
+          if (event.code === 4001) {
+            // This phone opened the round in another tab or window, which now holds the connection.
+            nearbyRuntime.otherTab = true;
+            setNearbyStatus("other-tab");
+            return;
+          }
+          if (event.code === 4009) {
+            // A different phone opened the same link; never fight over the room.
             if (!channelOpen) setNearbyStatus("in-use");
             return;
           }
@@ -9957,6 +10037,8 @@ var qrcode = function() {
         sendNearbySignal({ type: "leave" });
       }
       clearInterval(nearbyHeartbeatTimer);
+      clearInterval(nearbyPeerWatchTimer);
+      clearTimeout(nearbyPeerLostTimer);
       clearTimeout(nearbyReconnectTimer);
       clearTimeout(nearbyAutoStartTimer);
       clearTimeout(nearbyConnectTimer);
@@ -10005,7 +10087,7 @@ var qrcode = function() {
       updateNearbyBanner();
     }
 
-    const PRESSABLE_SELECTOR = ".rating-option, .follow-through-button, .library-filter, .topic-progress-card, .play-style-card, .preset-card, .importance-option";
+    const PRESSABLE_SELECTOR = ".rating-option, .follow-through-button, .library-filter, .topic-progress-card, .play-style-card, .preset-card, .importance-option, .feedback-actions .question-library-action";
     function syncPressedStates(root = app) {
       root.querySelectorAll(PRESSABLE_SELECTOR).forEach((button) => {
         const pressed = String(button.classList.contains("active"));
@@ -10023,8 +10105,8 @@ var qrcode = function() {
       let action = "";
       const linkEnded = !nearbyRuntime.role || ["expired", "in-use", "failed", "partner-cancelled", "unsupported"].includes(nearbyRuntime.status);
       const undelivered = ["celebration", "reveal"].includes(state.screen) && state.completedPlayers?.[nearbyLocalPlayer()] && state.nearbyDelivered !== state.nearbyRoundId;
-      if (state.playStyle === "nearby" && state.nearbyRoundId && !nearbyChannelOpen()) {
-        if (undelivered && !linkEnded) {
+      if (state.playStyle === "nearby" && state.nearbyRoundId && (undelivered || !nearbyChannelOpen())) {
+        if (undelivered && (nearbyChannelOpen() || !linkEnded)) {
           message = `Sending your answers to ${partner}… keep Aligned open until this disappears.`;
           tone = "warning";
         } else if (undelivered && linkEnded && !nearbyRuntime.partnerLeft) {
@@ -10033,6 +10115,10 @@ var qrcode = function() {
             : `Your answers haven’t reached ${partner} yet — the pairing link closed. Show a new QR to deliver them.`;
           tone = "warning";
           if (state.nearbyRole !== "join") action = '<button class="secondary-btn" type="button" data-nearby-banner-repair>Pair again</button>';
+        } else if (nearbyRuntime.status === "other-tab") {
+          message = "Aligned is open in another tab or window, which is using the connection to your partner.";
+          tone = "warning";
+          action = '<button class="secondary-btn" type="button" data-nearby-use-tab>Use this tab</button>';
         } else if (state.screen === "question" && !linkEnded && !nearbyRuntime.partnerLeft) {
           message = `Reconnecting to ${partner}’s phone… keep answering, nothing is lost.`;
         } else if (state.screen === "question") {
@@ -10050,12 +10136,12 @@ var qrcode = function() {
         banner.id = "nearby-banner";
         banner.setAttribute("role", "status");
       }
-      const anchor = state.screen === "question" ? app.querySelector(".question-screen .progress-track") : null;
+      const anchor = state.screen === "question" ? (app.querySelector(".question-screen .progress-constellation") || app.querySelector(".question-screen .progress-track")) : null;
       const screenElement = app.querySelector(".screen");
       if (anchor) {
         if (banner.previousElementSibling !== anchor) anchor.after(banner);
       } else if (screenElement) {
-        if (banner.parentElement !== screenElement || screenElement.firstElementChild !== banner) screenElement.prepend(banner);
+        if (banner.parentElement !== app || app.firstElementChild !== banner) app.prepend(banner);
       } else if (banner.parentElement !== document.body) {
         document.body.appendChild(banner);
       }
@@ -10065,6 +10151,7 @@ var qrcode = function() {
         banner.dataset.signature = signature;
         banner.innerHTML = `<span>${escapeHTML(message)}</span>${action}`;
         banner.querySelector("[data-nearby-banner-repair]")?.addEventListener("click", repairNearbyRound);
+        banner.querySelector("[data-nearby-use-tab]")?.addEventListener("click", retryNearbyConnection);
       }
     }
 
@@ -10258,7 +10345,7 @@ var qrcode = function() {
       } else if (payload.type === "round-init") {
         applyNearbyRoundInit(payload);
       } else if (payload.type === "delivered") {
-        if (payload.roundId && payload.roundId === state.nearbyRoundId) {
+        if (payload.roundId && payload.roundId === state.nearbyRoundId && state.nearbyDelivered !== payload.roundId) {
           state.nearbyDelivered = payload.roundId;
           saveState();
           updateNearbyBanner();
@@ -10336,6 +10423,7 @@ var qrcode = function() {
         if (nearbyDataChannel !== channel) return;
         nearbyNegotiationFailures = 0;
         nearbyRuntime.partnerLeft = false;
+        clearTimeout(nearbyPeerLostTimer);
         if (nearbyRuntime.role === "host" && state.screen === "nearby" && state.nearbyRepairScreen) {
           state.screen = state.nearbyRepairScreen;
           state.nearbyRepairScreen = "";
@@ -10353,17 +10441,27 @@ var qrcode = function() {
           nearbyAutoStartTimer = window.setTimeout(startNearbyRound, 650);
         }
       });
-      channel.addEventListener("message", handleNearbyMessage);
-      channel.addEventListener("close", () => {
-        if (channel.__manualClose || nearbyDataChannel !== channel) return;
-        setNearbyStatus("reconnecting");
-        updateNearbyBanner();
-        if (nearbyRuntime.role === "host") {
-          window.setTimeout(() => {
-            if (nearbyDataChannel === channel && nearbySignalingSocket?.readyState === WebSocket.OPEN) negotiateNearbyHost();
-          }, 800);
-        }
+      channel.addEventListener("message", (message) => {
+        nearbyLastPeerMessageAt = Date.now();
+        handleNearbyMessage(message);
       });
+      channel.addEventListener("open", () => {
+        nearbyLastPeerMessageAt = Date.now();
+        clearInterval(nearbyPeerWatchTimer);
+        nearbyPeerWatchTimer = window.setInterval(() => {
+          if (nearbyDataChannel !== channel || channel.readyState !== "open") return;
+          try { channel.send(JSON.stringify({ type: "keepalive" })); } catch {}
+          if (state.nearbyRoundId && state.completedPlayers?.[nearbyLocalPlayer()] && state.nearbyDelivered !== state.nearbyRoundId) {
+            try { channel.send(JSON.stringify(nearbyPlayerPayload(nearbyLocalPlayer()))); } catch {}
+          }
+          if (Date.now() - nearbyLastPeerMessageAt > NEARBY_PEER_SILENCE_MS) {
+            // The other phone has gone quiet: treat the link as lost now rather than waiting for the transport to time out.
+            handleNearbyChannelLost(channel);
+            try { channel.close(); } catch {}
+          }
+        }, 5000);
+      });
+      channel.addEventListener("close", () => handleNearbyChannelLost(channel));
     }
 
     function createNearbyPeer() {
@@ -10382,6 +10480,12 @@ var qrcode = function() {
       });
       peer.addEventListener("connectionstatechange", () => {
         if (peer !== nearbyPeerConnection || peer.connectionState !== "failed") return;
+        // Some browsers keep the data channel "open" after the connection has failed; close it so both phones notice.
+        if (nearbyDataChannel?.readyState === "open") {
+          const failedChannel = nearbyDataChannel;
+          handleNearbyChannelLost(failedChannel);
+          try { failedChannel.close(); } catch {}
+        }
         nearbyNegotiationFailures += 1;
         if (nearbyNegotiationFailures >= 3) {
           setNearbyStatus("blocked");
@@ -10491,6 +10595,7 @@ var qrcode = function() {
 
     function retryNearbyConnection() {
       nearbyNegotiationFailures = 0;
+      nearbyRuntime.otherTab = false;
       if (nearbyRuntime.role === "host") {
         if (nearbySignalingSocket?.readyState === WebSocket.OPEN) negotiateNearbyHost();
         else if (nearbyRuntime.roomId && !nearbyRoomExpired()) connectNearbySignaling("host", nearbyRuntime.roomId, nearbyRuntime.hostToken).catch(() => {});
@@ -10737,7 +10842,7 @@ var qrcode = function() {
             <p class="eyebrow">Private & local</p>
             <h2 id="secret-title">${escapeHTML(title)}</h2>
             <p class="dialog-copy">${escapeHTML(copy)}</p>
-            <label class="custom-label">Passphrase or PIN<input class="custom-input" id="secret-input" type="password" autocomplete="${creating ? "new-password" : "current-password"}"></label>
+            <label class="custom-label">${minimum >= 8 || /passphrase|backup/i.test(title) ? "Passphrase" : "PIN"}<input class="custom-input" id="secret-input" type="password" autocomplete="${creating ? "new-password" : "current-password"}"></label>
             <p class="error" id="secret-error" role="alert"></p>
             <div class="dialog-actions"><button class="secondary-btn" id="secret-cancel" type="button">Cancel</button><button class="primary-btn" id="secret-confirm" type="button">${escapeHTML(confirmLabel)}</button></div>
           </section>`;
@@ -10805,15 +10910,21 @@ var qrcode = function() {
 
     async function decryptBackupWrapper(wrapper) {
       if (!window.crypto?.subtle) throw new Error("This browser cannot decrypt the backup without a secure connection.");
-      const passphrase = await requestSecret({ title: "Unlock encrypted backup", copy: "Enter the passphrase used when this backup was created.", confirmLabel: "Unlock", minimum: 1 });
-      if (!passphrase) throw new Error("Import cancelled.");
-      try {
-        const key = await deriveBackupKey(passphrase, base64ToBytes(wrapper.salt));
-        const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: base64ToBytes(wrapper.iv) }, key, base64ToBytes(wrapper.data));
-        return JSON.parse(new TextDecoder().decode(decrypted));
-      } catch {
-        throw new Error("That passphrase is incorrect or the encrypted backup is damaged.");
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        const passphrase = await requestSecret({
+          title: "Unlock encrypted backup",
+          copy: attempt ? "That passphrase didn’t work. Check it and try again." : "Enter the passphrase used when this backup was created.",
+          confirmLabel: "Unlock",
+          minimum: 1
+        });
+        if (!passphrase) throw new Error("Import cancelled.");
+        try {
+          const key = await deriveBackupKey(passphrase, base64ToBytes(wrapper.salt));
+          const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: base64ToBytes(wrapper.iv) }, key, base64ToBytes(wrapper.data));
+          return JSON.parse(new TextDecoder().decode(decrypted));
+        } catch {}
       }
+      throw new Error("That passphrase is incorrect or the encrypted backup is damaged.");
     }
 
     async function hashPin(pin) {
@@ -10904,7 +11015,12 @@ var qrcode = function() {
         if (child.matches(".modal-backdrop, .app-toast, #toast-live, #nearby-banner, script")) return;
         child.inert = Boolean(top);
       });
-      if (top) modalWasOpen = true;
+      if (top) {
+        if (modalWasOpen && !top.contains(document.activeElement)) {
+          (top.querySelector("[data-modal-cancel], .primary-btn, button") || top.querySelector("[tabindex]"))?.focus({ preventScroll: true });
+        }
+        modalWasOpen = true;
+      }
       if (!top && modalWasOpen) {
         const target = modalReturnFocus;
         const key = modalReturnKey;
@@ -10930,7 +11046,7 @@ var qrcode = function() {
     let lastModalOpenedAt = 0;
     document.addEventListener("click", (event) => {
       if (event.target instanceof Element && event.target.matches(".modal-backdrop") && Date.now() - lastModalOpenedAt < 400) event.stopImmediatePropagation();
-      if (event.target instanceof Element && event.target.closest(".modal-backdrop [data-modal-confirm], .modal-backdrop #secret-confirm") && Date.now() - lastModalOpenedAt < 350) {
+      if (event.target instanceof Element && event.target.closest(".modal-backdrop button") && Date.now() - lastModalOpenedAt < 400) {
         event.stopImmediatePropagation();
         event.preventDefault();
       }
@@ -11170,6 +11286,10 @@ var qrcode = function() {
         cosmic: "#04010f",
         pastel: "#fff8f6"
       }[state.visualTheme] || "#0f172a");
+      try {
+        const barColor = { midnight: "#0f172a", sunset: "#6f2738", cosmic: "#04010f", pastel: "#fff8f6" }[state.visualTheme] || "#0f172a";
+        window.AlignedAndroid?.setSystemBars?.(barColor, state.visualTheme === "pastel");
+      } catch {}
 
       if (state.ambientMusicEnabled && audioAllowed()) {
         ambientSoundscape.start();
@@ -11366,7 +11486,7 @@ var qrcode = function() {
           <p class="dialog-copy" id="reset-copy">This removes names, current answers, saved round results, question history, exclusions, custom questions, and settings from this browser. Export a backup first if you may want them later.</p>
           <div class="dialog-actions">
             <button class="secondary-btn" id="cancel-reset" type="button">Keep my data</button>
-            <button class="primary-btn" id="confirm-reset" type="button">Reset everything</button>
+            <button class="primary-btn danger-btn" id="confirm-reset" type="button">Reset everything</button>
           </div>
         </section>
       `;
@@ -11438,7 +11558,7 @@ var qrcode = function() {
     });
 
     function escapeHTML(value) {
-      return String(value)
+      return String(value ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
@@ -11846,7 +11966,7 @@ var qrcode = function() {
           <div class="dialog-graphic" aria-hidden="true">♡</div>
           <p class="eyebrow">Comfort check</p>
           <h2 id="sensitive-title">Both players should opt in</h2>
-          <p class="dialog-copy">This round may include ${escapeHTML(labels.join(", "))}. Either person can skip any prompt without explaining why.</p>
+          <p class="dialog-copy">This round may include ${escapeHTML(labels.length > 1 ? `${labels.slice(0, -1).join(", ")} and ${labels[labels.length - 1]}` : labels.join(""))}. Either person can skip any prompt without explaining why.</p>
           <div class="dialog-actions">
             <button class="secondary-btn" id="sensitive-cancel" type="button">Change packs</button>
             <button class="primary-btn" id="sensitive-confirm" type="button">We both agree</button>
@@ -11905,9 +12025,9 @@ var qrcode = function() {
         .trim()
         .split(/\s+/)
         .slice(0, 2)
-        .map((part) => part[0] || "")
+        .map((part) => Array.from(part).find((character) => /\p{L}|\p{N}/u.test(character)) || "")
         .join("")
-        .toUpperCase() || "?";
+        .toUpperCase() || Array.from(String(name || "").trim())[0] || "?";
     }
 
     function categorySymbol(category) {
@@ -12022,7 +12142,7 @@ var qrcode = function() {
         return `<div class="nearby-alert" role="alert"><h3>The phones couldn’t link directly</h3><p>Some networks block phone-to-phone connections. Usually one of these fixes it:</p><ul><li>Put both phones on the same Wi-Fi network — this works almost everywhere.</li><li>Turn off any VPN or “private relay” on both phones.</li><li>Guest, hotel and work Wi-Fi often block phone-to-phone links${nearbyRelayAvailable() ? "; switching both phones to mobile data usually helps" : ""}.</li></ul><div class="actions">${retry}${oneDevice}</div></div>`;
       }
       if (status === "expired") {
-        return `<div class="nearby-alert" role="alert"><h3>This QR has expired</h3><p>Pairing rooms close after a while for privacy, and old or mistyped links stop working. ${isHost ? "Create a new QR and scan it again." : "Ask your partner to create a new QR, then scan it again."}</p><div class="actions">${isHost ? newQR : ""}${oneDevice}</div></div>`;
+        return `<div class="nearby-alert" role="alert"><h3>This QR is no longer active</h3><p>Pairing rooms close after a while for privacy, and old or mistyped links stop working. ${isHost ? "Create a new QR and scan it again." : "Ask your partner to create a new QR, then scan it again."}</p><div class="actions">${isHost ? newQR : ""}${oneDevice}</div></div>`;
       }
       if (status === "in-use") {
         return `<div class="nearby-alert" role="alert"><h3>This link is already being used</h3><p>Another phone opened the same join link. Each QR connects exactly two phones. ${isHost ? "Create a new QR if the wrong phone joined." : "Ask your partner for a new QR."}</p><div class="actions">${isHost ? newQR : ""}${oneDevice}</div></div>`;
@@ -12037,6 +12157,9 @@ var qrcode = function() {
             ? "This browser can’t make direct phone-to-phone connections. Open this page in Safari, and if Lockdown Mode is on, allow this site."
             : "This browser can’t make direct phone-to-phone connections. Update it, or use Chrome, Edge, Firefox or Safari.";
         return `<div class="nearby-alert" role="alert"><h3>Two-phone play isn’t available here</h3><p>${offlineCopy}</p><div class="actions">${oneDevice}</div></div>`;
+      }
+      if (status === "other-tab") {
+        return `<div class="nearby-alert" role="alert"><h3>Open in another tab</h3><p>Aligned is open in another tab or window on this device, and that one is using the pairing room.</p><div class="actions"><button class="primary-btn" id="nearby-retry" type="button">Use this tab</button></div></div>`;
       }
       if (status === "partner-cancelled") {
         return `<div class="nearby-alert" role="alert"><h3>${isHost ? "Your partner left" : "Your partner cancelled pairing"}</h3><p>${isHost ? "Create a new QR when you’re both ready." : "Ask them to show a new QR when you’re both ready."}</p><div class="actions">${isHost ? newQR : ""}${oneDevice}</div></div>`;
@@ -12065,7 +12188,7 @@ var qrcode = function() {
             <p class="eyebrow">Two phones · one scan</p>
             <h2 id="nearby-title">${isJoin ? `Joining your <span class="accent-text">partner’s round.</span>` : `Scan once, <span class="accent-text">connect automatically.</span>`}</h2>
             <p class="lede">${isJoin ? "Your partner’s phone sends the questions. You’ll each answer privately, then reveal together." : state.nearbyRepairScreen ? `Reconnecting your round: ${partnerName} scans this new QR and you carry on where you left off.` : "Each person answers privately on their own phone, then you reveal together. No account needed."}</p>
-            ${["blocked", "expired", "in-use", "failed", "unsupported", "host-missing", "partner-cancelled"].includes(status) ? "" : nearbyStatusPill()}
+            ${["blocked", "expired", "in-use", "failed", "unsupported", "host-missing", "partner-cancelled", "other-tab"].includes(status) ? "" : nearbyStatusPill()}
             ${initial ? `
               <div class="nearby-choice-grid" style="grid-template-columns:1fr">
                 <button class="nearby-choice" id="nearby-host" type="button"><strong>♡ Show the pairing QR</strong><small>${hostName} answers on this ${COARSE_POINTER ? "phone" : "device"}. ${partnerName} scans the QR with their regular camera and joins automatically.</small></button>
@@ -12135,7 +12258,7 @@ var qrcode = function() {
           : canReconnect
             ? '<span class="connection-pill busy" role="status"><span class="pulse-dot" aria-hidden="true"></span>Reconnecting… your answers will send automatically</span>'
             : '<span class="connection-pill warning" role="status"><span class="pulse-dot" aria-hidden="true"></span>The phones are no longer connected</span>';
-      const showFallback = !connected && (!canReconnect || nearbyRuntime.partnerLeft || nearbyRuntime.status === "blocked");
+      const showFallback = !connected && (!canReconnect || nearbyRuntime.partnerLeft || ["blocked", "peer-lost"].includes(nearbyRuntime.status));
       const isHost = state.nearbyRole !== "join";
       const repairCopy = isHost
         ? `<p>Or show a new QR for ${partner} to scan — the same round continues and nothing is lost.</p><div class="actions"><button class="secondary-btn" id="nearby-repair" type="button">Pair again with a new QR</button></div>`
@@ -12263,7 +12386,8 @@ var qrcode = function() {
       if (document.activeElement && document.activeElement !== document.body) return;
       let element = null;
       try { element = app.querySelector(lastFocusKey); } catch {}
-      element?.focus({ preventScroll: true });
+      const closedMenu = element?.closest("details:not([open])");
+      (closedMenu ? closedMenu.querySelector("summary") : element)?.focus({ preventScroll: true });
     }).observe(app, { childList: true, subtree: true });
 
     // Android app shell: the hardware Back button closes dialogs first, then returns to Home.
@@ -12489,11 +12613,8 @@ var qrcode = function() {
           const source = getQuestionCatalog().find((question) => question.id === button.dataset.duplicateQuestion);
           if (!source) return;
           const topicLabel = TOPIC_OPTIONS.find((topic) => topic.id === source.topic)?.label || "Connection";
-          const duplicate = { id: `custom_${Date.now()}_${randomIndex(1000000)}`, topic: source.topic, category: `Custom · ${topicLabel}`, type: source.type, prompt: `${source.prompt} (variation)`, ...(source.type === "slider" ? { labels: [...source.labels] } : {}) };
-          state.customQuestions.push(duplicate);
-          state.questionTagOverrides[duplicate.id] = [...(source.tags || [])];
-          saveState(); playSound("match"); renderLibrary();
-          requestAnimationFrame(() => openQuestionEditor(duplicate.id));
+          const draft = { id: `custom_${Date.now()}_${randomIndex(1000000)}`, topic: source.topic, category: `Custom · ${topicLabel}`, type: source.type, prompt: source.prompt, tags: [...(source.tags || [])], ...(source.type === "slider" ? { labels: [...source.labels] } : {}) };
+          openQuestionEditor(draft.id, draft);
         }));
         list.querySelectorAll("[data-question-flag]").forEach((button) => button.addEventListener("click", () => {
           const id = button.dataset.flagQuestion;
@@ -12568,6 +12689,7 @@ var qrcode = function() {
               danger: true
             });
             if (!confirmed) return;
+            window.setTimeout(() => (document.querySelector("[data-delete-question]") || document.getElementById("library-search"))?.focus({ preventScroll: true }), 0);
             state.customQuestions = state.customQuestions.filter((question) => question.id !== id);
             state.excludedQuestionIds = state.excludedQuestionIds.filter((questionId) => questionId !== id);
             state.neverQuestionIds = state.neverQuestionIds.filter((questionId) => questionId !== id);
@@ -12659,7 +12781,9 @@ var qrcode = function() {
         });
         saveState();
         playSound("celebrate");
+        libraryView = { ...libraryView, filter: "all", topic: "all", search: prompt.slice(0, 60) };
         renderLibrary();
+        showToast("Added to your library. It’s shown below — clear the search to see everything.");
       });
 
       document.getElementById("save-favorite-pack").addEventListener("click", () => {
@@ -12681,20 +12805,21 @@ var qrcode = function() {
       renderQuestionList();
     }
 
-    function openQuestionEditor(questionId) {
-      const question = getQuestionCatalog().find((item) => item.id === questionId);
+    function openQuestionEditor(questionId, draft = null) {
+      const question = draft || getQuestionCatalog().find((item) => item.id === questionId);
       if (!question) return;
       const isCustom = question.id.startsWith("custom_");
+      const existingTags = draft ? draft.tags : (state.questionTagOverrides[question.id] || []);
       const overlay = document.createElement("div");
       overlay.className = "modal-backdrop";
       overlay.innerHTML = `
         <section class="exit-dialog" role="dialog" aria-modal="true" aria-labelledby="edit-question-title">
           <p class="eyebrow">Make it yours</p>
-          <h2 id="edit-question-title">Edit question</h2>
+          <h2 id="edit-question-title">${draft ? "New variation" : "Edit question"}</h2>
           <label class="custom-label">Prompt<textarea class="comment-textarea" id="edit-question-prompt" maxlength="500">${escapeHTML(question.prompt)}</textarea></label>
           ${question.type === "slider" ? `<div class="field-grid" style="margin-top:12px"><label>Left label<input class="custom-input" id="edit-left-label" maxlength="60" value="${escapeHTML(question.labels?.[0] || "Low")}"></label><label>Right label<input class="custom-input" id="edit-right-label" maxlength="60" value="${escapeHTML(question.labels?.[1] || "High")}"></label></div>` : ""}
-          <label class="custom-label" style="margin-top:12px">Search tags<input class="custom-input" id="edit-question-tags" maxlength="180" value="${escapeHTML((state.questionTagOverrides[question.id] || []).join(", "))}" placeholder="communication, travel, boundaries"></label>
-          <p class="topic-note">Separate tags with commas. Editing keeps the original question ID, history, and saved answers intact.</p>
+          <label class="custom-label" style="margin-top:12px">Search tags<input class="custom-input" id="edit-question-tags" maxlength="180" value="${escapeHTML(existingTags.join(", "))}" placeholder="communication, travel, boundaries"></label>
+          <p class="topic-note">Separate tags with commas. ${draft ? "Your variation is saved as a new custom question; the original stays unchanged." : "Editing keeps the original question ID, history, and saved answers intact."}</p>
           <p class="error" id="edit-question-error" role="alert"></p>
           <div class="dialog-actions"><button class="secondary-btn" id="cancel-question-edit" type="button">Cancel</button>${!isCustom && state.questionEdits[question.id] ? '<button class="text-btn" id="restore-question" type="button">Restore original</button>' : ""}<button class="primary-btn" id="save-question-edit" type="button">Save changes</button></div>
         </section>`;
@@ -12709,14 +12834,19 @@ var qrcode = function() {
         if (!prompt) { overlay.querySelector("#edit-question-error").textContent = "The question needs a prompt."; return; }
         const labels = question.type === "slider" ? [overlay.querySelector("#edit-left-label").value.trim(), overlay.querySelector("#edit-right-label").value.trim()] : undefined;
         if (question.type === "slider" && labels.some((label) => !label)) { overlay.querySelector("#edit-question-error").textContent = "Add both slider labels."; return; }
-        if (isCustom) {
+        if (draft) {
+          const { tags, ...fields } = draft;
+          state.customQuestions.push({ ...fields, prompt, ...(labels ? { labels } : {}) });
+        } else if (isCustom) {
           const target = state.customQuestions.find((item) => item.id === question.id);
           if (target) { target.prompt = prompt; if (labels) target.labels = labels; }
         } else {
           state.questionEdits[question.id] = { prompt, ...(labels ? { labels } : {}) };
         }
         state.questionTagOverrides[question.id] = [...new Set(overlay.querySelector("#edit-question-tags").value.split(",").map((tag) => normalizeAnswer(tag)).filter(Boolean))].slice(0, 12);
+        if (draft) libraryView = { ...libraryView, filter: "all", topic: "all", search: prompt.slice(0, 60) };
         saveState(); overlay.remove(); renderLibrary(); playSound("match");
+        if (draft) showToast("Variation added to your library. It’s shown below — clear the search to see everything.");
       });
       document.body.appendChild(overlay);
       const promptEditor = overlay.querySelector("#edit-question-prompt");
@@ -12896,7 +13026,7 @@ var qrcode = function() {
         if (state.privatePinHash) {
           const pin = await requestSecret({ title: "Unlock private reflections", copy: `Enter the device PIN for ${round.names[playerIndex]}'s private notes.`, confirmLabel: "Unlock notes", minimum: 4 });
           if (!pin) return;
-          if (await hashPin(pin) !== state.privatePinHash) { showToast("That PIN did not match."); return; }
+          if (await hashPin(pin) !== state.privatePinHash) { showToast("That PIN did not match.", { tone: "warning" }); unlockButton.focus(); return; }
         }
         document.getElementById("reflection-lock-copy").hidden = true;
         document.getElementById("private-note-content").hidden = false;
@@ -12931,7 +13061,7 @@ var qrcode = function() {
               <label class="setting-row" for="settings-sound"><span>Sounds</span><input id="settings-sound" type="checkbox" role="switch" ${state.soundEnabled ? "checked" : ""}></label>
               <label class="setting-row" for="settings-ambient"><span>Ambient music</span><input id="settings-ambient" type="checkbox" role="switch" ${state.ambientMusicEnabled ? "checked" : ""}></label>
               <div class="setting-row"><label for="sound-theme">Sound style</label><select class="custom-select" id="sound-theme"><option value="cute" ${state.soundTheme === "cute" ? "selected" : ""}>Cute chimes</option><option value="dreamy" ${state.soundTheme === "dreamy" ? "selected" : ""}>Dreamy bells</option><option value="arcade" ${state.soundTheme === "arcade" ? "selected" : ""}>Playful arcade</option></select></div>
-              <div class="setting-row"><label for="sound-volume">Volume</label><input id="sound-volume" type="range" min="0" max="1" step="0.05" value="${state.soundVolume}"></div>
+              <div class="setting-row"><label for="sound-volume">Volume</label><input id="sound-volume" class="range-input volume-input" type="range" min="0" max="1" step="0.05" value="${state.soundVolume}" style="--range-progress: ${Math.round(state.soundVolume * 100)}%"></div>
               <label class="setting-row" for="settings-haptics" ${typeof navigator.vibrate === "function" ? "" : "hidden"}><span>Vibration (on phones)</span><input id="settings-haptics" type="checkbox" role="switch" ${state.hapticsEnabled ? "checked" : ""}></label>
               <button class="secondary-btn" id="test-sound" type="button" style="margin-top:12px">Test the sound</button>
             </article>
@@ -12962,7 +13092,7 @@ var qrcode = function() {
                 <button class="data-tool" id="import-data" type="button"><span aria-hidden="true">↑</span>Import backup</button>
                 <button class="data-tool danger" id="reset-game" type="button"><span aria-hidden="true">↺</span>Reset everything</button>
               </div>
-              <input id="import-file" type="file" accept="application/json,.json,.aligned,.awc" hidden>
+              <input id="import-file" type="file" ${IS_IOS ? "" : 'accept="application/json,.json,.aligned,.awc"'} hidden>
               <p class="data-status" id="data-status" role="status"></p>
             </article>
             <article class="settings-card full" id="offline-card">
@@ -12984,6 +13114,7 @@ var qrcode = function() {
       });
       document.getElementById("sound-theme").addEventListener("change", (event) => { state.soundTheme = event.currentTarget.value; saveState(); playSound("unlock"); });
       document.getElementById("sound-volume").addEventListener("input", (event) => {
+        event.currentTarget.style.setProperty("--range-progress", `${Math.round(Number(event.currentTarget.value) * 100)}%`);
         state.soundVolume = Number(event.currentTarget.value);
         saveState();
         if (state.ambientMusicEnabled) {
@@ -13019,7 +13150,11 @@ var qrcode = function() {
         status.textContent = "Checking…";
         try {
           await registration.update();
-          status.textContent = registration.waiting || registration.installing ? "A new version is downloading. Restart Aligned after your round to use it." : "You have the latest version.";
+          if (navigator.serviceWorker.controller && updateReadyToUse) showUpdateReady(status);
+          else if (registration.waiting || registration.installing) {
+            status.textContent = "Downloading the new version…";
+            navigator.serviceWorker.addEventListener("controllerchange", () => showUpdateReady(document.getElementById("install-status")), { once: true });
+          } else status.textContent = "You have the latest version.";
         } catch {
           status.textContent = navigator.onLine === false ? "You're offline — the game still works; check again when you're connected." : "Couldn't check right now. Try again later.";
         }
@@ -13072,6 +13207,7 @@ var qrcode = function() {
           playSound("match");
           render();
           showToast("Backup imported successfully. Your saved state is restored.");
+          document.getElementById("import-data")?.focus({ preventScroll: true });
         } catch (importError) {
           const message = String(importError?.message || "");
           if (message === "Import cancelled.") {
@@ -13583,6 +13719,8 @@ var qrcode = function() {
       const isNotReady = state.notReady[state.activePlayer][question.id] === true;
       const isFavorite = state.favoriteQuestionIds.includes(question.id);
 
+      if (question.type === "slider" && !Number.isFinite(Number(savedAnswer))) savedAnswer = undefined;
+      if (question.type === "slider" && savedAnswer !== undefined) savedAnswer = Math.max(1, Math.min(10, Math.round(Number(savedAnswer))));
       if (question.type === "slider" && (savedAnswer === undefined || savedAnswer === null)) {
         savedAnswer = 5;
         state.answers[state.activePlayer][question.id] = savedAnswer;
@@ -13646,7 +13784,7 @@ var qrcode = function() {
             <div class="question-decor" aria-hidden="true"><span></span><span></span><span></span></div>
             <div class="question-meta">
               <span class="category-pill"><span class="category-symbol">${categorySymbol(question.category)}</span>${escapeHTML(question.category)}</span>
-              <span style="display:flex;gap:8px;align-items:center">
+              <span class="question-meta-actions">
                 <button class="favorite-button ${isFavorite ? "active" : ""}" id="favorite-current" type="button" aria-label="${isFavorite ? "Remove from" : "Add to"} favorites" aria-pressed="${isFavorite}">★</button>
                 <span class="type-chip"><span aria-hidden="true">${question.type === "slider" ? "↔" : "✎"}</span>${question.type === "slider" ? "Slide your answer" : "Write your answer"}</span>
               </span>
@@ -14381,7 +14519,12 @@ var qrcode = function() {
         registration.addEventListener("updatefound", () => {
           const worker = registration.installing;
           worker?.addEventListener("statechange", () => {
-            if (worker.state === "installed" && navigator.serviceWorker.controller) showToast("A newer game version is ready. Refresh when your current round is finished.");
+            if (worker.state === "installed" && navigator.serviceWorker.controller) showToast("A new version of Aligned is ready. Refresh when your round is finished to use it.");
+            if (worker.state === "activated" && navigator.serviceWorker.controller) {
+              updateReadyToUse = true;
+              const status = document.getElementById("install-status");
+              if (status) showUpdateReady(status);
+            }
           });
         });
       }).catch(() => {}));
@@ -14539,6 +14682,16 @@ var qrcode = function() {
       }
     });
 
+    function reconnectNearbyNow() {
+      if (!nearbyRuntime.role || !nearbyRuntime.roomId || nearbyRuntime.otherTab || nearbyRoomExpired()) return;
+      if (nearbySignalingSocket && nearbySignalingSocket.readyState <= WebSocket.OPEN) return;
+      clearTimeout(nearbyReconnectTimer);
+      nearbyRuntime.reconnectAttempts = 0;
+      const token = nearbyRuntime.role === "host" ? nearbyRuntime.hostToken : nearbyRuntime.joinToken;
+      connectNearbySignaling(nearbyRuntime.role, nearbyRuntime.roomId, token).catch(() => {});
+    }
+    window.addEventListener("online", reconnectNearbyNow);
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reconnectNearbyNow(); });
     window.addEventListener("hashchange", handleNearbyJoinLaunch);
     window.addEventListener("pageshow", (event) => {
       if (event.persisted) handleNearbyJoinLaunch();
@@ -14546,6 +14699,7 @@ var qrcode = function() {
     if (!handleNearbyJoinLaunch()) {
       resumeNearbySession();
       render();
+      if (state.screen !== "setup") focusScreenHeading();
     }
   </script>
 </body>

@@ -4,9 +4,12 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -88,7 +91,9 @@ public class MainActivity extends Activity {
         super.onNewIntent(intent);
         setIntent(intent);
         Uri data = intent.getData();
-        if (data != null && isAppUri(data)) web.loadUrl(startUrl(intent));
+        if (data == null) return;
+        if (isAppUri(data)) web.loadUrl(startUrl(intent));
+        else openExternally(data);
     }
 
     @Override
@@ -225,8 +230,22 @@ public class MainActivity extends Activity {
     }
 
     private void openExternally(Uri uri) {
+        Intent view = new Intent(Intent.ACTION_VIEW, uri);
+        if (SITE_HOST.equalsIgnoreCase(uri.getHost())) {
+            // Links on the game's own site (e.g. an update download) must go to a browser, never back to this app.
+            ResolveInfo browser = getPackageManager().resolveActivity(
+                new Intent(Intent.ACTION_VIEW, Uri.parse("https://example.com/")), PackageManager.MATCH_DEFAULT_ONLY);
+            String browserPackage = browser == null || browser.activityInfo == null ? null : browser.activityInfo.packageName;
+            if (browserPackage != null && !"android".equals(browserPackage) && !getPackageName().equals(browserPackage)) {
+                view.setPackage(browserPackage);
+            } else {
+                Intent chooser = Intent.createChooser(view, "Open with");
+                chooser.putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, new ComponentName[] { new ComponentName(this, MainActivity.class) });
+                view = chooser;
+            }
+        }
         try {
-            startActivity(new Intent(Intent.ACTION_VIEW, uri));
+            startActivity(view);
         } catch (ActivityNotFoundException error) {
             Toast.makeText(this, "No app can open that link.", Toast.LENGTH_SHORT).show();
         }
@@ -317,6 +336,30 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void openExternal(String url) {
             runOnUiThread(() -> openExternally(Uri.parse(url)));
+        }
+
+        /** Matches the system bars to the game's visual theme (light themes get dark icons). */
+        @JavascriptInterface
+        public void setSystemBars(String color, boolean lightBackground) {
+            runOnUiThread(() -> {
+                int parsed;
+                try {
+                    parsed = android.graphics.Color.parseColor(color);
+                } catch (IllegalArgumentException error) {
+                    return;
+                }
+                getWindow().setStatusBarColor(parsed);
+                getWindow().setNavigationBarColor(parsed);
+                web.setBackgroundColor(parsed);
+                int flags = getWindow().getDecorView().getSystemUiVisibility();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    flags = lightBackground ? flags | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR : flags & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    flags = lightBackground ? flags | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR : flags & ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                }
+                getWindow().getDecorView().setSystemUiVisibility(flags);
+            });
         }
     }
 }
