@@ -101,15 +101,15 @@ behave well? Recommend concrete synthesis changes (notes, envelopes, layering, p
 
 ## Score history
 
-| Reviewer | R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Mobile | 7.0–8.2 | 8.4–9.2 | 8.6–9.3 | 8.6–9.3 | 8.3–9.2 | 8.7–9.3 | 8.4–9.3 | 8.5–9.3 | 8.8–9.3 |
-| Desktop | 7.5–8.8 | 7.9–9.2 | 8.0–9.1 | 8.5–9.3 | 7.8–9.0 | 8.4–9.1 | 8.3–9.2 | 8.6–9.3 | 8.8–9.3 |
-| Multiplayer/QR | 5.0–7.0 | 7.6–8.8 | 8.3–9.0 | 8.5–9.2 | 8.3–9.0 | 8.7–9.2 | 8.8–9.2 | 8.9–9.3 | 9.0–9.3 |
-| QA/accessibility | 6.6–8.6 | 8.0–8.9 | 8.5–9.2 | 8.6–9.3 | 8.6–9.3 | 8.7–9.2 | 8.0–9.2 | 8.6–9.2 | 8.9–9.3 |
-| Cross-platform/offline | — | 8.0–9.2 | 8.7–9.5 | 9.3–9.5 | 8.6–9.3 | 9.2–9.5 | 8.5–9.5 | 8.9–9.5 | 9.0–9.5 |
-| Fun & engagement | — | — | — | — | 7.6–9.1 (fun 7.6) | 8.6–9.1 (fun 8.6) | 8.9–9.3 (fun 8.9) | 8.7–9.3 (fun 9.1) | 8.8–9.3 (fun 9.1) |
-| Sound design | — | — | — | — | 5.8 mobile / 6.0 desktop | 7.4 mobile / 7.8 desktop | 8.3 mobile / 8.6 desktop | 8.7 mobile / 8.9 desktop | 9.0 mobile / 9.2 desktop |
+| Reviewer | R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Mobile | 7.0–8.2 | 8.4–9.2 | 8.6–9.3 | 8.6–9.3 | 8.3–9.2 | 8.7–9.3 | 8.4–9.3 | 8.5–9.3 | 8.8–9.3 | 9.0–9.3 |
+| Desktop | 7.5–8.8 | 7.9–9.2 | 8.0–9.1 | 8.5–9.3 | 7.8–9.0 | 8.4–9.1 | 8.3–9.2 | 8.6–9.3 | 8.8–9.3 | 8.8–9.3 |
+| Multiplayer/QR | 5.0–7.0 | 7.6–8.8 | 8.3–9.0 | 8.5–9.2 | 8.3–9.0 | 8.7–9.2 | 8.8–9.2 | 8.9–9.3 | 9.0–9.3 | 8.8–9.3 |
+| QA/accessibility | 6.6–8.6 | 8.0–8.9 | 8.5–9.2 | 8.6–9.3 | 8.6–9.3 | 8.7–9.2 | 8.0–9.2 | 8.6–9.2 | 8.9–9.3 | — (API outage) |
+| Cross-platform/offline | — | 8.0–9.2 | 8.7–9.5 | 9.3–9.5 | 8.6–9.3 | 9.2–9.5 | 8.5–9.5 | 8.9–9.5 | 9.0–9.5 | 9.2–9.5 |
+| Fun & engagement | — | — | — | — | 7.6–9.1 (fun 7.6) | 8.6–9.1 (fun 8.6) | 8.9–9.3 (fun 8.9) | 8.7–9.3 (fun 9.1) | 8.8–9.3 (fun 9.1) | 9.0–9.3 (fun 9.1/9.2) |
+| Sound design | — | — | — | — | 5.8 mobile / 6.0 desktop | 7.4 mobile / 7.8 desktop | 8.3 mobile / 8.6 desktop | 8.7 mobile / 8.9 desktop | 9.0 mobile / 9.2 desktop | 9.2 mobile / 9.3 desktop |
 
 R5 reviewed round 5's game-feel branch (commit 0ec3741). Its fixes ship as **1.2.0**: a rebuilt audio engine
 (mix bus, compressor + limiter, ducked generative F-major ambient that suspends in the background, in-key
@@ -161,6 +161,18 @@ louder swap/delete/disagree cues, smoother pads and crossfade-aware melody; inte
 reconnects; a connected joiner starting from Home leaves the round properly; Journal refreshes live; the
 leave dialog is always safe-first; both card faces switch at 90° in both directions; reduced-motion focus,
 fixed question-screen anchor, toolbar tooltips on focus, focused fields clear the sticky bar.
+
+R10 reviewed 1.2.4 (commit 4f1cb8c; the QA reviewer failed twice on API overload and is re-run in R11). Its
+fixes ship as **1.2.5**: step climb spans exactly one octave per round, Dreamy step/count-up levelled, finale
+duck 0.2, count-up haptic in pulseHaptic, louder swap whoosh, 1.2 s pad fade; prompts chosen same-tier
+least-recently-used (no disagreement lines on matches), spicy flirty by default with an explicit sensitive
+list, conversation starter only for real talking points, varied celebration headline, mind reader ranks by
+hits; keyboard flip focus restored (card back visible at once), toolbar tooltips actually render, quick-pick
+note shown in the hint line; pack chip errors focus the name field, pack save toast, confirm before deleting
+a pack, no duplicate pack names, pastel error colour, red discard confirm; connected host can start the next
+round from Home, joiner leave committed only once the new round starts (and they become Player 1), focus
+never restored into text fields, expired-room host asked before leaving an unfinished reveal; reduced-motion
+face switch without delay, nested-dialog Esc, sticky-bar background fallback.
 
 Round 4 is on `main` (tested, deployed). Round 5's game-design changes are on branch
 **`wip/round5-game-feel`** and are **not yet tested** — they address the Fun findings:

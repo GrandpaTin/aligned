@@ -6147,6 +6147,7 @@
       [data-tooltip]::after {
         position: absolute;
         bottom: -38px;
+        content: attr(data-tooltip);
         left: 50%;
         transform: translateX(-50%) translateY(4px);
         z-index: 100;
@@ -6529,7 +6530,9 @@
     [data-theme="sunset"] .card-back { background-color: #3a1424; }
     [data-theme="cosmic"] .card-back { background-color: #0a0420; }
     /* Both faces switch at the 90° point in both directions, so engines that ignore backface-visibility still flip cleanly. */
-    .flip-card .card-front, .flip-card.flipped .card-back { transition: visibility 0s linear 0.08s; }
+    .flip-card .card-front { transition: visibility 0s linear 0.08s; }
+    /* The back shows at once so keyboard focus can move straight onto it. */
+    .flip-card.flipped .card-back { transition: none; }
     .flip-card:not(.flipped) .card-back { visibility: hidden; transition: visibility 0s linear 0.08s; }
     .highlight-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
     @media (min-width: 900px) { .highlight-grid:has(> .highlight-card:nth-child(4)) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -6545,16 +6548,23 @@
     }
     .question-header { flex-wrap: wrap; }
     .question-header .progress-copy { margin-left: auto; text-align: right; }
-    @media (max-width: 600px) and (max-height: 820px) {
-      .question-screen .question-actions { position: sticky; bottom: 0; z-index: 20; margin-inline: -8px; padding: 8px; border-radius: 16px; background: color-mix(in srgb, var(--card) 94%, transparent); box-shadow: 0 -10px 24px rgba(2, 6, 23, 0.3); }
+    @media (max-width: 600px) and (max-height: 900px) {
+      .question-screen .question-actions { position: sticky; bottom: 0; z-index: 20; margin-inline: -8px; padding: 8px; border-radius: 16px; background: var(--card); background: color-mix(in srgb, var(--card) 94%, transparent); box-shadow: 0 -10px 24px rgba(2, 6, 23, 0.3); }
       [data-theme="pastel"] .question-screen .question-actions { background: rgba(255, 248, 246, 0.95); }
       html:has(.question-screen .question-actions) { scroll-padding-bottom: 76px; }
     }
     .screen.question-screen { margin-top: 0; }
     .quick-pick-hint { margin: 4px 0 0; color: var(--muted); font-size: max(12px, .78rem); }
     @media (min-width: 601px) {
-      body:has(.question-screen) .app-toast { top: auto; bottom: 120px; }
+      body:has(.question-screen) .app-toast { top: auto; bottom: 120px; max-width: 300px; }
     }
+    [data-theme="pastel"] .error { color: #b91c1c; }
+    @media (max-width: 899px) { .setup-start-actions { bottom: max(8px, env(safe-area-inset-bottom)) !important; } }
+    @media (min-width: 601px) and (max-height: 900px) {
+      body:has(.question-screen) .app-toast { top: 92px; bottom: auto; }
+    }
+    .reduced-motion .flip-card .card-face { transition-delay: 0s !important; }
+    @media (prefers-reduced-motion: reduce) { .flip-card .card-face { transition-delay: 0s !important; } }
     .highlight-note { display: block; margin-top: 6px; color: var(--muted); font-size: max(12px, .76rem); font-weight: 650; }
     .guess-panel { margin: 14px 0 4px; padding: 12px 14px; border: 1px dashed color-mix(in srgb, var(--violet) 60%, transparent); border-radius: 16px; background: color-mix(in srgb, var(--violet) 8%, transparent); }
     .guess-panel.guessed { border-style: solid; }
@@ -9425,7 +9435,7 @@ var qrcode = function() {
           "Make a pinky promise about this one.",
           "Who said it first in real life, do you think?",
           "Describe this answer using only emojis, out loud.",
-          "What would your pets say about this match?",
+          "What would your friends’ group chat say about this match?",
           "Give this match a sports commentator’s replay."
         ],
         medium: [
@@ -9482,7 +9492,19 @@ var qrcode = function() {
           "What would you want to remember about this match a year from now?",
           "Is there a small ritual that could honour this?",
           "Did you expect each other to answer this way? Why?",
-          "Where else in life do you two think alike like this?"
+          "Where else in life do you two think alike like this?",
+          "What does this shared answer make easier for you?",
+          "When did you first notice you agree on this?",
+          "What would you tell a friend about this match?",
+          "How could you lean into this together this week?",
+          "What feels good about hearing the same answer?",
+          "Is there a story behind why you both answered this way?",
+          "What would make this even better for you both?",
+          "Which tiny habit keeps this true for you?",
+          "What would you like to protect about this?",
+          "How would you celebrate this in a small way?",
+          "What does this say about how you fit together?",
+          "Name one moment this showed up recently."
         ],
         medium: [
           "Where do your answers overlap, even if the numbers or wording differ?",
@@ -9577,11 +9599,11 @@ var qrcode = function() {
           "Would it help to revisit this on another night?"
         ],
         far: [
-          "Is this a someday, a maybe, or a not-for-us? No pressure.",
+          "Would it help to pause here and come back to this another night?",
           "What would help this feel safe to come back to another time?",
           "Different comfort levels are normal. What would help you feel respected here?",
           "Would you like to leave this here for tonight, or talk a little more?",
-          "What would you each need to feel respected here?",
+          "What is one thing you would each like the other to keep in mind?",
           "It’s okay to see this differently. What would help you both feel cared for?",
           "Is there one thing the other could do that would make this feel easier?",
           "Would a check-in later feel better than deciding anything now?",
@@ -10002,7 +10024,7 @@ var qrcode = function() {
     let nearbyLastPeerMessageAt = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.2.4";
+    const APP_VERSION = "1.2.5";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -11749,7 +11771,7 @@ var qrcode = function() {
             <p class="dialog-copy" id="confirm-copy">${escapeHTML(copy)}</p>
             <div class="dialog-actions">
               <button class="${safeFirst ? "primary-btn" : "secondary-btn"}" type="button" data-modal-cancel>${escapeHTML(cancelLabel)}</button>
-              <button class="${safeFirst ? "secondary-btn" : `primary-btn ${danger ? "danger-btn" : ""}`}" type="button" data-modal-confirm>${escapeHTML(confirmLabel)}</button>
+              <button class="${safeFirst ? `secondary-btn ${danger ? "danger-btn" : ""}` : `primary-btn ${danger ? "danger-btn" : ""}`}" type="button" data-modal-confirm>${escapeHTML(confirmLabel)}</button>
             </div>
           </section>`;
         const finish = (value) => {
@@ -11966,7 +11988,7 @@ var qrcode = function() {
           osc.detune.value = (index % 2 === 0 ? 4 : -4) + (Math.random() - 0.5) * 3;
           gain.gain.setValueAtTime(0.0001, at);
           gain.gain.linearRampToValueAtTime(0.03, at + 2);
-          gain.gain.setValueAtTime(0.03, end - 2);
+          gain.gain.setValueAtTime(0.03, end - 1.2);
           gain.gain.linearRampToValueAtTime(0.0001, end);
           // A soft octave partial keeps the pad audible on small phone speakers.
           const octave = ctx.createOscillator();
@@ -12157,7 +12179,8 @@ var qrcode = function() {
         delete: 30,
         whoosh: 12,
         rate: 16,
-        open: [12, 30, 16]
+        open: [12, 30, 16],
+        countup: [8, 260, 8, 260, 8]
       };
       if (!(kind in patterns)) return;
       navigator.vibrate(patterns[kind]);
@@ -12199,8 +12222,8 @@ var qrcode = function() {
         const modulator = ctx.createOscillator();
         const depth = ctx.createGain();
         carrier.frequency.value = frequency;
-        modulator.frequency.value = frequency * 3.5;
-        depth.gain.setValueAtTime(frequency * 2, at);
+        modulator.frequency.value = frequency * (frequency > 1500 ? 2 : 3.5);
+        depth.gain.setValueAtTime(Math.min(frequency * 2, 2500), at);
         depth.gain.exponentialRampToValueAtTime(0.01, at + 0.3);
         modulator.connect(depth); depth.connect(carrier.frequency); carrier.connect(voice);
         const overtone = ctx.createOscillator();
@@ -12305,15 +12328,16 @@ var qrcode = function() {
           duck = 0.8;
         } else if (kind === "step") {
           const raw = Math.max(0, Number(options.degree) || 0);
-          const degree = raw % 10;
-          sequence([pentatonic(degree), pentatonic(degree + 2)], 0.055, 0.08 * jitter() * (themeName === "dreamy" ? 0.55 : 1), themeName === "dreamy" ? { ...wobble(), decay: 0.7 } : wobble());
+          // Spread the climb over the round: first question on the tonic, last an octave up.
+          const degree = Number(options.count) > 1 ? Math.round((5 * Math.min(raw, options.count - 1)) / (options.count - 1)) : raw % 6;
+          sequence([pentatonic(degree), pentatonic(degree + 2)], 0.055, 0.08 * jitter() * (themeName === "dreamy" ? 0.85 : 1), themeName === "dreamy" ? { ...wobble(), decay: 0.7 } : wobble());
         } else if (kind === "lock") {
           sequence([pentatonic(3), pentatonic(2), pentatonic(0)], 0.075, 0.08);
         } else if (kind === "unlock") {
           sequence([pentatonic(3, 4), pentatonic(0), pentatonic(2), pentatonic(3)], 0.06, 0.09);
         } else if (kind === "reveal") {
           noiseSweep(ctx, start, { from: 1400, to: 2800, duration: 0.07, peak: 0.04 });
-          const d = (Number(options.degree) || 0) % 8;
+          const d = (Number(options.degree) || 0) % 5;
           sequence([pentatonic(d), pentatonic(d + 3)], 0.06, 0.09 * (themeName === "dreamy" ? 0.75 : 1));
         } else if (kind === "match") {
           audioEngine.lastMatchAt = Date.now();
@@ -12343,14 +12367,13 @@ var qrcode = function() {
             const at = start + Math.random() * sparkleSpan;
             end = Math.max(end, soundNote(ctx, out, pentatonic(Math.floor(Math.random() * 5), 7) * shift, at, 0.014, { theme: themeName, dry: true, pan: (Math.random() - 0.5) * 1.2, attack: 0.004, decay: 0.12 }));
           }
-          duck = options.finale ? 0.35 : 0.45;
+          duck = options.finale ? 0.2 : 0.45;
         } else if (kind === "countup") {
           // Ease-out ticks that climb an octave in step with the score rings (1.1 s).
           for (let i = 0; i < 12; i++) {
             const progress = 1 - (1 - (i + 1) / 12) ** 0.5;
-            end = Math.max(end, soundNote(ctx, out, pentatonic(Math.round((i / 11) * 5)) * shift, start + progress * 1.05, 0.05 + 0.025 * (i / 11), { theme: themeName, attack: 0.003, decay: themeName === "dreamy" ? 0.12 : 0.045, dry: true }));
+            end = Math.max(end, soundNote(ctx, out, pentatonic(Math.round((i / 11) * 5)) * shift, start + progress * 1.05, (0.05 + 0.025 * (i / 11)) * (themeName === "dreamy" ? 1.4 : 1), { theme: themeName, attack: 0.003, decay: themeName === "dreamy" ? 0.12 : 0.045, dry: true }));
           }
-          if (state.hapticsEnabled && navigator.vibrate) navigator.vibrate([8, 260, 8, 260, 8]);
           duck = 0.6;
         } else if (kind === "error") {
           [880, 698.46].forEach((frequency, index) => {
@@ -12382,8 +12405,8 @@ var qrcode = function() {
           sequence([pentatonic(0), pentatonic(2), pentatonic(4)], 0.08, 0.08);
           duck = 0.6;
         } else if (kind === "whoosh") {
-          end = noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.14, q: 0.8 });
-          end = Math.max(end, note(pentatonic(3), start + 0.22, 0.05, { decay: 0.12, dry: true }));
+          end = noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.2, q: 0.8 });
+          end = Math.max(end, note(pentatonic(5), start + 0.22, 0.05, { decay: 0.12, dry: true }));
           duck = 0.7;
         }
         audioEngine.duck(duck, Math.max(0.1, end - ctx.currentTime));
@@ -12418,7 +12441,8 @@ var qrcode = function() {
       };
 
       const handleKeydown = (event) => {
-        if (event.key === "Escape") closeDialog();
+        // A confirm stacked on top owns Esc; it returns here instead of closing both.
+        if (event.key === "Escape" && !overlay.hidden && !event.defaultPrevented && document.querySelectorAll(".modal-backdrop").length === 1) closeDialog();
       };
 
       overlay.addEventListener("click", (event) => {
@@ -12979,6 +13003,8 @@ var qrcode = function() {
     // Whole words only: "compete" is not about pets.
     const LIGHT_PROMPT_PATTERN = /\b(?:karaoke|superpowers?|movies?|films?|songs?|snacks?|pizza|vacations?|holidays?|weekends?|zombies?|games?|sitcoms?|pets?|desserts?|playlists?|road trips?|festivals?|danc(?:e|es|ing)|costumes?|emojis?|lottery|islands?|breakfast|coffee|ice cream|theme parks?)\b/i;
     const PLAYFUL_SPICY = /^spy_(?:2[2-9]|3\d)$/;
+    // Comfort, consent and boundary prompts: these get gentle follow-ups, never flirty ones.
+    const SENSITIVE_SPICY = /^spy_(?:2|5|6|10|13|15|17|20|21)$/;
     const HISTORY_PROMPT_PATTERN = /\bour relationship\b|\bthe relationship we\b|\bfrom me\b|\bwe have built\b|\bsince we met\b|\bour history\b|\bwhen we first\b|\bin our home\b|\babout me that\b|\bour friendship\b|\bhabit of mine\b|\bmoment between us\b|\bfelt unexpectedly\b|\bwhat should I do\b|\bcheck-in\b|\bnicknames between us\b|\brecently\b|\bby me\b|\bI (?:have )?tried\b|\bI sometimes\b|\bnever stop\b|\bour closeness\b|\bI might\b|\bhas grown\b|\bdo I\b|\bhave I\b|\bfalling asleep\b/i;
 
     function questionTone(question) {
@@ -13587,8 +13613,10 @@ var qrcode = function() {
     new MutationObserver(() => {
       if (!hasRenderedOnce || !lastFocusKey || document.querySelector(".modal-backdrop")) return;
       if (document.activeElement && document.activeElement !== document.body) return;
+      if (lastFocusOutsideModal && lastFocusOutsideModal.isConnected) return;
       let element = null;
       try { element = app.querySelector(lastFocusKey); } catch {}
+      if (element && element.matches("input:not([type=range]):not([type=checkbox]):not([type=radio]), textarea")) return;
       const closedMenu = element?.closest("details:not([open])");
       (closedMenu ? closedMenu.querySelector("summary") : element)?.focus({ preventScroll: true });
     }).observe(app, { childList: true, subtree: true });
@@ -13728,7 +13756,7 @@ var qrcode = function() {
                 <label for="pack-name">Pack name<input class="custom-input" id="pack-name" maxlength="60" placeholder="Sunday night check-in"></label>
                 <div class="actions" style="align-self:end;margin-top:0"><button class="primary-btn" id="save-favorite-pack" type="button">Save ${favoriteIds.size} ${favoriteIds.size === 1 ? "favorite" : "favorites"}</button></div>
               </div>
-              ${state.customPacks.length ? `<div class="library-filters" style="margin-top:14px">${state.customPacks.map((pack) => `<span class="library-filter active saved-pack-chip" title="Play it from Home under “Your packs”">${escapeHTML(pack.name)} · ${pack.questionIds.length}Q <button type="button" data-delete-pack="${escapeHTML(pack.id)}" aria-label="Delete ${escapeHTML(pack.name)}" style="border:0;color:inherit;background:transparent;cursor:pointer">×</button></span>`).join("")}</div>` : ""}
+              ${state.customPacks.length ? `<div class="library-filters" style="margin-top:14px">${state.customPacks.map((pack) => `<span class="library-filter active saved-pack-chip" title="Play it from Home under “Your packs”">${escapeHTML(pack.name)} · ${pack.questionIds.length}Q <button type="button" data-delete-pack="${escapeHTML(pack.id)}" aria-label="Delete ${escapeHTML(pack.name)}" style="border:0;color:inherit;background:transparent;cursor:pointer;min-width:44px;min-height:44px">×</button></span>`).join("")}</div>` : ""}
               <p class="error" id="pack-error" role="alert"></p>
             </div>
           </details>
@@ -14016,13 +14044,19 @@ var qrcode = function() {
         const error = document.getElementById("pack-error");
         if (!name) { playSound("error"); error.textContent = "Give this pack a name first."; return; }
         if (!state.favoriteQuestionIds.length) { playSound("error"); error.textContent = "Favorite at least one question first."; return; }
+        if (state.customPacks.some((pack) => pack.name.toLowerCase() === name.toLowerCase())) { playSound("error"); error.textContent = "You already have a pack with that name."; return; }
         state.customPacks.push({ id: `pack_${Date.now()}_${randomIndex(100000)}`, name, questionIds: [...state.favoriteQuestionIds] });
         saveState(); playSound("unlock"); renderLibrary();
+        showToast(`Saved “${name}” — play it from Home under Your packs.`);
       });
 
       document.querySelectorAll("[data-delete-pack]").forEach((button) => {
-        button.addEventListener("click", () => {
-          state.customPacks = state.customPacks.filter((pack) => pack.id !== button.dataset.deletePack);
+        button.addEventListener("click", async () => {
+          const pack = state.customPacks.find((item) => item.id === button.dataset.deletePack);
+          if (!pack) return;
+          const sure = await openConfirmDialog({ eyebrow: "Your packs", title: `Delete “${pack.name}”?`, copy: "The questions stay in your library; only this saved pack is removed.", confirmLabel: "Delete pack", cancelLabel: "Keep it", danger: true, safeFirst: true });
+          if (!sure) return;
+          state.customPacks = state.customPacks.filter((item) => item.id !== pack.id);
           saveState(); playSound("delete"); renderLibrary();
         });
       });
@@ -14909,6 +14943,8 @@ var qrcode = function() {
           const names = [playerOne.value.trim(), playerTwo.value.trim()];
           if (!pack || names.some((name) => !name)) {
             playSound("error"); error.textContent = "Add both names before starting a custom pack.";
+            (names[0] ? playerTwo : playerOne).focus();
+            showToast("Add both names first, then tap your pack again.");
             return;
           }
           const validIds = new Set(getQuestionCatalog().map((question) => question.id));
@@ -14961,22 +14997,39 @@ var qrcode = function() {
           playSound("error"); error.textContent = "That combination needs more questions. Add another pack or choose a shorter round.";
           return;
         }
+        let leaveJoinedRound = false;
         if (state.playStyle === "nearby" && state.nearbyRole === "join" && nearbyChannelOpen()) {
           const host = state.names[0] || "your partner";
           const unfinished = revealUnfinished() ? " Your scores haven’t been revealed yet — leaving skips the count-up and its scores go straight to your Journal." : "";
           const leave = await openConfirmDialog({ title: "Leave the two-phone round?", copy: `${host} starts the next two-phone round from their phone.${unfinished} Leave to start your own round here?`, confirmLabel: "Leave and start", cancelLabel: "Stay", safeFirst: true });
           if (!leave) return;
-          if (revealUnfinished()) state.revealCelebrated = state.selectedQuestionIds.join("|");
-          closeNearbyConnection({ notifyPartner: true });
-          state.nearbyRole = "";
-          state.resumeScreen = null;
-          saveState();
+          leaveJoinedRound = true;
+          if (names[1] === state.names[1] && names[0] === state.names[0]) names.reverse();
         }
-        const commitLeave = await confirmStartingOver();
+        const commitLeave = leaveJoinedRound ? () => {} : await confirmStartingOver();
         if (!commitLeave) return;
 
         openSensitiveConsent(selectedTopics, () => animateRoundSelection(form.querySelector('button[type="submit"]'), () => {
+          if (leaveJoinedRound) {
+            if (revealUnfinished()) state.revealCelebrated = state.selectedQuestionIds.join("|");
+            closeNearbyConnection({ notifyPartner: true });
+            state.nearbyRole = "";
+            state.resumeScreen = null;
+            showToast(`You’re hosting now — ${names[0]} answers on this phone.`);
+          }
           commitLeave();
+          // N1: a host still linked to the partner starts the next two-phone round straight away.
+          if (state.playStyle === "nearby" && state.nearbyRole === "host" && nearbyChannelOpen()) {
+            startGame({ names, questionMode, questionCount, selectedTopics, selectedQuestionIds, playStyle: "nearby" });
+            state.activePlayer = 0;
+            state.nearbyRole = "host";
+            state.nearbyRoundId = newNearbyRoundId();
+            saveState();
+            nearbyRuntime.roundStarted = true;
+            nearbyRuntime.partnerProgress = null;
+            sendNearbyMessage(nearbyRoundInitPayload({ newRound: true }));
+            return;
+          }
           if (state.playStyle === "nearby") {
             state.names = names;
             state.questionMode = questionMode;
@@ -15055,7 +15108,7 @@ var qrcode = function() {
             <button class="quick-pick-option ${quickPickChosen && Number(savedAnswer) === 2 ? "active" : ""}" type="button" data-quick-pick="2" aria-pressed="${quickPickChosen && Number(savedAnswer) === 2}"><span aria-hidden="true">◀</span>${escapeHTML(question.labels[0])}</button>
             <button class="quick-pick-option ${quickPickChosen && Number(savedAnswer) === 9 ? "active" : ""}" type="button" data-quick-pick="9" aria-pressed="${quickPickChosen && Number(savedAnswer) === 9}">${escapeHTML(question.labels[1])}<span aria-hidden="true">▶</span></button>
           </div>
-          <p class="quick-pick-hint">Tap a side to move on — open “Add context” first if you want to explain.</p>
+          <p class="quick-pick-hint">${POINTER_VERB} a side to move on — open “Add context” first if you want to explain.</p>
           <details class="quick-pick-between"><summary>Somewhere in between?</summary>` : ""}
           <div class="slider-panel">
             <div class="slider-value" id="slider-value" aria-hidden="true">${Number(savedAnswer)}</div>
@@ -15213,7 +15266,10 @@ var qrcode = function() {
         if (addingMore) {
           // Someone explaining their pick keeps the card; Next moves on when they're done.
           error.className = "not-ready-note";
-          error.textContent = "Side picked — finish your note, then press Next.";
+          error.textContent = "Side picked — press Next when you’re done.";
+          const hint = document.querySelector(".quick-pick-hint");
+          if (hint) { hint.textContent = "Side picked — press Next when you’re done."; hint.setAttribute("role", "status"); }
+          revealAboveStickyBar(error);
           return;
         }
         window.setTimeout(() => (form.requestSubmit ? form.requestSubmit() : form.querySelector('button[type="submit"]')?.click()), 260);
@@ -15316,6 +15372,7 @@ var qrcode = function() {
         const notReady = state.notReady[state.activePlayer][question.id] === true;
         if (quickPick && !notReady && state.answers[state.activePlayer][question.id] === undefined) {
           playSound("error"); error.textContent = "Pick a side — or open “Somewhere in between?”";
+          revealAboveStickyBar(error);
           document.querySelector("[data-quick-pick]")?.focus();
           return;
         }
@@ -15330,7 +15387,7 @@ var qrcode = function() {
         const otherPlayer = state.activePlayer === 0 ? 1 : 0;
         if (state.questionIndex < totalQuestions - 1) {
           state.questionIndex += 1;
-          playSound("step", { degree: state.questionIndex });
+          playSound("step", { degree: state.questionIndex, count: totalQuestions });
           if (state.playStyle === "nearby") sendNearbyMessage({ type: "progress", roundId: state.nearbyRoundId, answered: state.questionIndex, total: totalQuestions });
         } else if (state.playStyle === "nearby") {
           state.completedPlayers[state.activePlayer] = true;
@@ -15415,13 +15472,31 @@ var qrcode = function() {
       return `${hidden} Sit together and flip the cards at your own pace.`;
     }
 
+    function celebrationHeadline() {
+      const round = roundsPlayedToday();
+      const preset = state.sessionPreset;
+      if (round <= 1) return `You both showed up <span class="accent-text">honestly.</span>`;
+      const today = new Date().toDateString();
+      const earlier = state.completedRounds.filter((item) => new Date(item.completedAt).toDateString() === today).slice(0, -1);
+      const best = earlier.reduce((top, item) => Math.max(top, Number(item.alignment?.overall) || 0), 0);
+      const lines = [
+        preset === "spicy-night" ? `Spicy round complete <span class="accent-text">🔥</span>` : "",
+        preset === "road-trip" ? `Another lap of the <span class="accent-text">road trip.</span>` : "",
+        preset === "deep-dive" ? `That was a deep one — <span class="accent-text">well done.</span>` : "",
+        best ? `Tonight’s best is ${best}% — <span class="accent-text">can this one beat it?</span>` : "",
+        `Round ${round} — <span class="accent-text">still finding new things.</span>`,
+        `Round ${round} locked in. <span class="accent-text">Ready?</span>`
+      ].filter(Boolean);
+      return lines[round % lines.length];
+    }
+
     function renderCelebration() {
       app.innerHTML = `
         <section class="screen celebration-screen" aria-labelledby="celebration-title">
           <div class="celebration-card">
             <div class="celebration-orb" aria-hidden="true">♡</div>
             <p class="eyebrow">Answers complete</p>
-            <h2 id="celebration-title">You both showed up <span class="accent-text">honestly.</span></h2>
+            <h2 id="celebration-title">${celebrationHeadline()}</h2>
             <p class="lock-copy">${celebrationTeaser()}</p>
             <div class="actions lock-actions">
               <button class="primary-btn" id="open-reveal-board" type="button">Open the reveal board</button>
@@ -15509,10 +15584,10 @@ var qrcode = function() {
     function mindReaderHeadline(tally) {
       const players = tally.filter((item) => item.made);
       const rate = (item) => item.hits / item.made;
-      if (players.length === 2 && rate(players[0]) === rate(players[1])) {
-        return players[0].hits ? "A tie — you read each other equally well" : "No mind reading tonight — plenty left to learn!";
+      if (players.length === 2 && players[0].hits === players[1].hits) {
+        return players[0].hits ? `A tie — you each read ${players[0].hits === 1 ? "one" : players[0].hits} right` : "No mind reading tonight — plenty left to learn!";
       }
-      const best = [...players].sort((a, b) => rate(b) - rate(a) || b.hits - a.hits)[0];
+      const best = [...players].sort((a, b) => b.hits - a.hits || rate(b) - rate(a))[0];
       if (!best.hits) return "No mind reading tonight — plenty left to learn!";
       const name = escapeHTML(state.names[best.player]);
       if (rate(best) >= 0.8 && best.made >= 2) return `👑 ${name} is tonight’s mind reader — ${best.hits} of ${best.made}!`;
@@ -15621,24 +15696,27 @@ var qrcode = function() {
     function discussionPromptMarkup(question, matchInfo, usedPrompts = new Set()) {
       const tier = matchInfo.unrated ? "unrated" : matchInfo.percent >= 75 ? "close" : matchInfo.percent >= 40 ? "medium" : "far";
       // Written answers have no "sides", so a big difference there uses the warm wording.
-      const spicyPlayful = question.topic === "spicy" && (PLAYFUL_SPICY.test(question.id) || questionTone(question) === "light");
+      const spicyPlayful = question.topic === "spicy" && !SENSITIVE_SPICY.test(question.id) && questionTone(question) !== "deep";
       const tone = spicyPlayful ? (question.type === "text" ? "flirtyText" : "flirty") : question.topic === "spicy" ? "gentle" : questionTone(question) === "light" && !(question.type === "text" && tier === "far") ? "light" : "warm";
       if (!state.cardPrompts || typeof state.cardPrompts !== "object") state.cardPrompts = {};
       const key = `${tier}:${tone}`;
       const kept = state.cardPrompts[question.id];
       let chosen = kept && kept.key === key && typeof kept.text === "string" && !usedPrompts.has(kept.text) ? kept.text : "";
       if (!chosen) {
-        const neighbours = { close: ["close", "medium", "far"], medium: ["medium", "close", "far"], far: ["far", "medium", "close"] };
-        const pools = tier === "unrated" ? [DISCUSSION_PROMPTS.unrated] : neighbours[tier].map((name) => DISCUSSION_PROMPTS[tone][name]);
-        const recent = new Set(Array.isArray(state.recentPrompts) ? state.recentPrompts : []);
+        // Same tier first, least recently used first; borrow only from a tier that still fits the card.
+        const fitting = { close: ["close"], medium: ["medium", "close"], far: ["far", "medium"] };
+        const pools = tier === "unrated" ? [DISCUSSION_PROMPTS.unrated] : fitting[tier].map((name) => DISCUSSION_PROMPTS[tone][name]);
+        const recentList = Array.isArray(state.recentPrompts) ? state.recentPrompts : [];
         // First dates skip follow-ups that assume a shared past.
-        const historySafe = (text) => state.questionIntensity !== "cozy" || !(HISTORY_PROMPT_PATTERN.test(text) || /\blast notice|\bled you both\b|\bin each other\b|\bpets?\b/i.test(text));
+        const historySafe = (text) => state.questionIntensity !== "cozy" || !(HISTORY_PROMPT_PATTERN.test(text) || /\blast notice|\bled you both\b|\bin each other\b|\bpets?\b|\bnoticed? you\b|\brecently\b/i.test(text));
         const seed = [...question.id].reduce((total, character) => total + character.charCodeAt(0), 0);
-        const ordered = pools.flatMap((prompts) => prompts.map((_, index) => prompts[(seed + index) % prompts.length]));
-        chosen = ordered.find((text) => historySafe(text) && !usedPrompts.has(text) && !recent.has(text))
-          || ordered.find((text) => historySafe(text) && !usedPrompts.has(text))
-          || ordered.find((text) => !usedPrompts.has(text))
-          || ordered[0];
+        const age = (text) => recentList.lastIndexOf(text);
+        const rankPool = (prompts) => prompts.map((_, index) => prompts[(seed + index) % prompts.length])
+          .filter((text) => !usedPrompts.has(text) && historySafe(text))
+          .sort((a, b) => age(a) - age(b));
+        chosen = pools.map(rankPool).find((list) => list.length)?.[0]
+          || pools.flat().find((text) => !usedPrompts.has(text))
+          || pools[0][0];
         state.cardPrompts[question.id] = { key, text: chosen };
         state.recentPrompts = [...(Array.isArray(state.recentPrompts) ? state.recentPrompts : []).filter((text) => text !== chosen), chosen].slice(-60);
       }
@@ -15719,7 +15797,10 @@ var qrcode = function() {
         const [first, second] = [state.answers[0][item.question.id], state.answers[1][item.question.id]];
         const short = (value) => {
           const text = item.question.type === "slider" ? (pickLabel(item.question, value) || sliderMeaning(item.question, value)) : String(value ?? "").trim();
-          return text.length > 42 ? `${text.slice(0, 40)}…` : text;
+          // Slider meanings are short labels; only free-text answers are trimmed (at a word boundary).
+          if (item.question.type === "slider" || text.length <= 42) return text;
+          const cut = text.slice(0, 40);
+          return `${cut.slice(0, cut.lastIndexOf(" ") > 24 ? cut.lastIndexOf(" ") : 40)}…`;
         };
         return `<span class="highlight-answers"><span style="--player-color: var(--blue)">${escapeHTML(state.names[0])}: ${escapeHTML(short(first))}</span><span style="--player-color: var(--green)">${escapeHTML(state.names[1])}: ${escapeHTML(short(second))}</span></span>`;
       };
@@ -15746,7 +15827,8 @@ var qrcode = function() {
         const hasComment = [0, 1].some((player) => String(state.comments[player]?.[item.question.id] || "").trim());
         return (rating === "different" ? 3 : rating === "discuss" ? 2.5 : 1) * item.importance * (hasComment ? 1.4 : 1) * (100 - item.match.percent);
       };
-      const conversationHighlight = [...comparable].filter((item) => item !== closestHighlight && item !== surpriseHighlight && item.match.percent < 100 && !isQuickPickQuestion(item.question)).sort((a, b) => talkWeight(b) - talkWeight(a))[0]
+      const realTalkingPoint = (item) => item.match.percent < 75 || ["discuss", "different"].includes(state.textRatings[item.question.id]) || [0, 1].some((player) => String(state.comments[player]?.[item.question.id] || "").trim());
+      const conversationHighlight = [...comparable].filter((item) => item !== closestHighlight && item !== surpriseHighlight && realTalkingPoint(item) && !isQuickPickQuestion(item.question)).sort((a, b) => talkWeight(b) - talkWeight(a))[0]
         || [...comparable].filter((item) => item !== closestHighlight && item !== surpriseHighlight && (item.match.percent < 75 || ["discuss", "different"].includes(state.textRatings[item.question.id]))).sort((a, b) => a.match.percent - b.match.percent)[0];
       const usedPrompts = new Set();
       const cards = questions.map((question, index) => {
@@ -15847,7 +15929,7 @@ var qrcode = function() {
                 </div>
               </div>
             </div>
-            ${tonightLine()}
+            ${allRevealed ? tonightLine() : ""}
             ${topicAlignmentCards ? `<details class="topic-alignment-area" ${window.innerWidth > 600 ? "open" : ""} ${allRevealed ? "" : 'aria-hidden="true" inert'}>
               <summary class="topic-alignment-title">Alignment by question pack</summary>
               <div class="topic-alignment-grid">${topicAlignmentCards}</div>
@@ -16120,7 +16202,7 @@ var qrcode = function() {
             back.focus({ preventScroll: true });
             if (scroll) card.scrollIntoView({ block: "nearest", behavior: motionReduced() ? "auto" : "smooth" });
           } else {
-            card.querySelector(".card-front")?.focus({ preventScroll: true });
+            window.setTimeout(() => { if (!card.classList.contains("flipped")) card.querySelector(".card-front")?.focus({ preventScroll: true }); }, 110);
           }
         });
       }
@@ -16204,6 +16286,8 @@ var qrcode = function() {
               const host = state.names[0] || "Your partner";
               showToast(`${host}’s phone isn’t connected. Ask ${host} to tap “Play another round” and scan the new QR — or use “Switch vibe or players” to play on this phone.`, { tone: "warning" });
             } else {
+              if (!(await confirmLeavingReveal())) return;
+              if (revealUnfinished()) state.revealCelebrated = state.selectedQuestionIds.join("|");
               closeNearbyConnection();
               state.screen = "nearby";
               saveState();
