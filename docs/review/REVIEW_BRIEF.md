@@ -99,15 +99,15 @@ behave well? Recommend concrete synthesis changes (notes, envelopes, layering, p
 
 ## Score history
 
-| Reviewer | R1 | R2 | R3 | R4 | R5 | R6 |
-| --- | --- | --- | --- | --- | --- | --- |
-| Mobile | 7.0–8.2 | 8.4–9.2 | 8.6–9.3 | 8.6–9.3 | 8.3–9.2 | 8.7–9.3 |
-| Desktop | 7.5–8.8 | 7.9–9.2 | 8.0–9.1 | 8.5–9.3 | 7.8–9.0 | 8.4–9.1 |
-| Multiplayer/QR | 5.0–7.0 | 7.6–8.8 | 8.3–9.0 | 8.5–9.2 | 8.3–9.0 | 8.7–9.2 |
-| QA/accessibility | 6.6–8.6 | 8.0–8.9 | 8.5–9.2 | 8.6–9.3 | 8.6–9.3 | 8.7–9.2 |
-| Cross-platform/offline | — | 8.0–9.2 | 8.7–9.5 | 9.3–9.5 | 8.6–9.3 | 9.2–9.5 |
-| Fun & engagement | — | — | — | — | 7.6–9.1 (fun 7.6) | 8.6–9.1 (fun 8.6) |
-| Sound design | — | — | — | — | 5.8 mobile / 6.0 desktop | 7.4 mobile / 7.8 desktop |
+| Reviewer | R1 | R2 | R3 | R4 | R5 | R6 | R7 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Mobile | 7.0–8.2 | 8.4–9.2 | 8.6–9.3 | 8.6–9.3 | 8.3–9.2 | 8.7–9.3 | 8.4–9.3 |
+| Desktop | 7.5–8.8 | 7.9–9.2 | 8.0–9.1 | 8.5–9.3 | 7.8–9.0 | 8.4–9.1 | 8.3–9.2 |
+| Multiplayer/QR | 5.0–7.0 | 7.6–8.8 | 8.3–9.0 | 8.5–9.2 | 8.3–9.0 | 8.7–9.2 | 8.8–9.2 |
+| QA/accessibility | 6.6–8.6 | 8.0–8.9 | 8.5–9.2 | 8.6–9.3 | 8.6–9.3 | 8.7–9.2 | 8.0–9.2 |
+| Cross-platform/offline | — | 8.0–9.2 | 8.7–9.5 | 9.3–9.5 | 8.6–9.3 | 9.2–9.5 | 8.5–9.5 |
+| Fun & engagement | — | — | — | — | 7.6–9.1 (fun 7.6) | 8.6–9.1 (fun 8.6) | 8.9–9.3 (fun 8.9) |
+| Sound design | — | — | — | — | 5.8 mobile / 6.0 desktop | 7.4 mobile / 7.8 desktop | 8.3 mobile / 8.6 desktop |
 
 R5 reviewed round 5's game-feel branch (commit 0ec3741). Its fixes ship as **1.2.0**: a rebuilt audio engine
 (mix bus, compressor + limiter, ducked generative F-major ambient that suspends in the background, in-key
@@ -129,6 +129,16 @@ Cozy history filter widened; prompt pools doubled, stable per card and fresh acr
 one →"; "Saved for later" in the Journal; phone toasts at the top and non-blocking; theme selected states;
 no mid-word breaks; Esc closes a card; unlock announced to screen readers; quick-pick sides in Library and
 Journal; Back leaves Home in one press (`tests/e2e/back.mjs`).
+
+R7 reviewed 1.2.1 (commit c580916). Its fixes ship as **1.2.2**: Safari/Firefox mirrored card faces fixed
+(`.card-face { isolation: isolate }` + hidden inactive face); unfinished reveals survive reloads and are
+guarded by a confirm on Start / Play another round / Switch vibe; hidden-round matching uses the newest
+snapshot only; Lamport-stamped sync (newest wins, ties to host, rejected edits echoed) for ratings,
+follow-through and intentions, all included in the reconnect resync; partner re-renders wait for the unlock
+animation; selected rating chips visible in every theme; desktop toasts under the top bar; 20 light quick
+picks (Road Trip freshness), whole-word light detection, flirty Spicy Night draw and follow-ups,
+"Before you rate" above the rating buttons; sound: single slider tap, phone-audible dreamy/error cues,
+cluster-free ambient voicing, rate/open/finale cues, default volume 0.8; Back guard reused after reload.
 
 Round 4 is on `main` (tested, deployed). Round 5's game-design changes are on branch
 **`wip/round5-game-feel`** and are **not yet tested** — they address the Fun findings:

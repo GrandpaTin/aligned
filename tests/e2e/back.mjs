@@ -23,4 +23,8 @@ console.log("3 Back ->", await back(p)); console.log("3 Back ->", await back(p))
 p = await fresh(); await dismissTutorial(p); await p.waitForTimeout(500*T);
 await p.click("#settings-button", F); await p.waitForTimeout(800*T); await p.click("#replay-tutorial", F); await p.waitForTimeout(1000*T);
 console.log("4 dialog", await state(p)); console.log("4 Back ->", await back(p)); console.log("4 Back ->", await back(p)); console.log("4 Back ->", await back(p));
+// 5: reload on Settings must not add a dead Back press
+p = await fresh(); await dismissTutorial(p); await p.waitForTimeout(500*T);
+await p.click("#settings-button", F); await p.waitForTimeout(800*T); await p.reload(); await p.waitForTimeout(1200*T);
+console.log("5 Back ->", await back(p)); console.log("5 Back ->", await back(p));
 console.log("errors", errors); await b.close();

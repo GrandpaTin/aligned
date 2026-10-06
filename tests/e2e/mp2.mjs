@@ -52,7 +52,11 @@ try {
     const h = await host.evaluate(() => JSON.parse(localStorage.getItem("aligned-state-v1")).revealedIds.length);
     const j = await join.evaluate(() => JSON.parse(localStorage.getItem("aligned-state-v1")).revealedIds.length);
     log(`revealed host=${h} join=${j}`); if (h !== 2 || j !== 2) throw new Error("reveal state diverged");
-    await host.click("#new-round"); await join.waitForSelector("#question-form", { timeout: 15000 }); log("second round started on both");
+    await host.click("#new-round");
+    // Leaving an unfinished reveal asks first (deliberate); confirm after the dialog's 400 ms tap guard.
+    const leave = host.locator("[data-modal-confirm]");
+    if (await leave.isVisible({ timeout: 2000 }).catch(() => false)) { await host.waitForTimeout(450); await leave.click(); }
+    await join.waitForSelector("#question-form", { timeout: 15000 }); log("second round started on both");
   } else if (scenario === "leave") {
     await host.goto(BASE); await dismissTutorial(host);
     await answerAll(join, "J"); log("partner finished");
