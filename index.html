@@ -219,21 +219,21 @@
       transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 160ms ease, border-color 160ms ease;
     }
 
-    .brand:hover {
+    @media (hover: hover) { .brand:hover {
       border-color: rgba(251, 113, 133, 0.3);
       box-shadow: 0 0 12px rgba(251, 113, 133, 0.22);
       transform: scale(1.03);
-    }
+    } }
 
     .brand:active {
       transform: scale(0.97);
     }
 
-    .brand:hover .brand-mark {
+    @media (hover: hover) { .brand:hover .brand-mark {
       color: var(--coral);
       text-shadow: 0 0 10px rgba(251, 113, 133, 0.7);
       animation: heart-beat 1.2s ease-in-out infinite;
-    }
+    } }
 
     @media (max-width: 440px) {
       .brand-text { display: none; }
@@ -273,11 +273,11 @@
       transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
     }
 
-    .home-btn:hover {
+    @media (hover: hover) { .home-btn:hover {
       border-color: color-mix(in srgb, var(--coral) 36%, transparent);
       background: color-mix(in srgb, var(--coral) 9%, transparent);
       transform: translateY(-2px);
-    }
+    } }
 
     .home-btn.active {
       border-color: var(--coral);
@@ -285,11 +285,11 @@
       box-shadow: 0 0 12px color-mix(in srgb, var(--coral) 20%, transparent);
     }
 
-    [data-theme] .home-btn:hover {
+    @media (hover: hover) { [data-theme] .home-btn:hover {
       border-color: color-mix(in srgb, var(--coral) 36%, transparent);
       background: color-mix(in srgb, var(--coral) 9%, transparent);
       transform: translateY(-2px);
-    }
+    } }
 
     [data-theme] .home-btn.active {
       border-color: var(--coral);
@@ -544,10 +544,10 @@
       transition: border-color 150ms ease, background 150ms ease;
     }
 
-    .session-dropdown-trigger:hover {
+    @media (hover: hover) { .session-dropdown-trigger:hover {
       border-color: color-mix(in srgb, var(--coral) 40%, transparent);
       background: rgba(30, 41, 59, 0.8);
-    }
+    } }
 
     .session-trigger-arrow {
       font-size: 0.8rem;
@@ -595,9 +595,9 @@
       transition: background 120ms ease;
     }
 
-    .session-dropdown-item:hover {
+    @media (hover: hover) { .session-dropdown-item:hover {
       background: rgba(255, 255, 255, 0.08);
-    }
+    } }
 
     .session-dropdown-item.selected {
       background: color-mix(in srgb, var(--coral) 15%, transparent);
@@ -677,10 +677,10 @@
       transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
     }
 
-    .mode-option:hover .mode-card {
+    @media (hover: hover) { .mode-option:hover .mode-card {
       border-color: color-mix(in srgb, var(--coral) 38%, transparent);
       transform: translateY(-2px);
-    }
+    } }
 
     .mode-option input:checked + .mode-card {
       border-color: var(--coral);
@@ -779,10 +779,10 @@
       line-height: 1.25;
     }
 
-    .count-option:hover .count-card {
+    @media (hover: hover) { .count-option:hover .count-card {
       border-color: color-mix(in srgb, var(--coral) 38%, transparent);
       transform: translateY(-2px);
-    }
+    } }
 
     .count-option input:checked + .count-card {
       border-color: var(--coral);
@@ -809,10 +809,10 @@
       font-weight: 760;
     }
 
-    .mini-action:hover {
+    @media (hover: hover) { .mini-action:hover {
       color: var(--text);
       border-color: rgba(251, 113, 133, 0.35);
-    }
+    } }
 
     .topic-picker {
       display: flex;
@@ -853,10 +853,10 @@
       font-weight: 900;
     }
 
-    .topic-option:hover .topic-chip {
+    @media (hover: hover) { .topic-option:hover .topic-chip {
       border-color: color-mix(in srgb, var(--topic-color) 48%, transparent);
       transform: translateY(-2px);
-    }
+    } }
 
     .topic-option input:checked + .topic-chip {
       border-color: color-mix(in srgb, var(--topic-color) 70%, transparent);
@@ -1019,11 +1019,11 @@
       transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
     }
 
-    .primary-btn:hover {
+    @media (hover: hover) { .primary-btn:hover {
       background: #fda4af;
       box-shadow: 0 14px 36px rgba(251, 113, 133, 0.3);
       transform: translateY(-2px);
-    }
+    } }
 
     .primary-btn:active {
       transform: translateY(0);
@@ -1038,9 +1038,9 @@
       background: rgba(148, 163, 184, 0.08);
     }
 
-    .secondary-btn:hover {
+    @media (hover: hover) { .secondary-btn:hover {
       background: rgba(148, 163, 184, 0.14);
-    }
+    } }
 
     .text-btn {
       min-height: 36px;
@@ -1049,9 +1049,9 @@
       background: transparent;
     }
 
-    .text-btn:hover {
+    @media (hover: hover) { .text-btn:hover {
       color: var(--text);
-    }
+    } }
 
     .error {
       min-height: 20px;
@@ -1961,9 +1961,9 @@
       transition: height 320ms cubic-bezier(0.22, 1, 0.36, 1), transform 180ms ease;
     }
 
-    .flip-card:hover {
+    @media (hover: hover) { .flip-card:hover {
       transform: translateY(-2px);
-    }
+    } }
 
     .card-front:focus-visible,
     .card-close-button:focus-visible {
@@ -2273,7 +2273,7 @@
       border-radius: 7px;
       color: #0f172a;
       background: var(--marker-color);
-      font-size: 0.68rem;
+      font-size: max(12px, 0.72rem);
       font-weight: 900;
       line-height: 1.2;
       transform: translateX(-50%);
@@ -2413,10 +2413,10 @@
       background: rgba(251, 113, 133, 0.08);
     }
 
-    .reveal-all-btn:hover {
+    @media (hover: hover) { .reveal-all-btn:hover {
       border-color: rgba(251, 113, 133, 0.48);
       background: rgba(251, 113, 133, 0.14);
-    }
+    } }
 
     .reveal-buddies {
       display: inline-flex;
@@ -2479,11 +2479,11 @@
       transition: transform 170ms ease, border-color 170ms ease, background 170ms ease;
     }
 
-    .library-launch:hover {
+    @media (hover: hover) { .library-launch:hover {
       border-color: rgba(167, 139, 250, 0.45);
       background: linear-gradient(135deg, rgba(167, 139, 250, 0.16), rgba(96, 165, 250, 0.09));
       transform: translateY(-2px);
-    }
+    } }
 
     .library-launch-copy {
       display: flex;
@@ -2562,17 +2562,17 @@
       transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
     }
 
-    .data-tool:hover {
+    @media (hover: hover) { .data-tool:hover {
       border-color: rgba(96, 165, 250, 0.36);
       color: var(--text);
       background: rgba(96, 165, 250, 0.08);
       transform: translateY(-2px);
-    }
+    } }
 
-    .data-tool.danger:hover {
+    @media (hover: hover) { .data-tool.danger:hover {
       border-color: rgba(251, 113, 133, 0.42);
       background: rgba(251, 113, 133, 0.09);
-    }
+    } }
 
     .data-status {
       min-height: 18px;
@@ -2677,18 +2677,27 @@
       transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
     }
 
-    .topic-progress-card:hover,
+    
     .topic-progress-card.active {
       border-color: color-mix(in srgb, var(--topic-color) 48%, transparent);
       background: color-mix(in srgb, var(--topic-color) 8%, rgba(30, 41, 59, 0.72));
       transform: translateY(-2px);
     }
+    @media (hover: hover) { .topic-progress-card:hover {
+      border-color: color-mix(in srgb, var(--topic-color) 48%, transparent);
+      background: color-mix(in srgb, var(--topic-color) 8%, rgba(30, 41, 59, 0.72));
+      transform: translateY(-2px);
+    } }
 
-    [data-theme] .topic-progress-card:hover,
+    
     [data-theme] .topic-progress-card.active {
       border-color: color-mix(in srgb, var(--topic-color) 48%, transparent);
       background-image: linear-gradient(color-mix(in srgb, var(--topic-color) 8%, transparent), color-mix(in srgb, var(--topic-color) 8%, transparent));
     }
+    @media (hover: hover) { [data-theme] .topic-progress-card:hover {
+      border-color: color-mix(in srgb, var(--topic-color) 48%, transparent);
+      background-image: linear-gradient(color-mix(in srgb, var(--topic-color) 8%, transparent), color-mix(in srgb, var(--topic-color) 8%, transparent));
+    } }
 
     .topic-progress-top {
       display: flex;
@@ -3017,10 +3026,10 @@
       font-weight: 760;
     }
 
-    .question-library-action:hover {
+    @media (hover: hover) { .question-library-action:hover {
       border-color: rgba(251, 113, 133, 0.36);
       color: var(--text);
-    }
+    } }
 
     .library-empty {
       padding: 36px 20px;
@@ -3304,14 +3313,9 @@
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
     }
 
-    .name-input:hover,
-    .answer-textarea:hover,
-    .comment-textarea:hover,
-    .custom-input:hover,
-    .custom-select:hover,
-    .library-search:hover {
+    @media (hover: hover) { .name-input:hover,.answer-textarea:hover,.comment-textarea:hover,.custom-input:hover,.custom-select:hover,.library-search:hover {
       border-color: rgba(251, 113, 133, 0.34);
-    }
+    } }
 
     .count-card,
     .mode-card,
@@ -5108,13 +5112,13 @@
       font-weight: 500;
     }
 
-    .text-size-option:hover {
+    @media (hover: hover) { .text-size-option:hover {
       background: rgba(255, 255, 255, 0.05);
       color: var(--text);
-    }
-    [data-theme="pastel"] .text-size-option:hover {
+    } }
+    @media (hover: hover) { [data-theme="pastel"] .text-size-option:hover {
       background: rgba(15, 23, 42, 0.04);
-    }
+    } }
 
     .text-size-option.active {
       border-color: var(--coral);
@@ -6126,14 +6130,14 @@
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--coral) 12%, transparent), 0 10px 22px rgba(85, 74, 112, 0.08) !important;
     }
 
-    [data-theme="pastel"] .session-dropdown-trigger:hover {
+    @media (hover: hover) { [data-theme="pastel"] .session-dropdown-trigger:hover {
       border-color: color-mix(in srgb, var(--coral) 40%, transparent) !important;
       background: #fafafc !important;
-    }
+    } }
 
-    [data-theme="pastel"] .session-dropdown-item:hover {
+    @media (hover: hover) { [data-theme="pastel"] .session-dropdown-item:hover {
       background: rgba(79, 91, 120, 0.08) !important;
-    }
+    } }
 
     [data-theme="pastel"] .topic-option input:checked + .topic-chip {
       border-color: var(--topic-color) !important;
@@ -6448,7 +6452,7 @@
     .screen, .question-screen, .flip-card, .error, #setup-error { scroll-margin-top: calc(84px + env(safe-area-inset-top, 0px)); }
     .vibe-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
     .vibe-tile { display: grid; gap: 4px; min-height: 92px; padding: 14px; border: 1px solid var(--line); border-radius: 18px; color: var(--text); background: rgba(15, 23, 42, 0.5); text-align: left; cursor: pointer; transition: transform 160ms ease, border-color 160ms ease; }
-    .vibe-tile:hover { transform: translateY(-2px); border-color: var(--coral); }
+    @media (hover: hover) { .vibe-tile:hover { transform: translateY(-2px); border-color: var(--coral); } }
     .vibe-tile.active { border-color: var(--coral); background: linear-gradient(145deg, color-mix(in srgb, var(--coral) 18%, transparent), color-mix(in srgb, var(--violet) 10%, transparent)); }
     .vibe-tile small { color: var(--muted); font-size: max(12px, .74rem); line-height: 1.35; }
     .vibe-icon { font-size: 1.4rem; }
@@ -11150,7 +11154,7 @@ var qrcode = function() {
           showToast(`${partner} flipped card ${number}`);
           const question = getSelectedQuestions().find((item) => item?.id === newlyRevealed[0]);
           const match = question ? revealMatchInfo(question, state.answers[0][question.id], state.answers[1][question.id]) : null;
-          playSound(match?.isMatch ? "match" : "reveal", { topic: question?.topic, exact: match?.exact, degree: number - 1 });
+          playSound("partner-flip", { topic: question?.topic, degree: number - 1, match: Boolean(match?.isMatch) });
         }
       } else if (payload.type === "text-rating") {
         if (sameRound && acceptRemoteRating(payload.questionId, payload.rating, payload.at)) {
@@ -12140,7 +12144,7 @@ var qrcode = function() {
           const earlyOut = rubs(frequency, next);
           if (first || lateIn) {
             gain.gain.setValueAtTime(0.0001, at);
-            if (lateIn) gain.gain.setValueAtTime(0.0001, at + 0.6);
+            if (lateIn) gain.gain.setValueAtTime(0.0001, at + 0.3);
             gain.gain.linearRampToValueAtTime(0.03, at + (first ? fadeIn : 1.2));
           } else {
             gain.gain.setValueCurveAtTime(curve(true), at, 1.2);
@@ -12155,6 +12159,7 @@ var qrcode = function() {
           const octave = ctx.createOscillator();
           const octaveLevel = ctx.createGain();
           octave.frequency.value = frequency * 2;
+          octave.detune.value = osc.detune.value;
           // The lowest voice gets a stronger octave so phones still hear the chord's root.
           octaveLevel.gain.value = index === 0 ? 0.6 : 0.3;
           osc.connect(gain);
@@ -12332,6 +12337,7 @@ var qrcode = function() {
       const patterns = {
         tap: 14,
         step: 14,
+        "partner-flip": 10,
         lock: [18, 35, 18],
         unlock: [10, 25, 14],
         reveal: 16,
@@ -12460,7 +12466,7 @@ var qrcode = function() {
     function playSound(kind = "tap", options = {}) {
       if (!audioAllowed()) return;
       pulseHaptic(kind);
-      if (!state.soundEnabled || !(state.soundVolume > 0) || document.hidden) return;
+      if (!state.soundEnabled || !(state.soundVolume > 0) || document.hidden) { if (audioEngine.ctx) armIdleSuspend(); return; }
       try {
         const ctx = audioEngine.ensure();
         if (!ctx) return;
@@ -12501,7 +12507,7 @@ var qrcode = function() {
           const stepExtra = themeName === "dreamy" ? { ...wobble(), decay: 0.7 } : wobble();
           sequence(rung.map((d) => pentatonic(d)), 0.055, stepPeak, stepExtra);
           if (raw > 0 && rungIndex(raw - 1) === index) {
-            end = Math.max(end, note(pentatonic(rung[1] + 1), start + 2 * gap(0.055), stepPeak * 0.5, stepExtra));
+            end = Math.max(end, note(pentatonic(Math.min(rung[1] + 1, ladder[ladder.length - 1][1] - 1)), start + 2 * gap(0.055), stepPeak * 0.5, stepExtra));
           }
         } else if (kind === "lock") {
           sequence([pentatonic(3), pentatonic(2), pentatonic(0)], 0.075, 0.08, themeName === "cute" ? { octaveLevel: 0.6 } : undefined);
@@ -12573,6 +12579,10 @@ var qrcode = function() {
           if (options.agree) sequence([pentatonic(d), pentatonic(d + 2)], 0.06, 0.08, cuteLift);
           else end = Math.max(end, note(pentatonic(d), start, 0.085, { ...cuteLift, decay: themeName === "dreamy" ? 0.6 : 0.12 }));
           duck = 0.8;
+        } else if (kind === "partner-flip") {
+          const d = (Number(options.degree) || 0) % 5;
+          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045, { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true });
+          duck = 0.9;
         } else if (kind === "open") {
           noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.11, q: 0.8 });
           sequence([pentatonic(0), pentatonic(2), pentatonic(4)], 0.08, 0.08, themeName === "cute" ? { octaveLevel: 0.6 } : undefined);
@@ -13848,7 +13858,7 @@ var qrcode = function() {
       document.querySelectorAll("[data-compact-floor]").forEach((element) => { element.style.removeProperty("font-size"); element.removeAttribute("data-compact-floor"); });
       if (state.textSize !== "small") return;
       document.querySelectorAll("#app *, .topbar *, .bottom-nav *").forEach((element) => {
-        if (element.closest(".text-size-option, svg, [aria-hidden=\"true\"]") || !element.textContent.trim()) return;
+        if (element.closest(".text-size-option, svg, .reveal-buddy, .progress-star, .pass-person, .card-spark, .question-decor") || !element.textContent.trim()) return;
         if (parseFloat(getComputedStyle(element).fontSize) < 11.95) {
           element.style.setProperty("font-size", "12px", "important");
           element.setAttribute("data-compact-floor", "");
@@ -16984,7 +16994,8 @@ var qrcode = function() {
       // Resume audio on user interaction to satisfy browser autoplay policy.
       try {
         if (state.ambientMusicEnabled) ambientSoundscape.start();
-        else { audioEngine.resume(); armIdleSuspend(); }
+        else audioEngine.resume();
+        armIdleSuspend();
       } catch (e) {
         // Prevent audio issues from blocking user interaction handlers
       }
