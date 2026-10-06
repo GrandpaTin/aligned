@@ -6424,6 +6424,50 @@
       }
     }
     .screen, .question-screen, .flip-card, .error, #setup-error { scroll-margin-top: calc(84px + env(safe-area-inset-top, 0px)); }
+    .vibe-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .vibe-tile { display: grid; gap: 4px; min-height: 92px; padding: 14px; border: 1px solid var(--line); border-radius: 18px; color: var(--text); background: rgba(15, 23, 42, 0.5); text-align: left; cursor: pointer; transition: transform 160ms ease, border-color 160ms ease; }
+    .vibe-tile:hover { transform: translateY(-2px); border-color: var(--coral); }
+    .vibe-tile.active { border-color: var(--coral); background: linear-gradient(145deg, color-mix(in srgb, var(--coral) 18%, transparent), color-mix(in srgb, var(--violet) 10%, transparent)); }
+    .vibe-tile small { color: var(--muted); font-size: max(12px, .74rem); line-height: 1.35; }
+    .vibe-icon { font-size: 1.4rem; }
+    [data-theme="pastel"] .vibe-tile { background: rgba(255, 255, 255, 0.7); }
+    @media (min-width: 760px) { .vibe-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+    .quick-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0 8px; }
+    .quick-pick-option { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 96px; padding: 16px; border: 2px solid var(--line); border-radius: 20px; color: var(--text); background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)); font: inherit; font-size: 1.05rem; font-weight: 800; text-align: center; cursor: pointer; transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease; }
+    .quick-pick-option:hover, .quick-pick-option.active { border-color: var(--question-color, var(--coral)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--question-color, var(--coral)) 22%, transparent); transform: translateY(-2px); }
+    [data-theme="pastel"] .quick-pick-option { background: #ffffff; color: #1e293b; }
+    .quick-pick-between > summary { cursor: pointer; color: var(--muted); }
+    .guess-panel { margin: 14px 0 4px; padding: 12px 14px; border: 1px dashed color-mix(in srgb, var(--violet) 60%, transparent); border-radius: 16px; background: color-mix(in srgb, var(--violet) 8%, transparent); }
+    .guess-panel.guessed { border-style: solid; }
+    .guess-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; font-weight: 800; }
+    .guess-label small { color: var(--muted); font-weight: 600; }
+    .guess-input::-webkit-slider-thumb { background: var(--violet); }
+    .answer-extras { margin-top: 14px; border: 1px solid var(--line); border-radius: 16px; padding: 4px 14px; }
+    .answer-extras > summary { cursor: pointer; font-weight: 750; }
+    .answer-extras > summary small, .card-more > summary small { margin-left: 6px; color: var(--muted); font-weight: 600; }
+    .guess-results { display: grid; gap: 6px; margin-top: 12px; }
+    .guess-line { padding: 8px 12px; border-radius: 12px; background: rgba(148, 163, 184, 0.1); font-size: max(12px, .8rem); }
+    .guess-line.hit { background: color-mix(in srgb, var(--violet) 20%, transparent); font-weight: 750; }
+    .card-more { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 6px; }
+    .card-more > summary { cursor: pointer; font-weight: 750; padding: 8px 0; }
+    .card-back-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; }
+    .alignment-rating.unrated { border: 1px solid color-mix(in srgb, var(--violet) 55%, transparent); border-radius: 16px; padding: 12px; background: color-mix(in srgb, var(--violet) 8%, transparent); }
+    .reveal-progress { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; }
+    .reveal-count { font-weight: 800; }
+    .reveal-dots { display: flex; flex-wrap: wrap; gap: 6px; }
+    .reveal-dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(148, 163, 184, 0.3); transition: background 200ms ease, transform 200ms ease; }
+    .reveal-dot.on { background: var(--coral); transform: scale(1.15); }
+    .alignment-dashboard { position: relative; margin-top: 24px; }
+    .alignment-dashboard .score-lock { display: none; }
+    .alignment-dashboard.locked { min-height: 160px; overflow: hidden; }
+    .alignment-dashboard.locked > :not(.score-lock) { filter: blur(14px); opacity: .35; pointer-events: none; user-select: none; }
+    .alignment-dashboard.locked .score-lock { position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; gap: 6px; text-align: center; }
+    .alignment-dashboard.locked .score-lock span { font-size: 1.8rem; color: var(--coral); }
+    .alignment-dashboard.locked .score-lock small { color: var(--muted); }
+    .highlight-jump { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; }
+    .highlight-answers { display: grid; gap: 4px; margin-top: 8px; font-size: max(12px, .78rem); font-weight: 650; }
+    .highlight-answers span { padding-left: 8px; border-left: 3px solid var(--player-color); color: var(--muted); }
     .not-ready-note { color: var(--muted); font-size: .78rem; line-height: 1.45; }
     .danger-btn { border-color: rgba(248, 113, 113, 0.5) !important; color: #fecaca !important; background: rgba(127, 29, 29, 0.35) !important; }
     [data-theme="pastel"] .danger-btn { color: #991b1b !important; background: #fee2e2 !important; }
@@ -9109,6 +9153,21 @@ var qrcode = function() {
       { id: "spy_19", topic: "spicy", category: "Spicy", type: "text", prompt: "What romantic routine could use a playful shake-up?" },
       { id: "spy_20", topic: "spicy", category: "Spicy", type: "text", prompt: "How should a partner respond when one person is not in the mood?" },
       { id: "spy_21", topic: "spicy", category: "Spicy", type: "text", prompt: "What conversation about intimacy would make our connection stronger?" },
+      { id: "spy_22", topic: "spicy", category: "Spicy", type: "slider", prompt: "Our next date night should be…", labels: ["Candlelit at home", "Dressed up and out"] },
+      { id: "spy_23", topic: "spicy", category: "Spicy", type: "slider", prompt: "Flirty texts during the workday?", labels: ["Save it for later", "Send them all day"] },
+      { id: "spy_24", topic: "spicy", category: "Spicy", type: "slider", prompt: "Your ideal amount of affection in public?", labels: ["Hand-holding at most", "Steal kisses anywhere"] },
+      { id: "spy_25", topic: "spicy", category: "Spicy", type: "text", prompt: "What small thing do I do that you find unexpectedly attractive?" },
+      { id: "spy_26", topic: "spicy", category: "Spicy", type: "slider", prompt: "When it comes to romance, you’re more…", labels: ["Slow burn", "Spontaneous sparks"] },
+      { id: "spy_27", topic: "spicy", category: "Spicy", type: "text", prompt: "Describe a perfect lazy morning together in three words." },
+      { id: "spy_28", topic: "spicy", category: "Spicy", type: "slider", prompt: "A surprise getaway just for the two of us?", labels: ["Tell me the plan", "Surprise me completely"] },
+      { id: "spy_29", topic: "spicy", category: "Spicy", type: "text", prompt: "Which outfit of mine is your secret favorite?" },
+      { id: "spy_30", topic: "spicy", category: "Spicy", type: "slider", prompt: "Slow dancing in the kitchen with no music?", labels: ["Feels a bit silly", "Yes, anytime"] },
+      { id: "spy_31", topic: "spicy", category: "Spicy", type: "text", prompt: "What compliment would you love to hear more often?" },
+      { id: "spy_32", topic: "spicy", category: "Spicy", type: "slider", prompt: "After a long day, what makes you feel closest?", labels: ["A long talk", "A long cuddle"] },
+      { id: "spy_33", topic: "spicy", category: "Spicy", type: "slider", prompt: "How adventurous should our next date be?", labels: ["Cozy and familiar", "Somewhere brand new"] },
+      { id: "spy_34", topic: "spicy", category: "Spicy", type: "text", prompt: "What’s one date you’ve always wanted to try with me?" },
+      { id: "spy_35", topic: "spicy", category: "Spicy", type: "slider", prompt: "Love notes: what’s your style?", labels: ["Sweet and simple", "Bold and steamy"] },
+      { id: "spy_36", topic: "spicy", category: "Spicy", type: "slider", prompt: "Being playfully teased by me?", labels: ["Go gentle", "Bring it on"] },
 
       { id: "dlb_1", topic: "dealbreakers", category: "Dealbreakers", type: "slider", prompt: "Could a relationship recover from physical infidelity?", labels: ["Never", "Possibly with work"] },
       { id: "dlb_2", topic: "dealbreakers", category: "Dealbreakers", type: "slider", prompt: "Could a relationship recover from a long emotional affair?", labels: ["Never", "Possibly with work"] },
@@ -9180,7 +9239,7 @@ var qrcode = function() {
       { id: "check-in", label: "Quick Check-in", icon: "☀", copy: "5 caring questions for right now", count: 5, intensity: "curious", mode: "slider-heavy", topics: ["connection", "love"] },
       { id: "date-night", label: "Cozy Date Night", icon: "♡", copy: "Warm connection with a little play", count: 10, intensity: "cozy", mode: "mixed", topics: ["connection", "love", "fun"] },
       { id: "deep-dive", label: "Deep Dive", icon: "◇", copy: "Honest values and future conversations", count: 10, intensity: "deep", mode: "mixed", topics: ["connection", "lifestyle", "future", "money"] },
-      { id: "spicy-night", label: "Spicy Night", icon: "♨", copy: "Flirty, intimate, and opt-in", count: 10, intensity: "spicy", mode: "slider-heavy", topics: ["connection", "love", "spicy"] },
+      { id: "spicy-night", label: "Spicy Night", icon: "♨", copy: "Flirty, intimate, and opt-in", count: 10, intensity: "spicy", mode: "mixed", topics: ["connection", "love", "spicy"], focus: "spicy" },
       { id: "money-meeting", label: "Money Meeting", icon: "$", copy: "Habits, goals, and financial expectations", count: 10, intensity: "deep", mode: "slider-heavy", topics: ["money", "future"] },
       { id: "future-planning", label: "Future Planning", icon: "↗", copy: "Dreams, logistics, and shared direction", count: 10, intensity: "deep", mode: "mixed", topics: ["future", "lifestyle", "money"] },
       { id: "repair", label: "Conflict Repair", icon: "☂", copy: "Slow, caring prompts for reconnection", count: 5, intensity: "deep", mode: "mixed", topics: ["connection", "love"] },
@@ -9228,7 +9287,7 @@ var qrcode = function() {
         names: ["", ""],
         sessionPreset: "custom",
         playStyle: "pass-and-play",
-        questionMode: "slider-heavy",
+        questionMode: "mixed",
         questionCount: 5,
         questionIntensity: "curious",
         selectedTopics: [...DEFAULT_TOPICS],
@@ -9267,6 +9326,8 @@ var qrcode = function() {
         customPacks: [],
         completedRounds: [],
         completedPlayers: [false, false],
+        guesses: [{}, {}],
+        revealCelebrated: "",
         nearbyRole: "",
         nearbyRoundId: "",
         nearbyRemote: null,
@@ -9504,6 +9565,9 @@ var qrcode = function() {
         }
 
         restored.activePlayer = restored.activePlayer === 1 ? 1 : 0;
+        restored.guesses = Array.isArray(cached.guesses) ? [cleanAnswerMap(cached.guesses[0]), cleanAnswerMap(cached.guesses[1])] : [{}, {}];
+        restored.guesses = restored.guesses.map((map) => Object.fromEntries(Object.entries(map).filter(([, value]) => typeof value === "number")));
+        restored.revealCelebrated = typeof restored.revealCelebrated === "string" ? restored.revealCelebrated.slice(0, 400) : "";
         restored.completedPlayers = Array.isArray(cached.completedPlayers)
           ? [cached.completedPlayers[0] === true, cached.completedPlayers[1] === true]
           : [restored.activePlayer === 1 || restored.screen === "intermission", false];
@@ -10161,6 +10225,7 @@ var qrcode = function() {
         roundId: state.nearbyRoundId,
         player,
         answers: { ...state.answers[player] },
+        guesses: { ...(state.guesses?.[player] || {}) },
         comments: { ...state.comments[player] },
         importance: { ...state.importance[player] },
         notReady: { ...state.notReady[player] }
@@ -10243,6 +10308,8 @@ var qrcode = function() {
         }
         return typeof value === "string" ? [[id, value]] : [];
       }));
+      state.guesses = Array.isArray(state.guesses) ? state.guesses : [{}, {}];
+      state.guesses[player] = Object.fromEntries(Object.entries(cleanAnswerMap(keep(remote.guesses))).filter(([, value]) => typeof value === "number"));
       state.comments[player] = Object.fromEntries(Object.entries(keep(remote.comments)).filter(([, value]) => typeof value === "string").map(([id, value]) => [id, value.slice(0, 400)]));
       state.privateNotes[player] = {};
       state.importance[player] = Object.fromEntries(Object.entries(keep(remote.importance)).filter(([, value]) => [0, 1, 2].includes(Number(value))).map(([id, value]) => [id, Number(value)]));
@@ -10356,7 +10423,7 @@ var qrcode = function() {
         state.nearbyRemote = {
           roundId: payload.roundId,
           player: payload.player === 0 ? 0 : 1,
-          answers: payload.answers, comments: payload.comments, importance: payload.importance, notReady: payload.notReady
+          answers: payload.answers, guesses: payload.guesses, comments: payload.comments, importance: payload.importance, notReady: payload.notReady
         };
         nearbyRuntime.partnerProgress = { answered: state.selectedQuestionIds.length, total: state.selectedQuestionIds.length };
         saveState();
@@ -10405,9 +10472,18 @@ var qrcode = function() {
         }
         next = next.filter((id) => roundIds.has(id));
         if (next.length === state.revealedIds.length && next.every((id) => state.revealedIds.includes(id))) return;
+        const newlyRevealed = next.filter((id) => !state.revealedIds.includes(id));
         state.revealedIds = next;
         saveState();
         refreshRevealFromPartner();
+        if (state.screen === "reveal" && newlyRevealed.length === 1) {
+          const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "Your partner";
+          const number = state.selectedQuestionIds.indexOf(newlyRevealed[0]) + 1;
+          showToast(`${partner} flipped card ${number}`);
+          const question = getSelectedQuestions().find((item) => item?.id === newlyRevealed[0]);
+          const match = question ? revealMatchInfo(question, state.answers[0][question.id], state.answers[1][question.id]) : null;
+          playSound(match?.isMatch ? "match" : "reveal");
+        }
       } else if (payload.type === "text-rating") {
         if (sameRound && state.selectedQuestionIds.includes(payload.questionId) && ["aligned", "nuanced", "discuss", "different"].includes(payload.rating)) {
           state.textRatings[payload.questionId] = payload.rating;
@@ -10629,6 +10705,7 @@ var qrcode = function() {
       state.privateNotes[other] = {};
       state.importance[other] = {};
       state.notReady[other] = {};
+      if (Array.isArray(state.guesses)) state.guesses[other] = {};
       state.completedPlayers = [localPlayer === 0, localPlayer === 1];
       state.activePlayer = localPlayer;
       state.playStyle = "pass-and-play";
@@ -11643,10 +11720,30 @@ var qrcode = function() {
       return { isMatch: false, exact: false, percent, label: "Unique perspectives", color: "#a78bfa" };
     }
 
+    const TEXT_RATING_INFO = {
+      aligned: { label: "You agree", color: "#4ade80", isMatch: true },
+      nuanced: { label: "Similar, with nuance", color: "#86efac", isMatch: true },
+      discuss: { label: "Worth discussing", color: "#fbbf24", isMatch: false },
+      different: { label: "Very different", color: "#fb7185", isMatch: false }
+    };
+
+    // The couple decides how close two written answers are; until then the card says so instead of guessing.
+    function revealMatchInfo(question, firstAnswer, secondAnswer) {
+      if (question.type !== "text") return getMatchInfo(question, firstAnswer, secondAnswer);
+      if (!hasComparableAnswer(question, firstAnswer) || !hasComparableAnswer(question, secondAnswer)) return getMatchInfo(question, firstAnswer, secondAnswer);
+      const rating = state.textRatings[question.id];
+      const info = TEXT_RATING_INFO[rating];
+      if (!info) return { isMatch: false, exact: false, percent: null, unrated: true, label: "Your call", color: "#a78bfa" };
+      return { isMatch: info.isMatch, exact: rating === "aligned", percent: ratingScore(rating), label: info.label, color: info.color, rated: true };
+    }
+
     function differenceMarkup(matchInfo, question) {
+      if (matchInfo.unrated) return "";
       const scoreCopy = matchInfo.missing
         ? "Not compared"
-        : question.type === "slider"
+        : matchInfo.rated
+          ? "Your rating"
+          : question.type === "slider"
         ? `${matchInfo.gap} point${matchInfo.gap === 1 ? "" : "s"} apart`
         : `${matchInfo.percent}% wording overlap`;
       return `
@@ -11689,7 +11786,8 @@ var qrcode = function() {
 
     function calculateAlignmentSummaryForAnswers(questions, answers, ratings = {}, importance = [{}, {}], notReady = [{}, {}]) {
       const scored = questions.filter((question) => !notReady[0]?.[question.id] && !notReady[1]?.[question.id]
-        && hasComparableAnswer(question, answers[0]?.[question.id]) && hasComparableAnswer(question, answers[1]?.[question.id])).map((question) => {
+        && hasComparableAnswer(question, answers[0]?.[question.id]) && hasComparableAnswer(question, answers[1]?.[question.id])
+        && (question.type !== "text" || ratingScore(ratings[question.id]) !== undefined)).map((question) => {
         const score = question.type === "text" && ratingScore(ratings[question.id]) !== undefined
           ? ratingScore(ratings[question.id])
           : getMatchInfo(question, answers[0]?.[question.id], answers[1]?.[question.id]).percent;
@@ -11878,6 +11976,47 @@ var qrcode = function() {
       return selected;
     }
 
+    const DEEP_PROMPT_PATTERN = /emotional safety|vulnerab|insecur|trauma|forgiv|jealous|regret|lonel|grief|hurt|betray|resent|conflict|argument|fight|fear|boundar|trust|apolog|repair|deal ?breaker|walk away/i;
+    const LIGHT_PROMPT_PATTERN = /karaoke|superpower|movie|film|song|snack|pizza|vacation|holiday|weekend|zombie|game|sitcom|pet|dessert|playlist|road trip|festival|dance|costume|emoji|lottery|island|breakfast|coffee|ice cream|theme park/i;
+    const HISTORY_PROMPT_PATTERN = /\bour relationship\b|\bthe relationship we\b|\bfrom me\b|\bwe have built\b|\bsince we met\b|\bour history\b|\bwhen we first\b|\bin our home\b|\babout me that\b/i;
+
+    function questionTone(question) {
+      if (["dealbreakers", "politics", "money"].includes(question.topic) || DEEP_PROMPT_PATTERN.test(question.prompt)) return "deep";
+      if (question.topic === "fun" || LIGHT_PROMPT_PATTERN.test(question.prompt)) return "light";
+      return "warm";
+    }
+
+    function questionNeedsHistory(question) {
+      return HISTORY_PROMPT_PATTERN.test(question.prompt);
+    }
+
+    // Warm up with something light, let the deepest prompt land about two-thirds in, finish gently,
+    // and never show the same answer format three times in a row.
+    function orderRoundAsRamp(questionIds) {
+      const catalogById = new Map(getQuestionCatalog().map((question) => [question.id, question]));
+      const items = questionIds.map((id) => catalogById.get(id)).filter(Boolean);
+      if (items.length < 3) return questionIds;
+      const weight = { light: 0, warm: 1, deep: 2 };
+      const sorted = [...items].sort((a, b) => weight[questionTone(a)] - weight[questionTone(b)]);
+      const opener = sorted.shift();
+      const closer = sorted.find((question) => questionTone(question) !== "deep") || sorted[0];
+      sorted.splice(sorted.indexOf(closer), 1);
+      const middle = sorted;
+      const deepest = middle.filter((question) => questionTone(question) === "deep");
+      const rest = middle.filter((question) => questionTone(question) !== "deep");
+      const ordered = [opener, ...rest];
+      const peakIndex = Math.max(1, Math.round(items.length * 0.66) - 1);
+      deepest.forEach((question, offset) => ordered.splice(Math.min(ordered.length, peakIndex + offset), 0, question));
+      ordered.push(closer);
+      for (let index = 2; index < ordered.length; index += 1) {
+        if (ordered[index].type === ordered[index - 1].type && ordered[index].type === ordered[index - 2].type) {
+          const swap = ordered.findIndex((question, other) => other > index && question.type !== ordered[index].type);
+          if (swap > 0) [ordered[index], ordered[swap]] = [ordered[swap], ordered[index]];
+        }
+      }
+      return ordered.map((question) => question.id);
+    }
+
     function chooseRoundQuestions(
       mode = "slider-heavy",
       count = 5,
@@ -11885,9 +12024,15 @@ var qrcode = function() {
     ) {
       const selectedTopicSet = new Set(topics);
       const excludedIds = new Set([...state.excludedQuestionIds, ...state.neverQuestionIds]);
-      const pool = getQuestionCatalog().filter(
+      let pool = getQuestionCatalog().filter(
         (question) => selectedTopicSet.has(question.topic) && !excludedIds.has(question.id)
       );
+      if (state.questionIntensity === "cozy") {
+        // Cozy is safe for a first date: no heavy prompts and nothing that assumes a long shared history.
+        const gentle = pool.filter((question) => questionTone(question) !== "deep" && !questionNeedsHistory(question));
+        if (gentle.length >= count) pool = gentle;
+      }
+      const focusTopic = SESSION_PRESETS.find((preset) => preset.id === state.sessionPreset)?.focus;
       const sliderTarget = mode === "sliders-only"
         ? count
         : mode === "mixed"
@@ -11896,9 +12041,14 @@ var qrcode = function() {
       const textTarget = count - sliderTarget;
       const availableTopics = topics.filter((topic) => pool.some((question) => question.topic === topic));
       const topicSequence = [];
+      if (focusTopic && availableTopics.includes(focusTopic)) {
+        // A themed night (e.g. Spicy Night) draws at least half of its questions from its own pack.
+        for (let index = 0; index < Math.ceil(count / 2); index += 1) topicSequence.push(focusTopic);
+      }
       while (topicSequence.length < count && availableTopics.length) {
         topicSequence.push(...shuffled(availableTopics));
       }
+      topicSequence.splice(0, topicSequence.length, ...shuffled(topicSequence.slice(0, count)));
       const typeSequence = shuffled([
         ...Array.from({ length: sliderTarget }, () => "slider"),
         ...Array.from({ length: textTarget }, () => "text")
@@ -11920,7 +12070,7 @@ var qrcode = function() {
         selectedIds.add(chosen.id);
       }
 
-      return selected;
+      return orderRoundAsRamp(selected);
     }
 
     function allowedTopicsForIntensity(intensity = state.questionIntensity) {
@@ -11931,7 +12081,14 @@ var qrcode = function() {
       return new Set(TOPIC_OPTIONS.map((topic) => topic.id));
     }
 
+    function roundsPlayedToday() {
+      const today = new Date().toDateString();
+      return state.completedRounds.filter((round) => new Date(round.completedAt).toDateString() === today).length;
+    }
+
     function startGame({ names, questionMode, questionCount, selectedTopics, selectedQuestionIds, playStyle = "pass-and-play" }) {
+      const roundNumber = roundsPlayedToday() + 1;
+      if (roundNumber > 1) window.setTimeout(() => showToast(`Round ${roundNumber} tonight · ${selectedQuestionIds.length} fresh questions`), 200);
       const settings = persistentSetupState();
       state = {
         ...initialState(),
@@ -13267,7 +13424,7 @@ var qrcode = function() {
               <p class="eyebrow">Latest alignment</p>
               <h2>${escapeHTML(latestDescriptor.title)}</h2>
               <p>${escapeHTML(latestRound.names[0])} + ${escapeHTML(latestRound.names[1])} · ${escapeHTML(formatRoundDate(latestRound.completedAt))}</p>
-              <span class="home-result-history-count">${state.completedRounds.length} saved ${state.completedRounds.length === 1 ? "round" : "rounds"}</span>
+              <span class="home-result-history-count">${state.completedRounds.length} ${state.completedRounds.length === 1 ? "round" : "rounds"} played together</span>
               <span class="home-result-history-count">${latestAlignment.fitOverall ?? latestAlignment.overall}% relationship fit</span>
             </div>
           </div>
@@ -13311,7 +13468,11 @@ var qrcode = function() {
               <button class="play-style-card ${state.playStyle === "nearby" ? "active" : ""} ${NEARBY_PLAY_SUPPORTED ? "" : "unavailable"}" type="button" data-play-style="nearby" ${NEARBY_PLAY_SUPPORTED ? "" : 'aria-disabled="true"'}><strong>⌁ Two phones · one scan</strong><small>${NEARBY_PLAY_SUPPORTED ? "Scan once, connect automatically, and answer privately on separate phones." : IS_OFFLINE_FILE ? "Needs the installed or online app — this offline copy plays on one device." : "Not available in this browser — play on one device."}</small></button>
             </div>
 
-            <p class="setup-section-title">Session preset</p>
+            <p class="setup-section-title">Pick tonight’s vibe</p>
+            <div class="vibe-tiles" role="group" aria-label="Quick start presets">
+              ${["date-night", "road-trip", "check-in", "deep-dive"].map((id) => SESSION_PRESETS.find((preset) => preset.id === id)).filter(Boolean).map((preset) => `<button class="vibe-tile ${state.sessionPreset === preset.id ? "active" : ""}" type="button" data-vibe="${preset.id}"><span class="vibe-icon" aria-hidden="true">${preset.icon}</span><strong>${preset.label}</strong><small>${preset.copy}</small></button>`).join("")}
+            </div>
+            <p class="setup-section-title">Or choose any preset</p>
             <div class="session-dropdown-container" id="session-dropdown">
               <button class="session-dropdown-trigger" id="session-select-trigger" type="button" aria-expanded="false" aria-haspopup="listbox">
                 <span class="session-trigger-val">${activePreset.icon} ${activePreset.label}</span>
@@ -13471,6 +13632,9 @@ var qrcode = function() {
       const dropdownTrigger = document.getElementById("session-select-trigger");
       
       const dropdownItems = [...dropdownContainer.querySelectorAll("[data-session-preset]")];
+      document.querySelectorAll("[data-vibe]").forEach((tile) => tile.addEventListener("click", () => {
+        dropdownContainer.querySelector(`[data-session-preset="${CSS.escape(tile.dataset.vibe)}"]`)?.click();
+      }));
       const setDropdownOpen = (open, { focusItem = false } = {}) => {
         dropdownContainer.classList.toggle("open", open);
         dropdownTrigger.setAttribute("aria-expanded", open ? "true" : "false");
@@ -13706,6 +13870,14 @@ var qrcode = function() {
 
     let lastQuestionAdvanceAt = 0;
 
+    // Some sliders with two vivid ends play as a quick two-card pick (same choice on both phones, by question id).
+    function isQuickPickQuestion(question) {
+      if (question.type !== "slider" || !Array.isArray(question.labels)) return false;
+      if (question.labels.some((label) => !label || label.length > 30)) return false;
+      const hash = [...question.id].reduce((total, character) => (total * 31 + character.charCodeAt(0)) % 9973, 7);
+      return hash % 3 === 0;
+    }
+
     function renderQuestion() {
       const questions = getSelectedQuestions();
       const totalQuestions = questions.length;
@@ -13727,12 +13899,27 @@ var qrcode = function() {
         saveState();
       }
 
+      const otherPlayerIndex = state.activePlayer === 0 ? 1 : 0;
+      const partnerName = state.names[otherPlayerIndex] || "your partner";
+      if (!Array.isArray(state.guesses)) state.guesses = [{}, {}];
+      const savedGuess = state.guesses[state.activePlayer]?.[question.id];
+      const quickPick = isQuickPickQuestion(question);
+      const guessMarkup = question.type === "slider" ? `
+          <div class="guess-panel ${savedGuess ? "guessed" : ""}">
+            <label class="guess-label" for="guess-input"><span aria-hidden="true">🔮</span> Guess where ${escapeHTML(partnerName)} lands <small>${savedGuess ? `Your guess: ${savedGuess}` : "optional · scores mind-reader points"}</small></label>
+            <input class="range-input guess-input" id="guess-input" type="range" min="1" max="10" step="1" value="${savedGuess || 5}" style="--range-progress: ${(((savedGuess || 5) - 1) / 9) * 100}%" aria-valuetext="${savedGuess ? `Guess ${savedGuess} out of 10` : "No guess yet"}">
+          </div>` : "";
       const inputMarkup = question.type === "text"
         ? `
           <label class="answer-label" for="answer-input">Your answer</label>
           <textarea class="answer-textarea" id="answer-input" maxlength="600" placeholder="Write what feels true to you…" aria-describedby="answer-error">${escapeHTML(savedAnswer || "")}</textarea>
         `
         : `
+          ${quickPick ? `<div class="quick-pick" role="group" aria-label="Quick pick">
+            <button class="quick-pick-option" type="button" data-quick-pick="2"><span aria-hidden="true">◀</span>${escapeHTML(question.labels[0])}</button>
+            <button class="quick-pick-option" type="button" data-quick-pick="9">${escapeHTML(question.labels[1])}<span aria-hidden="true">▶</span></button>
+          </div>
+          <details class="quick-pick-between"><summary>Somewhere in between?</summary>` : ""}
           <div class="slider-panel">
             <div class="slider-value" id="slider-value" aria-hidden="true">${Number(savedAnswer)}</div>
             <input
@@ -13752,6 +13939,8 @@ var qrcode = function() {
               <span>${escapeHTML(question.labels?.[1] || "High")} · 10</span>
             </div>
           </div>
+          ${quickPick ? "</details>" : ""}
+          ${quickPick ? "" : guessMarkup}
           <details class="comment-details" ${savedComment ? "open" : ""}>
             <summary>Add context to your slider answer <span aria-hidden="true">(optional)</span></summary>
             <textarea class="comment-textarea" id="comment-input" aria-label="Optional context for your slider answer" maxlength="400" placeholder="Why did you choose that number?">${escapeHTML(savedComment)}</textarea>
@@ -13791,6 +13980,8 @@ var qrcode = function() {
             </div>
             <h2 class="prompt" id="question-title">${escapeHTML(question.prompt)}</h2>
             ${inputMarkup}
+            <details class="answer-extras" ${isNotReady || savedPrivateNote || savedImportance !== 1 ? "open" : ""}>
+            <summary><span aria-hidden="true">⋯</span> More options <small>how much it matters · pass · private note</small></summary>
             <div class="importance-panel">
               <strong>How much does this topic matter to you?</strong>
               <div class="importance-options" role="group" aria-label="Importance of this question">
@@ -13802,6 +13993,7 @@ var qrcode = function() {
               <summary>Private reflection for ${escapeHTML(playerName)}</summary>
               <p class="topic-note">Hidden from the reveal board. Reopen it later from the Results Journal when you have the device.</p>
               <textarea class="private-note-input" id="private-note-input" aria-label="Private reflection, hidden from the reveal board" maxlength="500" placeholder="What do you want to remember about your answer?">${escapeHTML(savedPrivateNote)}</textarea>
+            </details>
             </details>
             <p class="error" id="answer-error" role="alert"></p>
             <div class="actions question-actions">
@@ -13816,6 +14008,25 @@ var qrcode = function() {
       const form = document.getElementById("question-form");
       const input = document.getElementById("answer-input");
       const error = document.getElementById("answer-error");
+      const guessInput = document.getElementById("guess-input");
+      guessInput?.addEventListener("input", () => {
+        const value = Number(guessInput.value);
+        state.guesses[state.activePlayer] = { ...(state.guesses[state.activePlayer] || {}), [question.id]: value };
+        guessInput.style.setProperty("--range-progress", `${((value - 1) / 9) * 100}%`);
+        guessInput.setAttribute("aria-valuetext", `Guess ${value} out of 10`);
+        const panel = guessInput.closest(".guess-panel");
+        panel?.classList.add("guessed");
+        const note = panel?.querySelector("small");
+        if (note) note.textContent = `Your guess: ${value}`;
+        saveState();
+      });
+      document.querySelectorAll("[data-quick-pick]").forEach((button) => button.addEventListener("click", () => {
+        input.value = button.dataset.quickPick;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        document.querySelectorAll("[data-quick-pick]").forEach((item) => item.classList.toggle("active", item === button));
+        playSound("tap");
+        window.setTimeout(() => form.requestSubmit(), 260);
+      }));
 
       document.getElementById("favorite-current").addEventListener("click", (event) => {
         const button = event.currentTarget;
@@ -14038,6 +14249,9 @@ var qrcode = function() {
       const status = state.conversationStatus[question.id] || "";
       const escapedQuestionId = escapeHTML(question.id);
       return `
+        <details class="card-more" ${status ? "open" : ""}>
+        <summary><span aria-hidden="true">⋯</span> Save for later <small>next steps · how much it matters · rate the question</small></summary>
+        ${importanceMarkup(question)}
         <div class="follow-through">
           <strong>What should happen next?</strong>
           <div class="follow-through-actions">
@@ -14046,7 +14260,33 @@ var qrcode = function() {
           ${status === "intention" ? `<input class="custom-input intention-input" data-intention-input="${escapedQuestionId}" maxlength="180" placeholder="One small thing we want to do together…" value="${escapeHTML(state.sharedIntentions.find((item) => item.questionId === question.id)?.text || "")}">` : ""}
           <details class="feedback-menu" style="margin-top:10px"><summary>Rate this question itself</summary><div class="feedback-actions">${[["valuable", "Especially valuable"], ["uncomfortable", "Uncomfortable"], ["rewrite", "Poorly worded"]].map(([value, label]) => `<button class="question-library-action ${(state.questionFlags[question.id] || []).includes(value) ? "active" : ""}" type="button" data-reveal-flag="${value}" data-flag-question="${escapedQuestionId}">${label}</button>`).join("")}</div></details>
         </div>
+        </details>
       `;
+    }
+
+    function guessHit(question, playerIndex) {
+      const guess = state.guesses?.[playerIndex]?.[question.id];
+      const actual = Number(state.answers?.[playerIndex === 0 ? 1 : 0]?.[question.id]);
+      if (typeof guess !== "number" || !Number.isFinite(actual)) return null;
+      return { guess, actual, distance: Math.abs(guess - actual), hit: Math.abs(guess - actual) <= 1 };
+    }
+
+    function guessRevealMarkup(question) {
+      const lines = [0, 1].map((player) => {
+        const result = guessHit(question, player);
+        if (!result) return "";
+        const other = state.names[player === 0 ? 1 : 0];
+        const verdict = result.distance === 0 ? "nailed it ★" : result.hit ? "within 1 — mind reader!" : `off by ${result.distance}`;
+        return `<span class="guess-line ${result.hit ? "hit" : ""}">🔮 ${escapeHTML(state.names[player])} guessed ${escapeHTML(other)} would say ${result.guess} · ${verdict}</span>`;
+      }).filter(Boolean);
+      return lines.length ? `<div class="guess-results">${lines.join("")}</div>` : "";
+    }
+
+    function mindReaderTally(questions) {
+      return [0, 1].map((player) => {
+        const results = questions.map((question) => guessHit(question, player)).filter(Boolean);
+        return { player, made: results.length, hits: results.filter((result) => result.hit).length };
+      });
     }
 
     function sliderReveal(question, firstAnswer, secondAnswer, matchInfo) {
@@ -14082,7 +14322,7 @@ var qrcode = function() {
             <span class="legend-item"><span class="legend-dot" style="--dot-color: var(--green)"></span>${escapeHTML(state.names[1])}: ${sliderDisplay(secondAnswer)}</span>
           </div>
           ${differenceMarkup(matchInfo, question)}
-          ${importanceMarkup(question)}
+          ${guessRevealMarkup(question, firstAnswer, secondAnswer)}
           ${commentsMarkup}
         </div>
       `;
@@ -14096,7 +14336,14 @@ var qrcode = function() {
         ["discuss", "Worth discussing", "#fbbf24"],
         ["different", "Very different", "#fb7185"]
       ];
+      const rating = state.textRatings[question.id];
       return `
+        <div class="alignment-rating ${rating ? "rated" : "unrated"}">
+          <strong>${rating ? "You rated this together" : "Read both answers, then rate them together"}</strong>
+          <div class="rating-options">
+            ${ratings.map(([value, label, color]) => `<button class="rating-option ${rating === value ? "active" : ""}" style="--rating-color:${color}" type="button" data-text-rating="${value}" data-rating-question="${escapedQuestionId}">${label}</button>`).join("")}
+          </div>
+        </div>
         <div class="answer-stack">
           <div class="answer-box" style="--player-color: var(--blue)">
             <span class="answer-name">${escapeHTML(state.names[0])}</span>
@@ -14108,13 +14355,6 @@ var qrcode = function() {
           </div>
         </div>
         ${differenceMarkup(matchInfo, question)}
-        ${importanceMarkup(question)}
-        <div class="alignment-rating">
-          <strong>How aligned do these answers feel to both of you?</strong>
-          <div class="rating-options">
-            ${ratings.map(([value, label, color]) => `<button class="rating-option ${state.textRatings[question.id] === value ? "active" : ""}" style="--rating-color:${color}" type="button" data-text-rating="${value}" data-rating-question="${escapedQuestionId}">${label}</button>`).join("")}
-          </div>
-        </div>
       `;
     }
 
@@ -14135,7 +14375,7 @@ var qrcode = function() {
       const alignment = calculateAlignmentSummary(questions);
       const alignmentCopy = alignmentDescriptor(alignment.overall);
       const overallColor = alignmentColor(alignment.overall);
-      const topicAlignmentCards = alignment.topics.map((item) => {
+      const topicAlignmentCards = alignment.topics.filter((item) => item.count >= 2).map((item) => {
         const topic = TOPIC_OPTIONS.find((option) => option.id === item.topic);
         return `
           <div class="topic-alignment-card">
@@ -14147,11 +14387,27 @@ var qrcode = function() {
       const matchInfoById = new Map();
       const scoredHighlights = questions.filter((question) => !state.notReady[0]?.[question.id] && !state.notReady[1]?.[question.id]).map((question) => ({
         question,
-        match: getMatchInfo(question, state.answers[0][question.id], state.answers[1][question.id]),
+        match: revealMatchInfo(question, state.answers[0][question.id], state.answers[1][question.id]),
         importance: Math.max(Number(state.importance[0]?.[question.id] ?? 1), Number(state.importance[1]?.[question.id] ?? 1))
       }));
       // Each highlight names a different question; a highlight is left empty rather than repeating one.
-      const comparable = scoredHighlights.filter((item) => !item.match.missing);
+      const comparable = scoredHighlights.filter((item) => !item.match.missing && !item.match.unrated);
+      const allRevealed = state.revealedIds.length === questions.length && questions.length > 0;
+      const tally = mindReaderTally(questions);
+      const highlightAnswers = (item) => {
+        if (!item) return "";
+        const [first, second] = [state.answers[0][item.question.id], state.answers[1][item.question.id]];
+        const short = (value) => {
+          const text = item.question.type === "slider" ? sliderDisplay(value) : String(value ?? "").trim();
+          return text.length > 42 ? `${text.slice(0, 40)}…` : text;
+        };
+        return `<span class="highlight-answers"><span style="--player-color: var(--blue)">${escapeHTML(state.names[0])}: ${escapeHTML(short(first))}</span><span style="--player-color: var(--green)">${escapeHTML(state.names[1])}: ${escapeHTML(short(second))}</span></span>`;
+      };
+      const highlightCard = (title, item, empty) => `<article class="highlight-card">
+        <span>${title}</span>
+        <strong class="highlight-answer">${item ? `<button class="highlight-jump" type="button" data-jump-card="${escapeHTML(item.question.id)}">${escapeHTML(item.question.prompt)}</button>${highlightAnswers(item)}` : escapeHTML(empty)}</strong>
+        <strong class="highlight-locked">Flip every card to unlock</strong>
+      </article>`;
       const closestHighlight = [...comparable].sort((a, b) => b.match.percent - a.match.percent)[0];
       const surpriseHighlight = [...comparable].filter((item) => item !== closestHighlight && item.match.percent < (closestHighlight?.match.percent ?? 101)).sort((a, b) => a.match.percent - b.match.percent)[0];
       const conversationHighlight = [...comparable].filter((item) => item !== closestHighlight && item !== surpriseHighlight).sort((a, b) => (b.importance * (100 - b.match.percent)) - (a.importance * (100 - a.match.percent)))[0];
@@ -14163,7 +14419,7 @@ var qrcode = function() {
         const answerHeld = state.notReady[0]?.[question.id] || state.notReady[1]?.[question.id];
         const matchInfo = answerHeld
           ? { isMatch: false, exact: false, percent: 0, gap: 0, label: "Not scored", color: "#a78bfa" }
-          : getMatchInfo(question, firstAnswer, secondAnswer);
+          : revealMatchInfo(question, firstAnswer, secondAnswer);
         matchInfoById.set(question.id, matchInfo);
         const answers = answerHeld
           ? notReadyReveal(question)
@@ -14207,7 +14463,10 @@ var qrcode = function() {
                 ${answers}
                 ${answerHeld ? `<div class="discussion-card"><strong>Gentle next step</strong><p>Would revisiting this later feel supportive, or is leaving it unanswered the right boundary?</p></div>` : discussionPromptMarkup(question, matchInfo)}
                 ${followThroughMarkup(question)}
-                <button class="tap-hint card-close-button" type="button">${POINTER_VERB} to close</button>
+                <div class="card-back-actions">
+                  <button class="tap-hint card-close-button" type="button">${POINTER_VERB} to close</button>
+                  ${index < questions.length - 1 ? `<button class="secondary-btn next-card-button" type="button" data-next-card="${index + 1}">Next card →</button>` : ""}
+                </div>
               </div>
             </div>
           </article>
@@ -14224,11 +14483,14 @@ var qrcode = function() {
               </div>
               <p class="eyebrow">The reveal board</p>
               <h2 id="reveal-title">Compare, connect, <span class="accent-text">talk.</span></h2>
-              <p class="lede">${POINTER_VERB} each card when you’re ready to see where your answers meet.</p>
+              <p class="lede">${POINTER_VERB} each card when you’re ready. Your scores unlock when every card is face up.</p>
+              <div class="reveal-progress" aria-live="polite"><span class="reveal-count" id="reveal-count">${state.revealedIds.length} of ${questions.length} revealed</span><span class="reveal-dots" aria-hidden="true">${questions.map((question) => `<span class="reveal-dot ${state.revealedIds.includes(question.id) ? "on" : ""}" data-dot="${escapeHTML(question.id)}"></span>`).join("")}</span></div>
             </div>
             <button class="secondary-btn reveal-all-btn" id="reveal-all" type="button"><span aria-hidden="true">✦</span><span>${state.revealedIds.length === questions.length ? "Hide all" : "Reveal all"}</span></button>
           </div>
-          <section class="alignment-dashboard" style="--overall-color: ${overallColor}" aria-labelledby="alignment-title">
+          <div class="reveal-grid">${cards}</div>
+          <section class="alignment-dashboard ${allRevealed ? "" : "locked"}" id="alignment-dashboard" style="--overall-color: ${overallColor}" aria-labelledby="alignment-title">
+            <div class="score-lock" aria-hidden="${allRevealed}"><span aria-hidden="true">✦</span><strong>Your scores are hiding</strong><small>Flip every card to unlock how in sync you are.</small></div>
             <div class="dual-score-dashboard">
               <div class="overall-alignment">
                 ${alignmentRingMarkup(alignment.overall, "similarity")}
@@ -14253,11 +14515,11 @@ var qrcode = function() {
               <div class="alignment-legend"><span>Less aligned</span><span class="heat-gradient"></span><span>More aligned</span></div>
             </details>
           </section>
-          <div class="reveal-grid">${cards}</div>
-          <section class="highlight-grid ${state.revealedIds.length === questions.length ? "" : "locked"}" aria-label="Round highlights" id="round-highlights">
-            <article class="highlight-card"><span>Closest match</span><strong class="highlight-answer">${escapeHTML(closestHighlight?.question.prompt || "Complete more scored answers to unlock this highlight.")}</strong><strong class="highlight-locked">Flip every card to unlock</strong></article>
-            <article class="highlight-card"><span>Biggest surprise</span><strong class="highlight-answer">${escapeHTML(surpriseHighlight?.question.prompt || "No scored surprise yet.")}</strong><strong class="highlight-locked">Flip every card to unlock</strong></article>
-            <article class="highlight-card"><span>Best conversation starter</span><strong class="highlight-answer">${escapeHTML(conversationHighlight?.question.prompt || "No conversation pick yet.")}</strong><strong class="highlight-locked">Flip every card to unlock</strong></article>
+          <section class="highlight-grid ${allRevealed ? "" : "locked"}" aria-label="Round highlights" id="round-highlights">
+            ${highlightCard("Closest match", closestHighlight, "Complete more scored answers to unlock this highlight.")}
+            ${highlightCard("Biggest surprise", surpriseHighlight, "No scored surprise yet.")}
+            ${highlightCard("Best conversation starter", conversationHighlight, "No conversation pick yet.")}
+            ${tally.some((item) => item.made) ? `<article class="highlight-card mind-reader"><span>🔮 Mind-reader</span><strong class="highlight-answer">${tally.filter((item) => item.made).map((item) => `${escapeHTML(state.names[item.player])} read ${escapeHTML(state.names[item.player === 0 ? 1 : 0])} ${item.hits}/${item.made}`).join(" · ")}</strong><strong class="highlight-locked">Flip every card to unlock</strong></article>` : ""}
           </section>
           <div class="actions reveal-actions">
             ${state.playStyle === "nearby" && state.nearbyRole === "join" && nearbyChannelOpen()
@@ -14336,8 +14598,46 @@ var qrcode = function() {
 
       function updateRevealAllButton() {
         const label = document.querySelector("#reveal-all span:last-child");
-        label.textContent = state.revealedIds.length === questions.length ? "Hide all" : "Reveal all";
-        document.getElementById("round-highlights")?.classList.toggle("locked", state.revealedIds.length !== questions.length);
+        const everything = state.revealedIds.length === questions.length;
+        label.textContent = everything ? "Hide all" : "Reveal all";
+        document.getElementById("round-highlights")?.classList.toggle("locked", !everything);
+        const count = document.getElementById("reveal-count");
+        if (count) count.textContent = `${state.revealedIds.length} of ${questions.length} revealed`;
+        document.querySelectorAll("[data-dot]").forEach((dot) => dot.classList.toggle("on", state.revealedIds.includes(dot.dataset.dot)));
+        const dashboard = document.getElementById("alignment-dashboard");
+        if (dashboard) {
+          const wasLocked = dashboard.classList.contains("locked");
+          dashboard.classList.toggle("locked", !everything);
+          dashboard.querySelector(".score-lock")?.setAttribute("aria-hidden", String(everything));
+          if (everything && wasLocked) celebrateScoreUnlock(dashboard);
+        }
+      }
+
+      // The payoff: rings count up from zero the first time a round's scores are unlocked.
+      function celebrateScoreUnlock(dashboard) {
+        const roundKey = state.selectedQuestionIds.join("|");
+        const firstTime = state.revealCelebrated !== roundKey;
+        state.revealCelebrated = roundKey;
+        saveState();
+        if (!firstTime || state.reducedMotion) return;
+        dashboard.querySelectorAll(".alignment-ring").forEach((ring) => {
+          const target = Number(getComputedStyle(ring).getPropertyValue("--ring-score")) || 0;
+          const label = ring.querySelector("strong");
+          const started = performance.now();
+          const step = (now) => {
+            const progress = Math.min(1, (now - started) / 1100);
+            const value = Math.round(target * (1 - Math.pow(1 - progress, 3)));
+            ring.style.setProperty("--ring-score", String(value));
+            if (label) label.textContent = `${value}%`;
+            if (progress < 1) requestAnimationFrame(step);
+          };
+          requestAnimationFrame(step);
+        });
+        window.setTimeout(() => {
+          burstConfetti(dashboard, 40);
+          playSound("celebrate");
+          dashboard.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        }, 350);
       }
 
       function applyCardState(card, shouldReveal) {
@@ -14384,7 +14684,18 @@ var qrcode = function() {
       flipCards.forEach((card) => {
         card.querySelector(".card-front").addEventListener("click", () => toggleCard(card));
         card.querySelector(".card-close-button").addEventListener("click", () => toggleCard(card));
+        card.querySelector("[data-next-card]")?.addEventListener("click", (event) => {
+          const next = flipCards[Number(event.currentTarget.dataset.nextCard)];
+          if (!next) return;
+          if (!next.classList.contains("flipped")) toggleCard(next);
+          next.scrollIntoView({ block: "start", behavior: state.reducedMotion ? "auto" : "smooth" });
+        });
       });
+      document.querySelectorAll("[data-jump-card]").forEach((button) => button.addEventListener("click", () => {
+        const card = flipCards.find((item) => item.dataset.questionId === button.dataset.jumpCard);
+        card?.scrollIntoView({ block: "start", behavior: state.reducedMotion ? "auto" : "smooth" });
+        card?.querySelector(".card-back")?.focus?.({ preventScroll: true });
+      }));
 
       let lastRevealAllAt = 0;
       document.getElementById("reveal-all").addEventListener("click", () => {
