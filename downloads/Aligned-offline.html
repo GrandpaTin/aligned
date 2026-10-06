@@ -15031,7 +15031,7 @@ var qrcode = function() {
 
     function renderSetup() {
       // A joiner whose host ended the link is back on their own phone: they become Player 1 here.
-      if (state.screen === "setup" && state.nearbyRole === "join" && !nearbyLinked() && !state.resumeScreen) {
+      if (state.screen === "setup" && state.nearbyRole === "join" && nearbyRuntime.partnerLeft && !nearbyLinked() && !state.resumeScreen) {
         state.names = [state.names[1], state.names[0]];
         state.nearbyRole = "";
         state.activePlayer = 0;
@@ -17101,20 +17101,20 @@ var qrcode = function() {
       history.replaceState(null, "", location.href.split("#")[0]);
       render();
       const players = state.names.filter(Boolean).join(" & ") || "this round";
+      const onlyReveal = revealUnfinished() && !["question", "intermission"].includes(state.screen) && !["question", "intermission"].includes(state.resumeScreen);
       openConfirmDialog({
         title: "Join your partner’s round?",
         copy: revealUnfinished() && !["question", "intermission"].includes(state.screen) && !["question", "intermission"].includes(state.resumeScreen)
           ? `This ${POINTER_VERB === "Tap" ? "phone" : "device"} has a round whose scores aren’t revealed yet (${players}). Joining skips the count-up — its scores go straight to your Journal.`
           : `This ${POINTER_VERB === "Tap" ? "phone" : "device"} has an unfinished round (${players}). Joining discards it — its answers can’t be recovered.`,
-        confirmLabel: "Discard and join",
+        confirmLabel: onlyReveal ? "Save to Journal and join" : "Discard and join",
         cancelLabel: "Keep my round",
-        danger: true,
+        danger: !onlyReveal,
         safeFirst: true
       }).then((ok) => {
         if (!ok) { showToast(`Kept your round. ${POINTER_VERB === "Tap" ? "Scan the QR" : "Open the join link"} again when you’re ready to join.`); return; }
-        if (revealUnfinished()) state.revealCelebrated = state.selectedQuestionIds.join("|");
-        state.resumeScreen = null;
-        state.screen = "setup";
+        // The local round stays resumable until the partner's round really starts (round-init replaces it then).
+        if (["celebration", "reveal"].includes(state.screen)) state.resumeScreen = state.screen;
         join();
       });
       return true;
