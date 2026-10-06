@@ -6465,6 +6465,14 @@
     .quick-pick-option.active { border-color: var(--question-color, var(--coral)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--question-color, var(--coral)) 22%, transparent); transform: translateY(-2px); }
     [data-theme="pastel"] .quick-pick-option { background: #ffffff; color: #1e293b; }
     .nowrap { white-space: nowrap; }
+    .vibe-running-low { grid-column: 1 / -1; margin: 4px 0 0; }
+    @media (pointer: coarse) { .vibe-running-low .text-btn { min-height: 44px; } }
+    .topic-alignment-card { justify-content: flex-start !important; }
+    @media (max-width: 340px) {
+      .question-screen .question-meta { flex-wrap: nowrap; gap: 6px; }
+      .question-screen .category-pill { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .question-screen .type-chip { padding-inline: 8px; white-space: nowrap; }
+    }
     /* Words break only when one can't fit a line on its own (hyphens: auto would hyphenate words that fit). */
     .quick-pick-option, .quick-guess-option { overflow-wrap: break-word; word-break: normal; hyphens: manual; -webkit-hyphens: manual; }
     @media (max-width: 380px) {
@@ -6485,7 +6493,7 @@
     .quick-pick-between[open] > summary::before { transform: rotate(90deg); }
     [data-theme="pastel"] .card-close-button { color: #9f1239; }
     [data-theme="pastel"] .answer-box { background: #ffffff; border-color: rgba(148, 163, 184, 0.35); }
-    [data-theme="pastel"] .answer-box .answer-name { filter: brightness(0.62) saturate(1.3); }
+    [data-theme="pastel"] .answer-name { filter: brightness(0.5) saturate(1.3); }
     [data-theme="pastel"] .answer-box .answer-copy { color: #1e293b; }
     [data-theme="sunset"] :is(.vibe-tile, .quick-pick-option, .quick-guess-option, .pick-side):not(.active):not(.chosen) { border-color: rgba(255, 226, 191, 0.19); background: rgba(67, 21, 38, 0.48); }
     [data-theme="cosmic"] :is(.vibe-tile, .quick-pick-option, .quick-guess-option, .pick-side):not(.active):not(.chosen) { border-color: rgba(167, 139, 250, 0.22); background: rgba(10, 4, 32, 0.55); }
@@ -6656,6 +6664,14 @@
       .question-screen .quick-guess, .question-screen .guess-panel { margin-top: 8px; padding: 6px 10px; }
       .question-screen .quick-guess small, .question-screen .guess-label small { display: none; }
       .question-screen .quick-pick-option { min-height: 56px; padding: 8px 10px; }
+      .question-screen #question-title { font-size: 1.2rem; margin-block: 4px; }
+      .question-screen .question-card { padding-top: 12px; }
+      .question-screen .question-meta { margin-bottom: 0; }
+      .question-screen .quick-guess { display: grid; grid-template-columns: auto 1fr 1fr; align-items: center; gap: 6px; }
+      .question-screen .quick-guess > span { font-size: 0.85rem; }
+      .question-screen .quick-guess-option { min-height: 44px; padding: 4px 8px; font-size: 0.8rem; }
+      .question-screen .quick-pick { margin: 8px 0 4px; }
+      .question-screen .quick-pick-hint { display: none; }
       .question-screen .question-actions { position: static !important; box-shadow: none !important; }
       .question-screen .progress-constellation { display: none; }
       .question-screen .question-header { margin-bottom: 4px; }
@@ -6665,7 +6681,8 @@
     @media (prefers-reduced-motion: reduce) { .flip-card-inner { transition: none !important; } }
     .reduced-motion .flip-card-inner { transition: none !important; }
     /* Cover the gap above the floating top bar so scrolled content never peeks out above it. */
-    .topbar::before { content: ""; position: absolute; left: 50%; width: 100vw; transform: translateX(-50%); bottom: 100%; height: max(8px, env(safe-area-inset-top)); background: color-mix(in srgb, var(--midnight) 82%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); pointer-events: none; }
+    .topbar-band { position: fixed; top: 0; left: 0; right: 0; height: max(8px, env(safe-area-inset-top)); z-index: 89; background: color-mix(in srgb, var(--midnight) 72%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); pointer-events: none; }
+    body:has(.topbar .home-btn[hidden]) .topbar-band { display: none; }
     .highlight-note { display: block; margin-top: 6px; color: var(--muted); font-size: max(12px, .76rem); font-weight: 650; }
     .guess-panel { margin: 14px 0 4px; padding: 12px 14px; border: 1px dashed color-mix(in srgb, var(--violet) 60%, transparent); border-radius: 16px; background: color-mix(in srgb, var(--violet) 8%, transparent); }
     .guess-panel.guessed { border-style: solid; }
@@ -6756,6 +6773,7 @@
     <span></span><span></span><span></span><span></span><span></span><span></span>
   </div>
   <main class="app-shell">
+    <div class="topbar-band" aria-hidden="true"></div>
     <header class="topbar">
       <div class="brand" aria-label="Aligned">
         <span class="brand-mark" aria-hidden="true">♡</span>
@@ -9579,6 +9597,16 @@ var qrcode = function() {
         ],
         far: [
           "Opposite ends! Each of you pitch your side like a movie trailer.",
+          "Name one thing you’d each happily try from the other side.",
+          "If this were a reality show, what would the episode be called?",
+          "Draw your answer in the air — can the other guess it?",
+          "Which side would a toddler pick, and why?",
+          "Make the other side sound irresistible in one sentence.",
+          "Give your answer a fake award and a speech.",
+          "What snack represents each side?",
+          "Which side would win in a game of rock-paper-scissors?",
+          "Turn this difference into a team cheer.",
+          "What would your pet (or dream pet) vote for?",
           "Who would win this debate at a dinner party?",
           "Act out what your side looks like in ten seconds.",
           "Would you swap answers for one day? What would it feel like?",
@@ -9790,6 +9818,18 @@ var qrcode = function() {
         "Ask them for one example from real life."
       ]
     };
+    // The playful lines at the end of warm.close, offered first on every other match of a soft night.
+    const PLAYFUL_WARM_CLOSE = DISCUSSION_PROMPTS.warm.close.slice(-5);
+    DISCUSSION_PROMPTS.cozyFar = [
+      "What’s the story behind your answer?",
+      "Give one compliment about the other side.",
+      "What would make the other side fun to try once?",
+      "Which part of the other answer surprised you most?",
+      "What would a perfect evening look like with a bit of both?",
+      "Ask one curious question about the other answer.",
+      "What did you learn about each other just now?",
+      "Where would you each be happy to meet in the middle?"
+    ];
     DISCUSSION_PROMPTS.lightText = {
       close: DISCUSSION_PROMPTS.light.close,
       medium: DISCUSSION_PROMPTS.light.medium,
@@ -10062,7 +10102,7 @@ var qrcode = function() {
           cardPrompts: cached.cardPrompts && typeof cached.cardPrompts === "object"
             ? Object.fromEntries(Object.entries(cached.cardPrompts).filter(([id, value]) => validIds.has(id) && value && typeof value.text === "string" && typeof value.key === "string").map(([id, value]) => [id, { key: value.key.slice(0, 40), text: value.text.slice(0, 300) }]))
             : {},
-          recentPrompts: Array.isArray(cached.recentPrompts) ? cached.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-60) : [],
+          recentPrompts: Array.isArray(cached.recentPrompts) ? cached.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-120) : [],
           recentHeadlines: Array.isArray(cached.recentHeadlines) ? [...new Set(cached.recentHeadlines.filter((text) => ["vibe", "roll", "another", "best", "finding", "locked"].includes(text)))].slice(-5) : [],
           packReturnPreset: typeof cached.packReturnPreset === "string" ? cached.packReturnPreset.slice(0, 40) : ""
         };
@@ -10176,7 +10216,7 @@ var qrcode = function() {
     let nearbyLastPeerMessageAt = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.3.0";
+    const APP_VERSION = "1.3.1";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -10829,6 +10869,7 @@ var qrcode = function() {
         type: "round-init", roundId: state.nearbyRoundId, newRound: Boolean(newRound), names: [...state.names], questionMode: state.questionMode,
         questionIntensity: state.questionIntensity, selectedTopics: [...state.selectedTopics],
         sessionPreset: state.sessionPreset, recentHeadlines: Array.isArray(state.recentHeadlines) ? state.recentHeadlines.slice(-5) : [],
+        recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-120) : [],
         selectedQuestionIds: [...state.selectedQuestionIds], questions: getSelectedQuestions().filter(Boolean)
       };
     }
@@ -11088,7 +11129,9 @@ var qrcode = function() {
         selectedQuestionIds, activePlayer: 1,
         nearbyRole: "join", nearbyRoundId: payload.roundId,
         sessionPreset: payload.sessionPreset === "pack" || SESSION_PRESETS.some((preset) => preset.id === payload.sessionPreset) ? payload.sessionPreset : "custom",
-        recentHeadlines: Array.isArray(payload.recentHeadlines) ? payload.recentHeadlines.filter((item) => typeof item === "string").map((item) => item.slice(0, 40)).slice(-5) : settings.recentHeadlines
+        recentPrompts: Array.isArray(payload.recentPrompts) ? payload.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-120) : settings.recentPrompts,
+        cardPrompts: {},
+        recentHeadlines: Array.isArray(payload.recentHeadlines) ? [...new Set(payload.recentHeadlines.filter((item) => ["vibe", "roll", "another", "best", "finding", "locked"].includes(item)))].slice(-5) : settings.recentHeadlines
       };
       if (!state.selectedTopics.length) state.selectedTopics = [...DEFAULT_TOPICS];
       nearbyRuntime.role = "join";
@@ -11474,7 +11517,7 @@ var qrcode = function() {
         privatePinHash: state.privatePinHash,
         tutorialSeen: state.tutorialSeen,
         answeredQuestionIds: [...state.answeredQuestionIds],
-        recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-60) : [],
+        recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-120) : [],
         recentHeadlines: Array.isArray(state.recentHeadlines) ? state.recentHeadlines.filter((item) => typeof item === "string").slice(-5) : [],
         packReturnPreset: typeof state.packReturnPreset === "string" ? state.packReturnPreset.slice(0, 40) : "",
         excludedQuestionIds: [...state.excludedQuestionIds],
@@ -12162,7 +12205,7 @@ var qrcode = function() {
         const rubs = (frequency, chord) => chord.some((other) => {
           const cents = Math.abs(1200 * Math.log2(frequency / other)) % 1200;
           const distance = Math.min(cents, 1200 - cents);
-          return distance > 50 && distance < 150;
+          return (distance > 50 && distance < 150) || (Math.min(frequency, other) < 300 && distance >= 150 && distance < 250);
         });
         const curve = (rising) => Float32Array.from({ length: 32 }, (_, step) => {
           const phase = (step / 31) * Math.PI / 2;
@@ -12308,6 +12351,7 @@ var qrcode = function() {
     }
 
     function applyPreferences() {
+      requestAnimationFrame(() => enforceCompactFloor());
       document.documentElement.dataset.theme = state.visualTheme;
       document.documentElement.dataset.textSize = state.textSize;
       document.documentElement.classList.toggle("high-contrast", state.highContrast);
@@ -12543,8 +12587,9 @@ var qrcode = function() {
           const stepPeak = 0.08 * jitter() * (themeName === "dreamy" ? 0.85 : 1);
           const stepExtra = themeName === "dreamy" ? { ...wobble(), decay: 0.7 } : wobble();
           sequence(rung.map((d) => pentatonic(d)), 0.055, stepPeak, stepExtra);
-          if (raw > 0 && rungIndex(raw - 1) === index && rung[1] + 1 < ladder[ladder.length - 1][1]) {
-            end = Math.max(end, note(pentatonic(rung[1] + 1), start + 2 * gap(0.055), stepPeak * 0.5, stepExtra));
+          if (raw > 0 && rungIndex(raw - 1) === index) {
+            const lift = rung[1] + 1 < ladder[ladder.length - 1][1] ? rung[1] + 1 : rung[0] + 1;
+            end = Math.max(end, note(pentatonic(lift), start + 2 * gap(0.055), stepPeak * 0.5, stepExtra));
           }
         } else if (kind === "lock") {
           sequence([pentatonic(3), pentatonic(2), pentatonic(0)], 0.075, 0.08, themeName === "cute" ? { octaveLevel: 0.6 } : undefined);
@@ -12618,7 +12663,7 @@ var qrcode = function() {
           duck = 0.8;
         } else if (kind === "partner-flip") {
           const d = (Number(options.degree) || 0) % 5;
-          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 1.4 : 1), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true });
+          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 1.4 : themeName === "cute" ? 1.2 : 1), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true, ...(themeName === "cute" ? { octaveLevel: 0.6 } : {}) });
           duck = 0.8;
         } else if (kind === "open") {
           noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.11, q: 0.8 });
@@ -13391,13 +13436,6 @@ var qrcode = function() {
       let pool = getQuestionCatalog().filter(
         (question) => selectedTopicSet.has(question.topic) && !excludedIds.has(question.id)
       );
-      // Before repeating tonight's questions, borrow unseen ones from the other topics this intensity allows.
-      const unseenInPool = pool.filter((question) => !state.answeredQuestionIds.includes(question.id)).length;
-      if (unseenInPool < count) {
-        const allowed = allowedTopicsForIntensity();
-        pool = pool.concat(getQuestionCatalog().filter((question) => !selectedTopicSet.has(question.topic) && allowed.has(question.topic)
-          && !excludedIds.has(question.id) && !state.answeredQuestionIds.includes(question.id)));
-      }
       if (state.questionIntensity === "cozy") {
         // Cozy is safe for a first date: no heavy prompts and nothing that assumes a long shared history.
         const gentle = pool.filter((question) => questionTone(question) !== "deep" && !questionNeedsHistory(question));
@@ -13420,6 +13458,32 @@ var qrcode = function() {
           ? Math.ceil(count * 0.6)
           : Math.ceil(count * 0.8);
       const textTarget = count - sliderTarget;
+      // Before repeating questions, borrow unseen ones of the same format (and the same vibe filters) from the
+      // other topics this intensity allows, so a quick, playful night stays mostly sliders.
+      {
+        const seen = coupleAnsweredIds();
+        // Custom rounds stay inside the packs the couple checked; vibes may borrow, but never from sensitive packs.
+        const SENSITIVE_TOPICS = ["spicy", "dealbreakers", "politics", "money"];
+        const allowed = state.sessionPreset === "custom" || state.sessionPreset === "pack"
+          ? new Set(selectedTopicSet)
+          : new Set([...allowedTopicsForIntensity()].filter((topic) => selectedTopicSet.has(topic) || !SENSITIVE_TOPICS.includes(topic)));
+        const fitsVibe = (question) => (state.questionIntensity !== "cozy" || (questionTone(question) !== "deep" && !questionNeedsHistory(question)))
+          && (activePreset?.tone !== "light" || questionTone(question) === "light")
+          && !(activePreset?.id === "spicy-night" && question.topic === "spicy" && questionTone(question) === "deep");
+        const inPool = new Set(pool.map((question) => question.id));
+        // If even the borrowed playful ones run out, warm (never deep) questions keep the format before anything repeats.
+        const fitsLoosely = (question) => questionTone(question) !== "deep" && (state.questionIntensity !== "cozy" || !questionNeedsHistory(question));
+        [["slider", sliderTarget], ["text", textTarget]].forEach(([type, target]) => {
+          [fitsVibe, fitsLoosely].forEach((fits) => {
+            const unseen = pool.filter((question) => question.type === type && !seen.has(question.id)).length;
+            if (unseen >= target) return;
+            const extra = getQuestionCatalog().filter((question) => question.type === type && !inPool.has(question.id)
+              && allowed.has(question.topic) && !excludedIds.has(question.id) && !seen.has(question.id) && fits(question));
+            extra.forEach((question) => inPool.add(question.id));
+            pool = pool.concat(extra);
+          });
+        });
+      }
       const availableTopics = topics.filter((topic) => pool.some((question) => question.topic === topic));
       const topicSequence = [];
       if (focusTopic && availableTopics.includes(focusTopic)) {
@@ -14947,6 +15011,19 @@ var qrcode = function() {
       document.getElementById("reset-game").addEventListener("click", openResetDialog);
     }
 
+    // A playful vibe that has used up this couple's unseen playful questions says so, instead of quietly going warm.
+    function vibeRunningLow() {
+      const preset = SESSION_PRESETS.find((item) => item.id === state.sessionPreset);
+      if (!preset || preset.tone !== "light" || !state.completedRounds.some(isTonightRound)) return "";
+      const seen = coupleAnsweredIds();
+      const allowed = allowedTopicsForIntensity();
+      const left = getQuestionCatalog().filter((question) => allowed.has(question.topic) && questionTone(question) === "light" && !seen.has(question.id)
+        && !state.neverQuestionIds.includes(question.id) && !state.excludedQuestionIds.includes(question.id)).length;
+      if (left >= (preset.count || state.questionCount)) return "";
+      const other = SESSION_PRESETS.find((item) => item.id === (preset.id === "date-night" ? "check-in" : "date-night"));
+      return `<p class="topic-note vibe-running-low" role="status">You’ve played nearly every ${escapeHTML(preset.label)} question — the next rounds mix in warmer ones.${other ? ` <button class="text-btn" type="button" data-vibe="${other.id}">Try ${escapeHTML(other.label)}</button>` : ""}</p>`;
+    }
+
     function presetAfterPack() {
       const previous = state.packReturnPreset;
       return SESSION_PRESETS.some((preset) => preset.id === previous) ? previous : "custom";
@@ -15053,6 +15130,7 @@ var qrcode = function() {
             <div class="vibe-tiles" role="group" aria-label="Quick start presets">
               ${["date-night", "road-trip", "check-in", "deep-dive"].map((id) => SESSION_PRESETS.find((preset) => preset.id === id)).filter(Boolean).map((preset) => `<button class="vibe-tile ${shownPreset === preset.id ? "active" : ""}" type="button" data-vibe="${preset.id}" aria-pressed="${shownPreset === preset.id}"><span class="vibe-icon" aria-hidden="true">${preset.icon}</span><strong>${preset.label}</strong><small>${preset.copy}</small></button>`).join("")}
             </div>
+            ${vibeRunningLow()}
             ${state.customPacks.length ? `<p class="setup-section-title">Your packs</p>
             <div class="library-filters custom-pack-starts">${state.customPacks.map((pack) => {
               const playable = pack.questionIds.filter((id) => getQuestionCatalog().some((question) => question.id === id) && !state.neverQuestionIds.includes(id)).length;
@@ -16222,12 +16300,18 @@ var qrcode = function() {
       let chosen = kept && kept.key === key && typeof kept.text === "string" && !usedPrompts.has(kept.text) ? kept.text : "";
       if (!chosen) {
         // Same tier first, least recently used first; borrow only from a tier that still fits the card.
-        const fitting = { close: ["close"], medium: ["medium", "close"], far: ["far", "medium"] };
+        const fitting = { close: ["close"], medium: ["medium"], far: ["far", "medium"] };
         const unratedPools = tone === "light" ? [DISCUSSION_PROMPTS.unratedLight, DISCUSSION_PROMPTS.unrated]
           : ["flirty", "flirtyText"].includes(tone) ? [DISCUSSION_PROMPTS.unratedFlirty, DISCUSSION_PROMPTS.unrated] : [DISCUSSION_PROMPTS.unrated];
-        const pools = tier === "unrated" ? unratedPools : fitting[tier].map((name) => DISCUSSION_PROMPTS[tone][name]);
+        let pools = tier === "unrated" ? unratedPools : fitting[tier].map((name) => DISCUSSION_PROMPTS[tone][name]);
+        const cardIndex = state.selectedQuestionIds.indexOf(question.id);
+        const softNight = state.sessionPreset === "date-night" || state.questionIntensity === "cozy";
+        // Every other warm match on a soft night gets one of the playful celebration lines.
+        if (softNight && tone === "warm" && tier === "close" && cardIndex % 2 === 1) pools = [PLAYFUL_WARM_CLOSE, ...pools];
+        if (state.questionIntensity === "cozy" && tone === "warm" && tier === "far") pools = [DISCUSSION_PROMPTS.cozyFar, DISCUSSION_PROMPTS.warm.medium];
         const recentList = Array.isArray(state.recentPrompts) ? state.recentPrompts : [];
-        const gagFamily = (text) => /movie trailer/i.test(text) ? "trailer" : /\bact (?:out|it out)\b|ten seconds/i.test(text) ? "act" : /sports commentator|nature.documentary|narrat/i.test(text) ? "voice" : "";
+        const gagFamily = (text) => /movie trailer/i.test(text) ? "trailer" : /\bact (?:out|it out)\b|ten seconds/i.test(text) ? "act" : /sports commentator|nature.documentary|narrat/i.test(text) ? "voice"
+          : /\bsong\b/i.test(text) ? "song" : /\bswap\b|\bfor (?:a|one) day\b|one-day/i.test(text) ? "swap" : /high five/i.test(text) ? "highfive" : /\bsnack/i.test(text) ? "snack" : "";
         const usedGags = new Set([...usedPrompts].map(gagFamily).filter(Boolean));
         // First dates skip follow-ups that assume a shared past.
         const historySafe = (text) => state.questionIntensity !== "cozy" || !(HISTORY_PROMPT_PATTERN.test(text) || /\blast notice|\bled you both\b|\bin each other\b|\bpets?\b|\bnoticed? you\b|\brecently\b/i.test(text));
@@ -16236,11 +16320,13 @@ var qrcode = function() {
         const rankPool = (prompts) => prompts.map((_, index) => prompts[(seed + index) % prompts.length])
           .filter((text) => !usedPrompts.has(text) && historySafe(text) && !(gagFamily(text) && usedGags.has(gagFamily(text))))
           .sort((a, b) => age(a) - age(b));
-        chosen = pools.map(rankPool).find((list) => list.length)?.[0]
+        const recentlyUsed = new Set(recentList);
+        const ownFirst = pools.map(rankPool).find((list) => list.length) || [];
+        chosen = ownFirst.find((text) => !recentlyUsed.has(text)) || ownFirst[0]
           || pools.flat().find((text) => !usedPrompts.has(text))
           || pools[0][0];
         state.cardPrompts[question.id] = { key, text: chosen };
-        state.recentPrompts = [...(Array.isArray(state.recentPrompts) ? state.recentPrompts : []).filter((text) => text !== chosen), chosen].slice(-60);
+        state.recentPrompts = [...(Array.isArray(state.recentPrompts) ? state.recentPrompts : []).filter((text) => text !== chosen), chosen].slice(-120);
       }
       usedPrompts.add(chosen);
       return `
@@ -16460,7 +16546,7 @@ var qrcode = function() {
           </section>
           <section class="highlight-grid ${allRevealed ? "" : "locked"}" aria-label="Round highlights" id="round-highlights">
             ${highlightCard(closestHighlight && closestHighlight.match.percent < 60 ? "Nearest common ground" : "Closest match", closestHighlight, "Complete more scored answers to unlock this highlight.", "", "One answer lines up beautifully…")}
-            ${highlightCard(surpriseNote && surpriseHighlight?.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No big surprises this round.", surpriseNote, surpriseHighlight ? "Someone is in for a surprise…" : "Your biggest surprise unlocks with the scores…")}
+            ${highlightCard(surpriseNote && surpriseHighlight?.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No big surprises this round.", surpriseNote, surpriseHighlight ? "Someone is in for a surprise…" : "Will anything surprise you? Unlocks with the scores…")}
             ${conversationHighlight ? highlightCard("Best conversation starter", conversationHighlight, "", "", "There is a story waiting in one card…") : ""}
             ${tally.some((item) => item.made) ? `<article class="highlight-card mind-reader"><span>🔮 Mind-reader</span><strong class="highlight-answer">${mindReaderHeadline(tally)}<small class="highlight-note">${tally.filter((item) => item.made).map((item) => `${escapeHTML(state.names[item.player])} read ${escapeHTML(state.names[item.player === 0 ? 1 : 0])} ${item.hits}/${item.made}`).join(" · ")}</small></strong><strong class="highlight-locked">${tally.some((item) => item.hits) ? "Someone read the other’s mind… " : "Did anyone read minds tonight? "}<small>${everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"}</small></strong></article>` : ""}
           </section>
@@ -16635,7 +16721,8 @@ var qrcode = function() {
         const ringNames = [...dashboard.querySelectorAll(".dual-score-dashboard .alignment-ring")].map((ring) => ring.getAttribute("aria-label")).filter(Boolean).join(", ");
         announce(`Scores unlocked: ${ringNames}.`);
         if (motionReduced()) {
-          playSound("celebrate", { finale: true });
+          const sinceMatch = Date.now() - (audioEngine.lastMatchAt || 0);
+          window.setTimeout(() => playSound("celebrate", { finale: true }), Math.max(0, 650 - sinceMatch));
           window.setTimeout(() => {
             dashboard.scrollIntoView({ block: "center", behavior: "auto" });
             const heading = dashboard.querySelector("#alignment-title");
@@ -16992,16 +17079,44 @@ var qrcode = function() {
         prepareNearbyJoin(launchRoomId, launchJoinToken);
         return true;
       }
-      if (["question", "intermission", "nearby-wait"].includes(state.screen)) {
-        state.resumeScreen = state.screen;
+      const join = () => {
+        if (["question", "intermission", "nearby-wait"].includes(state.screen)) {
+          state.resumeScreen = state.screen;
+        }
+        handledNearbyLaunch = launchSignature;
+        state.playStyle = "nearby";
+        state.screen = "nearby";
+        saveState();
+        history.replaceState(null, "", location.href.split("#")[0]);
+        render();
+        prepareNearbyJoin(launchRoomId, launchJoinToken);
+      };
+      const localRoundOpen = state.playStyle !== "nearby" && state.selectedQuestionIds.length > 0
+        && (["question", "intermission"].includes(state.screen) || ["question", "intermission"].includes(state.resumeScreen) || revealUnfinished());
+      if (!localRoundOpen) {
+        join();
+        return true;
       }
       handledNearbyLaunch = launchSignature;
-      state.playStyle = "nearby";
-      state.screen = "nearby";
-      saveState();
       history.replaceState(null, "", location.href.split("#")[0]);
       render();
-      prepareNearbyJoin(launchRoomId, launchJoinToken);
+      const players = state.names.filter(Boolean).join(" & ") || "this round";
+      openConfirmDialog({
+        title: "Join your partner’s round?",
+        copy: revealUnfinished() && !["question", "intermission"].includes(state.screen) && !["question", "intermission"].includes(state.resumeScreen)
+          ? `This ${POINTER_VERB === "Tap" ? "phone" : "device"} has a round whose scores aren’t revealed yet (${players}). Joining skips the count-up — its scores go straight to your Journal.`
+          : `This ${POINTER_VERB === "Tap" ? "phone" : "device"} has an unfinished round (${players}). Joining discards it — its answers can’t be recovered.`,
+        confirmLabel: "Discard and join",
+        cancelLabel: "Keep my round",
+        danger: true,
+        safeFirst: true
+      }).then((ok) => {
+        if (!ok) { showToast(`Kept your round. ${POINTER_VERB === "Tap" ? "Scan the QR" : "Open the join link"} again when you’re ready to join.`); return; }
+        if (revealUnfinished()) state.revealCelebrated = state.selectedQuestionIds.join("|");
+        state.resumeScreen = null;
+        state.screen = "setup";
+        join();
+      });
       return true;
     }
 
