@@ -3153,9 +3153,14 @@
     .count-option,
     .mode-option,
     .topic-option,
+    .intensity-option,
+    .theme-option,
+    .vibe-tile,
+    .flip-card .card-front,
     summary {
       user-select: none;
       -webkit-user-select: none;
+      -webkit-touch-callout: none;
     }
 
     button:focus-visible,
@@ -3364,7 +3369,7 @@
     .primary-btn {
       min-height: 54px;
       border: 1px solid rgba(255, 255, 255, 0.22);
-      color: #310b14;
+      color: #1f0610;
       background: linear-gradient(135deg, #fda4af, var(--coral) 58%, #f472b6);
       box-shadow: 0 14px 34px rgba(251, 113, 133, 0.27), inset 0 1px 0 rgba(255, 255, 255, 0.35);
       text-shadow: 0 1px 0 rgba(255, 255, 255, 0.15);
@@ -4073,15 +4078,9 @@
 
     @keyframes pass-device {
       0%,
-      15% {
-        left: 0;
-        transform: translateY(-50%) rotate(0);
-      }
+      15% { transform: translate3d(0, -50%, 0); }
       85%,
-      100% {
-        left: calc(100% - 28px);
-        transform: translateY(-50%) rotate(0);
-      }
+      100% { transform: translate3d(calc(100cqw - 28px), -50%, 0); }
     }
 
     @keyframes receiver-glow {
@@ -5092,7 +5091,7 @@
       color: var(--muted);
       cursor: pointer;
       font: inherit;
-      transition: all 180ms ease;
+      transition: background 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms ease;
     }
     
     [data-theme="sunset"] .text-size-option {
@@ -5433,7 +5432,7 @@
       padding: 0;
       border: 1px solid rgba(251, 191, 36, 0.2);
       border-radius: 12px;
-      color: #94a3b8;
+      color: var(--muted);
       background: rgba(15, 23, 42, 0.48);
       cursor: pointer;
     }
@@ -5700,7 +5699,7 @@
     [data-theme="sunset"] .primary-btn {
       border-color: rgba(255, 240, 210, 0.38);
       border-radius: 18px 7px 18px 7px;
-      color: #4e1729;
+      color: #3a0a16;
       background: linear-gradient(135deg, #ffe19e, #ff9b71 58%, #f97972);
       box-shadow: 0 15px 32px rgba(255, 131, 91, 0.28);
     }
@@ -5860,7 +5859,7 @@
     [data-theme="cosmic"] .primary-btn {
       border-color: rgba(255, 255, 255, 0.3);
       border-radius: 4px;
-      color: #09021a;
+      color: #05010f;
       background: linear-gradient(100deg, #56e7ff, #a777ff 48%, #ff54bd);
       box-shadow: 0 0 22px rgba(86, 231, 255, 0.28), 0 0 34px rgba(255, 84, 189, 0.16);
       letter-spacing: 0.045em;
@@ -6315,7 +6314,7 @@
     .question-library-actions > * { min-width: 0; }
     .question-library-actions .feedback-menu { flex-basis: 100%; }
     [data-theme="pastel"] .eyebrow { color: #be123c; }
-    [data-theme="pastel"] .primary-btn { color: #fff; background: linear-gradient(135deg, #be123c, #9f1239) !important; }
+    [data-theme="pastel"] .primary-btn { color: #fff; background: linear-gradient(135deg, #9f1239, #881337) !important; }
     [data-theme="sunset"] .footer-note { color: #fbcfe8; }
     [data-theme="sunset"] .tap-hint { color: #fecdd3; }
     .high-contrast .eyebrow { color: #fff; }
@@ -6324,7 +6323,7 @@
     .marker-value { white-space: nowrap; }
     [data-theme="pastel"] .alignment-dashboard .dual-score-dashboard .overall-alignment { background: transparent; border-color: transparent; box-shadow: none; }
     [data-theme="pastel"] .alignment-dashboard .score-explainer { color: #475569; }
-    .question-library-actions > .favorite-button { flex: 0 0 44px; min-width: 44px; }
+    .question-library-actions > .favorite-button { flex: 0 0 var(--tap, 48px); min-width: var(--tap, 48px); }
     .theme-option input:focus-visible + .theme-card { outline: 3px solid #fda4af; outline-offset: 2px; }
     [data-theme="pastel"] .theme-option input:focus-visible + .theme-card { outline-color: #be123c; }
     .comparison-wrap .comparison-legend { margin-top: 26px; }
@@ -6470,6 +6469,32 @@
     .quick-pick-option.active { border-color: var(--question-color, var(--coral)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--question-color, var(--coral)) 22%, transparent); transform: translateY(-2px); }
     [data-theme="pastel"] .quick-pick-option { background: #ffffff; color: #1e293b; }
     .nowrap { white-space: nowrap; }
+    /* DES-05 / DES-07 / DES-08: small labels that sat under 7:1 in individual themes. */
+    [data-theme="midnight"] .eyebrow { color: #ffb3c0; }
+    [data-theme="sunset"] .eyebrow { color: #ffe3a3; }
+    [data-theme="pastel"] .eyebrow { color: #9f1239; }
+    [data-theme="sunset"] .favorite-button { background: rgba(42, 13, 29, 0.55); }
+    [data-theme="midnight"] .card-close-button { color: #ffc2cc; }
+    [data-theme="cosmic"] .card-close-button { color: #ff9ad8; }
+    /* DES-09: light-theme fields and cards keep a visible 3:1 boundary. */
+    [data-theme="pastel"] :is(.name-input, .answer-textarea, .comment-textarea, .custom-input, .custom-select, .session-dropdown-trigger, .library-search, .private-note-input) { border-color: #8a93a6 !important; }
+    [data-theme="pastel"] :is(.preset-card, .play-style-card, .vibe-tile):not(.active) { border-color: #9aa3b5; }
+    /* DES-10: numbers that change in place keep a steady width. */
+    .alignment-ring-content strong, .progress-copy, .reveal-count, .slider-value, .dual-score-dashboard strong, .card-number { font-variant-numeric: tabular-nums; }
+    /* DES-11 / POL-07: touch has no hover, so pressing gives an immediate response. */
+    :is(.quick-pick-option, .quick-guess-option, .importance-option, .play-style-card, .vibe-tile, .text-size-option, .favorite-button,
+      .session-dropdown-trigger, .text-btn, .rating-option, .preset-card, .theme-card, .topic-option, .follow-through-button):active { transform: scale(0.97); transition-duration: 60ms; }
+    .flip-card:not(.flipped):active .flip-card-inner { transform: scale(0.985); }
+    label.setting-row:active { background-image: linear-gradient(color-mix(in srgb, var(--coral) 10%, transparent), color-mix(in srgb, var(--coral) 10%, transparent)); }
+    /* USE-09 / USE-10 / USE-11 / USE-13: no pull-to-refresh mid-round, no URL-bar jumps, toasts clear of side notches. */
+    body:has(.question-screen, .lock-screen, .reveal-screen, .celebration-screen) { overscroll-behavior-y: none; }
+    @supports (height: 100svh) { body, .app-shell { min-height: 100svh; } }
+    .question-library-list { max-height: min(68svh, 720px) !important; }
+    @media (max-width: 600px) { .app-toast { left: max(12px, env(safe-area-inset-left)) !important; right: max(12px, env(safe-area-inset-right)) !important; } }
+    /* EAS-05: the brand mark isn't a button, so it doesn't wear one. */
+    .topbar .brand-mark { border-color: transparent !important; box-shadow: none !important; background: transparent !important; }
+    /* POL-05: the hand-off arrow moves with transform only. */
+    .pass-path { container-type: inline-size; }
     [data-theme="sunset"] .question-header .progress-copy { background: rgba(42, 13, 29, 0.62); border-radius: 12px; padding: 4px 10px; }
     /* POL-02: cards resize without dragging the whole board through layout; bulk flips skip the height animation. */
     .flip-card { contain: layout; }
@@ -12658,17 +12683,18 @@ var qrcode = function() {
         tap: 14,
         step: 14,
         "partner-flip": 10,
-        lock: [18, 35, 18],
+        lock: [30],
         unlock: [10, 25, 14],
         reveal: 16,
-        celebrate: [18, 30, 18, 30, 32],
-        match: [20, 24, 20],
-        error: [24, 40, 24],
+        celebrate: [18, 40, 28],
+        finale: [20, 40, 20, 40, 20, 80, 60],
+        match: [12, 40, 12, 40, 24],
+        error: [60, 50, 60],
         delete: 30,
         whoosh: 12,
         rate: 16,
         open: [12, 30, 16],
-        countup: [8, 120, 8, 200, 8, 320, 10]
+        countup: [14, 90, 14, 150, 14, 240, 14, 380, 16]
       };
       if (!(kind in patterns)) return;
       navigator.vibrate(patterns[kind]);
@@ -12785,7 +12811,7 @@ var qrcode = function() {
     // a card flip where the card is, topic transposes into the question pack's key.
     function playSound(kind = "tap", options = {}) {
       if (!audioAllowed()) return;
-      pulseHaptic(kind);
+      pulseHaptic(kind === "celebrate" && options.finale ? "finale" : kind);
       if (!state.soundEnabled || !(state.soundVolume > 0) || document.hidden) { if (audioEngine.ctx) armIdleSuspend(); return; }
       try {
         const ctx = audioEngine.ensure();
@@ -13923,7 +13949,7 @@ var qrcode = function() {
           <div class="tutorial-steps">
             <div class="tutorial-step"><span>1</span><strong>Answer privately</strong><small>Each partner receives the same questions in the same order.</small></div>
             <div class="tutorial-step"><span>2</span><strong>Pass or pair</strong><small>Hand over one device (a lock screen hides the first answers) or link two phones with one QR scan.</small></div>
-            <div class="tutorial-step"><span>3</span><strong>Flip together</strong><small>Reveal one card at a time and use the conversation prompts.</small></div>
+            <div class="tutorial-step"><span>3</span><strong>Flip & rate together</strong><small>Reveal each card, rate the written answers together — then your two scores unlock. Guessing your partner’s answers earns mind-reader points.</small></div>
           </div>
           <div class="dialog-actions"><button class="primary-btn" id="tutorial-finish" type="button">Let’s play</button></div>
         </section>
@@ -14357,6 +14383,14 @@ var qrcode = function() {
     // Cards opened by hand on the reveal board, oldest first; Back closes the newest before leaving the board.
     let openedCards = [];
     window.alignedHandleBack = () => {
+      const openMenu = document.querySelector(".session-dropdown-container.open");
+      if (openMenu) {
+        openMenu.classList.remove("open");
+        const trigger = openMenu.querySelector(".session-dropdown-trigger");
+        trigger?.setAttribute("aria-expanded", "false");
+        trigger?.focus();
+        return true;
+      }
       const overlays = document.querySelectorAll(".modal-backdrop");
       if (overlays.length) {
         const overlay = overlays[overlays.length - 1];
@@ -14387,7 +14421,7 @@ var qrcode = function() {
     let backGuardArmed = Boolean(history.state && history.state.alignedBack);
     function armBackGuard() {
       if (window.AlignedAndroid || backGuardArmed) return;
-      if (state.screen === "setup" && !document.querySelector(".modal-backdrop")) return;
+      if (state.screen === "setup" && !document.querySelector(".modal-backdrop, .session-dropdown-container.open")) return;
       try {
         history.pushState({ alignedBack: true }, "", location.href);
         backGuardArmed = true;
@@ -15425,6 +15459,7 @@ var qrcode = function() {
                 <input class="name-input" id="player-two" maxlength="30" autocomplete="name" placeholder="Enter a name" value="${escapeHTML(state.names[1])}">
               </label>
             </div>
+            <p class="error" id="name-error" role="alert"></p>
 
             <p class="setup-section-title">How are you playing?</p>
             <div class="play-style-grid" aria-label="Play style">
@@ -15553,7 +15588,12 @@ var qrcode = function() {
 
       playerOne.addEventListener("input", rememberNames);
       playerTwo.addEventListener("input", rememberNames);
-      [playerOne, playerTwo].forEach((field) => field.addEventListener("input", () => { if (error.textContent && /name/i.test(error.textContent)) error.textContent = ""; }));
+      [playerOne, playerTwo].forEach((field) => field.addEventListener("input", () => {
+        if (error.textContent && /name/i.test(error.textContent)) error.textContent = "";
+        const nameError = document.getElementById("name-error");
+        if (nameError) nameError.textContent = "";
+        field.removeAttribute("aria-invalid");
+      }));
       document.querySelectorAll("[data-play-style]").forEach((button) => button.addEventListener("click", () => {
         rememberNames();
         if (button.dataset.playStyle === "nearby" && !NEARBY_PLAY_SUPPORTED) {
@@ -15623,6 +15663,7 @@ var qrcode = function() {
       }));
       const setDropdownOpen = (open, { focusItem = false } = {}) => {
         dropdownContainer.classList.toggle("open", open);
+        if (open) armBackGuard();
         dropdownTrigger.setAttribute("aria-expanded", open ? "true" : "false");
         if (open && focusItem) (dropdownItems.find((item) => item.classList.contains("selected")) || dropdownItems[0])?.focus();
       };
@@ -15846,6 +15887,9 @@ var qrcode = function() {
         const selectedTopics = topicInputs.filter((input) => input.checked && !input.disabled).map((input) => input.value);
         if (names.some((name) => !name)) {
           playSound("error"); error.textContent = "Add both names to begin.";
+          const nameError = document.getElementById("name-error");
+          if (nameError) nameError.textContent = "Add both names to begin.";
+          [playerOne, playerTwo].forEach((field) => field.setAttribute("aria-invalid", String(!field.value.trim())));
           (names[0] ? playerTwo : playerOne).focus();
           return;
         }
@@ -16066,7 +16110,7 @@ var qrcode = function() {
             <p class="error" id="answer-error" role="alert"></p>
             <div class="actions question-actions">
               ${state.questionIndex > 0 ? '<button class="secondary-btn" id="back-question" type="button">Back</button>' : ""}
-              ${state.playStyle !== "nearby" && !state.completedPlayers?.[state.activePlayer === 0 ? 1 : 0] ? '<button class="text-btn" id="skip-question" type="button" aria-label="Skip this prompt and get a different question">Skip</button>' : ""}
+              ${state.playStyle !== "nearby" && !state.completedPlayers?.[state.activePlayer === 0 ? 1 : 0] ? '<button class="text-btn" id="skip-question" type="button" aria-label="Swap this prompt for a different question">Swap question</button>' : ""}
               <button class="primary-btn" type="submit">${state.questionIndex === totalQuestions - 1 ? "Lock my answers" : "Next question"}</button>
             </div>
           </form>
@@ -17568,8 +17612,11 @@ var qrcode = function() {
     document.addEventListener("click", (event) => {
       // Resume audio on user interaction to satisfy browser autoplay policy.
       try {
-        if (state.ambientMusicEnabled) ambientSoundscape.start();
-        else audioEngine.resume();
+        const running = audioEngine.ctx && audioEngine.ctx.state === "running";
+        if (!running || (state.ambientMusicEnabled && !ambientSoundscape.generation)) {
+          if (state.ambientMusicEnabled) ambientSoundscape.start();
+          else audioEngine.resume();
+        }
         armIdleSuspend();
       } catch (e) {
         // Prevent audio issues from blocking user interaction handlers
