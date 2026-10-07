@@ -10896,7 +10896,9 @@ var qrcode = function() {
         } else if (state.screen === "question" && !linkEnded && !nearbyRuntime.partnerLeft) {
           message = `Reconnecting to ${partner}’s phone… keep answering, nothing is lost.`;
         } else if (state.screen === "question" && nearbyRuntime.partnerLeft) {
-          message = `${partner} left the two-phone round. Keep answering — ${partner} can answer on this phone at the end.`;
+          message = nearbyRuntime.partnerLeftReason === "kept-own-round"
+            ? `${partner} stayed on their own round. Keep answering — ${partner} can answer on this phone at the end.`
+            : `${partner} left the two-phone round. Keep answering — ${partner} can answer on this phone at the end.`;
           tone = "warning";
         } else if (state.screen === "question") {
           message = `The link to ${partner}’s phone has ended. Keep answering — you can reconnect or finish on one phone at the end.`;
@@ -11313,8 +11315,12 @@ var qrcode = function() {
         const declinedNewRound = payload.reason === "kept-own-round";
         closeNearbyConnection();
         nearbyRuntime.partnerLeft = true;
-        showToast(declinedNewRound ? `${partner} stayed on their own round. You can show the QR again later.` : `${partner} left the two-phone round. Your answers are saved on this phone.`, { tone: "warning" });
-        if (state.screen === "nearby") state.screen = "setup";
+        nearbyRuntime.partnerLeftReason = declinedNewRound ? "kept-own-round" : "";
+        // A host who hasn't answered anything yet goes back to pairing rather than a round nobody joined.
+        const hostUntouched = declinedNewRound && state.nearbyRole === "host" && state.screen === "question" && !Object.keys(state.answers?.[0] || {}).length;
+        if (hostUntouched) state.screen = "nearby";
+        showToast(declinedNewRound ? `${partner} stayed on their own round. ${hostUntouched ? "Show a new QR when you’re both ready." : "You can show a new QR from Home later."}` : `${partner} left the two-phone round. Your answers are saved on this phone.`, { tone: "warning" });
+        if (state.screen === "nearby" && !hostUntouched) state.screen = "setup";
         saveState();
         render();
       } else if (payload.type === "follow-through") {
@@ -12817,7 +12823,7 @@ var qrcode = function() {
           duck = 0.8;
         } else if (kind === "partner-flip") {
           const d = (Number(options.degree) || 0) % 5;
-          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 1.55 : themeName === "cute" ? 1.2 : 1), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true, ...(themeName === "cute" ? { octaveLevel: 0.6 } : {}), ...(themeName === "dreamy" ? { attack: 0.01 } : {}) });
+          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 1.9 : themeName === "cute" ? 1.2 : 1), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true, ...(themeName === "cute" ? { octaveLevel: 0.6 } : {}), ...(themeName === "dreamy" ? { attack: 0.01 } : {}) });
           duck = 0.8;
         } else if (kind === "open") {
           noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.11, q: 0.8 });
