@@ -6239,7 +6239,10 @@
     }
     [data-theme="pastel"] :is(button, a, summary, select, textarea, [tabindex]):focus-visible,
     [data-theme="pastel"] input:focus-visible + :is(.count-card, .topic-chip, .intensity-card, .mode-card) { outline-color: #be123c; }
-    :is(h1, h2, h3)[tabindex="-1"]:focus:not(:focus-visible) { outline: none; }
+    /* Script-focused screen headings show a ring only for people navigating by keyboard (browsers call a
+       launch-time focus "visible", which drew a box on phones resuming a round). */
+    :is(h1, h2, h3)[tabindex="-1"]:focus { outline: none; }
+    html.kbd-nav :is(h1, h2, h3)[tabindex="-1"]:focus-visible { outline: 3px solid var(--coral); outline-offset: 4px; }
 
     .setting-row { cursor: pointer; }
     .setting-row input[type="checkbox"] {
@@ -12026,6 +12029,10 @@ var qrcode = function() {
       }
     }
 
+    document.addEventListener("keydown", (event) => {
+      if (["Tab", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", " "].includes(event.key)) document.documentElement.classList.add("kbd-nav");
+    }, true);
+    document.addEventListener("pointerdown", () => document.documentElement.classList.remove("kbd-nav"), true);
     let lastModalOpenedAt = 0;
     document.addEventListener("click", (event) => {
       if (event.isTrusted && event.target instanceof Element && event.target.matches(".modal-backdrop") && Date.now() - lastModalOpenedAt < 400) event.stopImmediatePropagation();
@@ -15880,7 +15887,7 @@ var qrcode = function() {
           <form class="question-card" id="question-form" style="--question-color:${topicColor(questionTopic?.tone)}" novalidate>
             <div class="question-decor" aria-hidden="true"><span></span><span></span><span></span></div>
             <div class="question-meta">
-              <span class="category-pill"><span class="category-symbol">${categorySymbol(question.category)}</span>${escapeHTML(question.category)}</span>
+              <span class="category-pill" title="${escapeHTML(question.category)}"><span class="category-symbol">${categorySymbol(question.category)}</span>${escapeHTML(question.category)}</span>
               <span class="question-meta-actions">
                 <button class="favorite-button ${isFavorite ? "active" : ""}" id="favorite-current" type="button" aria-label="${isFavorite ? "Remove from" : "Add to"} favorites" aria-pressed="${isFavorite}">★</button>
                 <span class="type-chip"><span aria-hidden="true">${quickPick ? "⇄" : question.type === "slider" ? "↔" : "✎"}</span>${quickPick ? "Pick a side" : question.type === "slider" ? "Slide your answer" : "Write your answer"}</span>
