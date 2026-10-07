@@ -6647,7 +6647,7 @@
     .guess-label small, .home-results-copy p:not(.eyebrow), .round-mode-copy, [data-tooltip]::after, .alignment-ring-content span,
     .saved-round-date, .saved-answer-name, .saved-answer-value, .library-question-meta span, .library-answer-history summary,
     .intensity-card small, .mini-action, .home-topic-result span, .highlight-locked small, .round-copy span { font-size: max(12px, 0.72rem) !important; }
-    @media (max-width: 899px) { .guess-label { font-size: max(12px, .78rem) !important; } }
+    @media (max-width: 899px) { .guess-label { font-size: max(12px, .78rem) !important; } .mode-description { font-size: max(12px, .75rem) !important; } }
     /* D5: Large text never makes the ring captions smaller than Standard. */
     [data-text-size="large"] .alignment-dashboard .alignment-ring-content span { font-size: 12px !important; }
     /* D3: forced colors turn the faint decorative rings into solid arcs over the text. */
@@ -10312,8 +10312,9 @@ var qrcode = function() {
     if (loadStateFailed) {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        const slot = localStorage.getItem(`${STORAGE_KEY}-unreadable`) ? `${STORAGE_KEY}-unreadable-2` : `${STORAGE_KEY}-unreadable`;
-        if (raw && !localStorage.getItem(slot)) localStorage.setItem(slot, raw);
+        const first = localStorage.getItem(`${STORAGE_KEY}-unreadable`);
+        const slot = first ? `${STORAGE_KEY}-unreadable-2` : `${STORAGE_KEY}-unreadable`;
+        if (raw && raw !== first && !localStorage.getItem(slot)) localStorage.setItem(slot, raw);
       } catch {}
       window.setTimeout(() => showToast("Your saved game couldn’t be read, so Aligned started fresh. A copy was kept — download it from Settings → Your data.", { tone: "warning" }), 900);
       loadStateFailed = false;
