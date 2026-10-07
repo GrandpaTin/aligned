@@ -43,6 +43,11 @@ export async function answerAll(p, who, { stopAfter = 99 } = {}) {
       // Quick picks submit themselves; clicking Next too would race the 650 ms advance guard.
       await p.locator("[data-quick-pick]").nth(i % 2).click();
       await p.waitForTimeout(900);
+      // On the last question a pick waits for an explicit Lock (a mis-tap there must stay undoable).
+      if (/Lock my answers/.test(await p.locator(".quick-pick-hint").textContent().catch(() => "") || "")) {
+        await p.locator('#question-form button[type="submit"]').last().click();
+        await p.waitForTimeout(250);
+      }
       continue;
     } else await p.locator("input#answer-input").fill(String(1 + (i * 3) % 10));
     await p.locator('#question-form button[type="submit"]').last().click();

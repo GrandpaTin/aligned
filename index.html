@@ -37,7 +37,8 @@
       --card: #1e293b;
       --card-light: #273449;
       --text: #f8fafc;
-      --muted: #94a3b8;
+      --muted: #c4cfdd;
+      --text-2: #cbd5e1;
       --coral: #fb7185;
       --coral-dark: #e11d48;
       --blue: #60a5fa;
@@ -370,7 +371,7 @@
     .lede {
       max-width: 600px;
       margin: 12px 0 0;
-      color: #cbd5e1;
+      color: var(--text-2);
       font-size: clamp(0.92rem, 2.2vw, 1.05rem);
       line-height: 1.6;
     }
@@ -834,7 +835,7 @@
       border-radius: 11px;
       align-items: center;
       gap: 7px;
-      color: #cbd5e1;
+      color: var(--text-2);
       background: rgba(15, 23, 42, 0.47);
       font-size: 0.72rem;
       font-weight: 790;
@@ -951,7 +952,7 @@
 
     label {
       display: block;
-      color: #cbd5e1;
+      color: var(--text-2);
       font-size: 0.78rem;
       font-weight: 760;
     }
@@ -1087,7 +1088,7 @@
 
     .progress-copy {
       flex: 0 0 auto;
-      color: #cbd5e1;
+      color: var(--text-2);
       font-size: 0.88rem;
       font-weight: 780;
       text-align: right;
@@ -1399,7 +1400,7 @@
 
     .comment-details summary {
       padding: 13px 15px;
-      color: #cbd5e1;
+      color: var(--text-2);
       cursor: pointer;
       font-size: 0.76rem;
       font-weight: 780;
@@ -1456,7 +1457,7 @@
       padding: 11px 13px;
       border-left: 3px solid var(--player-color);
       border-radius: 4px 11px 11px 4px;
-      color: #cbd5e1;
+      color: var(--text-2);
       background: rgba(15, 23, 42, 0.45);
       font-size: 0.78rem;
       line-height: 1.45;
@@ -1539,7 +1540,7 @@
     .lock-copy {
       max-width: 470px;
       margin: 15px auto 0;
-      color: #cbd5e1;
+      color: var(--text-2);
       line-height: 1.65;
     }
 
@@ -1727,7 +1728,7 @@
       padding: 4px 8px;
       border: 1px solid rgba(148, 163, 184, 0.13);
       border-radius: 999px;
-      color: #cbd5e1;
+      color: var(--text-2);
       background: rgba(15, 23, 42, 0.35);
       font-size: 0.61rem;
       font-weight: 780;
@@ -1759,7 +1760,7 @@
 
     .home-topic-result span {
       margin-top: 7px;
-      color: #cbd5e1;
+      color: var(--text-2);
       font-size: 0.64rem;
       font-weight: 760;
       line-height: 1.25;
@@ -1862,7 +1863,7 @@
 
     .topic-alignment-title {
       margin: 0 0 12px;
-      color: #cbd5e1;
+      color: var(--text-2);
       font-size: 0.72rem;
       font-weight: 850;
       letter-spacing: 0.08em;
@@ -1909,7 +1910,7 @@
 
     .topic-alignment-name {
       margin-top: 8px;
-      color: #cbd5e1;
+      color: var(--text-2);
       font-size: 0.65rem;
       font-weight: 760;
       line-height: 1.2;
@@ -2293,7 +2294,7 @@
       flex-wrap: wrap;
       gap: 8px 16px;
       padding-top: 7px;
-      color: #cbd5e1;
+      color: var(--text-2);
       font-size: 0.78rem;
       font-weight: 700;
     }
@@ -2525,7 +2526,7 @@
       justify-content: space-between;
       gap: 12px;
       margin-bottom: 11px;
-      color: #cbd5e1;
+      color: var(--text-2);
       font-size: 0.72rem;
       font-weight: 850;
       letter-spacing: 0.07em;
@@ -2555,7 +2556,7 @@
       align-items: center;
       justify-content: center;
       gap: 7px;
-      color: #cbd5e1;
+      color: var(--text-2);
       background: rgba(30, 41, 59, 0.62);
       cursor: pointer;
       font-size: 0.7rem;
@@ -2705,7 +2706,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      color: #cbd5e1;
+      color: var(--text-2);
       font-size: 0.7rem;
       font-weight: 780;
     }
@@ -2780,7 +2781,7 @@
     }
 
     .custom-label {
-      color: #cbd5e1;
+      color: var(--text-2);
       font-size: 0.72rem;
       font-weight: 780;
     }
@@ -3095,7 +3096,7 @@
 
     .dialog-copy {
       margin: 11px 0 0;
-      color: #cbd5e1;
+      color: var(--text-2);
       line-height: 1.6;
     }
 
@@ -4047,14 +4048,8 @@
     }
 
     @keyframes aurora-morph {
-      0% {
-        transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
-        border-radius: 42% 58% 65% 35% / 45% 36% 64% 55%;
-      }
-      100% {
-        transform: translate3d(7vw, 5vh, 0) rotate(24deg) scale(1.16);
-        border-radius: 61% 39% 42% 58% / 34% 62% 38% 66%;
-      }
+      0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate3d(7vw, 5vh, 0) rotate(24deg) scale(1.16); }
     }
 
     @keyframes match-glow {
@@ -4550,7 +4545,8 @@
       --card: #1e293b;
       --card-light: #273449;
       --text: #f8fafc;
-      --muted: #94a3b8;
+      --muted: #c4cfdd;
+      --text-2: #cbd5e1;
       --line: rgba(148, 163, 184, 0.2);
       --coral: #fb7185;
       --coral-dark: #e11d48;
@@ -4568,6 +4564,7 @@
       --card-light: #925044;
       --text: #fff8ed;
       --muted: #f3cdbd;
+      --text-2: #fff1e8;
       --line: rgba(255, 229, 199, 0.24);
       --coral: #ff8a67;
       --coral-dark: #e85252;
@@ -4585,6 +4582,7 @@
       --card-light: #231956;
       --text: #f8f5ff;
       --muted: #b9b7e5;
+      --text-2: #cbd5e1;
       --line: rgba(121, 236, 255, 0.25);
       --coral: #ff54bd;
       --coral-dark: #d81b9c;
@@ -4601,7 +4599,8 @@
       --card: #ffffff;
       --card-light: #f3f7ff;
       --text: #26344a;
-      --muted: #5b667c;
+      --muted: #3f4a5f;
+      --text-2: #334155;
       --line: rgba(79, 91, 120, 0.17);
       --coral: #e96782;
       --coral-dark: #cf4968;
@@ -4622,6 +4621,7 @@
     .high-contrast {
       --text: #ffffff;
       --muted: #d8e2ef;
+      --text-2: #e2e8f0;
       --line: rgba(255, 255, 255, 0.38);
     }
 
@@ -5596,7 +5596,7 @@
       font-family: "Trebuchet MS", "Avenir Next", Avenir, sans-serif;
       background:
         radial-gradient(ellipse at 50% 112%, rgba(255, 209, 102, 0.42), transparent 36rem),
-        radial-gradient(circle at 92% 4%, rgba(255, 152, 100, 0.24), transparent 28rem),
+        radial-gradient(circle at 92% 4%, rgba(255, 152, 100, 0.12), transparent 28rem),
         linear-gradient(158deg, #2a0d1d 0%, #6f2738 48%, #a74640 100%);
     }
 
@@ -5909,6 +5909,7 @@
     [data-theme="pastel"].high-contrast {
       --text: #111827;
       --muted: #374151;
+      --text-2: #1f2937;
       --line: rgba(31, 41, 55, 0.34);
     }
 
@@ -6441,7 +6442,7 @@
       .setup-title-row .topic-toolbar { width: 100%; }
     }
     [data-theme="pastel"] .play-style-card small, [data-theme="pastel"] .count-time, [data-theme="pastel"] .mode-description,
-    [data-theme="pastel"] .preset-card small, [data-theme="pastel"] .intensity-card small, [data-theme="pastel"] .topic-note { color: #556178; }
+    [data-theme="pastel"] .preset-card small, [data-theme="pastel"] .intensity-card small, [data-theme="pastel"] .topic-note { color: var(--muted); }
     @media (display-mode: standalone) {
       [data-theme="pastel"] body::before {
         content: "";
@@ -6469,6 +6470,10 @@
     .quick-pick-option.active { border-color: var(--question-color, var(--coral)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--question-color, var(--coral)) 22%, transparent); transform: translateY(-2px); }
     [data-theme="pastel"] .quick-pick-option { background: #ffffff; color: #1e293b; }
     .nowrap { white-space: nowrap; }
+    [data-theme="sunset"] .question-header .progress-copy { background: rgba(42, 13, 29, 0.62); border-radius: 12px; padding: 4px 10px; }
+    /* POL-02: cards resize without dragging the whole board through layout; bulk flips skip the height animation. */
+    .flip-card { contain: layout; }
+    .reveal-bulk .flip-card { transition: transform 180ms ease !important; }
     .celebration-card #open-reveal-board { margin-top: 16px; }
     .vibe-running-low { grid-column: 1 / -1; margin: 4px 0 0; }
     @media (pointer: coarse) { .vibe-running-low .text-btn { min-height: 44px; } }
@@ -6615,9 +6620,9 @@
     .question-header { flex-wrap: wrap; }
     .question-header .progress-copy { margin-left: auto; text-align: right; }
     @media (max-width: 600px) and (max-height: 900px) {
-      .question-screen .question-actions { position: sticky; bottom: 0; z-index: 20; margin-inline: -8px; padding: 8px; border-radius: 16px; background: var(--card); background: color-mix(in srgb, var(--card) 94%, transparent); box-shadow: 0 -10px 24px rgba(2, 6, 23, 0.3); }
+      .question-screen .question-actions { position: sticky; bottom: 0; z-index: 20; margin-inline: -8px; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); border-radius: 16px; background: var(--card); background: color-mix(in srgb, var(--card) 94%, transparent); box-shadow: 0 -10px 24px rgba(2, 6, 23, 0.3); }
       [data-theme="pastel"] .question-screen .question-actions { background: rgba(255, 248, 246, 0.95); }
-      html:has(.question-screen .question-actions) { scroll-padding-bottom: 76px; }
+      html:has(.question-screen .question-actions) { scroll-padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
     }
     .screen.question-screen { margin-top: 0; }
     .quick-pick-hint { margin: 4px 0 0; color: var(--muted); font-size: max(12px, .78rem); }
@@ -6750,14 +6755,23 @@
     .danger-btn { border-color: rgba(248, 113, 113, 0.5) !important; color: #fecaca !important; background: rgba(127, 29, 29, 0.35) !important; }
     [data-theme="pastel"] .danger-btn { color: #991b1b !important; background: #fee2e2 !important; }
 
+    /* Touch targets: 48 px with at least 8 px between neighbours on touch screens. */
+    :root { --tap: 48px; }
     @media (pointer: coarse) {
-      .topbar-actions { gap: 4px !important; }
-      .home-btn { width: 44px !important; height: 44px !important; min-height: 44px !important; }
+      .topbar-actions { gap: 8px !important; }
+      .home-btn { width: var(--tap) !important; height: var(--tap) !important; min-height: var(--tap) !important; }
       .topic-chip, .mini-action, .importance-option, .not-ready-button, .session-dropdown-trigger,
-      .follow-through-button, .rating-option, .text-btn, .secondary-btn, .primary-btn,
-      .custom-input, .text-input, input[type="text"], .data-tool, .reveal-all-btn { min-height: 44px !important; }
+      .follow-through-button, .rating-option, .text-btn, .secondary-btn, .primary-btn, .next-card-button,
+      .custom-input, .text-input, input[type="text"], .data-tool, .reveal-all-btn, .setting-row,
+      .library-filter, .question-library-action, .quick-guess-option, .text-size-option, .count-option, .mode-option, .topic-option,
+      .intensity-option, .play-style-card, .vibe-tile, .card-close-button, .saved-pack-chip, [data-delete-pack] { min-height: var(--tap) !important; }
+      .favorite-button { flex: 0 0 var(--tap) !important; min-width: var(--tap) !important; min-height: var(--tap) !important; }
       .mini-action { padding-inline: 12px !important; }
-      details > summary { display: flex; align-items: center; min-height: 44px; }
+      details > summary { display: flex; align-items: center; min-height: var(--tap); }
+      :is(.topic-picker, .count-picker, .mode-picker, .text-size-toggle, .question-library-actions, .feedback-actions, .rating-options, .importance-options, .library-filters, .dialog-actions, .question-actions, .actions) { gap: 8px !important; }
+      /* Six top-bar buttons can't keep 48 px and 8 px gaps on a phone; sound and music stay in Settings there. */
+      @media (max-width: 480px) { #sound-toggle, #ambient-toggle { display: none !important; } }
+      @media (max-width: 480px) { .intensity-picker { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px !important; } }
     }
 
     @media (max-width: 600px) {
@@ -16127,12 +16141,13 @@ var qrcode = function() {
         playSound("tap");
         const comment = document.getElementById("comment-input");
         const addingMore = document.querySelector("#question-form .comment-details[open], #question-form .answer-extras[open]") || (comment && comment.value.trim());
-        if (addingMore) {
-          // Someone explaining their pick keeps the card; Next moves on when they're done.
+        const lastQuestion = state.questionIndex >= state.selectedQuestionIds.length - 1;
+        if (addingMore || lastQuestion) {
+          // Someone explaining their pick keeps the card; on the last question a mis-tap must not lock the answers.
           error.className = "not-ready-note";
           error.textContent = "";
           const hint = document.querySelector(".quick-pick-hint");
-          if (hint) { hint.textContent = "Side picked — press Next when you’re done."; hint.setAttribute("role", "status"); }
+          if (hint) { hint.textContent = lastQuestion && !addingMore ? "Side picked — tap Lock my answers when you’re ready." : "Side picked — press Next when you’re done."; hint.setAttribute("role", "status"); }
           revealAboveStickyBar(error);
           return;
         }
@@ -16306,7 +16321,7 @@ var qrcode = function() {
             <div class="lock-icon" aria-hidden="true">♥</div>
             <p class="eyebrow">Answers locked</p>
             <h2 id="lock-title">Pass the device to<br><span class="accent-text">${escapeHTML(nextPlayer)}</span></h2>
-            <p class="lock-copy">${escapeHTML(finishedPlayer)}'s answers are safely hidden. When ${escapeHTML(nextPlayer)} has the device, unlock the next turn.</p>
+            <p class="lock-copy">${escapeHTML(finishedPlayer)}’s answers are safely hidden. When ${escapeHTML(nextPlayer)} has the device, unlock the next turn.</p>
             <div class="pass-visual" aria-hidden="true">
               <span class="pass-person one">${escapeHTML(initials(finishedPlayer))}</span>
               <span class="pass-path"></span>
@@ -16314,11 +16329,21 @@ var qrcode = function() {
             </div>
             <div class="actions lock-actions">
               <button class="primary-btn" id="unlock-turn" type="button">I’m ${escapeHTML(nextPlayer)} — unlock</button>
+              <button class="secondary-btn" id="edit-my-answers" type="button">← ${escapeHTML(finishedPlayer)}: change my answers</button>
             </div>
           </div>
         </section>
       `;
 
+      document.getElementById("edit-my-answers").addEventListener("click", () => {
+        state.completedPlayers[finishedIndex] = false;
+        state.activePlayer = finishedIndex;
+        state.questionIndex = Math.max(0, state.selectedQuestionIds.length - 1);
+        state.screen = "question";
+        saveState();
+        playSound("tap");
+        render();
+      });
       document.getElementById("unlock-turn").addEventListener("click", () => {
         state.activePlayer = nextIndex;
         state.questionIndex = 0;
@@ -16978,10 +17003,17 @@ var qrcode = function() {
       }
 
       function sizeAllCards() {
-        flipCards.forEach(sizeCard);
+        const measured = flipCards.map((card) => {
+          const flipped = card.classList.contains("flipped");
+          const face = card.querySelector(flipped ? ".card-back" : ".card-front");
+          return { card, flipped, height: Math.max(flipped ? face.scrollHeight : face.offsetHeight, 210), top: card.offsetTop };
+        });
+        measured.forEach(({ card, flipped, height }) => {
+          if (!flipped) card.dataset.closedHeight = String(height);
+          card.style.height = `${height}px`;
+        });
         const rows = new Map();
-        flipCards.forEach((card) => {
-          const top = card.offsetTop;
+        measured.forEach(({ card, top }) => {
           if (!rows.has(top)) rows.set(top, []);
           rows.get(top).push(card);
         });
@@ -17216,6 +17248,9 @@ var qrcode = function() {
         const shouldReveal = state.revealedIds.length !== questions.length;
         state.revealedIds = shouldReveal ? questions.map((question) => question.id) : [];
         if (state.playStyle === "nearby") sendNearbyMessage({ type: "reveal-state", roundId: state.nearbyRoundId, all: shouldReveal });
+        const board = document.querySelector(".reveal-screen") || document.body;
+        board.classList.add("reveal-bulk");
+        window.setTimeout(() => board.classList.remove("reveal-bulk"), 900);
         flipCards.forEach((card) => {
           applyCardState(card, shouldReveal);
         });
