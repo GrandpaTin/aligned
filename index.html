@@ -189,6 +189,15 @@
       animation-delay: -12s;
     }
 
+    /* After a quiet spell the script sets html.ambient-rest: each frame of these decorative loops re-composites
+       the blurred bars behind and above them, so a still screen kept the GPU busy at 60 fps. Pausing holds
+       the current pose, so nothing jumps when input resumes. The busy pulse-dot is a status cue and stays live. */
+    html.ambient-rest :is(.aurora-blob, .ambient-specks span, .love-orbit, .orbit-heart, .orbit-person, .progress-star, .question-decor span,
+      .lock-icon, .pass-person, .match-badge, .celebration-orb, .brand-mark),
+    html.ambient-rest body::after,
+    html.ambient-rest .love-orbit::after,
+    html.ambient-rest .pass-path::after { animation-play-state: paused !important; }
+
     .app-shell {
       width: min(100% - 24px, 1080px);
       min-height: 100dvh;
@@ -296,6 +305,24 @@
       border-color: var(--coral);
       background: color-mix(in srgb, var(--coral) 12%, transparent);
       box-shadow: 0 0 12px color-mix(in srgb, var(--coral) 20%, transparent);
+    }
+
+    /* Header switches (sound, music) show "on" as a dot; the ring above is reserved for the current page. */
+    #sound-toggle,
+    #ambient-toggle {
+      position: relative;
+    }
+
+    .home-btn[aria-pressed="true"]::before {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--coral);
+      content: "";
+      pointer-events: none;
     }
 
     .home-icon {
@@ -531,8 +558,6 @@
       border-radius: var(--radius-lg);
       background: rgba(30, 41, 59, 0.9);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
     }
 
     .setup-card {
@@ -1047,11 +1072,12 @@
       color: #2b0a12;
       background: var(--coral);
       box-shadow: 0 12px 30px rgba(251, 113, 133, 0.22);
-      transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+      transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
     }
 
+    /* Brighten with a filter: a background swap drops the gradient image and fades the colour in from transparent. */
     @media (hover: hover) { .primary-btn:hover {
-      background: #fda4af;
+      filter: brightness(1.07) saturate(1.05);
       box-shadow: 0 14px 36px rgba(251, 113, 133, 0.3);
       transform: translateY(-2px);
     } }
@@ -2012,7 +2038,10 @@
       background: transparent;
       perspective: 1400px;
       text-align: left;
-      transition: height 320ms cubic-bezier(0.22, 1, 0.36, 1), transform 180ms ease;
+      /* Height snaps at the edge-on moment of the flip, on the faces' own 0.089s swap (toggleCard sets it in
+         the frame that starts the turn), instead of growing under the rotating 3D layer, which re-laid-out and
+         re-rastered it on every frame of the fastest part of the turn. */
+      transition: transform 180ms ease, height 0s linear 0.089s;
     }
 
     @media (hover: hover) { .flip-card:hover {
@@ -3153,6 +3182,43 @@
       text-align: center;
     }
 
+    .library-empty p {
+      margin: 0;
+    }
+
+    .library-empty [data-library-reset] {
+      margin-top: 14px;
+    }
+
+    /* The closing copy of a dialog (see ghostClosedModal): same backdrop, played backwards, never interactive.
+       One step below live dialogs so a dialog that opens as another closes stays on top. */
+    .modal-ghost {
+      position: fixed;
+      inset: 0;
+      z-index: 199;
+      display: grid;
+      padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+      place-items: center;
+      background: rgba(2, 6, 23, 0.78);
+      backdrop-filter: blur(16px) saturate(1.2);
+      -webkit-backdrop-filter: blur(16px) saturate(1.2);
+      pointer-events: none;
+      animation: modal-fade 150ms ease reverse forwards;
+    }
+
+    [data-theme="pastel"] .modal-ghost {
+      background: rgba(64, 52, 82, 0.36);
+    }
+
+    .modal-ghost * {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .modal-ghost > * {
+      animation: modal-rise 150ms ease reverse forwards !important;
+    }
+
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -3219,6 +3285,22 @@
       margin-top: 24px;
     }
 
+    /* Wider screens: buttons move to a new row instead of squeezing every label onto two lines, three-button
+       dialogs get room for one row, and a leading destructive choice stands apart from the safe ones. */
+    @media (min-width: 601px) {
+      .dialog-actions {
+        flex-wrap: wrap;
+      }
+
+      .exit-dialog:has(.dialog-actions > :nth-child(3)) {
+        width: min(100%, 520px);
+      }
+
+      .dialog-actions > .danger-btn:first-child {
+        margin-inline-end: auto;
+      }
+    }
+
     /* Premium responsive polish layer */
     :root {
       --midnight-deep: #08111f;
@@ -3231,6 +3313,11 @@
       --elev-2: 0 16px 42px rgba(2, 6, 23, 0.22);
       --elev-3: var(--soft-glow);
       --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      /* Shared motion scale: press feedback, hover/state changes, panels, screen-sized moves. */
+      --dur-press: 60ms;
+      --dur-fast: 160ms;
+      --dur-base: 220ms;
+      --dur-slow: 420ms;
     }
 
     html {
@@ -3394,8 +3481,8 @@
     .library-add {
       border-color: rgba(226, 232, 240, 0.13);
       box-shadow: var(--elev-3), inset 0 1px 0 rgba(255, 255, 255, 0.045);
-      backdrop-filter: blur(22px) saturate(1.2);
-      -webkit-backdrop-filter: blur(22px) saturate(1.2);
+      /* No backdrop blur: these panels are nearly opaque over an already-soft backdrop, so it was invisible,
+         yet every ambient animation frame re-blurred all of them (most of an idle screen's GPU cost). */
     }
 
     /* These cards are ~90% opaque over an already-blurred aurora, so re-blurring their backdrop showed nothing
@@ -4851,7 +4938,7 @@
       background: color-mix(in srgb, var(--sun) 10%, transparent);
     }
     .question-screen { position: relative; isolation: isolate; }
-    .question-screen::before { content: ""; position: fixed; z-index: -1; inset: 8% -15% auto; height: 52vh; pointer-events: none; background: radial-gradient(circle, color-mix(in srgb, var(--question-color, var(--coral)) 22%, transparent), transparent 65%); filter: blur(24px); animation: breathe 7s ease-in-out infinite alternate; }
+    .question-screen::before { content: ""; position: fixed; z-index: -1; inset: 8% -15% auto; height: 52vh; pointer-events: none; background: radial-gradient(circle, color-mix(in srgb, var(--question-color, var(--coral)) 22%, transparent), transparent 65%); filter: blur(24px); }
 
     .dual-score-dashboard { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
     .score-explainer { color: var(--muted); font-size: .72rem; line-height: 1.45; }
@@ -5978,8 +6065,10 @@
         linear-gradient(135deg, rgba(86, 231, 255, 0.055), transparent 28%),
         linear-gradient(145deg, rgba(24, 15, 65, 0.97), rgba(7, 3, 28, 0.96));
       box-shadow: 0 0 0 1px rgba(255, 84, 189, 0.06), 0 0 34px rgba(86, 231, 255, 0.09), inset 0 0 28px rgba(167, 119, 255, 0.055);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      /* No backdrop blur, as in the other themes: behind a 96% opaque fill it was invisible, yet it re-blurred
+         every panel (and each card face through its whole 3D turn) on every ambient animation frame. */
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
     }
 
     /* The theme rule above outranks the plain no-blur rule for these near-opaque cards; keep them unblurred here too. */
@@ -6444,9 +6533,13 @@
     /* Script-focused screen headings show a ring only for people navigating by keyboard (browsers call a
        launch-time focus "visible", which drew a box on phones resuming a round). */
     :is(h1, h2, h3)[tabindex="-1"]:focus { outline: none; }
-    html.kbd-nav :is(h1, h2, h3)[tabindex="-1"]:focus-visible { outline: 3px solid var(--coral); outline-offset: 4px; }
+    /* An underline follows the words (and their wraps); an outline boxed the heading's whole block, often the page width. */
+    html.kbd-nav :is(h1, h2, h3)[tabindex="-1"]:focus-visible { outline: none; text-decoration-line: underline; text-decoration-thickness: 3px; text-decoration-color: var(--coral); text-underline-offset: 0.2em; }
+    html.kbd-nav[data-theme="pastel"] :is(h1, h2, h3)[tabindex="-1"]:focus-visible { text-decoration-color: #be123c; }
 
-    .setting-row { cursor: pointer; }
+    /* Only the switch rows (labels) respond to a click anywhere on the row; select/range/text-size rows don't. */
+    label.setting-row { cursor: pointer; }
+    .custom-select { cursor: pointer; }
     .setting-row input[type="checkbox"] {
       appearance: none;
       -webkit-appearance: none;
@@ -6686,7 +6779,7 @@
     .alignment-ring-content strong, .progress-copy, .reveal-count, .slider-value, .dual-score-dashboard strong, .card-number { font-variant-numeric: tabular-nums; }
     /* DES-11 / POL-07: touch has no hover, so pressing gives an immediate response. */
     :is(.quick-pick-option, .quick-guess-option, .importance-option, .play-style-card, .vibe-tile, .text-size-option, .favorite-button,
-      .session-dropdown-trigger, .text-btn, .rating-option, .preset-card, .theme-card, .topic-option, .follow-through-button):active { transform: scale(0.97); transition-duration: 60ms; }
+      .session-dropdown-trigger, .text-btn, .rating-option, .preset-card, .theme-card, .topic-option, .follow-through-button):active { transform: scale(0.97); transition-duration: var(--dur-press); }
     .flip-card:not(.flipped):active .flip-card-inner { transform: scale(0.985); }
     label.setting-row:active { background-image: linear-gradient(color-mix(in srgb, var(--coral) 10%, transparent), color-mix(in srgb, var(--coral) 10%, transparent)); }
     /* USE-09 / USE-10 / USE-11 / USE-13: no pull-to-refresh mid-round, no URL-bar jumps, toasts clear of side notches. */
@@ -6699,9 +6792,10 @@
     /* POL-05: the hand-off arrow moves with transform only. */
     .pass-path { container-type: inline-size; }
     [data-theme="sunset"] .question-header .progress-copy { background: rgba(42, 13, 29, 0.62); border-radius: 12px; padding: 4px 10px; }
-    /* POL-02: cards resize without dragging the whole board through layout; bulk flips skip the height animation. */
+    /* POL-02: cards resize without dragging the whole board through layout. Bulk flips need no override any more:
+       height no longer animates (it snaps on the faces' 0.089s swap, see .flip-card), and dropping that delay here
+       made every card of the Reveal-all cascade jump to its new height while still showing its front. */
     .flip-card { contain: layout; }
-    .reveal-bulk .flip-card { transition: transform 180ms ease !important; }
     .celebration-card #open-reveal-board { margin-top: 16px; }
     .vibe-running-low { grid-column: 1 / -1; margin: 4px 0 0; }
     @media (pointer: coarse) { .vibe-running-low .text-btn { min-height: 44px; } }
@@ -6905,6 +6999,8 @@
     }
     .reduced-motion .flip-card .card-face { transition-delay: 0s !important; }
     @media (prefers-reduced-motion: reduce) { .flip-card .card-face { transition-delay: 0s !important; } }
+    .reduced-motion .flip-card { transition-delay: 0s !important; }
+    @media (prefers-reduced-motion: reduce) { .flip-card { transition-delay: 0s !important; } }
     .exit-dialog .comment-textarea { margin: 6px 0 0; width: 100%; min-height: 96px !important; }
 
     .question-tag { font-size: max(12px, .62rem); }
@@ -6971,6 +7067,40 @@
       }
     }
     @media (hover: hover) and (prefers-reduced-motion: reduce) { :is(.play-style-card, .preset-card, .theme-card):hover { transform: none !important; } }
+    /* These controls had no transition, so the hover lift and tint above popped in one frame beside neighbours that glide. */
+    @media (hover: hover) {
+      :is(.play-style-card, .preset-card, .rating-option, .follow-through-button, .importance-option, .mini-action, [data-favorite-question],
+        .highlight-card, .card-close-button, .setting-row, .quick-guess-option, .text-btn) {
+        transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) ease, border-color var(--dur-fast) ease,
+          background-color var(--dur-fast) ease, color var(--dur-fast) ease;
+      }
+    }
+    /* Controls that stayed inert under the pointer while their neighbours respond. */
+    @media (hover: hover) and (pointer: fine) {
+      .intensity-option:hover .intensity-card {
+        border-color: rgba(251, 113, 133, 0.4);
+        transform: translateY(-3px);
+      }
+      .favorite-button:hover {
+        border-color: rgba(251, 191, 36, 0.45);
+        color: var(--sun);
+      }
+      :is(.answer-extras, .card-more, .comment-details, .feedback-menu) > summary:hover,
+      #start-over:hover {
+        color: var(--text);
+        text-decoration-line: underline;
+        text-decoration-color: var(--coral);
+        text-underline-offset: 3px;
+      }
+      @supports (color: color-mix(in srgb, red, blue)) {
+        .intensity-option:hover .intensity-card { border-color: color-mix(in srgb, var(--coral) 40%, transparent); }
+        .favorite-button:hover { border-color: color-mix(in srgb, var(--sun) 45%, transparent); }
+      }
+    }
+    /* Same as the play-style/preset/theme cards: reduced motion keeps the tint but drops the lift. Not !important,
+       so a checked card keeps its own -2px (higher specificity) instead of dropping 2px under the pointer. */
+    @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) { .intensity-option:hover .intensity-card { transform: none; } }
+    @media (hover: hover) and (pointer: fine) { :where(.reduced-motion) .intensity-option:hover .intensity-card { transform: none; } }
     /* Phone landscape: the sticky action bar would cover the prompt itself, so it scrolls with the card. */
     @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
       .question-screen .turn-name { font-size: 1.15rem !important; line-height: 1.2; }
@@ -10792,7 +10922,7 @@ var qrcode = function() {
     let nearbyLastPeerMessageAt = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.3.8";
+    const APP_VERSION = "1.3.9";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -12592,7 +12722,7 @@ var qrcode = function() {
       const overlays = [...document.querySelectorAll(".modal-backdrop")];
       const top = overlays[overlays.length - 1];
       [...document.body.children].forEach((child) => {
-        if (child.matches(".modal-backdrop, .app-toast, #toast-live, #nearby-banner, script")) return;
+        if (child.matches(".modal-backdrop, .modal-ghost, .app-toast, #toast-live, #nearby-banner, script")) return;
         child.inert = Boolean(top);
       });
       if (top) {
@@ -12631,6 +12761,25 @@ var qrcode = function() {
       if (event.key === "Tab" || (!typing && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", " "].includes(event.key))) document.documentElement.classList.add("kbd-nav");
     }, true);
     document.addEventListener("pointerdown", () => document.documentElement.classList.remove("kbd-nav"), true);
+    // Rest the ambient loops after 15 s without input (see html.ambient-rest): a couple talking over the reveal
+    // board would otherwise keep the GPU recompositing at 60 fps. Any input or a screen change wakes them.
+    const AMBIENT_REST_MS = 15000;
+    let ambientRestTimer = 0;
+    let ambientWokeAt = 0;
+    function wakeAmbient() {
+      const root = document.documentElement;
+      const now = Date.now();
+      // pointermove and scroll fire in bursts; re-arming once a second is plenty.
+      if (now - ambientWokeAt < 1000 && !root.classList.contains("ambient-rest")) return;
+      ambientWokeAt = now;
+      root.classList.remove("ambient-rest");
+      clearTimeout(ambientRestTimer);
+      ambientRestTimer = window.setTimeout(() => root.classList.add("ambient-rest"), AMBIENT_REST_MS);
+    }
+    ["pointerdown", "pointermove", "keydown", "wheel", "touchstart"].forEach((type) => document.addEventListener(type, wakeAmbient, { capture: true, passive: true }));
+    window.addEventListener("scroll", wakeAmbient, { passive: true });
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") wakeAmbient(); });
+    wakeAmbient();
     // File names use the local calendar date (an evening export in the US is still "today").
     function localDateStamp(date = new Date()) {
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -12648,7 +12797,45 @@ var qrcode = function() {
       }
     }, true);
 
+    // Dialogs fade in but every close path removes them outright. Removal stays synchronous (focus return and
+    // inert bookkeeping depend on it); an inert, id-less copy plays the exit instead. The copy is added in the
+    // next animation frame, which still runs before that frame paints, so the dialog never blinks out.
+    const modalOpenOrder = new WeakMap();
+    let modalOpenCount = 0;
+    let closingModals = [];
+    let closingModalsAt = 0;
+    function ghostClosedModal(overlay) {
+      if (motionReduced() || document.visibilityState === "hidden") return;
+      if (!closingModals.length) {
+        closingModalsAt = performance.now();
+        requestAnimationFrame(playModalExit);
+      }
+      closingModals.push(overlay);
+    }
+    function playModalExit() {
+      // Several dialogs can close in one frame (a stack closing together, or a dialog re-shown only to be
+      // removed after the confirm above it); only the top one was on screen, so only it plays the exit.
+      const order = (item) => modalOpenOrder.get(item) || 0;
+      const overlay = closingModals.reduce((top, item) => (order(item) >= order(top) ? item : top));
+      closingModals = [];
+      // A frame that arrives late (the tab went to the background) would replay a dialog long gone.
+      if (overlay.isConnected || overlay.hidden || performance.now() - closingModalsAt > 1000) return;
+      const ghost = overlay.cloneNode(true);
+      ghost.className = "modal-ghost";
+      ghost.removeAttribute("style");
+      ghost.setAttribute("aria-hidden", "true");
+      ghost.inert = true;
+      ghost.querySelectorAll("*").forEach((element) => ["id", "name", "for", "role", "aria-live", "aria-modal"].forEach((attribute) => element.removeAttribute(attribute)));
+      ghost.querySelectorAll('input[type="password"]').forEach((input) => { input.value = ""; });
+      document.body.appendChild(ghost);
+      window.setTimeout(() => ghost.remove(), 170);
+    }
+
     new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => { if (node.nodeType === 1 && node.matches(".modal-backdrop")) modalOpenOrder.set(node, ++modalOpenCount); });
+        mutation.removedNodes.forEach((node) => { if (node.nodeType === 1 && node.matches(".modal-backdrop")) ghostClosedModal(node); });
+      });
       if (mutations.some((mutation) => [...mutation.addedNodes].some((node) => node.nodeType === 1 && node.matches(".modal-backdrop")))) lastModalOpenedAt = Date.now();
       const opened = mutations.some((mutation) => [...mutation.addedNodes].some((node) => node.nodeType === 1 && node.matches(".modal-backdrop")));
       if (opened && !modalReturnFocus) {
@@ -13108,9 +13295,10 @@ var qrcode = function() {
         // Music is an enhancement; never let it stop a screen from rendering.
       }
 
+      // Sound and music are switches, not places: aria-pressed (drawn as a dot) carries their state, so the
+      // .active ring only ever marks the current page.
       const ambientBtn = document.getElementById("ambient-toggle");
       if (ambientBtn) {
-        ambientBtn.classList.toggle("active", state.ambientMusicEnabled);
         ambientBtn.setAttribute("aria-pressed", String(state.ambientMusicEnabled));
       }
 
@@ -13120,7 +13308,6 @@ var qrcode = function() {
       if (ambientSwitch) ambientSwitch.checked = state.ambientMusicEnabled;
       const soundBtn = document.getElementById("sound-toggle");
       if (soundBtn) {
-        soundBtn.classList.toggle("active", state.soundEnabled);
         const iconSpan = soundBtn.querySelector(".home-icon");
         if (iconSpan) {
           iconSpan.classList.toggle("is-muted", !state.soundEnabled);
@@ -13139,6 +13326,8 @@ var qrcode = function() {
         if (el) {
           const isActive = state.screen === screenName || (screenName === "setup" && state.screen === "setup");
           el.classList.toggle("active", isActive);
+          if (isActive) el.setAttribute("aria-current", "page");
+          else el.removeAttribute("aria-current");
         }
       }
     }
@@ -14800,8 +14989,26 @@ var qrcode = function() {
       document.documentElement.classList.remove("measuring-text");
     }
 
+    // Moving to another question swaps the whole screen's markup in one frame; ease the card in from the side
+    // it comes from and grow the (freshly rebuilt) progress bar from its old width, so advancing reads as a step.
+    function animateQuestionStep(previousKey, nextKey, previousProgressWidth) {
+      const [previousPlayer, previousIndex] = previousKey.split(":").map(Number);
+      const [nextPlayer, nextIndex] = nextKey.split(":").map(Number);
+      const samePlayer = previousPlayer === nextPlayer;
+      const questionCard = app.querySelector(".question-card");
+      if (questionCard) {
+        questionCard.classList.add("q-advance");
+        if (samePlayer && nextIndex < previousIndex) questionCard.classList.add("q-back");
+      }
+      const bar = app.querySelector(".question-screen .progress-bar");
+      if (samePlayer && bar && previousProgressWidth && bar.style.width !== previousProgressWidth) {
+        bar.animate?.([{ width: previousProgressWidth }, { width: bar.style.width }], { duration: 300, easing: "ease" });
+      }
+    }
+
     function render() {
       const previousFocusKey = focusKeyFor(document.activeElement);
+      const previousProgressWidth = app.querySelector(".question-screen .progress-bar")?.style.width || "";
       if (state.screen === "nearby-wait" && state.nearbyRemote) {
         finishNearbyRoundIfReady();
         if (state.screen !== "nearby-wait") return;
@@ -14809,7 +15016,7 @@ var qrcode = function() {
       const screenChanged = lastRenderedScreen !== state.screen;
       if (screenChanged && state.screen !== "setup") document.querySelector("#tutorial-finish")?.closest(".modal-backdrop")?.remove();
       if (["question", "celebration", "reveal", "nearby-wait"].includes(state.screen) && !state.tutorialSeen) state.tutorialSeen = true;
-      if (screenChanged) lastScreenChangeAt = Date.now();
+      if (screenChanged) { lastScreenChangeAt = Date.now(); wakeAmbient(); }
       if (screenChanged && state.screen === "reveal" && state.playStyle === "nearby" && state.nearbyRoundId) {
         sendNearbyMessage({ type: "reveal-state", roundId: state.nearbyRoundId, revealedIds: [...state.revealedIds] });
       }
@@ -14870,12 +15077,9 @@ var qrcode = function() {
         requestAnimationFrame(() => { lastScreenSettledAt = performance.now(); });
       }
       const questionChanged = Boolean(questionKey) && lastRenderedQuestionKey !== questionKey;
-      if (questionChanged && !screenChanged) {
-        const questionCard = app.querySelector(".question-card");
-        if (questionCard) {
-          const [previousPlayer, previousIndex] = String(lastRenderedQuestionKey).split(":").map(Number);
-          questionCard.classList.add("q-advance");
-          if (previousPlayer === state.activePlayer && state.questionIndex < previousIndex) questionCard.classList.add("q-back");
+      if (questionChanged && !screenChanged && lastRenderedQuestionKey) {
+        if (!motionReduced()) {
+          animateQuestionStep(lastRenderedQuestionKey, questionKey, previousProgressWidth);
         }
       }
       lastRenderedQuestionKey = questionKey;
@@ -15134,7 +15338,30 @@ var qrcode = function() {
         });
 
         if (!filtered.length) {
-          list.innerHTML = `<div class="library-empty">No questions match these filters yet.</div>`;
+          // Say what is actually narrowing the list, and offer one click back to everything.
+          const query = libraryView.search.trim();
+          const statusLabel = libraryView.filter === "all" ? "" : (document.querySelector(`[data-library-filter="${libraryView.filter}"]`)?.textContent || "").replace("★", "").trim();
+          const topicLabel = libraryView.topic === "all" ? "" : TOPIC_OPTIONS.find((topic) => topic.id === libraryView.topic)?.label || "";
+          const scope = [statusLabel, topicLabel].filter(Boolean).join(" · ");
+          const message = query
+            ? `No questions match “${escapeHTML(query)}”${scope ? ` in ${escapeHTML(scope)}` : ""}.`
+            : scope ? `No questions in ${escapeHTML(scope)}.` : "No questions to show.";
+          const narrowed = Boolean(query || scope);
+          list.innerHTML = `<div class="library-empty"><p>${message}</p>${narrowed ? '<button class="secondary-btn" type="button" data-library-reset>Clear search &amp; filters</button>' : ""}</div>`;
+          list.querySelector("[data-library-reset]")?.addEventListener("click", () => {
+            libraryView.search = "";
+            libraryView.filter = "all";
+            libraryView.topic = "all";
+            libraryView.limit = 40;
+            const searchField = document.getElementById("library-search");
+            if (searchField) searchField.value = "";
+            document.querySelectorAll("[data-library-filter]").forEach((item) => item.classList.toggle("active", item.dataset.libraryFilter === "all"));
+            document.querySelectorAll("[data-library-topic]").forEach((item) => item.classList.remove("active"));
+            document.getElementById("all-library-topics")?.classList.add("active");
+            playSound("tap");
+            renderQuestionList();
+            searchField?.focus({ preventScroll: true });
+          });
           return;
         }
 
@@ -16162,11 +16389,30 @@ var qrcode = function() {
 
       playerOne.addEventListener("input", rememberNames);
       playerTwo.addEventListener("input", rememberNames);
+      // A pack or round-size error is about the selection, so it clears as soon as the selection changes
+      // (the presets set checkboxes without a change event, so they call this too).
+      const clearRoundError = () => { if (error.textContent && !/name/i.test(error.textContent)) error.textContent = ""; };
+      form.addEventListener("change", (event) => {
+        if (["topics", "question-count", "question-mode", "question-intensity"].includes(event.target.name)) clearRoundError();
+      });
+      // Names that differ only by case ("Sam" and "sam") make every hand-off, legend and journal entry ambiguous.
+      const rejectDuplicateNames = (names) => {
+        if (names[0].localeCompare(names[1], undefined, { sensitivity: "base" }) !== 0) return false;
+        playSound("error"); error.textContent = "Use two different names so turns don’t get mixed up.";
+        const nameError = document.getElementById("name-error");
+        if (nameError) nameError.textContent = error.textContent;
+        playerTwo.setAttribute("aria-invalid", "true");
+        playerTwo.focus();
+        playerTwo.select();
+        return true;
+      };
       [playerOne, playerTwo].forEach((field) => field.addEventListener("input", () => {
         if (error.textContent && /name/i.test(error.textContent)) error.textContent = "";
         const nameError = document.getElementById("name-error");
         if (nameError) nameError.textContent = "";
         field.removeAttribute("aria-invalid");
+        // A duplicate-name error marks the second field; fixing it from the first must clear that mark too.
+        [playerOne, playerTwo].forEach((other) => { if (other.value.trim()) other.removeAttribute("aria-invalid"); });
       }));
       document.querySelectorAll("[data-play-style]").forEach((button) => button.addEventListener("click", () => {
         rememberNames();
@@ -16384,6 +16630,7 @@ var qrcode = function() {
           }
           topicInputs.forEach((input) => { input.checked = !input.disabled && values.has(input.value); });
           rememberTopics();
+          clearRoundError();
           playSound("tap");
         });
       });
@@ -16406,6 +16653,7 @@ var qrcode = function() {
             showToast(`Add both names first, then ${POINTER_VERB.toLowerCase()} your pack again.`);
             return;
           }
+          if (rejectDuplicateNames(names)) return;
           const byId = new Map(getQuestionCatalog().map((question) => [question.id, question]));
           const selectedQuestionIds = orderRoundAsRamp(selectFreshQuestionIds(
             pack.questionIds.filter((id) => byId.has(id) && !state.neverQuestionIds.includes(id)),
@@ -16471,6 +16719,7 @@ var qrcode = function() {
           (names[0] ? playerTwo : playerOne).focus();
           return;
         }
+        if (rejectDuplicateNames(names)) return;
         if (!selectedTopics.length) {
           playSound("error"); error.textContent = "Choose at least one question pack.";
           // One scroll, to the message itself: centring the picker leaves the error under the sticky Start bar on short phones.
@@ -16859,6 +17108,13 @@ var qrcode = function() {
         });
       }
 
+      // Ctrl/Cmd+Enter in a text box continues (plain Enter stays a new line), as in most desktop editors.
+      form.querySelectorAll("textarea").forEach((box) => box.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" || !(event.ctrlKey || event.metaKey) || event.isComposing) return;
+        event.preventDefault();
+        const submit = [...form.querySelectorAll('button[type="submit"]')].pop();
+        if (typeof form.requestSubmit === "function") form.requestSubmit(submit); else submit?.click();
+      }));
       form.addEventListener("submit", (event) => {
         event.preventDefault();
         // A fast double tap must not skip the next (unseen) question.
@@ -17233,6 +17489,7 @@ var qrcode = function() {
         ["different", "Very different", "#fb7185"]
       ];
       const rating = state.textRatings[question.id];
+      // The unrated prompt sits below the buttons, where the rated panel puts it, so rating never moves them.
       return `
         <div class="answer-stack">
           <div class="answer-box" style="--player-color: var(--blue)">
@@ -17244,13 +17501,13 @@ var qrcode = function() {
             <p class="answer-copy">${escapeHTML(secondAnswer)}</p>
           </div>
         </div>
-        ${beforeRating}
         <div class="alignment-rating ${rating ? "rated" : "unrated"}">
           <strong>${rating ? "You rated this together" : ratingHeadingCopy(question.id, lastRateId)}</strong>
           <div class="rating-options">
             ${ratings.map(([value, label, color]) => `<button class="rating-option ${rating === value ? "active" : ""}" style="--rating-color:${color}" type="button" data-text-rating="${value}" data-rating-question="${escapedQuestionId}">${label}</button>`).join("")}
           </div>
         </div>
+        ${beforeRating}
         ${differenceMarkup(matchInfo, question)}
       `;
     }
@@ -18189,26 +18446,55 @@ var qrcode = function() {
         state.revealedIds = shouldReveal ? questions.map((question) => question.id) : [];
         if (state.playStyle === "nearby") sendNearbyMessage({ type: "reveal-state", roundId: state.nearbyRoundId, all: shouldReveal });
         const board = document.querySelector(".reveal-screen") || document.body;
+        // Revealing everything cascades across the board, one card every ~70 ms (350 ms at most), each with its
+        // own note, so every answer lands; the round's cue and confetti come with the last card. State is
+        // already final above. Hiding, and reduced motion, keep the single instant snap.
+        const cascade = shouldReveal && !motionReduced() ? flipCards.filter((card) => !card.classList.contains("flipped")) : [];
+        const step = cascade.length > 1 ? Math.min(70, 350 / (cascade.length - 1)) : 0;
+        const cascadeMs = step * Math.max(0, cascade.length - 1);
         board.classList.add("reveal-bulk");
-        window.setTimeout(() => board.classList.remove("reveal-bulk"), 900);
+        window.setTimeout(() => board.classList.remove("reveal-bulk"), cascadeMs + 900);
         let freshSpark = false;
         flipCards.forEach((card) => {
-          if (shouldReveal && !card.classList.contains("flipped") && sparkIds.has(card.dataset.questionId)) { markSparkFresh(card); freshSpark = true; }
-          applyCardState(card, shouldReveal);
-        });
-        if (shouldReveal) {
-          const matches = questions.filter((question) => matchInfoById.get(question.id)?.isMatch).length;
-          if (matches) {
-            burstConfetti(document.getElementById("reveal-all"), 34);
-            playSound("match");
-          } else {
-            // Only an opposite turning face up now earns the spark chime; one already open stays quiet.
-            playSound(freshSpark ? "spark" : "reveal");
+          if (!cascade.includes(card)) {
+            if (shouldReveal && !card.classList.contains("flipped") && sparkIds.has(card.dataset.questionId)) { markSparkFresh(card); freshSpark = true; }
+            applyCardState(card, shouldReveal);
           }
-          if (goldenFresh) burstConfetti(goldenCard, 24);
-        } else {
-          playSound("tap");
-        }
+        });
+        const finishReveal = () => {
+          if (shouldReveal) {
+            const button = document.getElementById("reveal-all");
+            if (!button) return;
+            const matches = questions.filter((question) => matchInfoById.get(question.id)?.isMatch).length;
+            if (matches) {
+              burstConfetti(button, 34);
+              playSound("match");
+            } else {
+              // Only an opposite turning face up now earns the spark chime; one already open stays quiet.
+              playSound(freshSpark ? "spark" : "reveal");
+            }
+            if (goldenFresh) burstConfetti(goldenCard, 24);
+          } else {
+            playSound("tap");
+          }
+        };
+        if (!cascade.length) finishReveal();
+        cascade.forEach((card, index) => window.setTimeout(() => {
+          const last = index === cascade.length - 1;
+          const id = card.dataset.questionId;
+          // The board may have re-rendered, or this card been closed by hand, since the click.
+          if (card.isConnected && state.revealedIds.includes(id) && !card.classList.contains("flipped")) {
+            if (sparkIds.has(id)) { markSparkFresh(card); freshSpark = true; }
+            applyCardState(card, true);
+            if (!last) {
+              const rect = card.getBoundingClientRect();
+              playSound("partner-flip", { pan: ((rect.left + rect.width / 2) / window.innerWidth - 0.5) * 0.8, topic: questions.find((item) => item.id === id)?.topic, degree: index, match: Boolean(matchInfoById.get(id)?.isMatch) });
+            }
+            requestAnimationFrame(() => requestAnimationFrame(sizeAllCards));
+          }
+          // A Hide all relayed from the partner's phone mid-cascade must not be answered with the reveal fanfare.
+          if (last && state.revealedIds.length) finishReveal();
+        }, index * step));
         updateRevealAllButton();
         saveState();
         requestAnimationFrame(() => requestAnimationFrame(sizeAllCards));
