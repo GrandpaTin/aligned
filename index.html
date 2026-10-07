@@ -6474,9 +6474,9 @@
     .topic-alignment-card { justify-content: flex-start !important; }
     /* When the category, answer-type chip and favourite can't share one row, the chip shrinks to its icon
        (a container query, so it follows the card's real width rather than the screen's). */
-    .question-screen .question-meta { container-type: inline-size; }
+    /* nowrap lives on the container itself (a container query can't restyle its own container). */
+    .question-screen .question-meta { container-type: inline-size; flex-wrap: nowrap; gap: 6px; }
     @container (max-width: 400px) {
-      .question-screen .question-meta { flex-wrap: nowrap; gap: 6px; }
       .question-screen .category-pill { min-width: 0; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .question-screen .question-meta-actions { flex-shrink: 0; }
       [data-text-size] .question-screen .question-meta .type-chip { padding-inline: 8px; white-space: nowrap; font-size: 0 !important; gap: 0; }
@@ -10286,6 +10286,12 @@ var qrcode = function() {
     let loadStateFailed = false;
 
     let state = loadState();
+    // A save that can't be read is kept aside (never overwritten by the fresh start) and the couple is told.
+    if (loadStateFailed) {
+      try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) localStorage.setItem(`${STORAGE_KEY}-unreadable`, raw); } catch {}
+      window.setTimeout(() => showToast("Your saved game couldn’t be read, so Aligned started fresh. A copy was kept on this device.", { tone: "warning" }), 900);
+      loadStateFailed = false;
+    }
     let lastRenderedScreen = null;
     let libraryView = { filter: "all", topic: "all", search: "", limit: 40 };
     let cleanupResponsiveRender = () => {};
@@ -11319,7 +11325,7 @@ var qrcode = function() {
         // A host who hasn't answered anything yet goes back to pairing rather than a round nobody joined.
         const hostUntouched = declinedNewRound && state.nearbyRole === "host" && state.screen === "question" && !Object.keys(state.answers?.[0] || {}).length;
         if (hostUntouched) state.screen = "nearby";
-        showToast(declinedNewRound ? `${partner} stayed on their own round. ${hostUntouched ? "Show a new QR when you’re both ready." : "You can show a new QR from Home later."}` : `${partner} left the two-phone round. Your answers are saved on this phone.`, { tone: "warning" });
+        showToast(declinedNewRound ? `${partner} stayed on their own round. ${hostUntouched ? "Show a new QR when you’re both ready." : state.screen === "nearby-wait" ? "Choose how to finish below." : "You can show a new QR from Home later."}` : `${partner} left the two-phone round. Your answers are saved on this phone.`, { tone: "warning" });
         if (state.screen === "nearby" && !hostUntouched) state.screen = "setup";
         saveState();
         render();
@@ -15228,8 +15234,8 @@ var qrcode = function() {
         if (freshOf("slider") >= sliderTarget && fresh >= count) return "";
         const sliders = freshOf("slider");
         const message = !fresh ? "You’ve played every question in your chosen packs"
-          : !sliders ? `No new slider questions left in your chosen packs (${fresh} written)`
-          : sliders < sliderTarget ? `Your chosen packs have only ${sliders} new slider question${sliders === 1 ? "" : "s"} left (${fresh - sliders} written)`
+          : !sliders ? `No new slider questions left in your chosen packs${state.questionMode === "sliders-only" ? "" : ` (${fresh} written)`}`
+          : sliders < sliderTarget ? `Your chosen packs have only ${sliders} new slider question${sliders === 1 ? "" : "s"} left${state.questionMode === "sliders-only" ? "" : ` (${fresh - sliders} written)`}`
           : `Your chosen packs have only ${fresh} new question${fresh === 1 ? "" : "s"} left`;
         return `<p class="topic-note vibe-running-low" role="status">${message} — add another pack below for fresh ones, or replay favourites.</p>`;
       }
