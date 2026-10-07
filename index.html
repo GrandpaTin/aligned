@@ -9856,8 +9856,14 @@ var qrcode = function() {
         "Which line of theirs would you like to hear again later?",
         "What would you whisper in reply to their answer?",
         "Pick the part of their answer that made you blush.",
-        "What would make their answer even more fun tonight?",
-        "Tell them one thing their answer made you want to try."
+        "Tell them what would make their answer even better tonight.",
+        "Tell them one thing their answer made you want to try.",
+        "Which line of theirs would you frame by the bed?",
+        "What would you add to their answer with just a look?",
+        "Read your favourite word of theirs in your best voice.",
+        "What would make you blush if they said it out loud?",
+        "Give their answer a cheeky one-line review.",
+        "What would you like to hear them say about this tomorrow?"
       ],
       unrated: [
         "Read both answers aloud, then rate them together.",
@@ -10315,9 +10321,10 @@ var qrcode = function() {
       let keptNewCopy = false;
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
+        // The first unreadable save is kept for good; the second slot always holds the newest one.
         const first = localStorage.getItem(`${STORAGE_KEY}-unreadable`);
         const slot = first ? `${STORAGE_KEY}-unreadable-2` : `${STORAGE_KEY}-unreadable`;
-        if (raw && raw !== first && !localStorage.getItem(slot)) { localStorage.setItem(slot, raw); keptNewCopy = true; }
+        if (raw && raw !== first && raw !== localStorage.getItem(`${STORAGE_KEY}-unreadable-2`)) { localStorage.setItem(slot, raw); keptNewCopy = true; }
       } catch {}
       window.setTimeout(() => showToast(keptNewCopy
         ? "Your saved game couldn’t be read, so Aligned started fresh. A copy was kept — download it from Settings → Save & transfer game data."
@@ -16720,6 +16727,9 @@ var qrcode = function() {
         <strong class="highlight-locked">${tease ? `${escapeHTML(tease)} ` : ""}<small>${everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"}</small></strong>
       </article>`;
       const closestHighlight = [...comparable].sort((a, b) => b.match.percent - a.match.percent)[0];
+      // Two slider answers either side of the middle aren't a "match", however close the numbers are.
+      const oppositeSides = (item) => item.question.type === "slider"
+        && (Number(state.answers[0][item.question.id]) - 5.5) * (Number(state.answers[1][item.question.id]) - 5.5) < 0;
       const biggestMiss = (item) => Math.max(...[0, 1].map((player) => guessHit(item.question, player)?.distance ?? -1));
       // The best surprise is a confident guess that missed; otherwise the widest gap.
       const guessSurprise = [...comparable].filter((item) => item !== closestHighlight && biggestMiss(item) >= 3).sort((a, b) => biggestMiss(b) - biggestMiss(a))[0];
@@ -16854,7 +16864,7 @@ var qrcode = function() {
             </details>` : ""}
           </section>
           <section class="highlight-grid ${allRevealed ? "" : "locked"}" aria-label="Round highlights" id="round-highlights">
-            ${highlightCard(closestHighlight && closestHighlight.match.percent < 60 ? "Nearest common ground" : "Closest match", closestHighlight, "Complete more scored answers to unlock this highlight.", "", closestHighlight && closestHighlight.match.percent < 60 ? "Your nearest common ground is waiting…" : "One answer lines up beautifully…")}
+            ${highlightCard(closestHighlight && (closestHighlight.match.percent < 60 || oppositeSides(closestHighlight)) ? "Nearest common ground" : "Closest match", closestHighlight, "Complete more scored answers to unlock this highlight.", "", closestHighlight && (closestHighlight.match.percent < 60 || oppositeSides(closestHighlight)) ? "Your nearest common ground is waiting…" : "One answer lines up beautifully…")}
             ${highlightCard(surpriseNote && surpriseHighlight?.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No big surprises this round.", surpriseNote, guessSurprise ? "Someone is in for a surprise…" : surpriseHighlight ? "The widest gap is waiting…" : "Will anything surprise you?")}
             ${conversationHighlight ? highlightCard("Best conversation starter", conversationHighlight, "", "", "There is a story waiting in one card…") : ""}
             ${tally.some((item) => item.made) ? `<article class="highlight-card mind-reader"><span>🔮 Mind-reader</span><strong class="highlight-answer">${mindReaderHeadline(tally)}<small class="highlight-note">${tally.filter((item) => item.made).map((item) => `${escapeHTML(state.names[item.player])} read ${escapeHTML(state.names[item.player === 0 ? 1 : 0])} ${item.hits}/${item.made}`).join(" · ")}</small></strong><strong class="highlight-locked">${tally.some((item) => item.hits) ? "Someone read the other’s mind… " : "Did anyone read minds tonight? "}<small>${everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"}</small></strong></article>` : ""}
