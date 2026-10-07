@@ -9836,7 +9836,7 @@ var qrcode = function() {
         "Which answer would make the better bumper sticker?",
         "Read their answer like a breaking-news headline.",
         "Which answer would win a game show?",
-        "Give their answer a one-word movie title.",
+        "Which answer would a toddler explain best?",
         "Which answer would your grandparents love most?",
         "Act out one word from their answer — can they guess it?",
         "Which answer would make the better holiday postcard?",
@@ -9846,7 +9846,7 @@ var qrcode = function() {
         "Which answer would you put on a mug?",
         "Swap one word in their answer to make it sillier.",
         "What emoji would they use to sign this answer?",
-        "Which answer would win in a talent show?",
+        "Which answer would make a better board-game card?",
         "Guess how long they took to write it."
       ],
       unratedFlirty: [
@@ -9878,7 +9878,7 @@ var qrcode = function() {
         "Which part of their answer felt most like them?",
         "Say one thing their answer taught you.",
         "What would make you both smile about these answers?",
-        "Name the word in their answer you'd underline.",
+        "What’s one thing their answer made you curious about?",
         "What surprised you about how they put it?"
       ]
     };
@@ -16340,9 +16340,9 @@ var qrcode = function() {
         "spicy-night": `Spicy round complete <span class="accent-text">🔥</span>`,
         "road-trip": earlier.some((item) => item.preset === "road-trip") ? `Another lap of the <span class="accent-text">road trip.</span>` : `First lap of the <span class="accent-text">road trip.</span>`,
         "deep-dive": `That was a deep one — <span class="accent-text">well done.</span>`,
-        "date-night": `Date night, round ${round} — <span class="accent-text">still sweet.</span>`,
+        "date-night": earlier.some((item) => item.preset === "date-night") ? `Date night, round ${round} — <span class="accent-text">still sweet.</span>` : `Date night begins — <span class="accent-text">sweet start.</span>`,
         "check-in": `Check-in done — <span class="accent-text">nicely caught up.</span>`,
-        pack: `Your own pack, round ${round} — <span class="accent-text">made for you two.</span>`
+        pack: earlier.some((item) => item.preset === "pack") ? `Your own pack, round ${round} — <span class="accent-text">made for you two.</span>` : `Your own pack — <span class="accent-text">made for you two.</span>`
       }[preset];
       const firstOfVibe = vibeLine && !earlier.some((item) => item.preset === preset);
       const seenBefore = new Set(state.completedRounds.filter(sameCouple).slice(0, -1).flatMap((item) => item.questionIds || []));
@@ -16569,7 +16569,7 @@ var qrcode = function() {
     // usedPrompts is shared across one board so no follow-up repeats within a round.
     // A card keeps its prompt once shown (unless its tier changes), a tier that runs out borrows from
     // its neighbour, and prompts seen in recent rounds come last so returning couples hear new lines.
-    const GAG_FAMILIES = [["trailer", /movie trailer/i], ["act", /\bact (?:out|it out)\b|ten seconds/i], ["voice", /sports commentator|announcer|nature.documentary|narrat/i],
+    const GAG_FAMILIES = [["trailer", /movie trailer|movie-trailer|movie title/i], ["show", /talent show|game show/i], ["title", /one-word title|dramatic .*title/i], ["act", /\bact (?:out|it out)\b|ten seconds/i], ["voice", /sports commentator|announcer|nature.documentary|narrat/i],
       ["song", /\bsong\b/i], ["swap", /\bswap\b|\bfor (?:a|one) day\b|one-day/i], ["highfive", /high five/i], ["snack", /\bsnack/i]];
     function promptGagFamilies(text) {
       return GAG_FAMILIES.filter(([, pattern]) => pattern.test(String(text))).map(([name]) => name);
@@ -16613,7 +16613,10 @@ var qrcode = function() {
         const recentlyUsed = new Set(recentList);
         const rankedPools = pools.map(rankPool);
         const ownFirst = rankedPools.find((list) => list.length) || [];
-        chosen = rankedPools.map((list) => list.find((text) => !recentlyUsed.has(text))).find(Boolean) || ownFirst[0]
+        const playfulFirst = [DISCUSSION_PROMPTS.unratedLight, DISCUSSION_PROMPTS.unratedFlirty, PLAYFUL_WARM_CLOSE].includes(pools[0])
+          || ["light", "lightText", "flirty", "flirtyText"].includes(tone);
+        chosen = (playfulFirst ? rankedPools[0]?.find((text) => !recentlyUsed.has(text)) || rankedPools[0]?.[0] : null)
+          || rankedPools.map((list) => list.find((text) => !recentlyUsed.has(text))).find(Boolean) || ownFirst[0]
           || pools.flat().find((text) => !usedPrompts.has(text))
           || pools[0][0];
         state.cardPrompts[question.id] = { key, text: chosen };
