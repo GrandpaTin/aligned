@@ -11291,9 +11291,10 @@ var qrcode = function() {
         nearbyRuntime.partnerLeft = true;
         dismissConfirmDialogs("link");
         const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "Your partner";
+        const declinedNewRound = state.nearbyRole === "host" && state.screen === "question" && !(nearbyRuntime.partnerProgress?.answered > 0);
         closeNearbyConnection();
         nearbyRuntime.partnerLeft = true;
-        showToast(`${partner} left the two-phone round. Your answers are saved on this phone.`, { tone: "warning" });
+        showToast(declinedNewRound ? `${partner} stayed on their own round. You can show the QR again later.` : `${partner} left the two-phone round. Your answers are saved on this phone.`, { tone: "warning" });
         if (state.screen === "nearby") state.screen = "setup";
         saveState();
         render();
@@ -12358,7 +12359,8 @@ var qrcode = function() {
           if (earlyOut) {
             gain.gain.setValueCurveAtTime(curve(false), at + CHORD_SECONDS, 0.6);
           } else if (midRub(frequency, next)) {
-            gain.gain.setValueCurveAtTime(curve(false), at + CHORD_SECONDS, 0.9);
+            gain.gain.setValueAtTime(0.03, at + CHORD_SECONDS);
+            gain.gain.setValueCurveAtTime(curve(false), at + CHORD_SECONDS + 0.15, 0.9);
           } else {
             gain.gain.setValueCurveAtTime(curve(false), at + CHORD_SECONDS, 1.2);
           }
@@ -12792,7 +12794,7 @@ var qrcode = function() {
           duck = 0.8;
         } else if (kind === "partner-flip") {
           const d = (Number(options.degree) || 0) % 5;
-          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 1.55 : themeName === "cute" ? 1.2 : 1), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true, ...(themeName === "cute" ? { octaveLevel: 0.6 } : {}) });
+          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 1.55 : themeName === "cute" ? 1.2 : 1), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true, ...(themeName === "cute" ? { octaveLevel: 0.6 } : {}), ...(themeName === "dreamy" ? { attack: 0.01 } : {}) });
           duck = 0.8;
         } else if (kind === "open") {
           noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.11, q: 0.8 });
@@ -17270,10 +17272,29 @@ var qrcode = function() {
       }
       const midRound = state.playStyle === "nearby" && state.nearbyRole === "join" && state.nearbyRoundId && ["question", "nearby-wait", "celebration", "reveal"].includes(state.screen);
       if (midRound) {
-        // A new QR from the host mid-round reconnects this round instead of starting over.
         handledNearbyLaunch = launchSignature;
         history.replaceState(null, "", location.href.split("#")[0]);
         render();
+        // Still linked to a partner and this is someone else's QR: ask before touching the working link.
+        if (nearbyChannelOpen() && nearbyRuntime.roomId && launchRoomId !== nearbyRuntime.roomId) {
+          const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "your partner";
+          openConfirmDialog({
+            title: "Leave your current round?",
+            copy: `You’re linked with ${partner}. Joining this new QR ends that link and discards your round with ${partner}.`,
+            confirmLabel: "Leave and join",
+            cancelLabel: `Stay with ${partner}`,
+            danger: true,
+            safeFirst: true,
+            tag: "link"
+          }).then((ok) => {
+            if (!ok) { showToast(`Still linked with ${partner}.`); return; }
+            closeNearbyConnection({ notifyPartner: true });
+            nearbyRuntime.initConfirmed = true;
+            prepareNearbyJoin(launchRoomId, launchJoinToken);
+          });
+          return true;
+        }
+        // Otherwise a new QR mid-round reconnects this round (or asks once the other host's round arrives).
         prepareNearbyJoin(launchRoomId, launchJoinToken);
         return true;
       }
