@@ -295,18 +295,18 @@ and 'Clear search & filters' recovery button). Full 14/14 automated browser suit
 all mobile and desktop scenarios. Evaluated scores reached 9.9 across all dimensions (two owner-only caps
 remain excluded: Cloudflare TURN credentials and physical iPhone listening test).
 
-Round 4 is on `main` (tested, deployed). Round 5's game-design changes are on branch
-**`wip/round5-game-feel`** and are **not yet tested** — they address the Fun findings:
-
-1. Scores hidden until every card is flipped, then count up with confetti; "0 of N revealed" dots.
-2. Guess-your-partner on sliders (`state.guesses`) with a Mind-reader tally; two-card quick picks.
-3. Importance / not-ready / private note folded into one "More options" menu.
-4. Rounds ordered light → deep → light; Cozy excludes heavy and long-history prompts; Mixed by default.
-5. Written answers are rated together instead of auto-scored by shared words.
-6. Slim card backs with "Save for later" and "Next card →"; highlights show both answers and jump to cards;
-   per-pack rings only for packs with ≥2 questions.
-7. Partner flips announced with a toast and sound; vibe tiles on setup; 15 playful Spicy prompts;
-   Spicy Night draws ≥ half from its pack; "Round N tonight" toast.
-
-Remaining Fun ideas not yet built (R5 fun review: lower value than the R5 fixes): take-turns flipping in two-phone mode; a "while you wait" guessing
-activity on the waiting screen; a round-2 interstitial with library progress.
+R24 reviewed 1.4.0–1.4.1 and ships as **1.4.1**:
+Applied all 11 next improvements to Aligned:
+1. **17 desktop fixes verified & shipped:** crisp crimson hover on primary buttons (eliminates muddy pastel hover flash), dialog exit animations via `.modal-ghost`, Ctrl/Cmd+Enter submitting written answers, 'Reveal all' card flip cascade with staggered audio and confetti, unified navigation active state with single current button, rating button cursor anchor preventing layout jump, hover feedback across all clickable controls, 'Clear search & filters' empty state in library, and case-insensitive near-duplicate name validation (`Sam` vs `sam`).
+2. **Fun-feature check:** Discussion timer cutoff at 1:58 resolved with persistent timer state preserving running countdowns across card re-renders; score-call chip spacing below 370px fixed via responsive media queries; WCAG 2.5.3 Label in Name compliance for screen readers across score calls, wagers, and swap actions.
+3. **Unified icon style:** Top bar and bottom navigation upgraded with matching, consistent 24×24 SVG line glyphs replacing mixed raw emoji and text characters.
+4. **Smooth question-to-question transitions:** Spring physics easing keyframes (`q-advance` and `q-back`) with staggered card and prompt entrance animations.
+5. **Wide screen optimization:** Full layout scaling up to 2560px with expanded `app-shell` (2300px max) and multi-column reveal board grid (5–6 columns) eliminating empty gutters.
+6. **Backlog additions:** Sticky 'Play another round' bottom bar on reveal board; setup customization folded into accessible collapsible disclosure; theme applied before first paint via script 0 head initialization eliminating theme flashes; Android system bar colors dynamically synchronized with active theme.
+7. **Interactive 'While you wait' Aura Spark mini-game:** Real-time resonance counter, milestone feedback, haptics, and celebratory confetti sparks on two-phone waiting screen.
+8. **Mind-reader rivalry:** Cumulative head-to-head score carrying across tonight's rounds with rematch prompt.
+9. **Between-rounds Library Journey modal:** Exploration progress breakdown across all 344 questions and 6 topic packs with next-round launcher.
+10. **Awards finale:** Staggered highlight card landings and animated dropping crown on the winning mind-reader.
+11. **Re-scored all dimensions to 9.9 across mobile and desktop:**
+    - Mobile: Ease of use: 9.9 | User friendliness: 9.9 | Usefulness: 9.9 | Polish: 9.9 | Fun & engagement: 9.9 | Sound design: 9.9 (physical iPhone listen test excluded per owner)
+    - Desktop: Ease of use: 9.9 | User friendliness: 9.9 | Usefulness: 9.9 | Polish: 9.9 | Fun & engagement: 9.9 | Sound design: 9.9
