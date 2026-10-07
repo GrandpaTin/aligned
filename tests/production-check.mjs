@@ -94,7 +94,7 @@ assert(html.includes('const STORAGE_KEY = "aligned-state-v1"'), "New saves must 
 assert(html.includes('const LEGACY_STORAGE_KEYS = ["are-we-compatible-state-v1"]'), "Existing browser data must have an explicit migration path");
 assert(html.includes('[STORAGE_KEY, ...LEGACY_STORAGE_KEYS].forEach'), "A full reset must clear both current and legacy storage keys");
 assert(html.includes('aligned-backup-${date}.json'), "Readable exports must use the Aligned filename");
-assert(html.includes('aligned-private-${new Date().toISOString().slice(0, 10)}.aligned'), "Encrypted exports must use the Aligned filename and extension");
+assert(html.includes('aligned-private-${localDateStamp()}.aligned'), "Encrypted exports must use the Aligned filename and extension");
 assert(html.includes("backface-visibility: hidden"), "Reveal cards must preserve the 3D flip implementation");
 assert(/\.alignment-dashboard\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)/.test(html), "Desktop reveal summaries must use a non-overlapping full-width layout");
 assert(html.includes(".alignment-dashboard .dual-score-dashboard .overall-alignment"), "Desktop score cards must retain dedicated layout containment");
