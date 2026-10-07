@@ -11136,8 +11136,8 @@ var qrcode = function() {
         openConfirmDialog({
           title: `Join ${newHost}’s round?`,
           copy: onlyReveal
-            ? "This phone has a round whose scores aren’t revealed yet. Joining skips the count-up — its scores go straight to your Journal."
-            : "This phone has an unfinished round. Joining discards it — its answers can’t be recovered.",
+            ? `This ${POINTER_VERB === "Tap" ? "phone" : "device"} has a round whose scores aren’t revealed yet. Joining skips the count-up — its scores go straight to your Journal.`
+            : `This ${POINTER_VERB === "Tap" ? "phone" : "device"} has an unfinished round. Joining discards it — its answers can’t be recovered.`,
           confirmLabel: onlyReveal ? "Save to Journal and join" : "Discard and join",
           cancelLabel: "Keep my round",
           danger: !onlyReveal,
@@ -11161,7 +11161,7 @@ var qrcode = function() {
       document.querySelectorAll(".modal-backdrop [data-modal-cancel]").forEach((button) => button.click());
       const answersInProgress = state.playStyle === "nearby" && state.nearbyRoundId && ["question", "nearby-wait"].includes(state.screen)
         && Object.keys(state.answers[1] || {}).length > 0;
-      if (answersInProgress && !payload.newRound) return;
+      if (answersInProgress && !payload.newRound && !nearbyRuntime.initConfirmed) return;
       const validTopics = new Set(TOPIC_OPTIONS.map((topic) => topic.id));
       (payload.questions || []).forEach((remoteQuestion) => {
         if (!remoteQuestion || typeof remoteQuestion !== "object" || typeof remoteQuestion.id !== "string") return;
@@ -13039,6 +13039,7 @@ var qrcode = function() {
         state.nearbyRepairScreen = "";
         if (state.playStyleBeforeJoin) state.playStyle = state.playStyleBeforeJoin;
         state.playStyleBeforeJoin = "";
+        nearbyRuntime.initConfirmed = false;
         state.screen = screen;
         saveState();
         render();
@@ -14020,6 +14021,7 @@ var qrcode = function() {
         closeNearbyConnection({ notifyPartner: true });
         state.playStyle = "pass-and-play";
         state.playStyleBeforeJoin = "";
+        nearbyRuntime.initConfirmed = false;
         state.screen = "setup";
         saveState();
         render();
