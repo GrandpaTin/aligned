@@ -7338,6 +7338,299 @@
     :root:not([data-theme]) .card-number, [data-theme="midnight"] .card-number { color: #cbd5e1; }
     /* M-12: sunset's --card-light is a mid-tone, so a card-light well drops the coral score to 2.6:1; use the theme's deep wine instead. */
     [data-theme="sunset"] .alignment-ring::before { background: linear-gradient(145deg, var(--midnight), var(--midnight-deep)); }
+
+    /* Relationship Dynamics Profiles */
+    .relationship-profile-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media (max-width: 680px) {
+      .relationship-profile-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .profile-card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid var(--line);
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.16s ease, transform 0.12s ease, background 0.16s ease;
+      min-height: 48px;
+    }
+    .profile-card:hover {
+      border-color: rgba(251, 113, 133, 0.4);
+      transform: translateY(-1px);
+    }
+    .profile-card.active {
+      border-color: var(--coral);
+      background: rgba(251, 113, 133, 0.12);
+      box-shadow: 0 0 16px rgba(251, 113, 133, 0.18);
+    }
+    .profile-card .profile-icon {
+      font-size: 1.15rem;
+      color: var(--coral);
+    }
+    .profile-card strong {
+      font-size: max(13px, 0.85rem);
+      font-weight: 700;
+    }
+    .profile-card small {
+      font-size: max(11px, 0.72rem);
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    /* While-You-Wait Prediction Challenge */
+    .while-you-wait-panel {
+      margin-top: 22px;
+      padding: 18px 20px;
+      border-radius: var(--radius-md);
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      text-align: left;
+    }
+    .while-you-wait-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--violet);
+      margin-bottom: 6px;
+    }
+    .while-you-wait-panel h3 {
+      margin: 0 0 4px;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+    .wyw-sub {
+      margin: 0 0 14px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .wyw-question {
+      margin-bottom: 12px;
+    }
+    .wyw-question:last-child {
+      margin-bottom: 0;
+    }
+    .wyw-question label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-2);
+    }
+    .wyw-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .wyw-btn {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      min-height: 36px;
+    }
+    .wyw-btn:hover {
+      border-color: var(--violet);
+    }
+    .wyw-btn.active {
+      background: rgba(167, 139, 250, 0.2);
+      border-color: var(--violet);
+      color: #ede9fe;
+      font-weight: 600;
+    }
+    .wyw-saved-note {
+      margin-top: 10px;
+      font-size: 0.78rem;
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    /* Per-Card Intuition Wager */
+    .card-wager-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 4px 8px;
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 2;
+    }
+    .wager-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-inline-end: 2px;
+    }
+    .wager-chip {
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-2);
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.14s ease;
+      min-height: 28px;
+    }
+    .wager-chip:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .wager-chip.active {
+      background: rgba(251, 113, 133, 0.25);
+      border-color: var(--coral);
+      color: var(--text);
+    }
+    .wager-outcome-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: max(12px, 0.72rem);
+      font-weight: 700;
+      margin-top: 8px;
+    }
+    .wager-outcome-badge.correct {
+      background: rgba(74, 222, 128, 0.16);
+      border: 1px solid rgba(74, 222, 128, 0.4);
+      color: #86efac;
+    }
+    .wager-outcome-badge.different {
+      background: rgba(167, 139, 250, 0.16);
+      border: 1px solid rgba(167, 139, 250, 0.4);
+      color: #c4b5fd;
+    }
+
+    /* Discussion Timer */
+    .discussion-timer-area {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--line);
+    }
+    .discussion-timer-toggle {
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .discussion-timer-toggle:hover {
+      color: var(--text);
+    }
+    .discussion-timer-box {
+      margin-top: 8px;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid var(--line);
+    }
+    .timer-time-display {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--sun);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .timer-track {
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .timer-fill {
+      width: 100%;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--coral), var(--sun));
+      transition: width 0.25s linear;
+    }
+    .timer-btn-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+    .timer-btn-row button {
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      min-height: 32px;
+    }
+
+    /* Keepsake Card Modal */
+    .keepsake-dialog {
+      max-width: 580px;
+      width: 100%;
+      text-align: center;
+    }
+    .keepsake-preview-wrap {
+      margin: 16px 0;
+      display: flex;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 18px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    }
+    .keepsake-canvas {
+      max-width: 100%;
+      height: auto;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    /* Turn Mode */
+    .turn-mode-btn.active {
+      background: rgba(96, 165, 250, 0.2);
+      border-color: var(--blue);
+      color: #bfdbfe;
+    }
+    .turn-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(96, 165, 250, 0.15);
+      border: 1px solid rgba(96, 165, 250, 0.35);
+      color: #dbeafe;
+      font-size: 0.82rem;
+      margin-top: 8px;
+    }
+    .turn-banner .turn-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--blue);
+      box-shadow: 0 0 8px var(--blue);
+    }
   </style>
 </head>
 <body>
@@ -10529,6 +10822,17 @@ var qrcode = function() {
       ]
     };
 
+    const RELATIONSHIP_PROFILES = [
+      { id: "romantic", icon: "♡", label: "Romantic", subtitle: "Partners & couples", fitLabel: "Relationship fit" },
+      { id: "friends", icon: "★", label: "Friends", subtitle: "Besties & close friends", fitLabel: "Friendship fit" },
+      { id: "roommates", icon: "⌂", label: "Roommates", subtitle: "Shared home & co-living", fitLabel: "Household fit" },
+      { id: "collaborators", icon: "⚡", label: "Collaborators", subtitle: "Co-founders & teammates", fitLabel: "Synergy fit" }
+    ];
+
+    function currentRelationshipProfile(profileId = state?.relationshipProfile) {
+      return RELATIONSHIP_PROFILES.find((p) => p.id === profileId) || RELATIONSHIP_PROFILES[0];
+    }
+
     const app = document.getElementById("app");
     const homeButton = document.getElementById("home-button");
     const bottomNav = document.getElementById("bottom-nav");
@@ -10538,6 +10842,7 @@ var qrcode = function() {
         version: 2,
         screen: "setup",
         names: ["", ""],
+        relationshipProfile: "romantic",
         sessionPreset: "custom",
         playStyle: "pass-and-play",
         questionMode: "mixed",
@@ -10579,6 +10884,10 @@ var qrcode = function() {
         excludedQuestionIds: [],
         neverQuestionIds: [],
         favoriteQuestionIds: [],
+        cardWagers: {},
+        whileYouWait: {},
+        turnBasedReveal: false,
+        activeTurn: 0,
         questionEdits: {},
         questionFlags: {},
         questionTagOverrides: {},
@@ -10922,7 +11231,7 @@ var qrcode = function() {
     let nearbyLastPeerMessageAt = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.3.9";
+    const APP_VERSION = "1.4.0";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -12306,6 +12615,7 @@ var qrcode = function() {
     function persistentSetupState() {
       return {
         names: [...state.names],
+        relationshipProfile: state.relationshipProfile || "romantic",
         sessionPreset: state.sessionPreset,
         playStyle: state.playStyle,
         questionMode: state.questionMode,
@@ -13598,6 +13908,11 @@ var qrcode = function() {
         } else if (kind === "open") {
           noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.11, q: 0.8 });
           sequence([pentatonic(0), pentatonic(2), pentatonic(4)], 0.08, 0.08, themeName === "cute" ? { octaveLevel: 0.6 } : undefined);
+          duck = 0.6;
+        } else if (kind === "chime") {
+          [pentatonic(2, 5), pentatonic(4, 5), pentatonic(7, 5)].forEach((frequency, index) => {
+            end = Math.max(end, soundNote(ctx, out, frequency * shift, start + index * 0.09, 0.05, { theme: themeName, attack: 0.02, decay: 0.9, dry: true }));
+          });
           duck = 0.6;
         } else if (kind === "spark") {
           // Contrary motion: one voice falls, the other rises to meet it, then both resolve on the octave.
@@ -14913,6 +15228,56 @@ var qrcode = function() {
       document.getElementById("start-nearby-round")?.addEventListener("click", startNearbyRound);
     }
 
+    function whileYouWaitChallengePanel(partner) {
+      const saved = state.whileYouWait || {};
+      const syncVal = saved.sync || "";
+      const bolderVal = saved.bolder || "";
+      const isSaved = Boolean(saved.answered);
+      return `
+        <div class="while-you-wait-panel">
+          <div class="while-you-wait-badge"><span aria-hidden="true">✦</span> While you wait prediction challenge</div>
+          <h3>Test your partner intuition</h3>
+          <p class="wyw-sub">Predict how your answers will compare. We’ll reveal your intuition score on the reveal board!</p>
+          <div class="wyw-question">
+            <label>1. Overall sync forecast</label>
+            <div class="wyw-options">
+              <button type="button" class="wyw-btn ${syncVal === "high" ? "active" : ""}" data-wyw-sync="high">High sync (80%+)</button>
+              <button type="button" class="wyw-btn ${syncVal === "balanced" ? "active" : ""}" data-wyw-sync="balanced">Balanced (60–79%)</button>
+              <button type="button" class="wyw-btn ${syncVal === "sparks" ? "active" : ""}" data-wyw-sync="sparks">Dynamic opposites (&lt;60%)</button>
+            </div>
+          </div>
+          <div class="wyw-question">
+            <label>2. Who had bolder answers?</label>
+            <div class="wyw-options">
+              <button type="button" class="wyw-btn ${bolderVal === "me" ? "active" : ""}" data-wyw-bolder="me">Me</button>
+              <button type="button" class="wyw-btn ${bolderVal === "partner" ? "active" : ""}" data-wyw-bolder="partner">${partner}</button>
+              <button type="button" class="wyw-btn ${bolderVal === "equal" ? "active" : ""}" data-wyw-bolder="equal">Equally bold</button>
+            </div>
+          </div>
+          ${isSaved ? '<p class="wyw-saved-note">✓ Predictions saved! They’ll unlock when you reveal.</p>' : ""}
+        </div>
+      `;
+    }
+
+    function bindWhileYouWait() {
+      document.querySelectorAll("[data-wyw-sync]").forEach((btn) => btn.addEventListener("click", () => {
+        state.whileYouWait = state.whileYouWait || {};
+        state.whileYouWait.sync = btn.dataset.wywSync;
+        state.whileYouWait.answered = true;
+        saveState();
+        playSound("tap");
+        render();
+      }));
+      document.querySelectorAll("[data-wyw-bolder]").forEach((btn) => btn.addEventListener("click", () => {
+        state.whileYouWait = state.whileYouWait || {};
+        state.whileYouWait.bolder = btn.dataset.wywBolder;
+        state.whileYouWait.answered = true;
+        saveState();
+        playSound("tap");
+        render();
+      }));
+    }
+
     function renderNearbyWait() {
       const localPlayer = nearbyLocalPlayer();
       const partner = escapeHTML(state.names[localPlayer === 0 ? 1 : 0] || "your partner");
@@ -14952,11 +15317,13 @@ var qrcode = function() {
       app.innerHTML = `<section class="screen nearby-screen" aria-labelledby="nearby-wait-title"><div class="nearby-card" style="text-align:center"><div class="celebration-orb" aria-hidden="true">⌁</div><p class="eyebrow">Your answers are locked in</p><h2 id="nearby-wait-title">${heading}</h2><p class="lede">${lede}</p>
         ${answered !== null ? `<div class="partner-progress"><div class="partner-progress-label"><span>${partner}</span><span>${answered} of ${total}${almost ? " · on the last one…" : " answered"}</span></div><div class="partner-progress-bar" role="progressbar" aria-label="${partner}’s progress" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${answered}"><span class="${almost ? "almost" : ""}" style="width:${(answered / Math.max(1, total)) * 100}%"></span></div></div>` : ""}
         ${showFallback ? "" : scoreCallPanel([localPlayer], "While you wait — call your score")}
+        ${showFallback ? "" : whileYouWaitChallengePanel(partner)}
         ${showFallback ? "" : statusBlock}${fallback}</div></section>`;
       document.getElementById("nearby-retry")?.addEventListener("click", retryNearbyConnection);
       document.getElementById("nearby-repair")?.addEventListener("click", repairNearbyRound);
       document.getElementById("nearby-finish-here")?.addEventListener("click", finishNearbyRoundOnThisDevice);
       bindScoreCalls();
+      bindWhileYouWait();
     }
 
     function focusKeyFor(element) {
@@ -16224,7 +16591,7 @@ var qrcode = function() {
               <h2>${escapeHTML(latestDescriptor.title)}</h2>
               <p>${escapeHTML(latestRound.names[0])} + ${escapeHTML(latestRound.names[1])} · ${escapeHTML(formatRoundDate(latestRound.completedAt))}</p>
               <span class="home-result-history-count">${state.completedRounds.filter((round) => !roundScoresHidden(round)).length} ${state.completedRounds.filter((round) => !roundScoresHidden(round)).length === 1 ? "round" : "rounds"} played together</span>
-              <span class="home-result-history-count">${latestAlignment.fitOverall ?? latestAlignment.overall}% relationship fit</span>
+              <span class="home-result-history-count">${latestAlignment.fitOverall ?? latestAlignment.overall}% ${escapeHTML(currentRelationshipProfile().fitLabel.toLowerCase())}</span>
             </div>
           </div>
           <div class="home-topic-results" aria-label="Latest alignment by topic">${homeTopicResults}</div>
@@ -16261,6 +16628,17 @@ var qrcode = function() {
               </label>
             </div>
             <p class="error" id="name-error" role="alert"></p>
+
+            <p class="setup-section-title">Who is playing?</p>
+            <div class="relationship-profile-grid" role="group" aria-label="Who is playing">
+              ${RELATIONSHIP_PROFILES.map((p) => `
+                <button class="profile-card ${(state.relationshipProfile || "romantic") === p.id ? "active" : ""}" type="button" data-relationship-profile="${p.id}" aria-pressed="${(state.relationshipProfile || "romantic") === p.id}">
+                  <span class="profile-icon" aria-hidden="true">${p.icon}</span>
+                  <strong>${escapeHTML(p.label)}</strong>
+                  <small>${escapeHTML(p.subtitle)}</small>
+                </button>
+              `).join("")}
+            </div>
 
             <p class="setup-section-title">How are you playing?</p>
             <div class="play-style-grid" aria-label="Play style">
@@ -16413,6 +16791,13 @@ var qrcode = function() {
         field.removeAttribute("aria-invalid");
         // A duplicate-name error marks the second field; fixing it from the first must clear that mark too.
         [playerOne, playerTwo].forEach((other) => { if (other.value.trim()) other.removeAttribute("aria-invalid"); });
+      }));
+      document.querySelectorAll("[data-relationship-profile]").forEach((button) => button.addEventListener("click", () => {
+        rememberNames();
+        state.relationshipProfile = button.dataset.relationshipProfile;
+        saveState();
+        playSound("tap");
+        render();
       }));
       document.querySelectorAll("[data-play-style]").forEach((button) => button.addEventListener("click", () => {
         rememberNames();
@@ -17760,6 +18145,227 @@ var qrcode = function() {
     }
     let ratingRenderQueued = false;
 
+    let discussionTimers = {};
+
+    function handleTimerAction(qid, action) {
+      if (!discussionTimers[qid]) {
+        discussionTimers[qid] = { seconds: 120, interval: null, running: false };
+      }
+      const timer = discussionTimers[qid];
+      const display = document.getElementById(`timer-display-${qid}`);
+      const fill = document.getElementById(`timer-fill-${qid}`);
+      const updateUI = () => {
+        const mins = String(Math.floor(timer.seconds / 60)).padStart(2, "0");
+        const secs = String(timer.seconds % 60).padStart(2, "0");
+        if (display) display.textContent = `${mins}:${secs}`;
+        if (fill) fill.style.width = `${(timer.seconds / 120) * 100}%`;
+      };
+
+      if (action === "start") {
+        if (timer.running) return;
+        timer.running = true;
+        playSound("tap");
+        timer.interval = setInterval(() => {
+          if (timer.seconds > 0) {
+            timer.seconds--;
+            updateUI();
+            if (timer.seconds === 0) {
+              clearInterval(timer.interval);
+              timer.running = false;
+              timer.interval = null;
+              playSound("chime");
+              pulseHaptic("celebrate");
+              if (display) display.textContent = "Time's up! ✦";
+            }
+          }
+        }, 1000);
+      } else if (action === "pause") {
+        if (!timer.running) return;
+        clearInterval(timer.interval);
+        timer.running = false;
+        timer.interval = null;
+        playSound("tap");
+      } else if (action === "reset") {
+        clearInterval(timer.interval);
+        timer.running = false;
+        timer.interval = null;
+        timer.seconds = 120;
+        updateUI();
+        playSound("tap");
+      }
+    }
+
+    function openKeepsakeModal(questions, alignment) {
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      const profile = currentRelationshipProfile();
+      const duoTitles = [
+        [90, "Telepathic Duo ✦"],
+        [80, "Harmonious Sparks ★"],
+        [70, "Dynamic Duo ⚡"],
+        [55, "Complementary Opposites ⇄"],
+        [0, "Spirited Explorers ✧"]
+      ];
+      const duoTitle = duoTitles.find(([threshold]) => alignment.overall >= threshold)?.[1] || "Aligned Duo";
+      const roundDate = formatRoundDate(new Date().toISOString());
+
+      overlay.innerHTML = `
+        <section class="exit-dialog keepsake-dialog" role="dialog" aria-modal="true" aria-labelledby="keepsake-title">
+          <p class="eyebrow">Round keepsake</p>
+          <h2 id="keepsake-title">Your alignment keepsake</h2>
+          <p class="dialog-copy">Save or share this moment of connection.</p>
+          <div class="keepsake-preview-wrap">
+            <canvas id="keepsake-canvas" width="800" height="1000" class="keepsake-canvas" aria-label="Keepsake card preview"></canvas>
+          </div>
+          <div class="dialog-actions" style="justify-content:center;gap:10px">
+            <button class="primary-btn" id="keepsake-download" type="button">Download PNG</button>
+            ${navigator.share ? '<button class="secondary-btn" id="keepsake-share" type="button">Share card</button>' : ""}
+            <button class="text-btn" id="keepsake-close" type="button">Close</button>
+          </div>
+        </section>
+      `;
+      document.body.appendChild(overlay);
+
+      const canvas = overlay.querySelector("#keepsake-canvas");
+      const ctx = canvas?.getContext("2d");
+      if (ctx) {
+        const bgGrad = ctx.createLinearGradient(0, 0, 800, 1000);
+        bgGrad.addColorStop(0, "#0b0f19");
+        bgGrad.addColorStop(0.5, "#1e1b4b");
+        bgGrad.addColorStop(1, "#0f172a");
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, 800, 1000);
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+        for (let i = 0; i < 40; i++) {
+          const x = (i * 197) % 800;
+          const y = (i * 263) % 1000;
+          const r = (i % 3) * 0.8 + 0.8;
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.strokeStyle = "rgba(251, 113, 133, 0.3)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(30, 30, 740, 940);
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#fb7185";
+        ctx.font = "bold 18px Inter, system-ui, sans-serif";
+        ctx.fillText("✦  A L I G N E D  ✦", 400, 95);
+
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = "bold 38px Inter, system-ui, sans-serif";
+        const name1 = state.names[0] || "Player 1";
+        const name2 = state.names[1] || "Player 2";
+        ctx.fillText(`${name1} & ${name2}`, 400, 160);
+
+        ctx.fillStyle = "#a78bfa";
+        ctx.font = "600 16px Inter, system-ui, sans-serif";
+        ctx.fillText(`${profile.icon} ${profile.label} · ${duoTitle}`, 400, 200);
+
+        const ringX = 400;
+        const ringY = 370;
+        const ringR = 110;
+
+        ctx.beginPath();
+        ctx.arc(ringX, ringY, ringR, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+        ctx.lineWidth = 14;
+        ctx.stroke();
+
+        const scoreFraction = Math.max(0, Math.min(100, alignment.overall)) / 100;
+        ctx.beginPath();
+        ctx.arc(ringX, ringY, ringR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * scoreFraction);
+        const arcGrad = ctx.createLinearGradient(ringX - ringR, ringY - ringR, ringX + ringR, ringY + ringR);
+        arcGrad.addColorStop(0, "#fb7185");
+        arcGrad.addColorStop(1, "#4ade80");
+        ctx.strokeStyle = arcGrad;
+        ctx.lineWidth = 14;
+        ctx.lineCap = "round";
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 64px Inter, system-ui, sans-serif";
+        ctx.fillText(`${alignment.overall}%`, ringX, ringY + 16);
+        ctx.font = "600 15px Inter, system-ui, sans-serif";
+        ctx.fillStyle = "#cbd5e1";
+        ctx.fillText("SIMILARITY", ringX, ringY + 44);
+
+        ctx.fillStyle = "#38bdf8";
+        ctx.font = "bold 22px Inter, system-ui, sans-serif";
+        ctx.fillText(`${alignment.fitOverall ?? alignment.overall}% ${profile.fitLabel.toUpperCase()}`, 400, 530);
+
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "600 14px Inter, system-ui, sans-serif";
+        ctx.fillText("TOP TOPIC ALIGNMENTS", 400, 595);
+
+        const topics = (alignment.topics || []).slice(0, 3);
+        topics.forEach((t, i) => {
+          const opt = TOPIC_OPTIONS.find((o) => o.id === t.topic);
+          const label = opt ? `${opt.icon} ${opt.label}` : t.topic;
+          const y = 640 + i * 46;
+          ctx.fillStyle = "rgba(255, 255, 255, 0.06)";
+          ctx.beginPath();
+          ctx.roundRect(140, y - 24, 520, 36, 18);
+          ctx.fill();
+
+          ctx.textAlign = "left";
+          ctx.fillStyle = "#f8fafc";
+          ctx.font = "600 16px Inter, system-ui, sans-serif";
+          ctx.fillText(label, 165, y);
+
+          ctx.textAlign = "right";
+          ctx.fillStyle = "#4ade80";
+          ctx.font = "bold 16px Inter, system-ui, sans-serif";
+          ctx.fillText(`${t.score}% in sync`, 635, y);
+        });
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#64748b";
+        ctx.font = "14px Inter, system-ui, sans-serif";
+        ctx.fillText(`Played together on ${roundDate}`, 400, 890);
+        ctx.fillStyle = "#475569";
+        ctx.font = "12px Inter, system-ui, sans-serif";
+        ctx.fillText("grandpatin.github.io/aligned", 400, 920);
+      }
+
+      const close = () => { overlay.remove(); document.removeEventListener("keydown", onKeydown); };
+      const onKeydown = (e) => { if (e.key === "Escape") close(); };
+      document.addEventListener("keydown", onKeydown);
+      overlay.querySelector("#keepsake-close")?.addEventListener("click", close);
+
+      overlay.querySelector("#keepsake-download")?.addEventListener("click", () => {
+        if (!canvas) return;
+        const link = document.createElement("a");
+        link.download = `aligned-keepsake-${localDateStamp()}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        playSound("unlock");
+        showToast("Keepsake image downloaded!");
+      });
+
+      overlay.querySelector("#keepsake-share")?.addEventListener("click", async () => {
+        if (!canvas) return;
+        canvas.toBlob(async (blob) => {
+          if (!blob) return;
+          const file = new File([blob], `aligned-keepsake-${localDateStamp()}.png`, { type: "image/png" });
+          try {
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              await navigator.share({ files: [file], title: "Our Aligned Results", text: "Look how well we aligned!" });
+            } else {
+              const link = document.createElement("a");
+              link.download = file.name;
+              link.href = URL.createObjectURL(blob);
+              link.click();
+              showToast("Keepsake saved to device.");
+            }
+          } catch {}
+        });
+      });
+    }
+
     function renderReveal() {
       const questions = getSelectedQuestions();
       const alignment = calculateAlignmentSummary(questions);
@@ -17879,6 +18485,11 @@ var qrcode = function() {
                   <span class="card-question">${escapeHTML(question.prompt)}</span>
                 </span>
                 ${question.id === goldenId ? `<span class="golden-ribbon"><span aria-hidden="true">✦</span> Golden card</span>` : ""}
+                <span class="card-wager-row" onclick="event.stopPropagation()">
+                  <span class="wager-tag">Bet:</span>
+                  <button type="button" class="wager-chip ${state.cardWagers?.[question.id] === 'match' ? 'active' : ''}" data-wager-qid="${escapedQuestionId}" data-wager-type="match" aria-label="Bet match for question ${index + 1}">Match</button>
+                  <button type="button" class="wager-chip ${state.cardWagers?.[question.id] === 'diff' ? 'active' : ''}" data-wager-qid="${escapedQuestionId}" data-wager-type="diff" aria-label="Bet opposites for question ${index + 1}">Opposites</button>
+                </span>
                 <span class="tap-hint">${question.id === finalId ? escapeHTML(finalHintCopy(question)) : `${POINTER_VERB} to reveal`}</span>
                 <span class="card-pair" aria-hidden="true"><span></span><span></span></span>
                 <span class="final-glow" aria-hidden="true"></span>
@@ -17896,8 +18507,29 @@ var qrcode = function() {
                 ${!answerHeld && matchInfo.isMatch && !(pickLabel(question, firstAnswer) && pickLabel(question, secondAnswer)) ? `<span class="match-badge"><span class="match-star" aria-hidden="true">★</span>${matchInfo.exact ? "Exact match" : "Close match"}</span>` : ""}
                 ${opposite ? `<span class="spark-badge"><span class="spark-icon" aria-hidden="true">⇄</span>${sparkLabel}</span>` : ""}
                 ${answers}
+                ${state.cardWagers?.[question.id] ? `
+                  <div class="wager-outcome-badge ${(state.cardWagers[question.id] === "match" && matchInfo.isMatch) || (state.cardWagers[question.id] === "diff" && !matchInfo.isMatch) ? "correct" : "different"}">
+                    ${(state.cardWagers[question.id] === "match" && matchInfo.isMatch) || (state.cardWagers[question.id] === "diff" && !matchInfo.isMatch)
+                      ? '<span aria-hidden="true">🎯</span> Intuition Hit! You called this'
+                      : `<span aria-hidden="true">🔮</span> Intuition Twist! You guessed ${state.cardWagers[question.id] === "match" ? "match" : "opposites"}`}
+                  </div>
+                ` : ""}
                 ${answerHeld ? `<div class="discussion-card"><strong>Gentle next step</strong><p>Would revisiting this later feel supportive, or is leaving it unanswered the right boundary?</p></div>` : matchInfo.unrated && question.type === "text" ? "" : question.id === goldenId ? goldenTaskMarkup() : discussionPromptMarkup(question, matchInfo, usedPrompts)}
                 ${followThroughMarkup(question)}
+                <div class="discussion-timer-area" data-timer-area="${escapedQuestionId}">
+                  <button class="discussion-timer-toggle text-btn" data-timer-toggle="${escapedQuestionId}" type="button">
+                    <span aria-hidden="true">⏱</span> 2-min discussion timer
+                  </button>
+                  <div class="discussion-timer-box" id="timer-box-${escapedQuestionId}" hidden>
+                    <div class="timer-time-display" id="timer-display-${escapedQuestionId}">02:00</div>
+                    <div class="timer-track"><div class="timer-fill" id="timer-fill-${escapedQuestionId}"></div></div>
+                    <div class="timer-btn-row">
+                      <button class="secondary-btn" data-timer-btn="start" data-timer-qid="${escapedQuestionId}" type="button">Start</button>
+                      <button class="secondary-btn" data-timer-btn="pause" data-timer-qid="${escapedQuestionId}" type="button">Pause</button>
+                      <button class="text-btn" data-timer-btn="reset" data-timer-qid="${escapedQuestionId}" type="button">Reset</button>
+                    </div>
+                  </div>
+                </div>
                 <div class="card-back-actions">
                   <button class="tap-hint card-close-button" type="button">${POINTER_VERB} to close</button>
                   ${index < questions.length - 1 ? `<button class="secondary-btn next-card-button" type="button" data-next-card="${index + 1}">Next card →</button>` : ""}
@@ -17920,8 +18552,17 @@ var qrcode = function() {
               <h2 id="reveal-title">Compare, connect, <span class="accent-text">talk.</span></h2>
               <p class="lede">${POINTER_VERB} each card when you’re ready. Your scores unlock when every card has been face up and the written answers are rated.</p>
               <div class="reveal-progress" aria-live="polite"><span class="reveal-count" id="reveal-count">${revealProgressCopy(questions)}</span><span class="reveal-dots" aria-hidden="true">${questions.map((question) => `<span class="reveal-dot ${cardSeen(question.id) ? "on" : ""}${question.id === finalId ? " final" : ""}" data-dot="${escapeHTML(question.id)}"></span>`).join("")}</span></div>
+              ${state.turnBasedReveal ? `
+                <div class="turn-banner" role="status">
+                  <span class="turn-dot" aria-hidden="true"></span>
+                  <span><strong>${escapeHTML(state.names[state.activeTurn || 0] || "Player 1")}’s turn</strong> to reveal a card</span>
+                </div>
+              ` : ""}
             </div>
-            <button class="secondary-btn reveal-all-btn" id="reveal-all" type="button"><span aria-hidden="true">✦</span><span>${state.revealedIds.length === questions.length ? "Hide all" : "Reveal all"}</span></button>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <button class="secondary-btn turn-mode-btn ${state.turnBasedReveal ? "active" : ""}" id="toggle-turn-mode" type="button" aria-pressed="${state.turnBasedReveal}"><span aria-hidden="true">⇄</span><span>Take turns</span></button>
+              <button class="secondary-btn reveal-all-btn" id="reveal-all" type="button"><span aria-hidden="true">✦</span><span>${state.revealedIds.length === questions.length ? "Hide all" : "Reveal all"}</span></button>
+            </div>
           </div>
           <div class="reveal-grid">${cards}</div>
           <section class="alignment-dashboard ${allRevealed ? "" : "locked"}" id="alignment-dashboard" style="--overall-color: ${overallColor}" aria-label="Your scores">
@@ -17938,7 +18579,7 @@ var qrcode = function() {
               <div class="overall-alignment">
                 ${alignmentRingMarkup(alignment.fitOverall, "fit")}
                 <div class="alignment-summary-copy">
-                  <p class="eyebrow">Relationship fit</p>
+                  <p class="eyebrow">${escapeHTML(currentRelationshipProfile().fitLabel)}</p>
                   <h3>${fitDescriptor(alignment.fitOverall).title}</h3>
                   <p class="score-explainer">Adjusts each difference by how important the topic felt to either person.</p>
                 </div>
@@ -17957,8 +18598,19 @@ var qrcode = function() {
             ${highlightCard(surpriseNote && surpriseHighlight?.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No big surprises this round.", surpriseNote, guessSurprise ? "Someone is in for a surprise…" : surpriseHighlight ? "The widest gap is waiting…" : "Will anything surprise you?")}
             ${conversationHighlight ? highlightCard("Best conversation starter", conversationHighlight, "", "", "There is a story waiting in one card…") : ""}
             ${tally.some((item) => item.made) ? `<article class="highlight-card mind-reader"><span>🔮 Mind-reader</span><strong class="highlight-answer">${mindReaderHeadline(tally)}<small class="highlight-note">${tally.filter((item) => item.made).map((item) => `${escapeHTML(state.names[item.player])} read ${escapeHTML(state.names[item.player === 0 ? 1 : 0])} ${item.hits}/${item.made}`).join(" · ")}</small></strong><strong class="highlight-locked">${tally.some((item) => item.hits) ? "Someone read the other’s mind… " : "Did anyone read minds tonight? "}<small>${everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"}</small></strong></article>` : ""}
+            ${state.whileYouWait?.answered ? `
+              <article class="highlight-card" style="border-color:rgba(167,139,250,0.4)">
+                <span>✦ While-you-wait intuition</span>
+                <strong class="highlight-answer">
+                  Sync guess: ${state.whileYouWait.sync === "high" ? "High (80%+)" : state.whileYouWait.sync === "balanced" ? "Balanced (60–79%)" : "Opposites (&lt;60%)"}
+                  <small class="highlight-note">Actual similarity: ${alignment.overall}% · ${(state.whileYouWait.sync === "high" && alignment.overall >= 80) || (state.whileYouWait.sync === "balanced" && alignment.overall >= 60 && alignment.overall < 80) || (state.whileYouWait.sync === "sparks" && alignment.overall < 60) ? "Spot on! 🎯" : "Plot twist! 🔮"}</small>
+                </strong>
+                <strong class="highlight-locked"><small>${everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"}</small></strong>
+              </article>
+            ` : ""}
           </section>
           <div class="actions reveal-actions">
+            ${allRevealed ? `<button class="secondary-btn" id="open-keepsake-btn" type="button"><span aria-hidden="true">✦</span> Save / Share Keepsake Card</button>` : ""}
             ${state.playStyle === "nearby" && state.nearbyRole === "join" && nearbyChannelOpen()
               ? `<button class="primary-btn" id="new-round" type="button" disabled style="opacity:0.6;cursor:not-allowed">Waiting for ${escapeHTML(state.names[0] || "your partner")} to start…</button>`
               : `<button class="primary-btn" id="new-round" type="button">Play another round</button>`
@@ -18325,6 +18977,11 @@ var qrcode = function() {
         // Read layout before the class flip so the tap doesn't force a restyle of the board.
         const rect = card.getBoundingClientRect();
         applyCardState(card, shouldReveal);
+        if (shouldReveal && state.turnBasedReveal) {
+          state.activeTurn = state.activeTurn === 0 ? 1 : 0;
+          const banner = document.querySelector(".turn-banner strong");
+          if (banner) banner.textContent = `${state.names[state.activeTurn || 0] || "Player 1"}’s turn`;
+        }
         state.revealedIds = shouldReveal
           ? [...new Set([...state.revealedIds, id])]
           : state.revealedIds.filter((revealedId) => revealedId !== id);
@@ -18435,6 +19092,44 @@ var qrcode = function() {
         if (face && !face.hasAttribute("tabindex") && face.classList.contains("card-back")) face.setAttribute("tabindex", "-1");
         face?.focus({ preventScroll: true });
       }));
+
+      document.getElementById("open-keepsake-btn")?.addEventListener("click", () => openKeepsakeModal(questions, alignment));
+      document.getElementById("toggle-turn-mode")?.addEventListener("click", () => {
+        state.turnBasedReveal = !state.turnBasedReveal;
+        state.activeTurn = 0;
+        saveState();
+        playSound("tap");
+        render();
+      });
+      document.querySelectorAll("[data-wager-qid]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const qid = btn.dataset.wagerQid;
+          const wager = btn.dataset.wagerType;
+          state.cardWagers = state.cardWagers || {};
+          state.cardWagers[qid] = state.cardWagers[qid] === wager ? "" : wager;
+          saveState();
+          playSound("tap");
+          render();
+        });
+      });
+      document.querySelectorAll("[data-timer-toggle]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const qid = btn.dataset.timerToggle;
+          const box = document.getElementById(`timer-box-${qid}`);
+          if (box) box.hidden = !box.hidden;
+          playSound("tap");
+        });
+      });
+      document.querySelectorAll("[data-timer-btn]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const qid = btn.dataset.timerQid;
+          const action = btn.dataset.timerBtn;
+          handleTimerAction(qid, action);
+        });
+      });
 
       let lastRevealAllAt = 0;
       document.getElementById("reveal-all").addEventListener("click", () => {
