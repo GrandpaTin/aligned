@@ -6476,6 +6476,9 @@
        (a container query, so it follows the card's real width rather than the screen's). */
     .question-screen .question-meta { container-type: inline-size; }
     @container (max-width: 400px) {
+      .question-screen .question-meta { flex-wrap: nowrap; gap: 6px; }
+      .question-screen .category-pill { min-width: 0; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .question-screen .question-meta-actions { flex-shrink: 0; }
       [data-text-size] .question-screen .question-meta .type-chip { padding-inline: 8px; white-space: nowrap; font-size: 0 !important; gap: 0; }
       [data-text-size] .question-screen .question-meta .type-chip > span { font-size: max(12px, 0.8rem) !important; }
     }
@@ -12040,7 +12043,10 @@ var qrcode = function() {
     }
 
     document.addEventListener("keydown", (event) => {
-      if (["Tab", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", " "].includes(event.key)) document.documentElement.classList.add("kbd-nav");
+      if (event.isComposing || event.keyCode === 229) return;
+      // Typing (including Enter/Space on a phone keyboard) isn't navigation; only Tab counts inside text fields.
+      const typing = event.target instanceof Element && event.target.matches("input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea, [contenteditable]");
+      if (event.key === "Tab" || (!typing && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", " "].includes(event.key))) document.documentElement.classList.add("kbd-nav");
     }, true);
     document.addEventListener("pointerdown", () => document.documentElement.classList.remove("kbd-nav"), true);
     // File names use the local calendar date (an evening export in the US is still "today").
@@ -17290,7 +17296,7 @@ var qrcode = function() {
             safeFirst: true,
             tag: "link"
           }).then((ok) => {
-            if (!ok) { if (nearbyChannelOpen()) showToast(`Still linked with ${partner}.`); return; }
+            if (!ok) { if (nearbyChannelOpen()) showToast(`Still linked with ${partner}.`); focusScreenHeading(); return; }
             closeNearbyConnection({ notifyPartner: true });
             nearbyRuntime.initConfirmed = true;
             // Show the joining screen rather than the round just left (it stays resumable if the join fails).
