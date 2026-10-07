@@ -12890,7 +12890,9 @@ var qrcode = function() {
           duck = 0.8;
         } else if (kind === "partner-flip") {
           const d = (Number(options.degree) || 0) % 5;
-          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 2.0 : themeName === "cute" ? 1.2 : 1.25), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true, ...(themeName === "cute" ? { octaveLevel: 0.6 } : {}), ...(themeName === "dreamy" ? { attack: 0.01 } : {}) });
+          // Lower notes sit inside the pad, so they get a touch more level; dreamy matches stay just under error/rate.
+          const tilt = (1 + 0.06 * (2 - d)) * (themeName === "dreamy" && options.match ? 0.95 : 1) * (themeName === "arcade" && options.match ? 1.1 : 1);
+          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * tilt * (themeName === "dreamy" ? 2.0 : themeName === "cute" ? 1.2 : 1.25), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true, ...(themeName === "cute" ? { octaveLevel: 0.6 } : {}), ...(themeName === "dreamy" ? { attack: 0.01 } : {}) });
           duck = 0.8;
         } else if (kind === "open") {
           noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.11, q: 0.8 });
