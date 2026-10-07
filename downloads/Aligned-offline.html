@@ -6238,7 +6238,10 @@
     }
     [data-theme="pastel"] :is(button, a, summary, select, textarea, [tabindex]):focus-visible,
     [data-theme="pastel"] input:focus-visible + :is(.count-card, .topic-chip, .intensity-card, .mode-card) { outline-color: #be123c; }
-    :is(h1, h2, h3)[tabindex="-1"]:focus:not(:focus-visible) { outline: none; }
+    /* Script-focused screen headings show a ring only for people navigating by keyboard (browsers call a
+       launch-time focus "visible", which drew a box on phones resuming a round). */
+    :is(h1, h2, h3)[tabindex="-1"]:focus { outline: none; }
+    html.kbd-nav :is(h1, h2, h3)[tabindex="-1"]:focus-visible { outline: 3px solid var(--coral); outline-offset: 4px; }
 
     .setting-row { cursor: pointer; }
     .setting-row input[type="checkbox"] {
@@ -6468,6 +6471,13 @@
     .vibe-running-low { grid-column: 1 / -1; margin: 4px 0 0; }
     @media (pointer: coarse) { .vibe-running-low .text-btn { min-height: 44px; } }
     .topic-alignment-card { justify-content: flex-start !important; }
+    /* When the category, answer-type chip and favourite can't share one row, the chip shrinks to its icon
+       (a container query, so it follows the card's real width rather than the screen's). */
+    .question-screen .question-meta { container-type: inline-size; }
+    @container (max-width: 400px) {
+      [data-text-size] .question-screen .question-meta .type-chip { padding-inline: 8px; white-space: nowrap; font-size: 0 !important; gap: 0; }
+      [data-text-size] .question-screen .question-meta .type-chip > span { font-size: max(12px, 0.8rem) !important; }
+    }
     /* Narrow phones keep the category name and let the answer-type chip shrink to its icon. */
     @media (max-width: 340px) {
       .question-screen .question-meta { flex-wrap: nowrap; gap: 6px; }
@@ -9841,8 +9851,8 @@ var qrcode = function() {
     const PLAYFUL_WARM_CLOSE = DISCUSSION_PROMPTS.warm.close.slice(-12);
     DISCUSSION_PROMPTS.cozyFar = [
       "What’s the story behind your answer?",
-      "Give one compliment about the other side.",
-      "What would make the other side fun to try once?",
+      "Give one compliment about their answer.",
+      "What would make their answer fun to try once?",
       "Which part of the other answer surprised you most?",
       "What would a perfect evening look like with a bit of both?",
       "Ask one curious question about the other answer.",
@@ -10162,7 +10172,7 @@ var qrcode = function() {
           cardPrompts: cached.cardPrompts && typeof cached.cardPrompts === "object"
             ? Object.fromEntries(Object.entries(cached.cardPrompts).filter(([id, value]) => validIds.has(id) && value && typeof value.text === "string" && typeof value.key === "string").map(([id, value]) => [id, { key: value.key.slice(0, 40), text: value.text.slice(0, 300) }]))
             : {},
-          recentPrompts: Array.isArray(cached.recentPrompts) ? cached.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-120) : [],
+          recentPrompts: Array.isArray(cached.recentPrompts) ? cached.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-400) : [],
           recentHeadlines: Array.isArray(cached.recentHeadlines) ? [...new Set(cached.recentHeadlines.filter((text) => ["vibe", "roll", "another", "best", "finding", "locked"].includes(text)))].slice(-5) : [],
           packReturnPreset: typeof cached.packReturnPreset === "string" ? cached.packReturnPreset.slice(0, 40) : ""
         };
@@ -10277,7 +10287,7 @@ var qrcode = function() {
     let nearbyLastPeerMessageAt = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.3.3";
+    const APP_VERSION = "1.3.4";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -10930,7 +10940,7 @@ var qrcode = function() {
         type: "round-init", roundId: state.nearbyRoundId, newRound: Boolean(newRound), names: [...state.names], questionMode: state.questionMode,
         questionIntensity: state.questionIntensity, selectedTopics: [...state.selectedTopics],
         sessionPreset: state.sessionPreset, recentHeadlines: Array.isArray(state.recentHeadlines) ? state.recentHeadlines.slice(-5) : [],
-        recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-120) : [],
+        recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-400) : [],
         selectedQuestionIds: [...state.selectedQuestionIds], questions: getSelectedQuestions().filter(Boolean)
       };
     }
@@ -11135,8 +11145,8 @@ var qrcode = function() {
         openConfirmDialog({
           title: `Join ${newHost}’s round?`,
           copy: onlyReveal
-            ? "This phone has a round whose scores aren’t revealed yet. Joining skips the count-up — its scores go straight to your Journal."
-            : "This phone has an unfinished round. Joining discards it — its answers can’t be recovered.",
+            ? `This ${POINTER_VERB === "Tap" ? "phone" : "device"} has a round whose scores aren’t revealed yet. Joining skips the count-up — its scores go straight to your Journal.`
+            : `This ${POINTER_VERB === "Tap" ? "phone" : "device"} has an unfinished round. Joining discards it — its answers can’t be recovered.`,
           confirmLabel: onlyReveal ? "Save to Journal and join" : "Discard and join",
           cancelLabel: "Keep my round",
           danger: !onlyReveal,
@@ -11160,7 +11170,7 @@ var qrcode = function() {
       document.querySelectorAll(".modal-backdrop [data-modal-cancel]").forEach((button) => button.click());
       const answersInProgress = state.playStyle === "nearby" && state.nearbyRoundId && ["question", "nearby-wait"].includes(state.screen)
         && Object.keys(state.answers[1] || {}).length > 0;
-      if (answersInProgress && !payload.newRound) return;
+      if (answersInProgress && !payload.newRound && !nearbyRuntime.initConfirmed) return;
       const validTopics = new Set(TOPIC_OPTIONS.map((topic) => topic.id));
       (payload.questions || []).forEach((remoteQuestion) => {
         if (!remoteQuestion || typeof remoteQuestion !== "object" || typeof remoteQuestion.id !== "string") return;
@@ -11228,7 +11238,7 @@ var qrcode = function() {
         selectedQuestionIds, activePlayer: 1,
         nearbyRole: "join", nearbyRoundId: payload.roundId,
         sessionPreset: payload.sessionPreset === "pack" || SESSION_PRESETS.some((preset) => preset.id === payload.sessionPreset) ? payload.sessionPreset : "custom",
-        recentPrompts: Array.isArray(payload.recentPrompts) ? payload.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-120) : settings.recentPrompts,
+        recentPrompts: Array.isArray(payload.recentPrompts) ? payload.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-400) : settings.recentPrompts,
         cardPrompts: {},
         recentHeadlines: Array.isArray(payload.recentHeadlines) ? [...new Set(payload.recentHeadlines.filter((item) => ["vibe", "roll", "another", "best", "finding", "locked"].includes(item)))].slice(-5) : settings.recentHeadlines
       };
@@ -11280,9 +11290,10 @@ var qrcode = function() {
         nearbyRuntime.partnerLeft = true;
         dismissConfirmDialogs("link");
         const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "Your partner";
+        const declinedNewRound = state.nearbyRole === "host" && state.screen === "question" && !(nearbyRuntime.partnerProgress?.answered > 0);
         closeNearbyConnection();
         nearbyRuntime.partnerLeft = true;
-        showToast(`${partner} left the two-phone round. Your answers are saved on this phone.`, { tone: "warning" });
+        showToast(declinedNewRound ? `${partner} stayed on their own round. You can show the QR again later.` : `${partner} left the two-phone round. Your answers are saved on this phone.`, { tone: "warning" });
         if (state.screen === "nearby") state.screen = "setup";
         saveState();
         render();
@@ -11617,7 +11628,7 @@ var qrcode = function() {
         privatePinHash: state.privatePinHash,
         tutorialSeen: state.tutorialSeen,
         answeredQuestionIds: [...state.answeredQuestionIds],
-        recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-120) : [],
+        recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-400) : [],
         recentHeadlines: Array.isArray(state.recentHeadlines) ? state.recentHeadlines.filter((item) => typeof item === "string").slice(-5) : [],
         packReturnPreset: typeof state.packReturnPreset === "string" ? state.packReturnPreset.slice(0, 40) : "",
         excludedQuestionIds: [...state.excludedQuestionIds],
@@ -11763,7 +11774,7 @@ var qrcode = function() {
       lastExportAt = Date.now();
       const json = JSON.stringify(createBackupPayload(), null, 2);
       const blob = new Blob([json], { type: "application/json" });
-      const date = new Date().toISOString().slice(0, 10);
+      const date = localDateStamp();
       if (saveWithAndroidBridge(`aligned-backup-${date}.json`, "application/json", json)) {
         playSound("unlock");
         return;
@@ -11853,7 +11864,7 @@ var qrcode = function() {
       const encrypted = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, plaintext));
       const wrapper = { app: "Aligned", formatVersion: 2, encrypted: true, cipher: "AES-GCM", kdf: "PBKDF2-SHA256", iterations: 250000, salt: bytesToBase64(salt), iv: bytesToBase64(iv), data: bytesToBase64(encrypted) };
       const blob = new Blob([JSON.stringify(wrapper)], { type: "application/json" });
-      if (saveWithAndroidBridge(`aligned-private-${new Date().toISOString().slice(0, 10)}.aligned`, "application/octet-stream", JSON.stringify(wrapper))) {
+      if (saveWithAndroidBridge(`aligned-private-${localDateStamp()}.aligned`, "application/octet-stream", JSON.stringify(wrapper))) {
         playSound("lock");
         showToast("Keep the backup’s passphrase somewhere safe — it can’t be recovered.");
         return;
@@ -11861,7 +11872,7 @@ var qrcode = function() {
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `aligned-private-${new Date().toISOString().slice(0, 10)}.aligned`;
+      anchor.download = `aligned-private-${localDateStamp()}.aligned`;
       document.body.appendChild(anchor); anchor.click(); anchor.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       playSound("lock");
@@ -12025,6 +12036,14 @@ var qrcode = function() {
       }
     }
 
+    document.addEventListener("keydown", (event) => {
+      if (["Tab", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", " "].includes(event.key)) document.documentElement.classList.add("kbd-nav");
+    }, true);
+    document.addEventListener("pointerdown", () => document.documentElement.classList.remove("kbd-nav"), true);
+    // File names use the local calendar date (an evening export in the US is still "today").
+    function localDateStamp(date = new Date()) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    }
     let lastModalOpenedAt = 0;
     document.addEventListener("click", (event) => {
       if (event.isTrusted && event.target instanceof Element && event.target.matches(".modal-backdrop") && Date.now() - lastModalOpenedAt < 400) event.stopImmediatePropagation();
@@ -12339,7 +12358,8 @@ var qrcode = function() {
           if (earlyOut) {
             gain.gain.setValueCurveAtTime(curve(false), at + CHORD_SECONDS, 0.6);
           } else if (midRub(frequency, next)) {
-            gain.gain.setValueCurveAtTime(curve(false), at + CHORD_SECONDS, 0.9);
+            gain.gain.setValueAtTime(0.03, at + CHORD_SECONDS);
+            gain.gain.setValueCurveAtTime(curve(false), at + CHORD_SECONDS + 0.15, 0.9);
           } else {
             gain.gain.setValueCurveAtTime(curve(false), at + CHORD_SECONDS, 1.2);
           }
@@ -12773,7 +12793,7 @@ var qrcode = function() {
           duck = 0.8;
         } else if (kind === "partner-flip") {
           const d = (Number(options.degree) || 0) % 5;
-          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 1.55 : themeName === "cute" ? 1.2 : 1), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true, ...(themeName === "cute" ? { octaveLevel: 0.6 } : {}) });
+          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 1.55 : themeName === "cute" ? 1.2 : 1), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true, ...(themeName === "cute" ? { octaveLevel: 0.6 } : {}), ...(themeName === "dreamy" ? { attack: 0.01 } : {}) });
           duck = 0.8;
         } else if (kind === "open") {
           noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.11, q: 0.8 });
@@ -13038,6 +13058,7 @@ var qrcode = function() {
         state.nearbyRepairScreen = "";
         if (state.playStyleBeforeJoin) state.playStyle = state.playStyleBeforeJoin;
         state.playStyleBeforeJoin = "";
+        nearbyRuntime.initConfirmed = false;
         state.screen = screen;
         saveState();
         render();
@@ -13631,12 +13652,18 @@ var qrcode = function() {
         const remaining = pool.filter((question) => !selectedIds.has(question.id));
         if (!remaining.length) break;
         const wantPlayful = topic === "spicy" && activePreset?.id === "spicy-night" && selected.filter((id) => PLAYFUL_SPICY.test(id)).length < 3;
+        // Written slots still to come count toward the drift limits, so the round's total stays near its promise.
+        const textSlotsLeft = typeSequence.slice(index + 1).filter((slot) => slot === "text").length;
         const drifted = type === "slider"
-          ? selected.filter((id) => catalogById.get(id)?.type === "text").length >= textTarget + 2
+          ? selected.filter((id) => catalogById.get(id)?.type === "text").length + textSlotsLeft >= textTarget + 2
           : selected.filter((id) => catalogById.get(id)?.type === "slider").length >= sliderTarget + 2;
         // Beyond a hard limit (written-heavy rounds are slow), the right format wins even over a repeat from tonight.
-        const hardDrifted = type === "slider" && selected.filter((id) => catalogById.get(id)?.type === "text").length >= textTarget + 5;
+        const writtenSoFar = selected.filter((id) => catalogById.get(id)?.type === "text").length;
+        const hardCap = mode === "mixed" ? textTarget + 2 : Math.max(textTarget + 2, Math.ceil(count * 0.7));
+        const hardDrifted = type === "slider" && writtenSoFar + textSlotsLeft >= hardCap;
         const rank = (question) => [
+          // "Sliders only" means sliders: a written question never stands in while any slider exists.
+          mode === "sliders-only" && question.type !== "slider" ? 1 : 0,
           hardDrifted && question.type !== type ? 1 : 0,
           tonightIds.has(question.id) ? 1 : 0,
           drifted && question.type !== type ? 1 : 0,
@@ -14019,6 +14046,7 @@ var qrcode = function() {
         closeNearbyConnection({ notifyPartner: true });
         state.playStyle = "pass-and-play";
         state.playStyleBeforeJoin = "";
+        nearbyRuntime.initConfirmed = false;
         state.screen = "setup";
         saveState();
         render();
@@ -14091,7 +14119,7 @@ var qrcode = function() {
       if (state.textSize !== "small") return;
       document.documentElement.classList.add("measuring-text");
       document.querySelectorAll("#app *, .topbar *, .bottom-nav *").forEach((element) => {
-        if (element.closest(".text-size-option, svg, .reveal-buddy, .progress-star, .pass-person, .card-spark, .question-decor") || (element.matches(".type-chip") && innerWidth <= 340) || !element.textContent.trim()) return;
+        if (element.closest(".text-size-option, svg, .reveal-buddy, .progress-star, .pass-person, .card-spark, .question-decor") || element.matches(".type-chip") || !element.textContent.trim()) return;
         if (parseFloat(getComputedStyle(element).fontSize) < 11.95) {
           element.style.setProperty("font-size", "12px", "important");
           element.setAttribute("data-compact-floor", "");
@@ -15157,7 +15185,11 @@ var qrcode = function() {
         const sliderTarget = state.questionMode === "sliders-only" ? count : state.questionMode === "mixed" ? Math.ceil(count * 0.6) : Math.ceil(count * 0.8);
         const fresh = freshOf("slider") + freshOf("text");
         if (freshOf("slider") >= sliderTarget && fresh >= count) return "";
-        return `<p class="topic-note vibe-running-low" role="status">${fresh ? `Your chosen packs have only ${fresh} new question${fresh === 1 ? "" : "s"} left` : "You’ve played every question in your chosen packs"} — add another pack below for fresh ones, or replay favourites.</p>`;
+        const sliders = freshOf("slider");
+        const message = !fresh ? "You’ve played every question in your chosen packs"
+          : sliders < sliderTarget ? `Your chosen packs have only ${sliders} new slider question${sliders === 1 ? "" : "s"} left (${fresh - sliders} written)`
+          : `Your chosen packs have only ${fresh} new question${fresh === 1 ? "" : "s"} left`;
+        return `<p class="topic-note vibe-running-low" role="status">${message} — add another pack below for fresh ones, or replay favourites.</p>`;
       }
       return "";
     }
@@ -15877,7 +15909,7 @@ var qrcode = function() {
           <form class="question-card" id="question-form" style="--question-color:${topicColor(questionTopic?.tone)}" novalidate>
             <div class="question-decor" aria-hidden="true"><span></span><span></span><span></span></div>
             <div class="question-meta">
-              <span class="category-pill"><span class="category-symbol">${categorySymbol(question.category)}</span>${escapeHTML(question.category)}</span>
+              <span class="category-pill" title="${escapeHTML(question.category)}"><span class="category-symbol">${categorySymbol(question.category)}</span>${escapeHTML(question.category)}</span>
               <span class="question-meta-actions">
                 <button class="favorite-button ${isFavorite ? "active" : ""}" id="favorite-current" type="button" aria-label="${isFavorite ? "Remove from" : "Add to"} favorites" aria-pressed="${isFavorite}">★</button>
                 <span class="type-chip"><span aria-hidden="true">${quickPick ? "⇄" : question.type === "slider" ? "↔" : "✎"}</span>${quickPick ? "Pick a side" : question.type === "slider" ? "Slide your answer" : "Write your answer"}</span>
@@ -16485,7 +16517,7 @@ var qrcode = function() {
           || pools.flat().find((text) => !usedPrompts.has(text))
           || pools[0][0];
         state.cardPrompts[question.id] = { key, text: chosen };
-        state.recentPrompts = [...(Array.isArray(state.recentPrompts) ? state.recentPrompts : []).filter((text) => text !== chosen), chosen].slice(-120);
+        state.recentPrompts = [...(Array.isArray(state.recentPrompts) ? state.recentPrompts : []).filter((text) => text !== chosen), chosen].slice(-400);
       }
       usedPrompts.add(chosen);
       return `
@@ -16543,7 +16575,7 @@ var qrcode = function() {
         return `
           <div class="topic-alignment-card">
             ${alignmentRingMarkup(item.score, "similar")}
-            <span class="topic-alignment-name"><span class="nowrap">${topic?.icon || "•"} ${escapeHTML(topic?.label || item.topic)} ·</span> <span class="nowrap">${item.fitScore}% fit ·</span> <span class="nowrap">${item.count}Q</span></span>
+            <span class="topic-alignment-name"><span class="nowrap">${topic?.icon || "•"} ${escapeHTML(topic?.label || item.topic)}</span> <span class="nowrap">· ${item.fitScore}% fit · ${item.count}Q</span></span>
           </div>
         `;
       }).join("");
@@ -17239,10 +17271,29 @@ var qrcode = function() {
       }
       const midRound = state.playStyle === "nearby" && state.nearbyRole === "join" && state.nearbyRoundId && ["question", "nearby-wait", "celebration", "reveal"].includes(state.screen);
       if (midRound) {
-        // A new QR from the host mid-round reconnects this round instead of starting over.
         handledNearbyLaunch = launchSignature;
         history.replaceState(null, "", location.href.split("#")[0]);
         render();
+        // Still linked to a partner and this is someone else's QR: ask before touching the working link.
+        if (nearbyChannelOpen() && nearbyRuntime.roomId && launchRoomId !== nearbyRuntime.roomId) {
+          const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "your partner";
+          openConfirmDialog({
+            title: "Leave your current round?",
+            copy: `You’re linked with ${partner}. Joining this new QR ends that link and discards your round with ${partner}.`,
+            confirmLabel: "Leave and join",
+            cancelLabel: `Stay with ${partner}`,
+            danger: true,
+            safeFirst: true,
+            tag: "link"
+          }).then((ok) => {
+            if (!ok) { showToast(`Still linked with ${partner}.`); return; }
+            closeNearbyConnection({ notifyPartner: true });
+            nearbyRuntime.initConfirmed = true;
+            prepareNearbyJoin(launchRoomId, launchJoinToken);
+          });
+          return true;
+        }
+        // Otherwise a new QR mid-round reconnects this round (or asks once the other host's round arrives).
         prepareNearbyJoin(launchRoomId, launchJoinToken);
         return true;
       }
