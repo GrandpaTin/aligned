@@ -9697,7 +9697,17 @@ var qrcode = function() {
           "What would you need to hear to feel understood here?",
           "Which part of this matters most to you, and which is flexible?",
           "How might this answer change in five years?",
-          "What question would you like to ask before you compare further?"
+          "What question would you like to ask before you compare further?",
+          "Which part of their answer surprised you in a good way?",
+          "What would a small step toward each other look like?",
+          "Is there a story behind where you each landed?",
+          "What would help this feel lighter to talk about?",
+          "Which bit of their answer do you already agree with?",
+          "How might this look different a year from now?",
+          "What would you like them to understand about your answer?",
+          "Where could you each bend a little without losing what matters?",
+          "What did you learn about them from this one?",
+          "Is this a big deal or a small preference for each of you?"
         ],
         far: [
           "What experience or value shaped your answer?",
@@ -9866,8 +9876,13 @@ var qrcode = function() {
       "Which answer would your friends guess was whose?",
       "What made you smile about the other answer?",
       "If you swapped answers for an evening, what would you do?",
-      "What would make the other side easy to say yes to?",
-      "What’s a question you’d like to ask about their answer?"
+      "What would make their answer easy to say yes to?",
+      "What’s a question you’d like to ask about their answer?",
+      "What would a perfect compromise date look like?",
+      "Which detail of their answer would you like to hear more about?",
+      "What does their answer tell you about what they enjoy?",
+      "How would you each explain your answer to a friend?",
+      "What’s one small thing you’d try from their answer this month?"
     ];
     DISCUSSION_PROMPTS.lightText = {
       close: [
@@ -13254,6 +13269,14 @@ var qrcode = function() {
       return { title: "Opposites with stories", copy: "You see these questions differently—slow down and learn what shaped each answer." };
     }
 
+    function fitDescriptor(percent) {
+      if (percent >= 88) return { title: "A natural fit" };
+      if (percent >= 72) return { title: "Fitting well together" };
+      if (percent >= 55) return { title: "A workable fit" };
+      if (percent >= 38) return { title: "Room to grow together" };
+      return { title: "Building your fit" };
+    }
+
     function alignmentRingMarkup(percent, caption = "aligned") {
       const score = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
       const color = alignmentColor(score);
@@ -13616,8 +13639,9 @@ var qrcode = function() {
         const inPool = new Set(pool.map((question) => question.id));
         // If even the borrowed playful ones run out, warm (never deep) questions keep the format before anything repeats.
         const fitsLoosely = (question) => questionTone(question) !== "deep" && (state.questionIntensity !== "cozy" || !questionNeedsHistory(question));
+        const fitsSlidersOnly = (question) => mode === "sliders-only" && question.type === "slider" && questionTone(question) !== "deep";
         [["slider", sliderTarget], ["text", textTarget]].forEach(([type, target]) => {
-          [fitsVibe, fitsLoosely].forEach((fits) => {
+          [fitsVibe, fitsLoosely, fitsSlidersOnly].forEach((fits) => {
             const unseen = pool.filter((question) => question.type === type && !seen.has(question.id)).length;
             if (unseen >= target) return;
             const extra = getQuestionCatalog().filter((question) => question.type === type && !inPool.has(question.id)
@@ -13668,12 +13692,13 @@ var qrcode = function() {
           : selected.filter((id) => catalogById.get(id)?.type === "slider").length >= sliderTarget + 2;
         // Beyond a hard limit (written-heavy rounds are slow), the right format wins even over a repeat from tonight.
         const writtenSoFar = selected.filter((id) => catalogById.get(id)?.type === "text").length;
-        const hardCap = mode === "mixed" ? textTarget + 2 : Math.max(textTarget + 2, Math.ceil(count * 0.7));
+        const hardCap = mode === "mixed" ? textTarget + 1 : Math.max(textTarget + 1, Math.ceil(count * 0.5));
         const hardDrifted = type === "slider" && writtenSoFar + textSlotsLeft >= hardCap;
         const rank = (question) => [
           // "Sliders only" means sliders: a written question never stands in while any slider exists.
           mode === "sliders-only" && question.type !== "slider" ? 1 : 0,
           hardDrifted && question.type !== type ? 1 : 0,
+          selected.some((id) => promptsAreTwins(question, catalogById.get(id))) ? 1 : 0,
           tonightIds.has(question.id) ? 1 : 0,
           drifted && question.type !== type ? 1 : 0,
           question.type === type ? 0 : 1,
@@ -15189,7 +15214,8 @@ var qrcode = function() {
       }
       if (state.sessionPreset === "custom" && state.completedRounds.some(isTonightRound)) {
         const topics = new Set(state.selectedTopics);
-        const freshOf = (type) => getQuestionCatalog().filter((question) => topics.has(question.topic) && question.type === type && usable(question)).length;
+        const cozyOk = (question) => state.questionIntensity !== "cozy" || questionTone(question) !== "deep";
+        const freshOf = (type) => getQuestionCatalog().filter((question) => topics.has(question.topic) && question.type === type && usable(question) && cozyOk(question)).length;
         const count = state.questionCount;
         const sliderTarget = state.questionMode === "sliders-only" ? count : state.questionMode === "mixed" ? Math.ceil(count * 0.6) : Math.ceil(count * 0.8);
         const fresh = freshOf("slider") + freshOf("text");
@@ -16740,7 +16766,7 @@ var qrcode = function() {
                 ${alignmentRingMarkup(alignment.fitOverall, "fit")}
                 <div class="alignment-summary-copy">
                   <p class="eyebrow">Relationship fit</p>
-                  <h3>${alignmentDescriptor(alignment.fitOverall).title}</h3>
+                  <h3>${fitDescriptor(alignment.fitOverall).title}</h3>
                   <p class="score-explainer">Adjusts each difference by how important the topic felt to either person.</p>
                 </div>
               </div>
