@@ -6475,6 +6475,9 @@
        (a container query, so it follows the card's real width rather than the screen's). */
     .question-screen .question-meta { container-type: inline-size; }
     @container (max-width: 400px) {
+      .question-screen .question-meta { flex-wrap: nowrap; gap: 6px; }
+      .question-screen .category-pill { min-width: 0; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .question-screen .question-meta-actions { flex-shrink: 0; }
       [data-text-size] .question-screen .question-meta .type-chip { padding-inline: 8px; white-space: nowrap; font-size: 0 !important; gap: 0; }
       [data-text-size] .question-screen .question-meta .type-chip > span { font-size: max(12px, 0.8rem) !important; }
     }
@@ -9693,7 +9696,17 @@ var qrcode = function() {
           "What would you need to hear to feel understood here?",
           "Which part of this matters most to you, and which is flexible?",
           "How might this answer change in five years?",
-          "What question would you like to ask before you compare further?"
+          "What question would you like to ask before you compare further?",
+          "Which part of their answer surprised you in a good way?",
+          "What would a small step toward each other look like?",
+          "Is there a story behind where you each landed?",
+          "What would help this feel lighter to talk about?",
+          "Which bit of their answer do you already agree with?",
+          "How might this look different a year from now?",
+          "What would you like them to understand about your answer?",
+          "Where could you each bend a little without losing what matters?",
+          "What did you learn about them from this one?",
+          "Is this a big deal or a small preference for each of you?"
         ],
         far: [
           "What experience or value shaped your answer?",
@@ -9862,8 +9875,13 @@ var qrcode = function() {
       "Which answer would your friends guess was whose?",
       "What made you smile about the other answer?",
       "If you swapped answers for an evening, what would you do?",
-      "What would make the other side easy to say yes to?",
-      "What’s a question you’d like to ask about their answer?"
+      "What would make their answer easy to say yes to?",
+      "What’s a question you’d like to ask about their answer?",
+      "What would a perfect compromise date look like?",
+      "Which detail of their answer would you like to hear more about?",
+      "What does their answer tell you about what they enjoy?",
+      "How would you each explain your answer to a friend?",
+      "What’s one small thing you’d try from their answer this month?"
     ];
     DISCUSSION_PROMPTS.lightText = {
       close: [
@@ -10287,7 +10305,7 @@ var qrcode = function() {
     let nearbyLastPeerMessageAt = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.3.4";
+    const APP_VERSION = "1.3.5";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -10772,11 +10790,12 @@ var qrcode = function() {
       });
     }
 
-    function closeNearbyConnection({ notifyPartner = false, forgetSession = true } = {}) {
+    function closeNearbyConnection({ notifyPartner = false, forgetSession = true, reason = "" } = {}) {
+      const leave = reason ? { type: "leave", reason } : { type: "leave" };
       if (notifyPartner && nearbyChannelOpen()) {
-        try { nearbyDataChannel.send(JSON.stringify({ type: "leave" })); } catch {}
+        try { nearbyDataChannel.send(JSON.stringify(leave)); } catch {}
       } else if (notifyPartner) {
-        sendNearbySignal({ type: "leave" });
+        sendNearbySignal(leave);
       }
       clearInterval(nearbyHeartbeatTimer);
       clearInterval(nearbyPeerWatchTimer);
@@ -10876,7 +10895,9 @@ var qrcode = function() {
         } else if (state.screen === "question" && !linkEnded && !nearbyRuntime.partnerLeft) {
           message = `Reconnecting to ${partner}’s phone… keep answering, nothing is lost.`;
         } else if (state.screen === "question" && nearbyRuntime.partnerLeft) {
-          message = `${partner} left the two-phone round. Keep answering — ${partner} can answer on this phone at the end.`;
+          message = nearbyRuntime.partnerLeftReason === "kept-own-round"
+            ? `${partner} stayed on their own round. Keep answering — ${partner} can answer on this phone at the end.`
+            : `${partner} left the two-phone round. Keep answering — ${partner} can answer on this phone at the end.`;
           tone = "warning";
         } else if (state.screen === "question") {
           message = `The link to ${partner}’s phone has ended. Keep answering — you can reconnect or finish on one phone at the end.`;
@@ -11154,7 +11175,7 @@ var qrcode = function() {
         }).then((ok) => {
           nearbyRuntime.initPending = false;
           if (!ok) {
-            closeNearbyConnection({ notifyPartner: true });
+            closeNearbyConnection({ notifyPartner: true, reason: "kept-own-round" });
             if (["question", "intermission", "nearby-wait", "celebration", "reveal"].includes(state.screen)) { state.resumeScreen = state.screen; state.screen = "setup"; }
             saveState(); render();
             showToast("Kept your round. You can finish it on this phone.");
@@ -11290,11 +11311,15 @@ var qrcode = function() {
         nearbyRuntime.partnerLeft = true;
         dismissConfirmDialogs("link");
         const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "Your partner";
-        const declinedNewRound = state.nearbyRole === "host" && state.screen === "question" && !(nearbyRuntime.partnerProgress?.answered > 0);
+        const declinedNewRound = payload.reason === "kept-own-round";
         closeNearbyConnection();
         nearbyRuntime.partnerLeft = true;
-        showToast(declinedNewRound ? `${partner} stayed on their own round. You can show the QR again later.` : `${partner} left the two-phone round. Your answers are saved on this phone.`, { tone: "warning" });
-        if (state.screen === "nearby") state.screen = "setup";
+        nearbyRuntime.partnerLeftReason = declinedNewRound ? "kept-own-round" : "";
+        // A host who hasn't answered anything yet goes back to pairing rather than a round nobody joined.
+        const hostUntouched = declinedNewRound && state.nearbyRole === "host" && state.screen === "question" && !Object.keys(state.answers?.[0] || {}).length;
+        if (hostUntouched) state.screen = "nearby";
+        showToast(declinedNewRound ? `${partner} stayed on their own round. ${hostUntouched ? "Show a new QR when you’re both ready." : "You can show a new QR from Home later."}` : `${partner} left the two-phone round. Your answers are saved on this phone.`, { tone: "warning" });
+        if (state.screen === "nearby" && !hostUntouched) state.screen = "setup";
         saveState();
         render();
       } else if (payload.type === "follow-through") {
@@ -11494,8 +11519,9 @@ var qrcode = function() {
         return;
       }
       try {
+        const confirmed = Boolean(nearbyRuntime.initConfirmed);
         closeNearbyConnection();
-        nearbyRuntime = { ...nearbyRuntime, role: "join", roomId, joinToken, expiresAt: Date.now() + 15 * 60 * 1000 };
+        nearbyRuntime = { ...nearbyRuntime, role: "join", roomId, joinToken, expiresAt: Date.now() + 15 * 60 * 1000, initConfirmed: confirmed };
         state.nearbyRole = "join";
         saveState();
         saveNearbySession();
@@ -12037,7 +12063,10 @@ var qrcode = function() {
     }
 
     document.addEventListener("keydown", (event) => {
-      if (["Tab", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", " "].includes(event.key)) document.documentElement.classList.add("kbd-nav");
+      if (event.isComposing || event.keyCode === 229) return;
+      // Typing (including Enter/Space on a phone keyboard) isn't navigation; only Tab counts inside text fields.
+      const typing = event.target instanceof Element && event.target.matches("input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea, [contenteditable]");
+      if (event.key === "Tab" || (!typing && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", " "].includes(event.key))) document.documentElement.classList.add("kbd-nav");
     }, true);
     document.addEventListener("pointerdown", () => document.documentElement.classList.remove("kbd-nav"), true);
     // File names use the local calendar date (an evening export in the US is still "today").
@@ -12793,7 +12822,7 @@ var qrcode = function() {
           duck = 0.8;
         } else if (kind === "partner-flip") {
           const d = (Number(options.degree) || 0) % 5;
-          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 1.55 : themeName === "cute" ? 1.2 : 1), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true, ...(themeName === "cute" ? { octaveLevel: 0.6 } : {}), ...(themeName === "dreamy" ? { attack: 0.01 } : {}) });
+          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 1.9 : themeName === "cute" ? 1.2 : 1), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true, ...(themeName === "cute" ? { octaveLevel: 0.6 } : {}), ...(themeName === "dreamy" ? { attack: 0.01 } : {}) });
           duck = 0.8;
         } else if (kind === "open") {
           noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.11, q: 0.8 });
@@ -13245,6 +13274,14 @@ var qrcode = function() {
       return { title: "Opposites with stories", copy: "You see these questions differently—slow down and learn what shaped each answer." };
     }
 
+    function fitDescriptor(percent) {
+      if (percent >= 88) return { title: "A natural fit" };
+      if (percent >= 72) return { title: "Fitting well together" };
+      if (percent >= 55) return { title: "A workable fit" };
+      if (percent >= 38) return { title: "Room to grow together" };
+      return { title: "Building your fit" };
+    }
+
     function alignmentRingMarkup(percent, caption = "aligned") {
       const score = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
       const color = alignmentColor(score);
@@ -13607,8 +13644,9 @@ var qrcode = function() {
         const inPool = new Set(pool.map((question) => question.id));
         // If even the borrowed playful ones run out, warm (never deep) questions keep the format before anything repeats.
         const fitsLoosely = (question) => questionTone(question) !== "deep" && (state.questionIntensity !== "cozy" || !questionNeedsHistory(question));
+        const fitsSlidersOnly = (question) => mode === "sliders-only" && question.type === "slider" && questionTone(question) !== "deep";
         [["slider", sliderTarget], ["text", textTarget]].forEach(([type, target]) => {
-          [fitsVibe, fitsLoosely].forEach((fits) => {
+          [fitsVibe, fitsLoosely, fitsSlidersOnly].forEach((fits) => {
             const unseen = pool.filter((question) => question.type === type && !seen.has(question.id)).length;
             if (unseen >= target) return;
             const extra = getQuestionCatalog().filter((question) => question.type === type && !inPool.has(question.id)
@@ -13659,12 +13697,13 @@ var qrcode = function() {
           : selected.filter((id) => catalogById.get(id)?.type === "slider").length >= sliderTarget + 2;
         // Beyond a hard limit (written-heavy rounds are slow), the right format wins even over a repeat from tonight.
         const writtenSoFar = selected.filter((id) => catalogById.get(id)?.type === "text").length;
-        const hardCap = mode === "mixed" ? textTarget + 2 : Math.max(textTarget + 2, Math.ceil(count * 0.7));
+        const hardCap = mode === "mixed" ? textTarget + 1 : Math.max(textTarget + 1, Math.ceil(count * 0.5));
         const hardDrifted = type === "slider" && writtenSoFar + textSlotsLeft >= hardCap;
         const rank = (question) => [
           // "Sliders only" means sliders: a written question never stands in while any slider exists.
           mode === "sliders-only" && question.type !== "slider" ? 1 : 0,
           hardDrifted && question.type !== type ? 1 : 0,
+          selected.some((id) => promptsAreTwins(question, catalogById.get(id))) ? 1 : 0,
           tonightIds.has(question.id) ? 1 : 0,
           drifted && question.type !== type ? 1 : 0,
           question.type === type ? 0 : 1,
@@ -15180,13 +15219,15 @@ var qrcode = function() {
       }
       if (state.sessionPreset === "custom" && state.completedRounds.some(isTonightRound)) {
         const topics = new Set(state.selectedTopics);
-        const freshOf = (type) => getQuestionCatalog().filter((question) => topics.has(question.topic) && question.type === type && usable(question)).length;
+        const cozyOk = (question) => state.questionIntensity !== "cozy" || questionTone(question) !== "deep";
+        const freshOf = (type) => getQuestionCatalog().filter((question) => topics.has(question.topic) && question.type === type && usable(question) && cozyOk(question)).length;
         const count = state.questionCount;
         const sliderTarget = state.questionMode === "sliders-only" ? count : state.questionMode === "mixed" ? Math.ceil(count * 0.6) : Math.ceil(count * 0.8);
         const fresh = freshOf("slider") + freshOf("text");
         if (freshOf("slider") >= sliderTarget && fresh >= count) return "";
         const sliders = freshOf("slider");
         const message = !fresh ? "You’ve played every question in your chosen packs"
+          : !sliders ? `No new slider questions left in your chosen packs (${fresh} written)`
           : sliders < sliderTarget ? `Your chosen packs have only ${sliders} new slider question${sliders === 1 ? "" : "s"} left (${fresh - sliders} written)`
           : `Your chosen packs have only ${fresh} new question${fresh === 1 ? "" : "s"} left`;
         return `<p class="topic-note vibe-running-low" role="status">${message} — add another pack below for fresh ones, or replay favourites.</p>`;
@@ -16730,7 +16771,7 @@ var qrcode = function() {
                 ${alignmentRingMarkup(alignment.fitOverall, "fit")}
                 <div class="alignment-summary-copy">
                   <p class="eyebrow">Relationship fit</p>
-                  <h3>${alignmentDescriptor(alignment.fitOverall).title}</h3>
+                  <h3>${fitDescriptor(alignment.fitOverall).title}</h3>
                   <p class="score-explainer">Adjusts each difference by how important the topic felt to either person.</p>
                 </div>
               </div>
@@ -17286,9 +17327,14 @@ var qrcode = function() {
             safeFirst: true,
             tag: "link"
           }).then((ok) => {
-            if (!ok) { showToast(`Still linked with ${partner}.`); return; }
+            if (!ok) { if (nearbyChannelOpen()) showToast(`Still linked with ${partner}.`); focusScreenHeading(); return; }
             closeNearbyConnection({ notifyPartner: true });
             nearbyRuntime.initConfirmed = true;
+            // Show the joining screen rather than the round just left (it stays resumable if the join fails).
+            if (["question", "intermission", "nearby-wait", "celebration", "reveal"].includes(state.screen)) state.resumeScreen = state.screen;
+            state.screen = "nearby";
+            saveState();
+            render();
             prepareNearbyJoin(launchRoomId, launchJoinToken);
           });
           return true;
