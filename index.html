@@ -1464,7 +1464,7 @@
 
     .slider-comment strong {
       color: var(--player-color);
-      font-size: 0.68rem;
+      font-size: max(12px, 0.68rem);
       letter-spacing: 0.04em;
       text-transform: uppercase;
     }
@@ -6469,6 +6469,7 @@
     .quick-pick-option.active { border-color: var(--question-color, var(--coral)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--question-color, var(--coral)) 22%, transparent); transform: translateY(-2px); }
     [data-theme="pastel"] .quick-pick-option { background: #ffffff; color: #1e293b; }
     .nowrap { white-space: nowrap; }
+    .celebration-card #open-reveal-board { margin-top: 16px; }
     .vibe-running-low { grid-column: 1 / -1; margin: 4px 0 0; }
     @media (pointer: coarse) { .vibe-running-low .text-btn { min-height: 44px; } }
     .topic-alignment-card { justify-content: flex-start !important; }
@@ -6492,6 +6493,7 @@
     }
     @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
       body:has(textarea:focus, input:not([type=range]):not([type=checkbox]):focus) .topbar { position: static; }
+      .question-screen .answer-textarea { min-height: 72px; }
       [data-text-size="large"] .question-screen .quick-pick-option { min-height: 48px; padding-block: 6px; }
       [data-text-size="large"] .question-screen .quick-pick { margin-top: 4px; }
     }
@@ -10310,13 +10312,16 @@ var qrcode = function() {
     let state = loadState();
     // A save that can't be read is kept aside (never overwritten by the fresh start) and the couple is told.
     if (loadStateFailed) {
+      let keptNewCopy = false;
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         const first = localStorage.getItem(`${STORAGE_KEY}-unreadable`);
         const slot = first ? `${STORAGE_KEY}-unreadable-2` : `${STORAGE_KEY}-unreadable`;
-        if (raw && raw !== first && !localStorage.getItem(slot)) localStorage.setItem(slot, raw);
+        if (raw && raw !== first && !localStorage.getItem(slot)) { localStorage.setItem(slot, raw); keptNewCopy = true; }
       } catch {}
-      window.setTimeout(() => showToast("Your saved game couldn’t be read, so Aligned started fresh. A copy was kept — download it from Settings → Your data.", { tone: "warning" }), 900);
+      window.setTimeout(() => showToast(keptNewCopy
+        ? "Your saved game couldn’t be read, so Aligned started fresh. A copy was kept — download it from Settings → Save & transfer game data."
+        : "Your saved game couldn’t be read, so Aligned started fresh. Earlier unreadable saves are in Settings → Save & transfer game data.", { tone: "warning" }), 900);
       loadStateFailed = false;
     }
     let lastRenderedScreen = null;
@@ -13096,7 +13101,9 @@ var qrcode = function() {
         const barHeight = bar && getComputedStyle(bar).position === "sticky" ? bar.offsetHeight : 0;
         const rect = element.getBoundingClientRect();
         const room = window.innerHeight - barHeight - 12;
-        const overflow = Math.min(rect.bottom - room, rect.top - 96);
+        const topbar = document.querySelector(".topbar");
+        const topGap = topbar && getComputedStyle(topbar).position === "sticky" ? 96 : 8;
+        const overflow = Math.min(rect.bottom - room, rect.top - topGap);
         if (overflow > 0) window.scrollBy({ top: overflow, behavior: motionReduced() ? "auto" : "smooth" });
       });
     }
