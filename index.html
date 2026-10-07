@@ -6472,6 +6472,13 @@
     .vibe-running-low { grid-column: 1 / -1; margin: 4px 0 0; }
     @media (pointer: coarse) { .vibe-running-low .text-btn { min-height: 44px; } }
     .topic-alignment-card { justify-content: flex-start !important; }
+    /* When the category, answer-type chip and favourite can't share one row, the chip shrinks to its icon
+       (a container query, so it follows the card's real width rather than the screen's). */
+    .question-screen .question-meta { container-type: inline-size; }
+    @container (max-width: 400px) {
+      [data-text-size] .question-screen .question-meta .type-chip { padding-inline: 8px; white-space: nowrap; font-size: 0 !important; gap: 0; }
+      [data-text-size] .question-screen .question-meta .type-chip > span { font-size: max(12px, 0.8rem) !important; }
+    }
     /* Narrow phones keep the category name and let the answer-type chip shrink to its icon. */
     @media (max-width: 340px) {
       .question-screen .question-meta { flex-wrap: nowrap; gap: 6px; }
@@ -9845,8 +9852,8 @@ var qrcode = function() {
     const PLAYFUL_WARM_CLOSE = DISCUSSION_PROMPTS.warm.close.slice(-12);
     DISCUSSION_PROMPTS.cozyFar = [
       "What’s the story behind your answer?",
-      "Give one compliment about the other side.",
-      "What would make the other side fun to try once?",
+      "Give one compliment about their answer.",
+      "What would make their answer fun to try once?",
       "Which part of the other answer surprised you most?",
       "What would a perfect evening look like with a bit of both?",
       "Ask one curious question about the other answer.",
@@ -10166,7 +10173,7 @@ var qrcode = function() {
           cardPrompts: cached.cardPrompts && typeof cached.cardPrompts === "object"
             ? Object.fromEntries(Object.entries(cached.cardPrompts).filter(([id, value]) => validIds.has(id) && value && typeof value.text === "string" && typeof value.key === "string").map(([id, value]) => [id, { key: value.key.slice(0, 40), text: value.text.slice(0, 300) }]))
             : {},
-          recentPrompts: Array.isArray(cached.recentPrompts) ? cached.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-120) : [],
+          recentPrompts: Array.isArray(cached.recentPrompts) ? cached.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-400) : [],
           recentHeadlines: Array.isArray(cached.recentHeadlines) ? [...new Set(cached.recentHeadlines.filter((text) => ["vibe", "roll", "another", "best", "finding", "locked"].includes(text)))].slice(-5) : [],
           packReturnPreset: typeof cached.packReturnPreset === "string" ? cached.packReturnPreset.slice(0, 40) : ""
         };
@@ -10934,7 +10941,7 @@ var qrcode = function() {
         type: "round-init", roundId: state.nearbyRoundId, newRound: Boolean(newRound), names: [...state.names], questionMode: state.questionMode,
         questionIntensity: state.questionIntensity, selectedTopics: [...state.selectedTopics],
         sessionPreset: state.sessionPreset, recentHeadlines: Array.isArray(state.recentHeadlines) ? state.recentHeadlines.slice(-5) : [],
-        recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-120) : [],
+        recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-400) : [],
         selectedQuestionIds: [...state.selectedQuestionIds], questions: getSelectedQuestions().filter(Boolean)
       };
     }
@@ -11232,7 +11239,7 @@ var qrcode = function() {
         selectedQuestionIds, activePlayer: 1,
         nearbyRole: "join", nearbyRoundId: payload.roundId,
         sessionPreset: payload.sessionPreset === "pack" || SESSION_PRESETS.some((preset) => preset.id === payload.sessionPreset) ? payload.sessionPreset : "custom",
-        recentPrompts: Array.isArray(payload.recentPrompts) ? payload.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-120) : settings.recentPrompts,
+        recentPrompts: Array.isArray(payload.recentPrompts) ? payload.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-400) : settings.recentPrompts,
         cardPrompts: {},
         recentHeadlines: Array.isArray(payload.recentHeadlines) ? [...new Set(payload.recentHeadlines.filter((item) => ["vibe", "roll", "another", "best", "finding", "locked"].includes(item)))].slice(-5) : settings.recentHeadlines
       };
@@ -11621,7 +11628,7 @@ var qrcode = function() {
         privatePinHash: state.privatePinHash,
         tutorialSeen: state.tutorialSeen,
         answeredQuestionIds: [...state.answeredQuestionIds],
-        recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-120) : [],
+        recentPrompts: Array.isArray(state.recentPrompts) ? state.recentPrompts.slice(-400) : [],
         recentHeadlines: Array.isArray(state.recentHeadlines) ? state.recentHeadlines.filter((item) => typeof item === "string").slice(-5) : [],
         packReturnPreset: typeof state.packReturnPreset === "string" ? state.packReturnPreset.slice(0, 40) : "",
         excludedQuestionIds: [...state.excludedQuestionIds],
@@ -13644,12 +13651,18 @@ var qrcode = function() {
         const remaining = pool.filter((question) => !selectedIds.has(question.id));
         if (!remaining.length) break;
         const wantPlayful = topic === "spicy" && activePreset?.id === "spicy-night" && selected.filter((id) => PLAYFUL_SPICY.test(id)).length < 3;
+        // Written slots still to come count toward the drift limits, so the round's total stays near its promise.
+        const textSlotsLeft = typeSequence.slice(index + 1).filter((slot) => slot === "text").length;
         const drifted = type === "slider"
-          ? selected.filter((id) => catalogById.get(id)?.type === "text").length >= textTarget + 2
+          ? selected.filter((id) => catalogById.get(id)?.type === "text").length + textSlotsLeft >= textTarget + 2
           : selected.filter((id) => catalogById.get(id)?.type === "slider").length >= sliderTarget + 2;
         // Beyond a hard limit (written-heavy rounds are slow), the right format wins even over a repeat from tonight.
-        const hardDrifted = type === "slider" && selected.filter((id) => catalogById.get(id)?.type === "text").length >= textTarget + 5;
+        const writtenSoFar = selected.filter((id) => catalogById.get(id)?.type === "text").length;
+        const hardCap = mode === "mixed" ? textTarget + 2 : Math.max(textTarget + 2, Math.ceil(count * 0.7));
+        const hardDrifted = type === "slider" && writtenSoFar + textSlotsLeft >= hardCap;
         const rank = (question) => [
+          // "Sliders only" means sliders: a written question never stands in while any slider exists.
+          mode === "sliders-only" && question.type !== "slider" ? 1 : 0,
           hardDrifted && question.type !== type ? 1 : 0,
           tonightIds.has(question.id) ? 1 : 0,
           drifted && question.type !== type ? 1 : 0,
@@ -14105,7 +14118,7 @@ var qrcode = function() {
       if (state.textSize !== "small") return;
       document.documentElement.classList.add("measuring-text");
       document.querySelectorAll("#app *, .topbar *, .bottom-nav *").forEach((element) => {
-        if (element.closest(".text-size-option, svg, .reveal-buddy, .progress-star, .pass-person, .card-spark, .question-decor") || (element.matches(".type-chip") && innerWidth <= 340) || !element.textContent.trim()) return;
+        if (element.closest(".text-size-option, svg, .reveal-buddy, .progress-star, .pass-person, .card-spark, .question-decor") || element.matches(".type-chip") || !element.textContent.trim()) return;
         if (parseFloat(getComputedStyle(element).fontSize) < 11.95) {
           element.style.setProperty("font-size", "12px", "important");
           element.setAttribute("data-compact-floor", "");
@@ -15171,7 +15184,11 @@ var qrcode = function() {
         const sliderTarget = state.questionMode === "sliders-only" ? count : state.questionMode === "mixed" ? Math.ceil(count * 0.6) : Math.ceil(count * 0.8);
         const fresh = freshOf("slider") + freshOf("text");
         if (freshOf("slider") >= sliderTarget && fresh >= count) return "";
-        return `<p class="topic-note vibe-running-low" role="status">${fresh ? `Your chosen packs have only ${fresh} new question${fresh === 1 ? "" : "s"} left` : "You’ve played every question in your chosen packs"} — add another pack below for fresh ones, or replay favourites.</p>`;
+        const sliders = freshOf("slider");
+        const message = !fresh ? "You’ve played every question in your chosen packs"
+          : sliders < sliderTarget ? `Your chosen packs have only ${sliders} new slider question${sliders === 1 ? "" : "s"} left (${fresh - sliders} written)`
+          : `Your chosen packs have only ${fresh} new question${fresh === 1 ? "" : "s"} left`;
+        return `<p class="topic-note vibe-running-low" role="status">${message} — add another pack below for fresh ones, or replay favourites.</p>`;
       }
       return "";
     }
@@ -16499,7 +16516,7 @@ var qrcode = function() {
           || pools.flat().find((text) => !usedPrompts.has(text))
           || pools[0][0];
         state.cardPrompts[question.id] = { key, text: chosen };
-        state.recentPrompts = [...(Array.isArray(state.recentPrompts) ? state.recentPrompts : []).filter((text) => text !== chosen), chosen].slice(-120);
+        state.recentPrompts = [...(Array.isArray(state.recentPrompts) ? state.recentPrompts : []).filter((text) => text !== chosen), chosen].slice(-400);
       }
       usedPrompts.add(chosen);
       return `
@@ -16557,7 +16574,7 @@ var qrcode = function() {
         return `
           <div class="topic-alignment-card">
             ${alignmentRingMarkup(item.score, "similar")}
-            <span class="topic-alignment-name"><span class="nowrap">${topic?.icon || "•"} ${escapeHTML(topic?.label || item.topic)} ·</span> <span class="nowrap">${item.fitScore}% fit ·</span> <span class="nowrap">${item.count}Q</span></span>
+            <span class="topic-alignment-name"><span class="nowrap">${topic?.icon || "•"} ${escapeHTML(topic?.label || item.topic)}</span> <span class="nowrap">· ${item.fitScore}% fit · ${item.count}Q</span></span>
           </div>
         `;
       }).join("");
