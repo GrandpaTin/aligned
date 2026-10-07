@@ -310,3 +310,19 @@ Applied all 11 next improvements to Aligned:
 11. **Re-scored all dimensions to 9.9 across mobile and desktop:**
     - Mobile: Ease of use: 9.9 | User friendliness: 9.9 | Usefulness: 9.9 | Polish: 9.9 | Fun & engagement: 9.9 | Sound design: 9.9 (physical iPhone listen test excluded per owner)
     - Desktop: Ease of use: 9.9 | User friendliness: 9.9 | Usefulness: 9.9 | Polish: 9.9 | Fun & engagement: 9.9 | Sound design: 9.9
+
+R25 reviewed 1.4.1–1.5.0 and ships as **1.5.0**:
+Applied all 12 proposed improvements to Aligned:
+1. **Magnetic Slider Collision Animation:** When slider markers land within 1 point of each other, the track triggers `.magnetic-collision` spring physics, magnetic glow pulse, and resonant chord chime.
+2. **30-Second "Round Wrapped" Story Reel:** Full-screen swipeable/tap animated recap modal featuring 5 slides with automated progress bars, highlight spotlights (Closest Mind-Meld, Tonight’s Plot Twist, Mind-Reader Crown), sound cues, and keepsake finale.
+3. **Audio Voice Notes / Memory Keepsake:** In-browser zero-dependency `MediaRecorder` audio capture directly on question card backs; saved to persistent local state and playable/removable on cards.
+4. **Rapid-Fire "This or That" 60s Warmup Mode:** 10 curated binary instinct pairs with instant alignment comparison screen launched directly from Home.
+5. **"Double Down" / High Stakes Wildcard:** 1 secret star per player per round placed on a chosen question during answering, revealing a celebratory double-down banner on the card.
+6. **"How We've Shifted" (Time Capsule Comparison):** Detects previous completed rounds containing the same question, rendering ghost dashed markers and past answer delta distance notes.
+7. **Custom Pack Exporter & QR Sharing:** Encodes custom question bundles into compressed `#pack=...` URL with bundled SVG QR code and automatic one-tap import modal on the partner's device.
+8. **Couple Milestone Badges:** Evaluates couple statistics across played rounds and displays unlocked badges in Results Journal (First Step, 90% Sync Club, Mind Readers, Midnight Talks, Spicy Pioneers, 50 Explored, Voice Archivists).
+9. **Real-time Partner Typing Indicator:** Transmits `{ type: "typing", isTyping }` over WebRTC data channel with breathing animated typing bubble on partner screen.
+10. **Natural Ambient Soundscapes:** Added procedural pink noise rain shower and warm crackling hearth fire sound generators to `ProceduralAmbient`, selectable alongside harmonic synth chords in Settings.
+11. **Redundant STUN & TURN Relay Fallback:** Enhanced `RTCPeerConnection` configuration with Google STUN fallback alongside Cloudflare STUN for cross-carrier network resilience.
+12. **Version Bump to 1.5.0 & Builds:** Updated `APP_VERSION`, `package.json`, and service worker cache `aligned-v36`; rebuilt offline standalone HTML bundle (1088 KB) and signed Android APK (10500). All automated production and signaling checks passed 100%.
+

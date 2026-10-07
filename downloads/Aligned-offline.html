@@ -3160,6 +3160,346 @@ var qrcode = function() {
       font-size: 0.78rem;
     }
 
+    /* Magnetic Slider Collision & Ghost Time Capsule Markers */
+    @keyframes magnetic-snap {
+      0% { transform: scale(1); filter: brightness(1); }
+      40% { transform: scale(1.3); filter: brightness(1.4) drop-shadow(0 0 10px var(--green)); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+    .magnetic-collision {
+      box-shadow: 0 0 18px rgba(74, 222, 128, 0.65), inset 0 2px 3px rgba(2, 6, 23, 0.35) !important;
+      border: 1px solid rgba(74, 222, 128, 0.45);
+    }
+    .magnetic-collision .marker {
+      animation: magnetic-snap 480ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .ghost-marker {
+      opacity: 0.45;
+      border: 2px dashed rgba(255, 255, 255, 0.8) !important;
+      background: rgba(148, 163, 184, 0.4) !important;
+      box-shadow: none !important;
+      pointer-events: none;
+    }
+    .ghost-marker .marker-value {
+      opacity: 0.7;
+      font-size: 0.65rem;
+      background: rgba(30, 41, 59, 0.8);
+      color: #cbd5e1;
+    }
+    .time-capsule-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: rgba(167, 139, 250, 0.12);
+      border: 1px solid rgba(167, 139, 250, 0.25);
+      font-size: 0.74rem;
+      color: #ddd6fe;
+    }
+
+    /* Round Wrapped Story Reel Modal */
+    .story-reel-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: #030712;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: env(safe-area-inset-top, 20px) 16px env(safe-area-inset-bottom, 20px);
+      user-select: none;
+    }
+    .story-reel-container {
+      width: 100%;
+      max-width: 440px;
+      height: 100%;
+      max-height: 820px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border-radius: 24px;
+      background: linear-gradient(165deg, #111827 0%, #030712 100%);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+    .story-progress-bar {
+      display: flex;
+      gap: 6px;
+      padding: 14px 16px 8px;
+      width: 100%;
+      z-index: 10;
+    }
+    .story-progress-segment {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .story-progress-fill {
+      height: 100%;
+      background: #ffffff;
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.1s linear;
+    }
+    .story-progress-fill.done { width: 100% !important; }
+    .story-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 16px 10px;
+      z-index: 10;
+    }
+    .story-header-title {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .story-close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 0;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    .story-slide {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      position: relative;
+    }
+    .story-nav-hotspot {
+      position: absolute;
+      top: 60px;
+      bottom: 60px;
+      width: 40%;
+      cursor: pointer;
+      z-index: 5;
+    }
+    .story-nav-prev { left: 0; }
+    .story-nav-next { right: 0; }
+    .story-big-badge {
+      font-size: 3.4rem;
+      margin-bottom: 12px;
+      animation: aura-pulse 1.8s ease-in-out infinite alternate;
+    }
+    .story-title {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.25;
+      margin-bottom: 10px;
+    }
+    .story-body {
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+      max-width: 340px;
+    }
+    .story-highlight-box {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      width: 100%;
+      text-align: left;
+    }
+
+    /* Voice Note Memory Recorder */
+    .voice-note-panel {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .voice-record-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 750;
+      background: rgba(239, 68, 68, 0.14);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      cursor: pointer;
+      transition: transform 120ms ease, background 120ms ease;
+    }
+    .voice-record-btn.recording {
+      background: #ef4444;
+      color: #fff;
+      animation: record-pulse 1s infinite alternate;
+    }
+    @keyframes record-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+      100% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    }
+    .voice-audio-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      font-size: 0.78rem;
+      color: #bae6fd;
+    }
+
+    /* Double Down Wildcard */
+    .wildcard-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #fbbf24;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      cursor: pointer;
+      transition: transform 120ms ease, background 120ms ease;
+    }
+    .wildcard-btn.active {
+      background: #f59e0b;
+      color: #1e1b4b;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.6);
+    }
+    .wildcard-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.15));
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fde68a;
+      font-size: 0.72rem;
+      font-weight: 850;
+      margin-left: 6px;
+    }
+
+    /* Partner Typing Indicator */
+    .partner-typing-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(167, 139, 250, 0.14);
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      font-size: 0.78rem;
+      color: #ddd6fe;
+      animation: aura-pulse 2s infinite alternate;
+      margin-top: 8px;
+    }
+    .typing-dots span {
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #c4b5fd;
+      margin: 0 1px;
+      animation: typing-jump 1s infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 200ms; }
+    .typing-dots span:nth-child(3) { animation-delay: 400ms; }
+    @keyframes typing-jump {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    /* Rapid-Fire "This or That" Warmup */
+    .lightning-panel {
+      text-align: center;
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(99, 102, 241, 0.1));
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      margin-top: 14px;
+    }
+    .lightning-choice-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 18px 0;
+    }
+    .lightning-btn {
+      padding: 18px 14px;
+      border-radius: 16px;
+      font-size: 0.96rem;
+      font-weight: 850;
+      color: var(--text);
+      background: rgba(30, 41, 59, 0.7);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      cursor: pointer;
+      transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+    }
+    .lightning-btn:hover {
+      transform: translateY(-2px);
+      border-color: var(--coral);
+      background: rgba(51, 65, 85, 0.85);
+    }
+
+    /* Milestone Badges in Journal */
+    .milestones-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .milestone-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 12px 8px;
+      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.45);
+      border: 1px solid var(--line);
+      font-size: 0.74rem;
+      opacity: 0.55;
+    }
+    .milestone-badge.unlocked {
+      opacity: 1;
+      background: linear-gradient(145deg, rgba(167, 139, 250, 0.15), rgba(74, 222, 128, 0.12));
+      border-color: rgba(74, 222, 128, 0.35);
+    }
+    .milestone-icon {
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+    }
+    .milestone-name {
+      font-weight: 800;
+      color: var(--text);
+    }
+    .milestone-desc {
+      color: var(--text-2);
+      font-size: 0.68rem;
+      margin-top: 2px;
+    }
+
     .session-dropdown-container {
       position: relative;
       width: 100%;
@@ -11243,6 +11583,9 @@ var qrcode = function() {
         completedRounds: [],
         completedPlayers: [false, false],
         guesses: [{}, {}],
+        voiceNotes: {},
+        wildcards: [null, null],
+        ambientSoundscape: "synth",
         revealCelebrated: "",
         nearbyRole: "",
         nearbyRoundId: "",
@@ -11449,7 +11792,10 @@ var qrcode = function() {
             : {},
           recentPrompts: Array.isArray(cached.recentPrompts) ? cached.recentPrompts.filter((text) => typeof text === "string").map((text) => text.slice(0, 300)).slice(-400) : [],
           recentHeadlines: Array.isArray(cached.recentHeadlines) ? [...new Set(cached.recentHeadlines.filter((text) => ["vibe", "roll", "another", "best", "finding", "locked"].includes(text)))].slice(-5) : [],
-          packReturnPreset: typeof cached.packReturnPreset === "string" ? cached.packReturnPreset.slice(0, 40) : ""
+          packReturnPreset: typeof cached.packReturnPreset === "string" ? cached.packReturnPreset.slice(0, 40) : "",
+          voiceNotes: cached.voiceNotes && typeof cached.voiceNotes === "object" ? cached.voiceNotes : {},
+          wildcards: Array.isArray(cached.wildcards) ? cached.wildcards : [null, null],
+          ambientSoundscape: ["synth", "rain", "hearth"].includes(cached.ambientSoundscape) ? cached.ambientSoundscape : "synth"
         };
 
         if (!validScreens.includes(restored.screen)) restored.screen = "setup";
@@ -11578,7 +11924,7 @@ var qrcode = function() {
     let nearbyLastPeerMessageAt = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.4.1";
+    const APP_VERSION = "1.5.0";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -12609,6 +12955,11 @@ var qrcode = function() {
         if (!sameRound) return;
         nearbyRuntime.partnerProgress = { answered: Math.max(0, Number(payload.answered) || 0), total: Math.max(1, Number(payload.total) || state.selectedQuestionIds.length) };
         if (state.screen === "nearby-wait") render();
+      } else if (payload.type === "typing") {
+        if (!sameRound) return;
+        nearbyRuntime.partnerTyping = Boolean(payload.isTyping);
+        const indicator = document.getElementById("partner-typing");
+        if (indicator) indicator.hidden = !nearbyRuntime.partnerTyping;
       } else if (payload.type === "leave") {
         nearbyRuntime.partnerLeft = true;
         dismissConfirmDialogs("link");
@@ -12764,7 +13115,7 @@ var qrcode = function() {
       }
       try { nearbyPeerConnection?.close(); } catch {}
       nearbyPendingCandidates = [];
-      const peer = new RTCPeerConnection({ iceServers: nearbyIceServers.length ? nearbyIceServers : [{ urls: "stun:stun.cloudflare.com:3478" }] });
+      const peer = new RTCPeerConnection({ iceServers: nearbyIceServers.length ? nearbyIceServers : [{ urls: ["stun:stun.cloudflare.com:3478", "stun:stun.l.google.com:19302"] }] });
       nearbyPeerConnection = peer;
       peer.addEventListener("icecandidate", (event) => {
         if (event.candidate) sendNearbySignal({ type: "candidate", candidate: event.candidate.toJSON?.() || event.candidate });
@@ -13707,6 +14058,111 @@ var qrcode = function() {
         if (!ctx) return;
         audioEngine.resume();
         if (this.generation) return;
+        const mode = state.ambientSoundscape || "synth";
+        if (mode === "rain") {
+          this.startRain(ctx);
+          return;
+        }
+        if (mode === "hearth") {
+          this.startHearth(ctx);
+          return;
+        }
+        this.startSynth(ctx);
+      }
+
+      startRain(ctx) {
+        const bufferSize = ctx.sampleRate * 3;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        let b0 = 0, b1 = 0, b2 = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.99886 * b0 + white * 0.0555179;
+          b1 = 0.99332 * b1 + white * 0.0750759;
+          b2 = 0.96900 * b2 + white * 0.1538520;
+          data[i] = (b0 + b1 + b2 + white * 0.5362) * 0.035;
+        }
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.loop = true;
+        const filter = ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.value = 1100;
+        const out = ctx.createGain();
+        out.gain.setValueAtTime(0.001, ctx.currentTime);
+        out.gain.linearRampToValueAtTime(0.7, ctx.currentTime + 2);
+        source.connect(filter);
+        filter.connect(out);
+        out.connect(audioEngine.musicBus);
+        source.start();
+        this.generation = {
+          source, out, filter,
+          stop: () => {
+            try {
+              out.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 1);
+              setTimeout(() => { try { source.stop(); source.disconnect(); out.disconnect(); } catch {} }, 1050);
+            } catch {}
+          }
+        };
+      }
+
+      startHearth(ctx) {
+        const bufferSize = ctx.sampleRate * 2;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * 0.02;
+        }
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.loop = true;
+        const filter = ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.value = 350;
+        const out = ctx.createGain();
+        out.gain.setValueAtTime(0.001, ctx.currentTime);
+        out.gain.linearRampToValueAtTime(0.65, ctx.currentTime + 1.5);
+        source.connect(filter);
+        filter.connect(out);
+        out.connect(audioEngine.musicBus);
+        source.start();
+
+        let crackleTimer = 0;
+        const scheduleCrackle = () => {
+          if (!this.generation) return;
+          if (ctx.state === "running") {
+            const crackleGain = ctx.createGain();
+            const now = ctx.currentTime;
+            crackleGain.gain.setValueAtTime(0.0001, now);
+            crackleGain.gain.linearRampToValueAtTime(0.05 + Math.random() * 0.06, now + 0.005);
+            crackleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04 + Math.random() * 0.03);
+            const osc = ctx.createOscillator();
+            osc.type = "triangle";
+            osc.frequency.setValueAtTime(350 + Math.random() * 700, now);
+            osc.frequency.exponentialRampToValueAtTime(70, now + 0.04);
+            osc.connect(crackleGain);
+            crackleGain.connect(out);
+            osc.start(now);
+            osc.stop(now + 0.06);
+            osc.onended = () => { osc.disconnect(); crackleGain.disconnect(); };
+          }
+          crackleTimer = window.setTimeout(scheduleCrackle, 120 + Math.random() * 450);
+        };
+        scheduleCrackle();
+
+        this.generation = {
+          source, out, filter, timer: crackleTimer,
+          stop: () => {
+            clearTimeout(crackleTimer);
+            try {
+              out.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 1);
+              setTimeout(() => { try { source.stop(); source.disconnect(); out.disconnect(); } catch {} }, 1050);
+            } catch {}
+          }
+        };
+      }
+
+      startSynth(ctx) {
         const now = ctx.currentTime;
         const out = ctx.createGain();
         out.gain.setValueAtTime(0.0001, now);
@@ -13853,6 +14309,11 @@ var qrcode = function() {
         const generation = this.generation;
         if (!generation) return;
         this.generation = null;
+        if (generation.stop) {
+          generation.stop();
+          armIdleSuspend();
+          return;
+        }
         window.clearTimeout(generation.timer);
         const ctx = audioEngine.ctx;
         const now = ctx.currentTime;
@@ -13861,7 +14322,7 @@ var qrcode = function() {
         generation.out.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
         window.setTimeout(() => {
           try { generation.lfo.stop(); } catch {}
-          [generation.lfo, generation.lfoDepth, generation.filter, generation.out].forEach((node) => node.disconnect());
+          [generation.lfo, generation.lfoDepth, generation.filter, generation.out].forEach((node) => node?.disconnect());
         }, 1600);
         armIdleSuspend();
       }
@@ -16055,7 +16516,10 @@ var qrcode = function() {
                 <label for="pack-name">Pack name<input class="custom-input" id="pack-name" maxlength="60" placeholder="Sunday night check-in"></label>
                 <div class="actions" style="align-self:end;margin-top:0"><button class="primary-btn" id="save-favorite-pack" type="button">Save ${favoriteIds.size} ${favoriteIds.size === 1 ? "favorite" : "favorites"}</button></div>
               </div>
-              ${state.customPacks.length ? `<div class="library-filters" style="margin-top:14px">${state.customPacks.map((pack) => `<span class="library-filter active saved-pack-chip" title="Play it from Home under “Your packs”">${escapeHTML(pack.name)} · ${pack.questionIds.length}Q <button type="button" data-delete-pack="${escapeHTML(pack.id)}" aria-label="Delete ${escapeHTML(pack.name)}" style="border:0;color:inherit;background:transparent;cursor:pointer;min-width:44px;min-height:44px">×</button></span>`).join("")}</div>` : ""}
+              ${state.customPacks.length ? `<div class="library-filters" style="margin-top:14px">${state.customPacks.map((pack) => `<span class="library-filter active saved-pack-chip" title="Play it from Home under “Your packs”">${escapeHTML(pack.name)} · ${pack.questionIds.length}Q <button type="button" data-share-pack="${escapeHTML(pack.id)}" aria-label="Share ${escapeHTML(pack.name)}" style="border:0;color:inherit;background:transparent;cursor:pointer;padding:2px 6px" title="Share pack via QR / link">🔗</button><button type="button" data-delete-pack="${escapeHTML(pack.id)}" aria-label="Delete ${escapeHTML(pack.name)}" style="border:0;color:inherit;background:transparent;cursor:pointer;min-width:32px;min-height:32px">×</button></span>`).join("")}</div>` : ""}
+              <div style="margin-top:10px">
+                <button class="secondary-btn" id="share-custom-pack-btn" type="button" style="display:inline-flex;align-items:center;gap:6px"><span aria-hidden="true">📤</span> Share Custom Questions (QR &amp; Link)</button>
+              </div>
               <p class="error" id="pack-error" role="alert"></p>
             </div>
           </details>
@@ -16401,6 +16865,16 @@ var qrcode = function() {
         });
       });
 
+      document.querySelectorAll("[data-share-pack]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const pack = state.customPacks.find((item) => item.id === button.dataset.sharePack);
+          if (pack) openPackShareModal(pack);
+        });
+      });
+      document.getElementById("share-custom-pack-btn")?.addEventListener("click", () => {
+        openPackShareModal();
+      });
+
       renderQuestionList();
     }
 
@@ -16538,6 +17012,12 @@ var qrcode = function() {
               </div>
             </article>
           </div>
+
+          <article class="journal-card" style="margin-top:16px">
+            <h3>Couple Milestones</h3>
+            <p>Milestone badges unlocked together as you explore, share, and connect.</p>
+            ${milestonesMarkup()}
+          </article>
 
           <article class="journal-card" style="margin-top:16px">
             <h3>Saved rounds</h3>
@@ -16710,6 +17190,7 @@ var qrcode = function() {
               <label class="setting-row" for="settings-sound"><span>Sounds</span><input id="settings-sound" type="checkbox" role="switch" ${state.soundEnabled ? "checked" : ""}></label>
               <label class="setting-row" for="settings-ambient"><span>Ambient music</span><input id="settings-ambient" type="checkbox" role="switch" ${state.ambientMusicEnabled ? "checked" : ""}></label>
               <div class="setting-row"><label for="sound-theme">Sound style</label><select class="custom-select" id="sound-theme"><option value="cute" ${state.soundTheme === "cute" ? "selected" : ""}>Cute chimes</option><option value="dreamy" ${state.soundTheme === "dreamy" ? "selected" : ""}>Dreamy bells</option><option value="arcade" ${state.soundTheme === "arcade" ? "selected" : ""}>Playful arcade</option></select></div>
+              <div class="setting-row"><label for="soundscape-mode">Ambient soundscape</label><select class="custom-select" id="soundscape-mode"><option value="synth" ${state.ambientSoundscape === "synth" ? "selected" : ""}>Harmonic Synth Chords</option><option value="rain" ${state.ambientSoundscape === "rain" ? "selected" : ""}>Gentle Rain Shower</option><option value="hearth" ${state.ambientSoundscape === "hearth" ? "selected" : ""}>Warm Crackling Hearth</option></select></div>
               <div class="setting-row"><label for="sound-volume">Volume</label><input id="sound-volume" class="range-input volume-input" type="range" min="0" max="1" step="0.05" value="${state.soundVolume}" style="--range-progress: ${Math.round(state.soundVolume * 100)}%"></div>
               <label class="setting-row" for="settings-haptics" ${typeof navigator.vibrate === "function" ? "" : "hidden"}><span>Vibration (on phones)</span><input id="settings-haptics" type="checkbox" role="switch" ${state.hapticsEnabled ? "checked" : ""}></label>
               <button class="secondary-btn" id="test-sound" type="button" style="margin-top:12px">Test the sound</button>
@@ -16763,6 +17244,15 @@ var qrcode = function() {
         applyPreferences();
       });
       document.getElementById("sound-theme").addEventListener("change", (event) => { state.soundTheme = event.currentTarget.value; saveState(); playSound("unlock"); });
+      document.getElementById("soundscape-mode")?.addEventListener("change", (event) => {
+        state.ambientSoundscape = event.currentTarget.value;
+        saveState();
+        if (state.ambientMusicEnabled && ambientSoundscape) {
+          ambientSoundscape.stop();
+          ambientSoundscape.start();
+        }
+        playSound("tap");
+      });
       document.getElementById("sound-volume").addEventListener("input", (event) => {
         event.currentTarget.style.setProperty("--range-progress", `${Math.round(Number(event.currentTarget.value) * 100)}%`);
         state.soundVolume = Number(event.currentTarget.value);
@@ -17155,6 +17645,7 @@ var qrcode = function() {
             <p class="error" id="setup-error" role="alert"></p>
             <div class="actions setup-start-actions">
               <button class="primary-btn" type="submit">Start your round</button>
+              <button class="secondary-btn" id="start-lightning-btn" type="button" style="display:inline-flex;align-items:center;gap:6px"><span aria-hidden="true">⚡</span> Rapid-Fire "This or That" (60s Warmup)</button>
             </div>
             <p class="privacy-note"><span aria-hidden="true">⌁</span><span>Your data stays in this browser unless you choose to export a backup.</span></p>
           </form>
@@ -17174,6 +17665,11 @@ var qrcode = function() {
         if (p2) p2.textContent = initials(playerTwo.value);
         saveState();
       };
+
+      document.getElementById("start-lightning-btn")?.addEventListener("click", () => {
+        rememberNames();
+        openLightningRoundModal();
+      });
 
       playerOne.addEventListener("input", rememberNames);
       playerTwo.addEventListener("input", rememberNames);
@@ -17704,8 +18200,13 @@ var qrcode = function() {
               <span class="category-pill" title="${escapeHTML(question.category)}"><span class="category-symbol">${categorySymbol(question.category)}</span>${escapeHTML(question.category)}</span>
               <span class="question-meta-actions">
                 <button class="favorite-button ${isFavorite ? "active" : ""}" id="favorite-current" type="button" aria-label="${isFavorite ? "Remove from" : "Add to"} favorites" aria-pressed="${isFavorite}">★</button>
+                <button class="wildcard-btn ${state.wildcards?.[state.activePlayer] === question.id ? "active" : ""}" id="wildcard-toggle" type="button" title="Double down on this question (1 per round)" aria-label="Double down wildcard">${state.wildcards?.[state.activePlayer] === question.id ? "★ Doubled Down" : "☆ Double Down"}</button>
                 <span class="type-chip"><span aria-hidden="true">${quickPick ? "⇄" : question.type === "slider" ? "↔" : "✎"}</span>${quickPick ? "Pick a side" : question.type === "slider" ? "Slide your answer" : "Write your answer"}</span>
               </span>
+            </div>
+            <div class="partner-typing-indicator" id="partner-typing" ${nearbyRuntime.partnerTyping ? "" : "hidden"}>
+              <div class="typing-dots"><span></span><span></span><span></span></div>
+              <span>${escapeHTML(partnerName)} is typing…</span>
             </div>
             <h2 class="prompt" id="question-title">${escapeHTML(question.prompt)}</h2>
             ${inputMarkup}
@@ -17825,6 +18326,39 @@ var qrcode = function() {
         button.setAttribute("aria-pressed", String(nowFavorite));
         saveState();
         playSound("tap");
+      });
+
+      document.getElementById("wildcard-toggle")?.addEventListener("click", () => {
+        state.wildcards = state.wildcards || [null, null];
+        const isCurrent = state.wildcards[state.activePlayer] === question.id;
+        state.wildcards[state.activePlayer] = isCurrent ? null : question.id;
+        saveState();
+        playSound(isCurrent ? "tap" : "spark");
+        const btn = document.getElementById("wildcard-toggle");
+        if (btn) {
+          const active = state.wildcards[state.activePlayer] === question.id;
+          btn.classList.toggle("active", active);
+          btn.textContent = active ? "★ Doubled Down" : "☆ Double Down";
+        }
+        showToast(isCurrent ? "Double down removed." : "★ Doubled down! Highlighted on reveal.");
+      });
+
+      let typingTimeout = null;
+      const sendTypingStatus = (isTyping) => {
+        if (state.playStyle === "nearby" && nearbyChannelOpen()) {
+          sendNearbyMessage({ type: "typing", roundId: state.nearbyRoundId, isTyping }, { queue: false });
+        }
+      };
+      form.querySelectorAll("textarea").forEach((textarea) => {
+        textarea.addEventListener("input", () => {
+          sendTypingStatus(true);
+          clearTimeout(typingTimeout);
+          typingTimeout = setTimeout(() => sendTypingStatus(false), 2500);
+        });
+        textarea.addEventListener("blur", () => {
+          clearTimeout(typingTimeout);
+          sendTypingStatus(false);
+        });
       });
 
       document.getElementById("private-note-input").addEventListener("input", (event) => {
@@ -18232,10 +18766,56 @@ var qrcode = function() {
         <p class="pick-verdict ${same ? "same" : "split"}">${same ? "★ Same side" : "Split decision!"}</p>`;
     }
 
+    function wildcardBadgeMarkup(questionId) {
+      const p1 = state.wildcards?.[0] === questionId;
+      const p2 = state.wildcards?.[1] === questionId;
+      if (!p1 && !p2) return "";
+      const names = [];
+      if (p1) names.push(state.names[0] || "Player 1");
+      if (p2) names.push(state.names[1] || "Player 2");
+      return `<div class="wildcard-badge" title="High stakes / Double down"><span aria-hidden="true">★</span> <span>${escapeHTML(names.join(" & "))} Doubled Down!</span></div>`;
+    }
+
+    function timeCapsulePastAnswers(questionId) {
+      if (!Array.isArray(state.completedRounds) || state.completedRounds.length === 0) return null;
+      const currentKey = state.selectedQuestionIds.join("|");
+      const past = [...state.completedRounds].reverse().find((round) => {
+        return Array.isArray(round?.questionIds) && round.questionIds.join("|") !== currentKey && round.questionIds.includes(questionId) && round.answers?.[0]?.[questionId] !== undefined && round.answers?.[1]?.[questionId] !== undefined;
+      });
+      if (!past) return null;
+      return {
+        ans1: past.answers[0][questionId],
+        ans2: past.answers[1][questionId],
+        date: past.completedAt ? formatRoundDate(past.completedAt) : "past round"
+      };
+    }
+
     function sliderReveal(question, firstAnswer, secondAnswer, matchInfo) {
       const p1 = ((Number(firstAnswer) - 1) / 9) * 100;
       const p2 = ((Number(secondAnswer) - 1) / 9) * 100;
       const nudge = Math.abs(p1 - p2) < 8 ? 2 : 0;
+      const isMagnetic = Math.abs(Number(firstAnswer) - Number(secondAnswer)) <= 1;
+      const pastAnswers = timeCapsulePastAnswers(question.id);
+      let ghostMarkup = "";
+      let pastNoteMarkup = "";
+      if (pastAnswers && !isNaN(Number(pastAnswers.ans1)) && !isNaN(Number(pastAnswers.ans2))) {
+        const oldP1 = ((Number(pastAnswers.ans1) - 1) / 9) * 100;
+        const oldP2 = ((Number(pastAnswers.ans2) - 1) / 9) * 100;
+        ghostMarkup = `
+          <div class="marker ghost-marker" style="--marker-pos: ${oldP1}%; --marker-color: var(--blue)" aria-hidden="true" title="${escapeHTML(state.names[0])} answered ${sliderDisplay(pastAnswers.ans1)} on ${escapeHTML(pastAnswers.date)}">
+            <span class="marker-value">${sliderDisplay(pastAnswers.ans1)}</span>
+          </div>
+          <div class="marker ghost-marker" style="--marker-pos: ${oldP2}%; --marker-color: var(--green)" aria-hidden="true" title="${escapeHTML(state.names[1])} answered ${sliderDisplay(pastAnswers.ans2)} on ${escapeHTML(pastAnswers.date)}">
+            <span class="marker-value">${sliderDisplay(pastAnswers.ans2)}</span>
+          </div>
+        `;
+        pastNoteMarkup = `
+          <div class="time-capsule-note">
+            <span aria-hidden="true">⏳</span>
+            <span>Shifted from ${escapeHTML(pastAnswers.date)} (was ${sliderDisplay(pastAnswers.ans1)} &amp; ${sliderDisplay(pastAnswers.ans2)})</span>
+          </div>
+        `;
+      }
       const firstComment = String(state.comments[0][question.id] || "").trim();
       const secondComment = String(state.comments[1][question.id] || "").trim();
       const commentsMarkup = firstComment || secondComment
@@ -18247,16 +18827,18 @@ var qrcode = function() {
         `
         : "";
       if (pickLabel(question, firstAnswer) && pickLabel(question, secondAnswer)) {
-        return `<div class="comparison-wrap">${quickPickReveal(question, firstAnswer, secondAnswer)}${guessRevealMarkup(question)}${commentsMarkup}</div>`;
+        return `<div class="comparison-wrap">${wildcardBadgeMarkup(question.id)}${quickPickReveal(question, firstAnswer, secondAnswer)}${guessRevealMarkup(question)}${commentsMarkup}</div>`;
       }
       return `
         <div class="comparison-wrap">
+          ${wildcardBadgeMarkup(question.id)}
           <div class="comparison-scale">
             <span>1 · ${escapeHTML(question.labels?.[0] || "Low")}</span>
             <span>${escapeHTML(question.labels?.[1] || "High")} · 10</span>
           </div>
-          <div class="comparison-track" style="--p1-pos: ${p1}%; --p2-pos: ${p2}%">
+          <div class="comparison-track ${isMagnetic ? "magnetic-collision" : ""}" style="--p1-pos: ${p1}%; --p2-pos: ${p2}%">
             <div class="comparison-gap" aria-hidden="true"></div>
+            ${ghostMarkup}
             <div class="marker marker-one" style="--marker-pos: ${p1}%; --marker-color: var(--blue); --marker-offset: -${nudge}px" aria-hidden="true">
               <span class="marker-value">${sliderDisplay(firstAnswer)}</span>
             </div>
@@ -18264,6 +18846,7 @@ var qrcode = function() {
               <span class="marker-value">${sliderDisplay(secondAnswer)}</span>
             </div>
           </div>
+          ${pastNoteMarkup}
           <div class="comparison-legend">
             <span class="legend-item"><span class="legend-dot" style="--dot-color: var(--blue)"></span>${escapeHTML(state.names[0])}: ${sliderDisplay(firstAnswer)}</span>
             <span class="legend-item"><span class="legend-dot" style="--dot-color: var(--green)"></span>${escapeHTML(state.names[1])}: ${sliderDisplay(secondAnswer)}</span>
@@ -18277,6 +18860,13 @@ var qrcode = function() {
 
     function textReveal(question, firstAnswer, secondAnswer, matchInfo, beforeRating = "", lastRateId = "") {
       const escapedQuestionId = escapeHTML(question.id);
+      const pastAnswers = timeCapsulePastAnswers(question.id);
+      const pastNoteMarkup = pastAnswers && pastAnswers.ans1 && pastAnswers.ans2 ? `
+        <div class="time-capsule-note">
+          <span aria-hidden="true">⏳</span>
+          <span>Previously answered on ${escapeHTML(pastAnswers.date)}</span>
+        </div>
+      ` : "";
       const ratings = [
         ["aligned", "Aligned", "#4ade80"],
         ["nuanced", "Similar + nuance", "#86efac"],
@@ -18286,6 +18876,7 @@ var qrcode = function() {
       const rating = state.textRatings[question.id];
       // The unrated prompt sits below the buttons, where the rated panel puts it, so rating never moves them.
       return `
+        ${wildcardBadgeMarkup(question.id)}
         <div class="answer-stack">
           <div class="answer-box" style="--player-color: var(--blue)">
             <span class="answer-name">${escapeHTML(state.names[0])}</span>
@@ -18296,6 +18887,7 @@ var qrcode = function() {
             <p class="answer-copy">${escapeHTML(secondAnswer)}</p>
           </div>
         </div>
+        ${pastNoteMarkup}
         <div class="alignment-rating ${rating ? "rated" : "unrated"}">
           <strong>${rating ? "You rated this together" : ratingHeadingCopy(question.id, lastRateId)}</strong>
           <div class="rating-options">
@@ -18778,6 +19370,533 @@ var qrcode = function() {
       });
     }
 
+    // ----------------------------------------------------
+    // VOICE MEMORIES
+    // ----------------------------------------------------
+    let voiceMediaRecorder = null;
+    let voiceAudioChunks = [];
+    let recordingTimer = null;
+
+    async function toggleVoiceRecording(questionId, button) {
+      if (voiceMediaRecorder && voiceMediaRecorder.state === "recording") {
+        voiceMediaRecorder.stop();
+        if (recordingTimer) clearInterval(recordingTimer);
+        button.classList.remove("recording");
+        button.textContent = "Processing audio…";
+        return;
+      }
+      try {
+        if (!navigator.mediaDevices?.getUserMedia) {
+          showToast("Microphone recording is not supported on this browser.");
+          return;
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        voiceAudioChunks = [];
+        voiceMediaRecorder = new MediaRecorder(stream);
+        voiceMediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) voiceAudioChunks.push(e.data);
+        };
+        voiceMediaRecorder.onstop = () => {
+          const blob = new Blob(voiceAudioChunks, { type: "audio/webm" });
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64Audio = reader.result;
+            state.voiceNotes = state.voiceNotes || {};
+            state.voiceNotes[questionId] = base64Audio;
+            saveState();
+            playSound("spark");
+            showToast("Voice memory saved! 🎙️");
+            stream.getTracks().forEach((track) => track.stop());
+            render();
+          };
+          reader.readAsDataURL(blob);
+        };
+        voiceMediaRecorder.start();
+        button.classList.add("recording");
+        playSound("tap");
+        let timeLeft = 15;
+        button.textContent = `Recording… (${timeLeft}s)`;
+        recordingTimer = setInterval(() => {
+          timeLeft--;
+          if (timeLeft <= 0) {
+            clearInterval(recordingTimer);
+            if (voiceMediaRecorder && voiceMediaRecorder.state === "recording") voiceMediaRecorder.stop();
+          } else {
+            button.textContent = `Recording… (${timeLeft}s)`;
+          }
+        }, 1000);
+      } catch (err) {
+        showToast("Microphone access was denied or unavailable.");
+      }
+    }
+
+    function playVoiceNote(questionId) {
+      const audioData = state.voiceNotes?.[questionId];
+      if (!audioData) return;
+      const audio = new Audio(audioData);
+      audio.play().catch(() => showToast("Could not play voice memory."));
+      playSound("tap");
+    }
+
+    function deleteVoiceNote(questionId) {
+      if (state.voiceNotes?.[questionId]) {
+        delete state.voiceNotes[questionId];
+        saveState();
+        playSound("tap");
+        showToast("Voice note removed.");
+        render();
+      }
+    }
+
+    function voiceNoteMarkup(questionId) {
+      const hasVoice = Boolean(state.voiceNotes?.[questionId]);
+      if (hasVoice) {
+        return `
+          <div class="voice-audio-chip">
+            <button class="text-btn" type="button" data-play-voice="${escapeHTML(questionId)}"><span aria-hidden="true">▶</span> Play Voice Memory</button>
+            <button class="text-btn" type="button" data-delete-voice="${escapeHTML(questionId)}" aria-label="Delete voice memory" style="color:var(--coral);margin-left:4px">✕</button>
+          </div>
+        `;
+      }
+      return `
+        <button class="voice-record-btn" type="button" data-record-voice="${escapeHTML(questionId)}">
+          <span aria-hidden="true">🎙️</span> Record Voice Memory
+        </button>
+      `;
+    }
+
+    // ----------------------------------------------------
+    // 30-SECOND "ROUND WRAPPED" STORY REEL
+    // ----------------------------------------------------
+    function openStoryReelModal(questions, alignment, tally) {
+      const overlay = document.createElement("div");
+      overlay.className = "story-reel-modal";
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+      overlay.setAttribute("aria-label", "Round Wrapped Story Reel");
+
+      const closestHighlight = questions.map((question) => ({
+        question,
+        match: revealMatchInfo(question, state.answers[0][question.id], state.answers[1][question.id])
+      })).filter((item) => !item.match.missing).sort((a, b) => b.match.percent - a.match.percent)[0];
+
+      const surpriseHighlight = questions.map((question) => ({
+        question,
+        match: revealMatchInfo(question, state.answers[0][question.id], state.answers[1][question.id])
+      })).filter((item) => !item.match.missing && item !== closestHighlight).sort((a, b) => a.match.percent - b.match.percent)[0];
+
+      const bestGuesser = [...tally.filter((item) => item.made)].sort((a, b) => b.hits - a.hits || (b.hits / b.made) - (a.hits / a.made))[0];
+      const duoTitles = [
+        [90, "Telepathic Duo ✦"],
+        [80, "Harmonious Sparks ★"],
+        [70, "Dynamic Duo ⚡"],
+        [55, "Complementary Opposites ⇄"],
+        [0, "Spirited Explorers ✧"]
+      ];
+      const duoTitle = duoTitles.find(([t]) => alignment.overall >= t)?.[1] || "Aligned Duo";
+
+      const slides = [
+        {
+          badge: "✨",
+          title: `${alignment.overall}% Sync`,
+          body: `${escapeHTML(alignmentDescriptor(alignment.overall).title)}<br><small style="color:#94a3b8">${questions.length} questions revealed together</small>`,
+          box: `<div style="font-weight:750;color:#c4b5fd">${escapeHTML(duoTitle)}</div>`
+        },
+        {
+          badge: "🎯",
+          title: "Closest Mind-Meld",
+          body: "Where your thoughts lined up most effortlessly:",
+          box: closestHighlight ? `<strong>${escapeHTML(closestHighlight.question.prompt)}</strong><br><small style="color:#4ade80">${closestHighlight.match.percent}% similarity match</small>` : "Completed smoothly!"
+        },
+        {
+          badge: "🔮",
+          title: "Tonight’s Plot Twist",
+          body: "The gap that will spark the best conversation:",
+          box: surpriseHighlight ? `<strong>${escapeHTML(surpriseHighlight.question.prompt)}</strong><br><small style="color:#fb7185">${surpriseHighlight.match.percent}% similarity gap</small>` : "No major surprises tonight!"
+        },
+        {
+          badge: "👑",
+          title: bestGuesser && bestGuesser.hits > 0 ? `${escapeHTML(state.names[bestGuesser.player])} Takes the Crown!` : "Mind-Reader Standoff!",
+          body: mindReaderHeadline(tally),
+          box: `<div style="font-size:0.86rem;color:#ddd6fe">${tally.filter((t) => t.made).map((t) => `${escapeHTML(state.names[t.player])}: ${t.hits}/${t.made} read right`).join(" · ") || "Every guess brought a laugh"}</div>`
+        },
+        {
+          badge: "🌟",
+          title: `${escapeHTML(state.names[0])} &amp; ${escapeHTML(state.names[1])}`,
+          body: `Round completed on ${escapeHTML(formatRoundDate(new Date().toISOString()))}.<br>Connection sealed in your Journal.`,
+          box: `<div style="display:flex;gap:8px;justify-content:center;margin-top:10px"><button class="primary-btn" id="story-open-keepsake" type="button">Save Keepsake</button><button class="secondary-btn" id="story-close-finish" type="button">Back to Board</button></div>`
+        }
+      ];
+
+      let currentSlide = 0;
+      let slideTimer = null;
+      const totalSlides = slides.length;
+
+      overlay.innerHTML = `
+        <div class="story-reel-container">
+          <div class="story-progress-bar">
+            ${slides.map((_, i) => `<div class="story-progress-segment"><div class="story-progress-fill" id="story-fill-${i}"></div></div>`).join("")}
+          </div>
+          <div class="story-top-row">
+            <div class="story-header-title"><span aria-hidden="true">✦</span> Aligned Wrapped</div>
+            <button class="story-close-btn" id="story-close-btn" type="button" aria-label="Close Story Reel">✕</button>
+          </div>
+          <div class="story-nav-hotspot story-nav-prev" id="story-prev-zone"></div>
+          <div class="story-nav-hotspot story-nav-next" id="story-next-zone"></div>
+          <div class="story-slide" id="story-slide-content"></div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      const renderCurrentSlide = () => {
+        const slide = slides[currentSlide];
+        const contentEl = overlay.querySelector("#story-slide-content");
+        if (contentEl) {
+          contentEl.innerHTML = `
+            <div class="story-big-badge">${slide.badge}</div>
+            <h2 class="story-title">${slide.title}</h2>
+            <p class="story-body">${slide.body}</p>
+            <div class="story-highlight-box">${slide.box}</div>
+          `;
+        }
+        overlay.querySelectorAll(".story-progress-fill").forEach((fill, idx) => {
+          fill.classList.toggle("done", idx < currentSlide);
+          fill.style.width = idx === currentSlide ? "0%" : idx < currentSlide ? "100%" : "0%";
+        });
+        playSound("tap");
+        startSlideTimer();
+      };
+
+      const startSlideTimer = () => {
+        clearInterval(slideTimer);
+        const fill = overlay.querySelector(`#story-fill-${currentSlide}`);
+        let elapsed = 0;
+        const duration = 5000;
+        slideTimer = setInterval(() => {
+          elapsed += 100;
+          if (fill) fill.style.width = `${Math.min(100, (elapsed / duration) * 100)}%`;
+          if (elapsed >= duration) {
+            clearInterval(slideTimer);
+            if (currentSlide < totalSlides - 1) {
+              currentSlide++;
+              renderCurrentSlide();
+            } else {
+              closeStory();
+            }
+          }
+        }, 100);
+      };
+
+      const closeStory = () => {
+        clearInterval(slideTimer);
+        document.removeEventListener("keydown", onStoryKey);
+        overlay.remove();
+      };
+
+      const onStoryKey = (e) => {
+        if (e.key === "Escape") closeStory();
+        else if (e.key === "ArrowRight" || e.key === " ") {
+          if (currentSlide < totalSlides - 1) { currentSlide++; renderCurrentSlide(); } else closeStory();
+        } else if (e.key === "ArrowLeft") {
+          if (currentSlide > 0) { currentSlide--; renderCurrentSlide(); }
+        }
+      };
+      document.addEventListener("keydown", onStoryKey);
+
+      overlay.querySelector("#story-close-btn")?.addEventListener("click", closeStory);
+      overlay.querySelector("#story-next-zone")?.addEventListener("click", () => {
+        if (currentSlide < totalSlides - 1) { currentSlide++; renderCurrentSlide(); } else closeStory();
+      });
+      overlay.querySelector("#story-prev-zone")?.addEventListener("click", () => {
+        if (currentSlide > 0) { currentSlide--; renderCurrentSlide(); }
+      });
+      overlay.addEventListener("click", (e) => {
+        if (e.target.id === "story-open-keepsake") {
+          closeStory();
+          openKeepsakeModal(questions, alignment);
+        } else if (e.target.id === "story-close-finish") {
+          closeStory();
+        }
+      });
+
+      renderCurrentSlide();
+    }
+
+    // ----------------------------------------------------
+    // RAPID-FIRE "THIS OR THAT" WARMUP
+    // ----------------------------------------------------
+    const LIGHTNING_PAIRS = [
+      { a: "Night in on the couch", b: "Night out on the town" },
+      { a: "Plan every hour of the trip", b: "Zero itinerary, pure spontaneous" },
+      { a: "Talk it out right away", b: "Need 20 minutes of quiet first" },
+      { a: "Early morning coffee together", b: "Midnight night owl snacking" },
+      { a: "Cook dinner together at home", b: "Order takeout & watch a movie" },
+      { a: "Tell a blunt honest truth", b: "Gentle white lie to protect feelings" },
+      { a: "Big rowdy group of friends", b: "Intimate one-on-one date" },
+      { a: "Texting throughout the day", b: "One long phone call before bed" },
+      { a: "Save for a rainy day", b: "Splurge on a memorable experience" },
+      { a: "Edge-of-your-seat thriller", b: "Cozy comforting comedy" }
+    ];
+
+    function openLightningRoundModal() {
+      const overlay = document.createElement("div");
+      overlay.className = "modal-backdrop";
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+
+      let currentStep = "p0";
+      let p0Answers = [];
+      let p1Answers = [];
+      let qIndex = 0;
+
+      const p0Name = escapeHTML(state.names[0] || "Player 1");
+      const p1Name = escapeHTML(state.names[1] || "Player 2");
+
+      const render = () => {
+        if (currentStep === "p0" || currentStep === "p1") {
+          const activeName = currentStep === "p0" ? p0Name : p1Name;
+          const pair = LIGHTNING_PAIRS[qIndex];
+          overlay.innerHTML = `
+            <section class="exit-dialog lightning-panel" style="max-width:520px;text-align:center">
+              <span class="eyebrow">⚡ 60-Second Speed Warmup</span>
+              <h2>${activeName}’s Turn</h2>
+              <p class="dialog-copy">Pick on instinct — question ${qIndex + 1} of ${LIGHTNING_PAIRS.length}:</p>
+              <div class="lightning-choice-grid">
+                <button type="button" class="lightning-btn" data-choice="a">${escapeHTML(pair.a)}</button>
+                <button type="button" class="lightning-btn" data-choice="b">${escapeHTML(pair.b)}</button>
+              </div>
+              <button type="button" class="text-btn" data-modal-cancel style="margin-top:10px">Quit Warmup</button>
+            </section>
+          `;
+          overlay.querySelectorAll("[data-choice]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const choice = btn.dataset.choice;
+              playSound("tap");
+              if (currentStep === "p0") {
+                p0Answers.push(choice);
+                if (qIndex < LIGHTNING_PAIRS.length - 1) {
+                  qIndex++;
+                  render();
+                } else {
+                  currentStep = "handoff";
+                  qIndex = 0;
+                  render();
+                }
+              } else {
+                p1Answers.push(choice);
+                if (qIndex < LIGHTNING_PAIRS.length - 1) {
+                  qIndex++;
+                  render();
+                } else {
+                  currentStep = "results";
+                  render();
+                }
+              }
+            });
+          });
+          overlay.querySelector("[data-modal-cancel]")?.addEventListener("click", () => overlay.remove());
+        } else if (currentStep === "handoff") {
+          overlay.innerHTML = `
+            <section class="exit-dialog lightning-panel" style="max-width:480px;text-align:center">
+              <div class="celebration-orb" aria-hidden="true">⇄</div>
+              <h2>Pass to ${p1Name}</h2>
+              <p class="dialog-copy">${p0Name} has locked in their lightning answers. Keep the screen private and pass to ${p1Name}!</p>
+              <div class="actions" style="justify-content:center;margin-top:20px">
+                <button type="button" class="primary-btn" id="start-p1-btn">I’m ${p1Name}, Let’s Go!</button>
+              </div>
+            </section>
+          `;
+          overlay.querySelector("#start-p1-btn")?.addEventListener("click", () => {
+            currentStep = "p1";
+            render();
+          });
+        } else if (currentStep === "results") {
+          let matches = 0;
+          LIGHTNING_PAIRS.forEach((_, i) => {
+            if (p0Answers[i] === p1Answers[i]) matches++;
+          });
+          const matchPct = Math.round((matches / LIGHTNING_PAIRS.length) * 100);
+          overlay.innerHTML = `
+            <section class="exit-dialog lightning-panel" style="max-width:540px;text-align:center">
+              <div class="celebration-orb" aria-hidden="true">⚡</div>
+              <h2>${matches} of ${LIGHTNING_PAIRS.length} in Sync! (${matchPct}%)</h2>
+              <p class="dialog-copy">${matchPct >= 80 ? "Telepathic instincts! You are primed for the main round." : matchPct >= 50 ? "Balanced dynamics — lovely blend of shared habits and unique tastes." : "Fascinating opposites! The main round will have great debate."}</p>
+              <div style="max-height:220px;overflow-y:auto;text-align:left;margin:14px 0;padding:8px 12px;background:rgba(15,23,42,0.6);border-radius:12px;border:1px solid var(--line);font-size:0.8rem">
+                ${LIGHTNING_PAIRS.map((pair, i) => {
+                  const same = p0Answers[i] === p1Answers[i];
+                  return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06)">
+                    <span>${pair[p0Answers[i]]}</span>
+                    <span>${same ? "✓ Match" : "⇄ Split"}</span>
+                  </div>`;
+                }).join("")}
+              </div>
+              <div class="actions" style="justify-content:center;margin-top:16px">
+                <button type="button" class="primary-btn" id="finish-lightning-btn">Start Main Round Now →</button>
+              </div>
+            </section>
+          `;
+          overlay.querySelector("#finish-lightning-btn")?.addEventListener("click", () => {
+            overlay.remove();
+            document.getElementById("start-round")?.click();
+          });
+        }
+      };
+
+      document.body.appendChild(overlay);
+      render();
+    }
+
+    // ----------------------------------------------------
+    // CUSTOM PACK QR & LINK SHARING
+    // ----------------------------------------------------
+    function openPackShareModal(pack = null) {
+      let questionsToShare = [];
+      let packTitle = "Custom Questions";
+      if (pack && Array.isArray(pack.questionIds) && pack.questionIds.length) {
+        packTitle = pack.name;
+        const catalog = getQuestionCatalog();
+        questionsToShare = catalog.filter((q) => pack.questionIds.includes(q.id));
+      } else {
+        questionsToShare = state.customQuestions || [];
+      }
+      if (!questionsToShare.length) {
+        showToast("Create custom questions in your library first to share a pack.");
+        return;
+      }
+      const overlay = document.createElement("div");
+      overlay.className = "modal-backdrop";
+      const payload = JSON.stringify(questionsToShare.map((q) => ({
+        prompt: q.prompt,
+        type: q.type,
+        labels: q.labels,
+        topic: q.topic || "connection"
+      })));
+      const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(payload))));
+      const shareUrl = `${PUBLIC_APP_URL}#pack=${encoded}`;
+
+      const qr = qrcode(0, "M");
+      qr.addData(shareUrl);
+      qr.make();
+      const qrSvg = qr.createSvgTag(5);
+
+      overlay.innerHTML = `
+        <section class="exit-dialog" role="dialog" aria-modal="true" style="max-width:440px;text-align:center">
+          <p class="eyebrow">Share Questions</p>
+          <h2>${escapeHTML(packTitle)} QR Code</h2>
+          <p class="dialog-copy">Scan with a phone camera to import ${questionsToShare.length} question${questionsToShare.length === 1 ? "" : "s"} instantly into another library.</p>
+          <div style="background:#fff;padding:14px;border-radius:16px;display:inline-block;margin:10px auto">
+            ${qrSvg}
+          </div>
+          <div class="actions" style="justify-content:center;margin-top:14px;gap:8px">
+            <button class="secondary-btn" id="copy-pack-link-btn" type="button">Copy Share Link</button>
+            <button class="primary-btn" data-modal-cancel type="button">Done</button>
+          </div>
+        </section>
+      `;
+      document.body.appendChild(overlay);
+
+      overlay.querySelector("#copy-pack-link-btn")?.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          showToast("Share link copied to clipboard!");
+        } catch {
+          showToast("Couldn’t copy link automatically.");
+        }
+      });
+      overlay.querySelector("[data-modal-cancel]")?.addEventListener("click", () => overlay.remove());
+    }
+
+    function checkPackImportHash() {
+      const hash = window.location.hash || "";
+      const match = hash.match(/#pack=([^&]+)/);
+      if (!match) return;
+      try {
+        const raw = decodeURIComponent(escape(atob(decodeURIComponent(match[1]))));
+        const items = JSON.parse(raw);
+        if (!Array.isArray(items) || !items.length) return;
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+        const existingPrompts = new Set(getQuestionCatalog().map((q) => q.prompt.trim().toLowerCase()));
+        const newItems = items.filter((item) => item.prompt && !existingPrompts.has(item.prompt.trim().toLowerCase()));
+        if (!newItems.length) {
+          showToast("These questions are already in your library!");
+          return;
+        }
+        const overlay = document.createElement("div");
+        overlay.className = "modal-backdrop";
+        overlay.innerHTML = `
+          <section class="exit-dialog" role="dialog" aria-modal="true" style="max-width:440px;text-align:center">
+            <p class="eyebrow">Import Pack</p>
+            <h2>Shared Questions Found</h2>
+            <p class="dialog-copy">Your partner shared ${newItems.length} question${newItems.length === 1 ? "" : "s"} with you. Add them to your library?</p>
+            <div style="max-height:160px;overflow-y:auto;text-align:left;padding:8px 12px;background:rgba(255,255,255,0.05);border-radius:10px;margin:10px 0;font-size:0.84rem">
+              ${newItems.map((q) => `<div>• ${escapeHTML(q.prompt)}</div>`).join("")}
+            </div>
+            <div class="actions" style="justify-content:center;gap:8px">
+              <button class="primary-btn" id="confirm-import-pack" type="button">Import to Library</button>
+              <button class="secondary-btn" data-modal-cancel type="button">Cancel</button>
+            </div>
+          </section>
+        `;
+        document.body.appendChild(overlay);
+        overlay.querySelector("#confirm-import-pack")?.addEventListener("click", () => {
+          state.customQuestions = state.customQuestions || [];
+          newItems.forEach((item) => {
+            state.customQuestions.push({
+              id: `custom_${Date.now()}_${randomIndex(100000)}`,
+              prompt: item.prompt.trim(),
+              type: item.type === "text" ? "text" : "slider",
+              labels: Array.isArray(item.labels) && item.labels.length === 2 ? item.labels : ["Low", "High"],
+              topic: item.topic || "connection",
+              category: "Custom",
+              custom: true
+            });
+          });
+          saveState();
+          playSound("spark");
+          showToast(`Imported ${newItems.length} question${newItems.length === 1 ? "" : "s"}!`);
+          overlay.remove();
+          render();
+        });
+        overlay.querySelector("[data-modal-cancel]")?.addEventListener("click", () => overlay.remove());
+      } catch (e) {
+        console.error("Pack import error:", e);
+      }
+    }
+
+    // ----------------------------------------------------
+    // MILESTONES & BADGES
+    // ----------------------------------------------------
+    function milestonesMarkup() {
+      const rounds = state.completedRounds || [];
+      const totalRounds = rounds.length;
+      const answeredTotal = coupleAnsweredIds().size;
+      const has90Sync = rounds.some((r) => Number(r.alignment?.overall || 0) >= 90);
+      const hasLateNight = rounds.some((r) => {
+        const hour = new Date(r.completedAt).getHours();
+        return hour >= 23 || hour <= 4;
+      });
+      const hasSpicy = rounds.some((r) => r.intensity === "spicy" || (r.questionIds || []).some((id) => id.startsWith("spy_")));
+      const hasVoice = Object.keys(state.voiceNotes || {}).length > 0;
+
+      const badges = [
+        { id: "first_step", name: "First Step", desc: "Completed your first round", icon: "🌱", unlocked: totalRounds >= 1 },
+        { id: "sync_90", name: "90% Sync Club", desc: "Achieved 90%+ similarity", icon: "💯", unlocked: has90Sync },
+        { id: "mind_reader", name: "Mind Readers", desc: "Read each other 3+ times", icon: "🔮", unlocked: (state.rivalryScores?.[0] || 0) + (state.rivalryScores?.[1] || 0) >= 3 },
+        { id: "midnight", name: "Midnight Talks", desc: "Completed a round past 11 PM", icon: "🌙", unlocked: hasLateNight },
+        { id: "spicy_pioneer", name: "Spicy Pioneers", desc: "Dared to play Spicy mode", icon: "🌶️", unlocked: hasSpicy },
+        { id: "explorer_50", name: "50 Explored", desc: "Explored 50+ questions", icon: "🗺️", unlocked: answeredTotal >= 50 },
+        { id: "voice_keeper", name: "Voice Archivists", desc: "Recorded a voice memory", icon: "🎙️", unlocked: hasVoice }
+      ];
+
+      return badges.map((b) => `
+        <div class="milestone-badge ${b.unlocked ? "unlocked" : "locked"}">
+          <span class="milestone-icon" aria-hidden="true">${b.icon}</span>
+          <span class="milestone-name">${escapeHTML(b.name)}</span>
+          <span class="milestone-desc">${b.unlocked ? "★ Unlocked" : escapeHTML(b.desc)}</span>
+        </div>
+      `).join("");
+    }
+
     function calculateTonightRivalry() {
       const p0 = state.names[0] || "Player 1";
       const p1 = state.names[1] || "Player 2";
@@ -19028,6 +20147,9 @@ var qrcode = function() {
                     </div>
                   </div>
                 </div>
+                <div class="voice-memory-section" style="margin-top:10px">
+                  ${voiceNoteMarkup(question.id)}
+                </div>
                 <div class="card-back-actions">
                   <button class="tap-hint card-close-button" type="button">${POINTER_VERB} to close</button>
                   ${index < questions.length - 1 ? `<button class="secondary-btn next-card-button" type="button" data-next-card="${index + 1}">Next card →</button>` : ""}
@@ -19118,7 +20240,7 @@ var qrcode = function() {
           </section>
           <div class="actions reveal-actions">
             <button class="secondary-btn" id="open-library-journey-btn" type="button"><span aria-hidden="true">🗺️</span> Explore Library Progress</button>
-            ${allRevealed ? `<button class="secondary-btn" id="open-keepsake-btn" type="button"><span aria-hidden="true">✦</span> Save / Share Keepsake Card</button>` : ""}
+            ${allRevealed ? `<button class="secondary-btn" id="open-story-reel-btn" type="button"><span aria-hidden="true">🎬</span> Watch Round Wrapped</button><button class="secondary-btn" id="open-keepsake-btn" type="button"><span aria-hidden="true">✦</span> Save / Share Keepsake Card</button>` : ""}
             ${state.playStyle === "nearby" && state.nearbyRole === "join" && nearbyChannelOpen()
               ? `<button class="primary-btn" id="new-round" type="button" disabled style="opacity:0.6;cursor:not-allowed">Waiting for ${escapeHTML(state.names[0] || "your partner")} to start…</button>`
               : `<button class="primary-btn" id="new-round" type="button">Play another round</button>`
@@ -19615,6 +20737,19 @@ var qrcode = function() {
       }));
 
       document.getElementById("open-keepsake-btn")?.addEventListener("click", () => openKeepsakeModal(questions, alignment));
+      document.getElementById("open-story-reel-btn")?.addEventListener("click", () => openStoryReelModal(questions, alignment, tally));
+      app.querySelectorAll("[data-record-voice]").forEach((btn) => btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleVoiceRecording(btn.dataset.recordVoice, btn);
+      }));
+      app.querySelectorAll("[data-play-voice]").forEach((btn) => btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        playVoiceNote(btn.dataset.playVoice);
+      }));
+      app.querySelectorAll("[data-delete-voice]").forEach((btn) => btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        deleteVoiceNote(btn.dataset.deleteVoice);
+      }));
       document.getElementById("open-library-journey-btn")?.addEventListener("click", openLibraryJourneyModal);
       document.getElementById("rivalry-rematch-btn")?.addEventListener("click", () => {
         showToast("Rivalry rematch on! Guess each other's answers this round 🔮");
@@ -20134,9 +21269,12 @@ var qrcode = function() {
       if (document.visibilityState === "visible") reconnectNearbyNow();
     });
     window.addEventListener("hashchange", handleNearbyJoinLaunch);
+    window.addEventListener("hashchange", checkPackImportHash);
     window.addEventListener("pageshow", (event) => {
       if (event.persisted) handleNearbyJoinLaunch();
+      checkPackImportHash();
     });
+    checkPackImportHash();
     if (!handleNearbyJoinLaunch()) {
       resumeNearbySession();
       render();
