@@ -11767,7 +11767,7 @@ var qrcode = function() {
       lastExportAt = Date.now();
       const json = JSON.stringify(createBackupPayload(), null, 2);
       const blob = new Blob([json], { type: "application/json" });
-      const date = new Date().toISOString().slice(0, 10);
+      const date = localDateStamp();
       if (saveWithAndroidBridge(`aligned-backup-${date}.json`, "application/json", json)) {
         playSound("unlock");
         return;
@@ -11857,7 +11857,7 @@ var qrcode = function() {
       const encrypted = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, plaintext));
       const wrapper = { app: "Aligned", formatVersion: 2, encrypted: true, cipher: "AES-GCM", kdf: "PBKDF2-SHA256", iterations: 250000, salt: bytesToBase64(salt), iv: bytesToBase64(iv), data: bytesToBase64(encrypted) };
       const blob = new Blob([JSON.stringify(wrapper)], { type: "application/json" });
-      if (saveWithAndroidBridge(`aligned-private-${new Date().toISOString().slice(0, 10)}.aligned`, "application/octet-stream", JSON.stringify(wrapper))) {
+      if (saveWithAndroidBridge(`aligned-private-${localDateStamp()}.aligned`, "application/octet-stream", JSON.stringify(wrapper))) {
         playSound("lock");
         showToast("Keep the backup’s passphrase somewhere safe — it can’t be recovered.");
         return;
@@ -11865,7 +11865,7 @@ var qrcode = function() {
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `aligned-private-${new Date().toISOString().slice(0, 10)}.aligned`;
+      anchor.download = `aligned-private-${localDateStamp()}.aligned`;
       document.body.appendChild(anchor); anchor.click(); anchor.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       playSound("lock");
@@ -12033,6 +12033,10 @@ var qrcode = function() {
       if (["Tab", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", " "].includes(event.key)) document.documentElement.classList.add("kbd-nav");
     }, true);
     document.addEventListener("pointerdown", () => document.documentElement.classList.remove("kbd-nav"), true);
+    // File names use the local calendar date (an evening export in the US is still "today").
+    function localDateStamp(date = new Date()) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    }
     let lastModalOpenedAt = 0;
     document.addEventListener("click", (event) => {
       if (event.isTrusted && event.target instanceof Element && event.target.matches(".modal-backdrop") && Date.now() - lastModalOpenedAt < 400) event.stopImmediatePropagation();
