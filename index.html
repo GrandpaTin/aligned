@@ -10773,11 +10773,12 @@ var qrcode = function() {
       });
     }
 
-    function closeNearbyConnection({ notifyPartner = false, forgetSession = true } = {}) {
+    function closeNearbyConnection({ notifyPartner = false, forgetSession = true, reason = "" } = {}) {
+      const leave = reason ? { type: "leave", reason } : { type: "leave" };
       if (notifyPartner && nearbyChannelOpen()) {
-        try { nearbyDataChannel.send(JSON.stringify({ type: "leave" })); } catch {}
+        try { nearbyDataChannel.send(JSON.stringify(leave)); } catch {}
       } else if (notifyPartner) {
-        sendNearbySignal({ type: "leave" });
+        sendNearbySignal(leave);
       }
       clearInterval(nearbyHeartbeatTimer);
       clearInterval(nearbyPeerWatchTimer);
@@ -11155,7 +11156,7 @@ var qrcode = function() {
         }).then((ok) => {
           nearbyRuntime.initPending = false;
           if (!ok) {
-            closeNearbyConnection({ notifyPartner: true });
+            closeNearbyConnection({ notifyPartner: true, reason: "kept-own-round" });
             if (["question", "intermission", "nearby-wait", "celebration", "reveal"].includes(state.screen)) { state.resumeScreen = state.screen; state.screen = "setup"; }
             saveState(); render();
             showToast("Kept your round. You can finish it on this phone.");
@@ -11291,7 +11292,7 @@ var qrcode = function() {
         nearbyRuntime.partnerLeft = true;
         dismissConfirmDialogs("link");
         const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "Your partner";
-        const declinedNewRound = state.nearbyRole === "host" && state.screen === "question" && !(nearbyRuntime.partnerProgress?.answered > 0);
+        const declinedNewRound = payload.reason === "kept-own-round";
         closeNearbyConnection();
         nearbyRuntime.partnerLeft = true;
         showToast(declinedNewRound ? `${partner} stayed on their own round. You can show the QR again later.` : `${partner} left the two-phone round. Your answers are saved on this phone.`, { tone: "warning" });
@@ -11495,8 +11496,9 @@ var qrcode = function() {
         return;
       }
       try {
+        const confirmed = Boolean(nearbyRuntime.initConfirmed);
         closeNearbyConnection();
-        nearbyRuntime = { ...nearbyRuntime, role: "join", roomId, joinToken, expiresAt: Date.now() + 15 * 60 * 1000 };
+        nearbyRuntime = { ...nearbyRuntime, role: "join", roomId, joinToken, expiresAt: Date.now() + 15 * 60 * 1000, initConfirmed: confirmed };
         state.nearbyRole = "join";
         saveState();
         saveNearbySession();
@@ -15188,6 +15190,7 @@ var qrcode = function() {
         if (freshOf("slider") >= sliderTarget && fresh >= count) return "";
         const sliders = freshOf("slider");
         const message = !fresh ? "You’ve played every question in your chosen packs"
+          : !sliders ? `No new slider questions left in your chosen packs (${fresh} written)`
           : sliders < sliderTarget ? `Your chosen packs have only ${sliders} new slider question${sliders === 1 ? "" : "s"} left (${fresh - sliders} written)`
           : `Your chosen packs have only ${fresh} new question${fresh === 1 ? "" : "s"} left`;
         return `<p class="topic-note vibe-running-low" role="status">${message} — add another pack below for fresh ones, or replay favourites.</p>`;
@@ -17287,9 +17290,14 @@ var qrcode = function() {
             safeFirst: true,
             tag: "link"
           }).then((ok) => {
-            if (!ok) { showToast(`Still linked with ${partner}.`); return; }
+            if (!ok) { if (nearbyChannelOpen()) showToast(`Still linked with ${partner}.`); return; }
             closeNearbyConnection({ notifyPartner: true });
             nearbyRuntime.initConfirmed = true;
+            // Show the joining screen rather than the round just left (it stays resumable if the join fails).
+            if (["question", "intermission", "nearby-wait", "celebration", "reveal"].includes(state.screen)) state.resumeScreen = state.screen;
+            state.screen = "nearby";
+            saveState();
+            render();
             prepareNearbyJoin(launchRoomId, launchJoinToken);
           });
           return true;
