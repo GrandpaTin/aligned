@@ -6419,7 +6419,7 @@
     .question-meta-actions .favorite-button { order: 2; }
     .range-input { min-height: 44px; background-clip: content-box; }
     .volume-input { width: min(48%, 190px); }
-    @media (max-width: 600px) {
+    @media (max-width: 899px) {
       .field-grid label, .play-style-card strong, .preset-info-copy, .preset-config-summary span, .intensity-card strong,
       .mode-topline span, .topic-chip, .topic-note, .topic-note strong, .round-mode-copy, .category-pill, .type-chip,
       .comment-details summary, .importance-panel strong, .private-reflection summary, .eyebrow, .reveal-all-btn span,
@@ -6491,6 +6491,7 @@
       [data-text-size] .question-screen .question-meta .type-chip > span { font-size: max(12px, 0.8rem) !important; }
     }
     @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+      body:has(textarea:focus, input:not([type=range]):not([type=checkbox]):focus) .topbar { position: static; }
       [data-text-size="large"] .question-screen .quick-pick-option { min-height: 48px; padding-block: 6px; }
       [data-text-size="large"] .question-screen .quick-pick { margin-top: 4px; }
     }
@@ -6646,7 +6647,7 @@
     .guess-label small, .home-results-copy p:not(.eyebrow), .round-mode-copy, [data-tooltip]::after, .alignment-ring-content span,
     .saved-round-date, .saved-answer-name, .saved-answer-value, .library-question-meta span, .library-answer-history summary,
     .intensity-card small, .mini-action, .home-topic-result span, .highlight-locked small, .round-copy span { font-size: max(12px, 0.72rem) !important; }
-    @media (max-width: 600px) { .guess-label { font-size: max(12px, .78rem) !important; } }
+    @media (max-width: 899px) { .guess-label { font-size: max(12px, .78rem) !important; } }
     /* D5: Large text never makes the ring captions smaller than Standard. */
     [data-text-size="large"] .alignment-dashboard .alignment-ring-content span { font-size: 12px !important; }
     /* D3: forced colors turn the faint decorative rings into solid arcs over the text. */
@@ -9832,7 +9833,21 @@ var qrcode = function() {
         "Swap answers: could you pass as each other?",
         "Give their answer a dramatic one-word title.",
         "What would your future selves say about these answers?",
-        "Which answer would make the better bumper sticker?"
+        "Which answer would make the better bumper sticker?",
+        "Read their answer like a breaking-news headline.",
+        "Which answer would win a game show?",
+        "Give their answer a one-word movie title.",
+        "Which answer would your grandparents love most?",
+        "Act out one word from their answer — can they guess it?",
+        "Which answer would make the better holiday postcard?",
+        "Score their answer for creativity out of ten.",
+        "Which answer would a cartoon character give?",
+        "Read their answer in a whisper — does it change?",
+        "Which answer would you put on a mug?",
+        "Swap one word in their answer to make it sillier.",
+        "What emoji would they use to sign this answer?",
+        "Which answer would win in a talent show?",
+        "Guess how long they took to write it."
       ],
       unratedFlirty: [
         "Read their answer back slowly — what makes you smile?",
@@ -9858,7 +9873,13 @@ var qrcode = function() {
         "Read their answer back in your own words.",
         "What would make their answer even more true for them?",
         "Find one thing both answers secretly share.",
-        "Ask them for one example from real life."
+        "Ask them for one example from real life.",
+        "What would you love to ask them about this later?",
+        "Which part of their answer felt most like them?",
+        "Say one thing their answer taught you.",
+        "What would make you both smile about these answers?",
+        "Name the word in their answer you'd underline.",
+        "What surprised you about how they put it?"
       ]
     };
     // The playful lines at the end of warm.close, offered first on every other match of a soft night.
@@ -10100,7 +10121,8 @@ var qrcode = function() {
     function loadState() {
       try {
         const cached = JSON.parse(storedStateJSON());
-        if (!cached || ![1, 2].includes(Number(cached.version))) return initialState();
+        if (!cached) return initialState();
+        if (![1, 2].includes(Number(cached.version))) { loadStateFailed = true; return initialState(); }
 
         const validScreens = ["setup", "question", "intermission", "celebration", "reveal", "library", "results", "settings", "nearby", "nearby-wait"];
         const validTopics = new Set(TOPIC_OPTIONS.map((topic) => topic.id));
@@ -10288,8 +10310,12 @@ var qrcode = function() {
     let state = loadState();
     // A save that can't be read is kept aside (never overwritten by the fresh start) and the couple is told.
     if (loadStateFailed) {
-      try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) localStorage.setItem(`${STORAGE_KEY}-unreadable`, raw); } catch {}
-      window.setTimeout(() => showToast("Your saved game couldn’t be read, so Aligned started fresh. A copy was kept on this device.", { tone: "warning" }), 900);
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const slot = localStorage.getItem(`${STORAGE_KEY}-unreadable`) ? `${STORAGE_KEY}-unreadable-2` : `${STORAGE_KEY}-unreadable`;
+        if (raw && !localStorage.getItem(slot)) localStorage.setItem(slot, raw);
+      } catch {}
+      window.setTimeout(() => showToast("Your saved game couldn’t be read, so Aligned started fresh. A copy was kept — download it from Settings → Your data.", { tone: "warning" }), 900);
       loadStateFailed = false;
     }
     let lastRenderedScreen = null;
@@ -11824,6 +11850,28 @@ var qrcode = function() {
       showToast("Your game data was exported as a readable JSON backup.");
     }
 
+    function unreadableSaveKeys() {
+      try { return [`${STORAGE_KEY}-unreadable`, `${STORAGE_KEY}-unreadable-2`].filter((key) => localStorage.getItem(key)); } catch { return []; }
+    }
+
+    // Hands back a save Aligned couldn't read, exactly as it was stored, for recovery or support.
+    function downloadUnreadableSave() {
+      const keys = unreadableSaveKeys();
+      if (!keys.length) return;
+      const text = keys.length === 1 ? localStorage.getItem(keys[0]) : JSON.stringify(keys.map((key) => localStorage.getItem(key)));
+      const name = `aligned-unreadable-save-${localDateStamp()}.json`;
+      if (saveWithAndroidBridge(name, "application/json", text)) return;
+      const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = name;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast("The unreadable save was downloaded as it was stored.");
+    }
+
     function bytesToBase64(bytes) {
       let binary = "";
       for (let index = 0; index < bytes.length; index += 32768) {
@@ -12951,6 +12999,7 @@ var qrcode = function() {
       overlay.querySelector("#cancel-reset").addEventListener("click", close);
       overlay.querySelector("#confirm-reset").addEventListener("click", () => {
         [STORAGE_KEY, ...LEGACY_STORAGE_KEYS].forEach((key) => localStorage.removeItem(key));
+        unreadableSaveKeys().forEach((key) => localStorage.removeItem(key));
         state = initialState();
         libraryView = { filter: "all", topic: "all", search: "", limit: 40 };
         document.removeEventListener("keydown", onKeydown);
@@ -13616,7 +13665,7 @@ var qrcode = function() {
       );
       if (state.questionIntensity === "cozy") {
         // Cozy is safe for a first date: no heavy prompts and nothing that assumes a long shared history.
-        const gentle = pool.filter((question) => questionTone(question) !== "deep" && !questionNeedsHistory(question));
+        const gentle = pool.filter((question) => questionTone(question) !== "deep" && (!questionNeedsHistory(question) || (mode === "sliders-only" && question.type === "slider")));
         if (gentle.length >= count) pool = gentle;
       }
       const activePreset = SESSION_PRESETS.find((preset) => preset.id === state.sessionPreset);
@@ -15058,6 +15107,7 @@ var qrcode = function() {
               <h3>Save & transfer game data</h3><p>Readable JSON · stored locally ${IN_ANDROID_APP ? "on this device" : "in this browser"}. Keep backups or transfer your progress to another device.</p>
               <div class="data-tools" style="margin-top:10px">
                 <button class="data-tool" id="export-data" type="button"><span aria-hidden="true">↓</span>Export backup</button>
+                ${unreadableSaveKeys().length ? '<button class="data-tool" id="download-unreadable" type="button"><span aria-hidden="true">⤓</span>Download unreadable save</button>' : ""}
                 <button class="data-tool" id="export-encrypted" type="button"><span aria-hidden="true">◇</span>Encrypted backup</button>
                 <button class="data-tool" id="import-data" type="button"><span aria-hidden="true">↑</span>Import backup</button>
                 <button class="data-tool danger" id="reset-game" type="button"><span aria-hidden="true">↺</span>Reset everything</button>
@@ -15135,6 +15185,7 @@ var qrcode = function() {
       updateOfflineReadiness();
       document.getElementById("configure-pin").addEventListener("click", configurePrivatePin);
       document.getElementById("export-data").addEventListener("click", exportBackup);
+      document.getElementById("download-unreadable")?.addEventListener("click", downloadUnreadableSave);
       document.getElementById("export-encrypted").addEventListener("click", exportEncryptedBackup);
       const importInput = document.getElementById("import-file");
       document.getElementById("import-data").addEventListener("click", () => importInput.click());
@@ -15226,7 +15277,8 @@ var qrcode = function() {
       }
       if (state.sessionPreset === "custom" && state.completedRounds.some(isTonightRound)) {
         const topics = new Set(state.selectedTopics);
-        const cozyOk = (question) => state.questionIntensity !== "cozy" || questionTone(question) !== "deep";
+        const cozyOk = (question) => state.questionIntensity !== "cozy" || (questionTone(question) !== "deep"
+          && (!questionNeedsHistory(question) || (state.questionMode === "sliders-only" && question.type === "slider")));
         const freshOf = (type) => getQuestionCatalog().filter((question) => topics.has(question.topic) && question.type === type && usable(question) && cozyOk(question)).length;
         const count = state.questionCount;
         const sliderTarget = state.questionMode === "sliders-only" ? count : state.questionMode === "mixed" ? Math.ceil(count * 0.6) : Math.ceil(count * 0.8);
@@ -16537,7 +16589,7 @@ var qrcode = function() {
       if (!chosen) {
         // Same tier first, least recently used first; borrow only from a tier that still fits the card.
         const fitting = { close: ["close"], medium: ["medium"], far: ["far", "medium"] };
-        const unratedPools = tone === "light" ? [DISCUSSION_PROMPTS.unratedLight, DISCUSSION_PROMPTS.unrated]
+        const unratedPools = ["light", "lightText"].includes(tone) ? [DISCUSSION_PROMPTS.unratedLight, DISCUSSION_PROMPTS.unrated]
           : ["flirty", "flirtyText"].includes(tone) ? [DISCUSSION_PROMPTS.unratedFlirty, DISCUSSION_PROMPTS.unrated] : [DISCUSSION_PROMPTS.unrated];
         let pools = tier === "unrated" ? unratedPools : fitting[tier].map((name) => DISCUSSION_PROMPTS[tone][name]);
         const cardIndex = state.selectedQuestionIds.indexOf(question.id);
