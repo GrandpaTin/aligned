@@ -12877,7 +12877,7 @@ var qrcode = function() {
           duck = 0.8;
         } else if (kind === "partner-flip") {
           const d = (Number(options.degree) || 0) % 5;
-          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 1.9 : themeName === "cute" ? 1.2 : 1), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true, ...(themeName === "cute" ? { octaveLevel: 0.6 } : {}), ...(themeName === "dreamy" ? { attack: 0.01 } : {}) });
+          end = note(pentatonic(d + (options.match ? 5 : 3)), start, 0.045 * (themeName === "dreamy" ? 2.0 : themeName === "cute" ? 1.2 : 1.25), { decay: themeName === "dreamy" ? 0.4 : 0.16, dry: true, ...(themeName === "cute" ? { octaveLevel: 0.6 } : {}), ...(themeName === "dreamy" ? { attack: 0.01 } : {}) });
           duck = 0.8;
         } else if (kind === "open") {
           noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.11, q: 0.8 });
@@ -14161,7 +14161,7 @@ var qrcode = function() {
       const statusBlock = connected
         ? '<span class="connection-pill connected" role="status"><span class="pulse-dot" aria-hidden="true"></span>Phones connected</span>'
         : nearbyRuntime.partnerLeft
-          ? `<span class="connection-pill warning" role="status"><span class="pulse-dot" aria-hidden="true"></span>${partner} left the round</span>`
+          ? `<span class="connection-pill warning" role="status"><span class="pulse-dot" aria-hidden="true"></span>${nearbyRuntime.partnerLeftReason === "kept-own-round" ? `${partner} kept their own round` : `${partner} left the round`}</span>`
           : canReconnect
             ? '<span class="connection-pill busy" role="status"><span class="pulse-dot" aria-hidden="true"></span>Reconnecting… your answers will send automatically</span>'
             : '<span class="connection-pill warning" role="status"><span class="pulse-dot" aria-hidden="true"></span>The phones are no longer connected</span>';
@@ -14178,7 +14178,7 @@ var qrcode = function() {
       const heading = connected || (!showFallback)
         ? `Waiting for <span class="accent-text">${partner}</span>`
         : nearbyRuntime.partnerLeft
-          ? `<span class="accent-text">${partner}</span> left the round`
+          ? `<span class="accent-text">${partner}</span> ${nearbyRuntime.partnerLeftReason === "kept-own-round" ? "stayed on their own round" : "left the round"}`
           : "The phones lost their connection";
       const lede = connected || !showFallback
         ? `The reveal board opens on both phones as soon as ${partner} finishes.`
