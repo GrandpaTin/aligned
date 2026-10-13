@@ -119,8 +119,21 @@ describe("End-to-End Round Lifecycle Simulation", () => {
     await page.click('#results-button');
     await page.waitForSelector(".radar-compass-card", { timeout: 6000 });
     assert(await page.locator(".radar-polygon").count() > 0, "Resonance Compass radar polygon must render in Journal");
+    assert(await page.locator("#resonance-compass-table").count() > 0, "Accessible table fallback must render in Journal");
 
-    // 9. Verify state saved in localStorage
+    // 9. Open Keepsake Storybook Modal from Journal
+    await page.click("#open-storybook-btn");
+    await page.waitForSelector(".storybook-sheet", { timeout: 5000 });
+    const title = await page.locator(".storybook-header h2").textContent();
+    assert.equal(title, "Casey & Riley", "Storybook header must display couple names");
+    assert(await page.locator(".storybook-sheet .radar-polygon").count() > 0, "Storybook must embed Resonance Compass");
+    assert(await page.locator("#storybook-print-btn").isVisible(), "Storybook must have print button");
+
+    // 10. Close Storybook modal
+    await page.evaluate(() => document.getElementById("storybook-close-btn")?.click());
+    await page.waitForSelector(".storybook-modal", { state: "detached", timeout: 5000 });
+
+    // 11. Verify state saved in localStorage
     const savedState = await page.evaluate(() => JSON.parse(localStorage.getItem("aligned-state-v1")));
     assert.equal(savedState.completedRounds.length, 1, "Completed round must be saved in history");
     assert(Number.isFinite(savedState.completedRounds[0].alignment.overall), "Overall alignment must be calculated");

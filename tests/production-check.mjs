@@ -165,9 +165,13 @@ assert(html.includes('id="hearth-volume"'), "Settings must contain hearth volume
 assert(html.includes('payload.type === "ambient-mix"'), "Signaling / data-channel must handle ambient-mix sync");
 
 // Feature coverage: Resonance Compass SVG Radar Polygon
+const escapeFnMatch = scripts[1].match(/function escapeHTML\(str\) \{[\s\S]*?\n    \}/);
+const escapeHTML = escapeFnMatch ? vm.runInNewContext(`(${escapeFnMatch[0]})`) : (s) => String(s);
+const descFnMatch = scripts[1].match(/function alignmentDescriptor\(percent\) \{[\s\S]*?\n    \}/);
+const alignmentDescriptor = descFnMatch ? vm.runInNewContext(`(${descFnMatch[0]})`) : () => ({ title: "Aligned" });
 const compassFnMatch = scripts[1].match(/function resonanceCompassMarkup\(rounds\) \{[\s\S]*?\n    \}/);
 assert(compassFnMatch, "Could not locate resonanceCompassMarkup");
-const resonanceCompassMarkup = vm.runInNewContext(`(${compassFnMatch[0]})`);
+const resonanceCompassMarkup = vm.runInNewContext(`(${compassFnMatch[0]})`, { escapeHTML, alignmentDescriptor });
 const sampleRounds = [
   { alignment: { overall: 88, topics: [{ topic: "lore", score: 90 }, { topic: "connection", score: 85 }] } }
 ];

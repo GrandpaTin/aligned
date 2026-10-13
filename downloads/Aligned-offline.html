@@ -12979,9 +12979,48 @@ var qrcode = function() {
       return true;
     }
 
+    function mergeNearbyDailyRitual(remote) {
+      if (!remote || !state.dailyRitual) return;
+      let changed = false;
+      const mergedDates = new Set([
+        ...(state.dailyRitual.completedDates || []),
+        ...(Array.isArray(remote.completedDates) ? remote.completedDates : [])
+      ]);
+      const sortedDates = [...mergedDates].sort().slice(-365);
+      if (sortedDates.length !== (state.dailyRitual.completedDates || []).length) {
+        state.dailyRitual.completedDates = sortedDates;
+        changed = true;
+      }
+      if (remote.answers && typeof remote.answers === "object") {
+        Object.entries(remote.answers).forEach(([date, ans]) => {
+          if (state.dailyRitual.answers[date] === undefined) {
+            state.dailyRitual.answers[date] = ans;
+            changed = true;
+          }
+        });
+      }
+      if (changed) {
+        const today = localDateStamp();
+        state.dailyRitual.lastDate = sortedDates[sortedDates.length - 1] || "";
+        state.dailyRitual.streak = calculateStreakFromDates(state.dailyRitual.completedDates, today);
+        saveState();
+        render();
+      }
+    }
+
     function sendNearbyHello() {
       const localPlayer = nearbyLocalPlayer();
-      sendNearbyMessage({ type: "hello", appVersion: APP_VERSION, roundId: state.nearbyRoundId || "", role: nearbyRuntime.role, inRound: ["question", "nearby-wait"].includes(state.screen) && state.playStyle === "nearby" }, { queue: false });
+      sendNearbyMessage({
+        type: "hello",
+        appVersion: APP_VERSION,
+        roundId: state.nearbyRoundId || "",
+        role: nearbyRuntime.role,
+        inRound: ["question", "nearby-wait"].includes(state.screen) && state.playStyle === "nearby",
+        dailyRitual: {
+          completedDates: state.dailyRitual?.completedDates || [],
+          answers: state.dailyRitual?.answers || {}
+        }
+      }, { queue: false });
       if (!state.nearbyRoundId || state.playStyle !== "nearby") return;
       if (state.screen === "question") sendNearbyMessage({ type: "progress", roundId: state.nearbyRoundId, answered: state.questionIndex, total: state.selectedQuestionIds.length });
       if (state.screen === "nearby-wait" || (nearbyRoundFinished() && state.completedPlayers?.[localPlayer])) sendNearbyMessage(nearbyPlayerPayload(localPlayer));
@@ -13240,6 +13279,9 @@ var qrcode = function() {
       const sameRound = !payload.roundId || payload.roundId === state.nearbyRoundId;
       if (payload.type === "hello") {
         nearbyRuntime.partnerLeft = false;
+        if (payload.dailyRitual && typeof payload.dailyRitual === "object") {
+          mergeNearbyDailyRitual(payload.dailyRitual);
+        }
         if (typeof payload.appVersion === "string" && payload.appVersion !== APP_VERSION && compareVersions(payload.appVersion, APP_VERSION) > 0) {
           showToast(`The other phone has a newer Aligned (${payload.appVersion.slice(0, 12)}). Everything still works; update this one when you can.`);
         } else if (typeof payload.appVersion === "string" && payload.appVersion !== APP_VERSION && compareVersions(payload.appVersion, APP_VERSION) < 0) {
@@ -14042,7 +14084,7 @@ var qrcode = function() {
 
     // Every dialog in the game is a .modal-backdrop appended to <body>. This one manager gives them all the same
     // behaviour: the page behind becomes inert, Tab stays inside, Escape cancels, and focus returns afterwards.
-    const MODAL_CANCEL_SELECTOR = "[data-modal-cancel], #stay-in-round, #cancel-reset, #sensitive-cancel, #secret-cancel, #cancel-question-edit, #close-reflections, #tutorial-finish";
+    const MODAL_CANCEL_SELECTOR = "[data-modal-cancel], .story-close-btn, #story-close-btn, #keepsake-close, #storybook-close-btn, #pack-share-close, #daily-ritual-close, #stay-in-round, #cancel-reset, #sensitive-cancel, #secret-cancel, #cancel-question-edit, #close-reflections, #tutorial-finish";
     let modalReturnFocus = null;
     let modalReturnKey = "";
     let modalWasOpen = false;
@@ -17371,7 +17413,7 @@ var qrcode = function() {
         const ly = (cy + (maxR + 20) * Math.sin(a.angle)).toFixed(1);
         return `
           <line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" class="radar-axis" />
-          <text x="${lx}" y="${ly}" class="radar-label">${a.label}</text>
+          <text x="${lx}" y="${ly}" class="radar-label" aria-hidden="true">${a.label}</text>
         `;
       }).join("");
 
@@ -17381,28 +17423,52 @@ var qrcode = function() {
         const r = maxR * (Math.max(20, Math.min(100, val)) / 100);
         const x = (cx + r * Math.cos(a.angle)).toFixed(1);
         const y = (cy + r * Math.sin(a.angle)).toFixed(1);
-        return { x, y, val };
+        return { x, y, val, label: a.label };
       });
 
       const polyPoints = points.map((p) => `${p.x},${p.y}`).join(" ");
       const vertices = points.map((p) => `<circle cx="${p.x}" cy="${p.y}" r="3.5" class="radar-vertex" />`).join("");
 
+      const tableRows = points.map((p) => {
+        const descriptor = alignmentDescriptor(p.val);
+        return `<tr>
+          <th scope="row">${escapeHTML(p.label)}</th>
+          <td>${p.val}%</td>
+          <td>${escapeHTML(descriptor.title)}</td>
+        </tr>`;
+      }).join("");
+
+      const summaryText = points.map((p) => `${p.label}: ${p.val}%`).join(", ");
+
       return `
-        <article class="journal-card radar-compass-card" style="margin-top:16px">
+        <article class="journal-card radar-compass-card" style="margin-top:16px" aria-labelledby="radar-heading">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
             <div style="text-align:left">
-              <h3 style="margin:0 0 2px">Resonance Compass</h3>
+              <h3 id="radar-heading" style="margin:0 0 2px">Resonance Compass</h3>
               <p style="margin:0;font-size:0.82rem;color:var(--text-2)">6-axis balance across relationship dimensions</p>
             </div>
             <button class="secondary-btn" id="open-storybook-btn" type="button" style="padding:6px 14px;font-size:0.8rem">📖 Keepsake Storybook</button>
           </div>
           <div class="radar-container">
-            <svg class="radar-svg" viewBox="0 0 220 220" role="img" aria-label="Resonance Compass Radar Chart">
+            <svg class="radar-svg" viewBox="0 0 220 220" role="img" aria-label="Resonance Compass: ${escapeHTML(summaryText)}" aria-describedby="resonance-compass-table">
               ${gridPolys}
               ${axisLines}
               <polygon points="${polyPoints}" class="radar-polygon" />
               ${vertices}
             </svg>
+            <table class="sr-only" id="resonance-compass-table">
+              <caption>Resonance Compass Dimensional Alignment Breakdown</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Dimension</th>
+                  <th scope="col">Alignment Score</th>
+                  <th scope="col">Evaluation</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${tableRows}
+              </tbody>
+            </table>
           </div>
         </article>
       `;
@@ -17465,12 +17531,13 @@ var qrcode = function() {
 
           <div class="storybook-actions">
             <button class="primary-btn" id="storybook-print-btn" type="button">🖨️ Print / Save as PDF</button>
-            <button class="secondary-btn" id="storybook-close-btn" type="button">Close</button>
+            <button class="secondary-btn" id="storybook-close-btn" data-modal-cancel type="button">Close</button>
           </div>
         </div>
       `;
 
       document.body.appendChild(modal);
+      armBackGuard();
       modal.querySelector("#storybook-print-btn").addEventListener("click", () => window.print());
       modal.querySelector("#storybook-close-btn").addEventListener("click", () => modal.remove());
     }
@@ -18065,12 +18132,27 @@ var qrcode = function() {
       return localDateStamp(d);
     }
 
+    function calculateStreakFromDates(completedDates = [], referenceDate = localDateStamp()) {
+      if (!Array.isArray(completedDates) || !completedDates.length) return 0;
+      const dateSet = new Set(completedDates);
+      let streak = 0;
+      const curr = new Date(`${referenceDate}T12:00:00`);
+      if (!dateSet.has(localDateStamp(curr))) {
+        curr.setDate(curr.getDate() - 1);
+        if (!dateSet.has(localDateStamp(curr))) return 0;
+      }
+      while (dateSet.has(localDateStamp(curr))) {
+        streak++;
+        curr.setDate(curr.getDate() - 1);
+      }
+      return streak;
+    }
+
     function renderDailyRitualCard() {
       const today = localDateStamp();
-      const yesterday = getYesterdayLocalDateStamp();
       const isDone = state.dailyRitual?.completedDates?.includes(today);
-      const streakActive = state.dailyRitual?.lastDate === today || state.dailyRitual?.lastDate === yesterday;
-      const streak = streakActive ? (state.dailyRitual?.streak || 0) : 0;
+      const streak = calculateStreakFromDates(state.dailyRitual?.completedDates || [], today);
+      if (state.dailyRitual) state.dailyRitual.streak = streak;
       const q = dailyQuestionForDate(today);
       return `
         <div class="daily-ritual-card">
@@ -18107,7 +18189,7 @@ var qrcode = function() {
               <span class="eyebrow" style="color:var(--coral)">Today’s response</span>
               <p style="font-size:1.1rem;font-weight:700;margin:6px 0 0;color:#fff">${escapeHTML(String(savedAnswer ?? "Done"))}</p>
             </div>
-            <div class="actions" style="justify-content:center"><button class="primary-btn" id="daily-close-btn" type="button">Close</button></div>
+            <div class="actions" style="justify-content:center"><button class="primary-btn" id="daily-close-btn" data-modal-cancel type="button">Close</button></div>
           ` : `
             <div style="margin:16px 0">
               ${isSlider ? `
@@ -18123,13 +18205,14 @@ var qrcode = function() {
             </div>
             <div class="actions" style="justify-content:center">
               <button class="primary-btn" id="daily-submit-btn" type="button">Complete Today’s Ritual ✨</button>
-              <button class="secondary-btn" id="daily-cancel-btn" type="button">Maybe Later</button>
+              <button class="secondary-btn" id="daily-cancel-btn" data-modal-cancel type="button">Maybe Later</button>
             </div>
           `}
         </div>
       `;
 
       document.body.appendChild(modal);
+      armBackGuard();
 
       if (isDone) {
         modal.querySelector("#daily-close-btn")?.addEventListener("click", () => modal.remove());
@@ -18152,14 +18235,8 @@ var qrcode = function() {
         if (!state.dailyRitual.completedDates) state.dailyRitual.completedDates = [];
         if (!state.dailyRitual.completedDates.includes(today)) state.dailyRitual.completedDates.push(today);
 
-        // Update streak
-        const yesterday = getYesterdayLocalDateStamp();
-        if (state.dailyRitual.lastDate === yesterday) {
-          state.dailyRitual.streak = (state.dailyRitual.streak || 0) + 1;
-        } else if (state.dailyRitual.lastDate !== today) {
-          state.dailyRitual.streak = 1;
-        }
         state.dailyRitual.lastDate = today;
+        state.dailyRitual.streak = calculateStreakFromDates(state.dailyRitual.completedDates, today);
 
         saveState();
         modal.remove();
@@ -19981,20 +20058,28 @@ var qrcode = function() {
           <h2 id="keepsake-title">Your alignment keepsake</h2>
           <p class="dialog-copy">Save or share this moment of connection.</p>
           <div class="keepsake-preview-wrap">
-            <canvas id="keepsake-canvas" width="800" height="1000" class="keepsake-canvas" aria-label="Keepsake card preview"></canvas>
+            <canvas id="keepsake-canvas" class="keepsake-canvas" style="width:100%;max-width:400px;aspect-ratio:4/5;display:block;margin:0 auto" aria-label="Keepsake card preview"></canvas>
           </div>
           <div class="dialog-actions" style="justify-content:center;gap:10px">
             <button class="primary-btn" id="keepsake-download" type="button">Download PNG</button>
             ${navigator.share ? '<button class="secondary-btn" id="keepsake-share" type="button">Share card</button>' : ""}
-            <button class="text-btn" id="keepsake-close" type="button">Close</button>
+            <button class="text-btn" id="keepsake-close" data-modal-cancel type="button">Close</button>
           </div>
         </section>
       `;
       document.body.appendChild(overlay);
+      armBackGuard();
 
       const canvas = overlay.querySelector("#keepsake-canvas");
       const ctx = canvas?.getContext("2d");
       if (ctx) {
+        const dpr = Math.max(2, Math.min(3, window.devicePixelRatio || 2));
+        const logicalW = 800;
+        const logicalH = 1000;
+        canvas.width = logicalW * dpr;
+        canvas.height = logicalH * dpr;
+        ctx.scale(dpr, dpr);
+
         const bgGrad = ctx.createLinearGradient(0, 0, 800, 1000);
         bgGrad.addColorStop(0, "#0b0f19");
         bgGrad.addColorStop(0.5, "#1e1b4b");
@@ -20104,9 +20189,19 @@ var qrcode = function() {
 
       overlay.querySelector("#keepsake-download")?.addEventListener("click", () => {
         if (!canvas) return;
+        const fileName = `aligned-keepsake-${localDateStamp()}.png`;
+        const dataUrl = canvas.toDataURL("image/png");
+        const base64Data = dataUrl.replace(/^data:image\/png;base64,/, "");
+
+        if (window.AlignedAndroid?.saveFile) {
+          window.AlignedAndroid.saveFile(fileName, "image/png", base64Data);
+          playSound("unlock");
+          return;
+        }
+
         const link = document.createElement("a");
-        link.download = `aligned-keepsake-${localDateStamp()}.png`;
-        link.href = canvas.toDataURL("image/png");
+        link.download = fileName;
+        link.href = dataUrl;
         link.click();
         playSound("unlock");
         showToast("Keepsake image downloaded!");
@@ -20301,7 +20396,7 @@ var qrcode = function() {
           </div>
           <div class="story-top-row">
             <div class="story-header-title"><span aria-hidden="true">✦</span> Aligned Wrapped</div>
-            <button class="story-close-btn" id="story-close-btn" type="button" aria-label="Close Story Reel">✕</button>
+            <button class="story-close-btn" id="story-close-btn" data-modal-cancel type="button" aria-label="Close Story Reel">✕</button>
           </div>
           <div class="story-nav-hotspot story-nav-prev" id="story-prev-zone"></div>
           <div class="story-nav-hotspot story-nav-next" id="story-next-zone"></div>
@@ -20309,6 +20404,7 @@ var qrcode = function() {
         </div>
       `;
       document.body.appendChild(overlay);
+      armBackGuard();
 
       const renderCurrentSlide = () => {
         const slide = slides[currentSlide];
@@ -20352,8 +20448,18 @@ var qrcode = function() {
       const closeStory = () => {
         clearInterval(slideTimer);
         document.removeEventListener("keydown", onStoryKey);
+        document.removeEventListener("visibilitychange", onStoryVisibility);
         overlay.remove();
       };
+
+      const onStoryVisibility = () => {
+        if (document.hidden) {
+          clearInterval(slideTimer);
+        } else {
+          startSlideTimer();
+        }
+      };
+      document.addEventListener("visibilitychange", onStoryVisibility);
 
       const onStoryKey = (e) => {
         if (e.key === "Escape") closeStory();
