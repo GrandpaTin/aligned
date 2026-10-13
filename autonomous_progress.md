@@ -595,7 +595,7 @@
 - **Verification:**
   - `npm test`: Passed (all 20 test suites, 135 unit tests across 20 runners in 280ms).
   - `npm run build`: `downloads/Aligned-offline.html` (1185 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
-- **Status:** Verified.
+- **Status:** Verified (`af6d26b`).
 
 
 
