@@ -19449,7 +19449,8 @@ var qrcode = function() {
       const inputMarkup = question.type === "text"
         ? `
           <label class="answer-label" for="answer-input">Your answer</label>
-          <textarea class="answer-textarea" id="answer-input" maxlength="600" placeholder="Write what feels true to you…" aria-describedby="question-title answer-error">${escapeHTML(savedAnswer || "")}</textarea>
+          <textarea class="answer-textarea" id="answer-input" maxlength="600" placeholder="Write what feels true to you…" aria-describedby="question-title answer-error answer-char-counter">${escapeHTML(savedAnswer || "")}</textarea>
+          <div class="char-counter" id="answer-char-counter" aria-live="polite" style="font-size:0.75rem;color:var(--text-2);text-align:right;margin-top:4px">${String(savedAnswer || "").length} / 600 characters</div>
         `
         : `
           ${quickPick ? `<div class="quick-guess ${savedGuess ? "guessed" : ""}" role="group" aria-label="Guess which side ${escapeHTML(partnerName)} picks">
@@ -19729,7 +19730,21 @@ var qrcode = function() {
         render();
       });
 
-      if (question.type === "slider") input.addEventListener("change", () => { saveState(); playSound("tap", { value: Number(input.value) }); });
+      if (question.type === "slider") {
+        input.addEventListener("change", () => { saveState(); playSound("tap", { value: Number(input.value) }); });
+        input.addEventListener("keydown", (e) => {
+          let val = Number(input.value);
+          if (e.key === "Home") val = 1;
+          else if (e.key === "End") val = 10;
+          else if (e.key === "PageUp") val = Math.min(10, val + 2);
+          else if (e.key === "PageDown") val = Math.max(1, val - 2);
+          else return;
+          e.preventDefault();
+          input.value = String(val);
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          playSound("tap", { value: val });
+        });
+      }
       input.addEventListener("blur", saveState);
       input.addEventListener("input", () => {
         if (error.textContent && error.className === "error") error.textContent = "";
@@ -19747,6 +19762,9 @@ var qrcode = function() {
           document.getElementById("slider-value").textContent = input.value;
           input.style.setProperty("--range-progress", `${((Number(input.value) - 1) / 9) * 100}%`);
           input.setAttribute("aria-valuetext", `${input.value} out of 10 (1 = ${question.labels?.[0] || "Low"}, 10 = ${question.labels?.[1] || "High"})`);
+        } else {
+          const charCounter = document.getElementById("answer-char-counter");
+          if (charCounter) charCounter.textContent = `${input.value.length} / 600 characters`;
         }
       });
 
@@ -20489,9 +20507,10 @@ var qrcode = function() {
 
     function handleTimerAction(qid, action) {
       if (!discussionTimers[qid]) {
-        discussionTimers[qid] = { seconds: 120, interval: null, running: false, isOpen: true };
+        discussionTimers[qid] = { qid, seconds: 120, interval: null, running: false, isOpen: true, targetTime: 0 };
       }
       const timer = discussionTimers[qid];
+      timer.qid = qid;
       const updateUI = () => {
         const liveDisplay = document.getElementById(`timer-display-${qid}`);
         const liveFill = document.getElementById(`timer-fill-${qid}`);
@@ -20505,13 +20524,15 @@ var qrcode = function() {
         if (timer.running) return;
         timer.running = true;
         timer.isOpen = true;
+        timer.targetTime = Date.now() + timer.seconds * 1000;
         playSound("tap");
         if (timer.interval) clearInterval(timer.interval);
         timer.interval = setInterval(() => {
-          if (timer.seconds > 0) {
-            timer.seconds--;
+          const remaining = Math.max(0, Math.ceil((timer.targetTime - Date.now()) / 1000));
+          if (remaining !== timer.seconds) {
+            timer.seconds = remaining;
             updateUI();
-            if (timer.seconds === 0) {
+            if (timer.seconds <= 0) {
               clearInterval(timer.interval);
               timer.running = false;
               timer.interval = null;
@@ -20520,18 +20541,21 @@ var qrcode = function() {
               updateUI();
             }
           }
-        }, 1000);
+        }, 250);
       } else if (action === "pause") {
         if (!timer.running) return;
         clearInterval(timer.interval);
         timer.running = false;
         timer.interval = null;
+        timer.seconds = Math.max(0, Math.ceil((timer.targetTime - Date.now()) / 1000));
+        updateUI();
         playSound("tap");
       } else if (action === "reset") {
         clearInterval(timer.interval);
         timer.running = false;
         timer.interval = null;
         timer.seconds = 120;
+        timer.targetTime = 0;
         updateUI();
         playSound("tap");
       }
@@ -22792,7 +22816,20 @@ var qrcode = function() {
           if (state.ambientMusicEnabled) ambientSoundscape.start();
         } catch {}
       }
-      if (document.visibilityState === "visible") reconnectNearbyNow();
+      if (document.visibilityState === "visible") {
+        reconnectNearbyNow();
+        Object.values(discussionTimers).forEach((t) => {
+          if (t && t.running && t.targetTime) {
+            t.seconds = Math.max(0, Math.ceil((t.targetTime - Date.now()) / 1000));
+            const liveDisplay = document.getElementById(`timer-display-${t.qid}`);
+            const liveFill = document.getElementById(`timer-fill-${t.qid}`);
+            const mins = String(Math.floor(t.seconds / 60)).padStart(2, "0");
+            const secs = String(t.seconds % 60).padStart(2, "0");
+            if (liveDisplay) liveDisplay.textContent = t.seconds === 0 ? "Time's up! ✦" : `${mins}:${secs}`;
+            if (liveFill) liveFill.style.width = `${(t.seconds / 120) * 100}%`;
+          }
+        });
+      }
     });
     const handleUnloadTeardown = () => {
       if (nearbyLinked()) {
