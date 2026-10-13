@@ -1,4 +1,4 @@
-const CACHE_NAME = "aligned-v40";
+const CACHE_NAME = "aligned-v41";
 const NAVIGATION_TIMEOUT_MS = 3000;
 const APP_FILES = ["./", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./og-image.jpg", "./apple-touch-icon.png", "./icon-maskable-512.png"];
 
@@ -24,7 +24,17 @@ self.addEventListener("fetch", (event) => {
   // Downloads (APK, offline copy) are fetched on demand and never stored in the offline cache.
   if (new URL(request.url).pathname.includes("/downloads/")) return;
 
-  const network = fetch(request)
+  const getNetworkResponse = async () => {
+    if (request.mode === "navigate" && event.preloadResponse) {
+      try {
+        const preload = await event.preloadResponse;
+        if (preload) return preload;
+      } catch (e) {}
+    }
+    return fetch(request);
+  };
+
+  const network = getNetworkResponse()
       .then(async (response) => {
         if (response.ok && response.type === "basic" && new URL(request.url).origin === self.location.origin) {
           // Shared links carry unique tracking queries (fbclid, utm_*); one entry per page keeps the cache from piling up copies.

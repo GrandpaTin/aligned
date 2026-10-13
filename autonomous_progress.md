@@ -19,6 +19,7 @@
 | **5** | 2026-10-13 01:20 | PWA Cache Key Normalization, WebRTC Identity Guard, Layout Stabilization, Modal Focus Hardening & Custom Pack Test Suite | Verified | `e3661ad` |
 | **7** | 2026-10-13 01:43 | SW Invalidation waitUntil, Keepsake GPU Buffer Purge, WebRTC Multi-Tab Guard, Mind-Reader Settle Guard & Live ARIA Announcements | Verified | `b76cf85` |
 | **8** | 2026-10-13 01:56 | Service Worker Navigation Preload, Audio Voice Scheduler Jitter & Deallocation, Modal Disconnect-Safe Guard, While-You-Wait In-Place Sync & Dual Intuition Payoff, Pack Builder A11y & Keepsake Math Suite | Verified | `e26d8d5` |
+| **9** | 2026-10-13 02:15 | Service Worker Preload Consumption (v41), Web Audio Linear Ramping & iOS Unlock, Story Reel Gestures & A11y, Keepsake SR Table, High-Contrast Radar Tokens & Taxonomy Ramp Test Suite | Verified | `fc17ce1` |
 
 ---
 
@@ -281,4 +282,45 @@
 - **Status:** Verified (`e26d8d5`).
 
 ---
+
+### Cycle 9 (2026-10-13 02:15 EDT)
+- **Audits Performed:**
+  - **Subagent A (Resource & Lifecycle):** Audited `sw.js` navigation preload consumption discovering unawaited `event.preloadResponse` leaking duplicate network requests; identified abrupt Web Audio gain steps and audio context suspend on iOS Safari mobile wakeups; audited procedural ambient volume transitions for click/pop audio discontinuities.
+  - **Subagent B (Accessibility & Flow):** Audited Story Reel modal discovering missing WCAG 2.2.2 reading controls (`mouseenter`/`focusin` pause, `mouseleave`/`focusout` resume), Spacebar conflict with keepsake launch, missing horizontal touch swipe navigation, and interactive button occlusion on slide 5 by side hotspots; audited Keepsake modal canvas accessibility discovering screen readers had no semantic access to relationship metrics; audited Resonance Compass and heat gradient tokens for WCAG 1.4.11 3:1 non-text contrast ratios.
+  - **Subagent C (Test Engineering & Catalog Taxonomy):** Audited the 364 question catalog across the 10 topic domains for prompt length bounds, tone classifications, session preset pools, and intensity ramp invariants (`orderRoundAsRamp`); designed and built `tests/taxonomy-ramp.test.mjs` with deterministic fixtures and run-smoothing verification.
+- **Implemented Fixes:**
+  1. **Service Worker Navigation Preload Consumption & Cache (`sw.js`):**
+     - Updated `sw.js` fetch handler to await `event.preloadResponse` before falling back to `fetch(request)`, consuming the preloaded response instead of duplicating page load requests.
+     - Bumped service worker cache name to `aligned-v41`.
+  2. **Web Audio Pop Elimination, Linear Volume Ramps & iOS Safari Wakeup (`index.html`):**
+     - Anchored `gain.setValueAtTime(gain.value, now)` before `linearRampToValueAtTime` in `ProceduralAmbient.updateMix()` and `.stop()`.
+     - Replaced abrupt 0.0001 step in `document.addEventListener("visibilitychange")` with smooth anchored 120ms linear ramp.
+     - Added `touchend` and `pointerdown` listeners for audio unlock on mobile iOS Safari.
+     - Added `touchcancel` on holographic card face listeners for gesture interruptions.
+  3. **Story Reel Touch Gestures, Keyboard Safety & WCAG 2.2.2 Pause (`index.html`):**
+     - Added `mouseenter`/`focusin` pause and `mouseleave`/`focusout` resume for the 5000ms auto-advance timer.
+     - Guarded `onStoryKey` so pressing Spacebar to activate `#story-open-keepsake` does not accidentally dismiss the modal.
+     - Added `aria-live="polite"` and `aria-atomic="true"` to `#story-slide-content`.
+     - Implemented horizontal touch swipe gestures (`touchstart`/`touchend` deltaX > 40px) and vertical swipe-down dismiss.
+     - Elevated `.story-highlight-box` to `position: relative; z-index: 10;` so slide 5 action buttons are never occluded by 40% side hotspots.
+  4. **Keepsake Screen-Reader Accessible Summary Table & Backdrop Dismissal (`index.html`):**
+     - Added `.sr-only` accessible summary table with `aria-describedby="keepsake-accessible-summary"` on `#keepsake-canvas` exposing duo title, similarity %, fit %, top 3 topic scores, and date.
+     - Added backdrop click dismissal on `openKeepsakeModal`.
+     - Added `safeEscape` fallback guard preventing `ReferenceError: escapeHTML is not defined` in VM test runners.
+  5. **Mind-Reader Wagering Crash Guard & Regex Boundary (`index.html`):**
+     - Guarded `mindReaderHeadline(tally)` to safely check `if (!players.length) return "..."` and `if (!best || !best.hits) return "..."` preventing `TypeError: Cannot read properties of undefined (reading 'hits')` when rounds have no wagers.
+     - Added word boundary `\bresent` to `DEEP_PROMPT_PATTERN` so prompts containing "represent" (e.g. `wld_15`) are not misclassified as deep resentment questions.
+  6. **Resonance Compass Radar & Heat Gradient Contrast Tokens (`index.html`):**
+     - Boosted `.radar-grid` to `rgba(255, 255, 255, 0.28)` and `.radar-axis` to `rgba(255, 255, 255, 0.42)` (and Pastel tokens to 0.38 / 0.55) achieving WCAG 1.4.11 3:1+ compliance.
+     - Upgraded `.heat-gradient` with high-contrast luminance ramp (`#e11d48` -> `#f59e0b` -> `#10b981`) and high-contrast borders.
+     - Improved `orderRoundAsRamp` run-smoothing to allow safe non-deep closer swaps and accurate neighbor collision checks.
+  7. **Automated Test Suite Expansion (`tests/taxonomy-ramp.test.mjs`, `package.json`):**
+     - Authored `tests/taxonomy-ramp.test.mjs` (5 unit tests running in 20ms covering 364 questions, preset fulfillment, tone classification, order ramp invariants, and semantic prompt twins).
+     - Integrated `tests/taxonomy-ramp.test.mjs` into `package.json` `"test"` script (12 test suites total).
+- **Verification:**
+  - `npm test`: Passed (all 12 test suites: production check, signaling security, daily ritual lifecycle, radar storybook, backup schema resilience, custom pack automation, quota recovery, audio preferences, webrtc peer simulation, mind-reader math, keepsake math, and taxonomy ramp — 45 unit tests across 12 runners in 230ms).
+  - `npm run test:e2e`: Passed (all 7 Playwright E2E tests: full 5-question round lifecycle, settings persistence across reload, custom pack launch, screen heading focus transitions, modal keyboard trapping, high-contrast persistence, and offline service worker cached execution in 91.3s).
+  - `npm run build`: `downloads/Aligned-offline.html` (1162 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
+- **Status:** Verified (`fc17ce1`).
+
 

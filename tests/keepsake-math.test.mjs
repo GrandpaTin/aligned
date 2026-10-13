@@ -1,4 +1,4 @@
-﻿import { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -91,6 +91,7 @@ function createKeepsakeHarness(dpr = 2) {
     window: { devicePixelRatio: dpr },
     navigator: { share: () => {} },
     document: mockDoc,
+    escapeHTML,
     state: { names: ["Sam", "Alex"] },
     currentRelationshipProfile: () => ({ icon: "♡", label: "Dating", fitLabel: "Chemistry" }),
     formatRoundDate: () => "October 13, 2026",

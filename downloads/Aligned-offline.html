@@ -3322,6 +3322,8 @@ var qrcode = function() {
       border: 1px solid rgba(255, 255, 255, 0.12);
       width: 100%;
       text-align: left;
+      position: relative;
+      z-index: 10;
     }
 
     /* Voice Note Memory Recorder */
@@ -3604,11 +3606,11 @@ var qrcode = function() {
     }
     .radar-grid {
       fill: none;
-      stroke: rgba(255, 255, 255, 0.1);
+      stroke: rgba(255, 255, 255, 0.28);
       stroke-dasharray: 2 3;
     }
     .radar-axis {
-      stroke: rgba(255, 255, 255, 0.15);
+      stroke: rgba(255, 255, 255, 0.42);
     }
     .radar-label {
       font-size: 11px;
@@ -5194,7 +5196,8 @@ var qrcode = function() {
       flex: 1;
       height: 6px;
       border-radius: 999px;
-      background: linear-gradient(90deg, #fb7185, #fbbf24, #4ade80);
+      background: linear-gradient(90deg, #e11d48 0%, #f59e0b 50%, #10b981 100%);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
     }
 
     .reveal-grid {
@@ -8141,13 +8144,15 @@ var qrcode = function() {
     .high-contrast .radar-label { fill: #ffffff !important; font-weight: 850; }
     .high-contrast .radar-polygon { stroke: #4ade80 !important; stroke-width: 3.5; fill: rgba(74, 222, 128, 0.35) !important; }
 
-    [data-theme="pastel"] .radar-grid { stroke: rgba(15, 23, 42, 0.22); }
-    [data-theme="pastel"] .radar-axis { stroke: rgba(15, 23, 42, 0.35); }
+    [data-theme="pastel"] .radar-grid { stroke: rgba(15, 23, 42, 0.38); }
+    [data-theme="pastel"] .radar-axis { stroke: rgba(15, 23, 42, 0.55); }
     [data-theme="pastel"] .radar-label { fill: #0f172a; }
-    [data-theme="pastel"].high-contrast .radar-grid { stroke: rgba(0, 0, 0, 0.45) !important; }
+    [data-theme="pastel"].high-contrast .radar-grid { stroke: rgba(0, 0, 0, 0.5) !important; }
     [data-theme="pastel"].high-contrast .radar-axis { stroke: #000000 !important; stroke-width: 1.5; }
     [data-theme="pastel"].high-contrast .radar-label { fill: #000000 !important; font-weight: 850; }
     [data-theme="pastel"].high-contrast .radar-polygon { stroke: #15803d !important; stroke-width: 3.5; fill: rgba(21, 128, 61, 0.3) !important; }
+    .high-contrast .heat-gradient { border: 1.5px solid #ffffff !important; }
+    [data-theme="pastel"].high-contrast .heat-gradient { border: 1.5px solid #000000 !important; }
 
     .reduced-motion *,
     .reduced-motion *::before,
@@ -14834,16 +14839,19 @@ var qrcode = function() {
         if (m.synth > 0 && !this.synthLayer) this.startSynth(ctx);
         else if (this.synthLayer?.out) {
           this.synthLayer.out.gain.cancelScheduledValues(now);
+          this.synthLayer.out.gain.setValueAtTime(this.synthLayer.out.gain.value, now);
           this.synthLayer.out.gain.linearRampToValueAtTime(Math.max(0.0001, m.synth), now + 0.3);
         }
         if (m.rain > 0 && !this.rainLayer) this.startRain(ctx);
         else if (this.rainLayer?.out) {
           this.rainLayer.out.gain.cancelScheduledValues(now);
+          this.rainLayer.out.gain.setValueAtTime(this.rainLayer.out.gain.value, now);
           this.rainLayer.out.gain.linearRampToValueAtTime(Math.max(0.0001, m.rain * 0.7), now + 0.3);
         }
         if (m.hearth > 0 && !this.hearthLayer) this.startHearth(ctx);
         else if (this.hearthLayer?.out) {
           this.hearthLayer.out.gain.cancelScheduledValues(now);
+          this.hearthLayer.out.gain.setValueAtTime(this.hearthLayer.out.gain.value, now);
           this.hearthLayer.out.gain.linearRampToValueAtTime(Math.max(0.0001, m.hearth * 0.65), now + 0.3);
         }
       }
@@ -14985,6 +14993,7 @@ var qrcode = function() {
           window.clearTimeout(s.timer);
           try {
             s.out.gain.cancelScheduledValues(now);
+            s.out.gain.setValueAtTime(s.out.gain.value, now);
             s.out.gain.linearRampToValueAtTime(0.0001, now + 1);
             setTimeout(() => { try { s.lfo.stop(); [s.lfo, s.lfoDepth, s.filter, s.out].forEach((n) => n?.disconnect()); } catch {} }, 1050);
           } catch {}
@@ -14994,6 +15003,7 @@ var qrcode = function() {
           this.rainLayer = null;
           try {
             r.out.gain.cancelScheduledValues(now);
+            r.out.gain.setValueAtTime(r.out.gain.value, now);
             r.out.gain.linearRampToValueAtTime(0.0001, now + 1);
             setTimeout(() => { try { r.source.stop(); r.source.disconnect(); r.filter?.disconnect(); r.out.disconnect(); } catch {} }, 1050);
           } catch {}
@@ -15004,6 +15014,7 @@ var qrcode = function() {
           window.clearTimeout(h.timer);
           try {
             h.out.gain.cancelScheduledValues(now);
+            h.out.gain.setValueAtTime(h.out.gain.value, now);
             h.out.gain.linearRampToValueAtTime(0.0001, now + 1);
             setTimeout(() => { try { h.source.stop(); h.source.disconnect(); h.filter?.disconnect(); h.out.disconnect(); } catch {} }, 1050);
           } catch {}
@@ -16148,7 +16159,7 @@ var qrcode = function() {
       return selected;
     }
 
-    const DEEP_PROMPT_PATTERN = /emotional safety|vulnerab|insecur|trauma|forgiv|jealous|regret|lonel|grief|hurt|betray|resent|conflict|argument|fight|fear|boundar|trust|apolog|repair|deal ?breaker|walk away|not in the mood|consent|disagree|reset|reconnect/i;
+    const DEEP_PROMPT_PATTERN = /emotional safety|vulnerab|insecur|trauma|forgiv|jealous|regret|lonel|grief|hurt|betray|\bresent|conflict|argument|\bfight|\bfear|boundar|trust|apolog|repair|deal ?breaker|walk away|not in the mood|consent|disagree|\breset\b|reconnect/i;
     // Whole words only: "compete" is not about pets.
     const LIGHT_PROMPT_PATTERN = /\b(?:karaoke|superpowers?|movies?|films?|songs?|snacks?|pizza|vacations?|holidays?|weekends?|zombies?|games?|sitcoms?|pets?|desserts?|playlists?|road trips?|festivals?|danc(?:e|es|ing)|costumes?|emojis?|lottery|islands?|breakfast|coffee|ice cream|theme parks?)\b/i;
     const PLAYFUL_SPICY = /^spy_(?:2[2-9]|3\d)$/;
@@ -16190,13 +16201,24 @@ var qrcode = function() {
       const last = ordered.length - 1;
       for (let index = 2; index < last; index += 1) {
         if (ordered[index].type === ordered[index - 1].type && ordered[index].type === ordered[index - 2].type) {
-          const swap = ordered.findIndex((question, other) => other > index && other < last && question.type !== ordered[index].type);
-          if (swap > 0) [ordered[index], ordered[swap]] = [ordered[swap], ordered[index]];
-          else {
-            const runType = ordered[index].type;
-            const fits = (other) => other >= 1 && ordered[other].type !== runType && questionTone(ordered[other]) !== "deep"
-              && ordered[other - 1]?.type !== runType && ordered[other + 1]?.type !== runType;
-            let back = index - 3;
+          const runType = ordered[index].type;
+          const maxForward = (questionTone(ordered[index]) !== "deep" && questionTone(ordered[last]) !== "deep") ? last : last - 1;
+          const swap = ordered.findIndex((question, other) => other > index && other <= maxForward && question.type !== runType && (other !== last || questionTone(ordered[index]) !== "deep"));
+          if (swap > 0) {
+            [ordered[index], ordered[swap]] = [ordered[swap], ordered[index]];
+          } else {
+            const wouldNotMakeThree = (pos) => {
+              const prev2 = pos >= 2 ? ordered[pos - 2]?.type : null;
+              const prev1 = pos >= 1 ? ordered[pos - 1]?.type : null;
+              const next1 = pos + 1 < ordered.length ? ordered[pos + 1]?.type : null;
+              const next2 = pos + 2 < ordered.length ? ordered[pos + 2]?.type : null;
+              if (prev2 === runType && prev1 === runType) return false;
+              if (prev1 === runType && next1 === runType) return false;
+              if (next1 === runType && next2 === runType) return false;
+              return true;
+            };
+            const fits = (other) => other >= 1 && ordered[other].type !== runType && questionTone(ordered[other]) !== "deep" && wouldNotMakeThree(other);
+            let back = index - 2;
             while (back >= 1 && !fits(back)) back -= 1;
             if (back >= 1) [ordered[index - 1], ordered[back]] = [ordered[back], ordered[index - 1]];
           }
@@ -19946,12 +19968,13 @@ var qrcode = function() {
 
     function mindReaderHeadline(tally) {
       const players = tally.filter((item) => item.made);
+      if (!players.length) return "No mind reading this round — plenty left to learn!";
       const rate = (item) => item.hits / item.made;
       if (players.length === 2 && players[0].hits === players[1].hits) {
         return players[0].hits ? `A tie — you each read ${players[0].hits === 1 ? "one" : players[0].hits} right` : "No mind reading this round — plenty left to learn!";
       }
       const best = [...players].sort((a, b) => b.hits - a.hits || rate(b) - rate(a))[0];
-      if (!best.hits) return "No mind reading this round — plenty left to learn!";
+      if (!best || !best.hits) return "No mind reading this round — plenty left to learn!";
       const name = escapeHTML(state.names[best.player]);
       if (rate(best) >= 0.8 && best.made >= 2) return `👑 ${name} is this round’s mind reader — ${best.hits} of ${best.made}!`;
       if (rate(best) < 0.5) return `${name} edges it — ${best.hits} of ${best.made}. Plenty left to learn!`;
@@ -20439,6 +20462,7 @@ var qrcode = function() {
       ];
       const duoTitle = duoTitles.find(([threshold]) => alignment.overall >= threshold)?.[1] || "Aligned Duo";
       const roundDate = formatRoundDate(new Date().toISOString());
+      const safeEscape = typeof escapeHTML === "function" ? escapeHTML : (s) => String(s);
 
       overlay.innerHTML = `
         <section class="exit-dialog keepsake-dialog" role="dialog" aria-modal="true" aria-labelledby="keepsake-title">
@@ -20446,7 +20470,20 @@ var qrcode = function() {
           <h2 id="keepsake-title">Your alignment keepsake</h2>
           <p class="dialog-copy">Save or share this moment of connection.</p>
           <div class="keepsake-preview-wrap">
-            <canvas id="keepsake-canvas" class="keepsake-canvas" style="width:100%;max-width:400px;aspect-ratio:4/5;display:block;margin:0 auto" aria-label="Keepsake card preview"></canvas>
+            <canvas id="keepsake-canvas" class="keepsake-canvas" style="width:100%;max-width:400px;aspect-ratio:4/5;display:block;margin:0 auto" aria-label="Keepsake card preview" aria-describedby="keepsake-accessible-summary"></canvas>
+            <div id="keepsake-accessible-summary" class="sr-only">
+              <p>${safeEscape(state.names[0] || "Player 1")} &amp; ${safeEscape(state.names[1] || "Player 2")} — ${safeEscape(duoTitle)} (${alignment.overall}% similarity, ${alignment.fitOverall ?? alignment.overall}% ${safeEscape(profile.fitLabel)}) on ${safeEscape(roundDate)}.</p>
+              <table>
+                <caption>Top Topic Alignments</caption>
+                <thead><tr><th scope="col">Topic</th><th scope="col">Sync</th></tr></thead>
+                <tbody>
+                  ${(alignment.topics || []).slice(0, 3).map((t) => {
+                    const opt = TOPIC_OPTIONS.find((o) => o.id === t.topic);
+                    return `<tr><td>${safeEscape(opt?.label || t.topic)}</td><td>${t.score}%</td></tr>`;
+                  }).join("")}
+                </tbody>
+              </table>
+            </div>
           </div>
           <div class="dialog-actions" style="justify-content:center;gap:10px">
             <button class="primary-btn" id="keepsake-download" type="button">Download PNG</button>
@@ -20581,6 +20618,7 @@ var qrcode = function() {
       const onKeydown = (e) => { if (e.key === "Escape") close(); };
       document.addEventListener("keydown", onKeydown);
       overlay.querySelector("#keepsake-close")?.addEventListener("click", close);
+      overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
 
       overlay.querySelector("#keepsake-download")?.addEventListener("click", () => {
         if (!canvas) return;
@@ -20797,11 +20835,40 @@ var qrcode = function() {
           </div>
           <div class="story-nav-hotspot story-nav-prev" id="story-prev-zone"></div>
           <div class="story-nav-hotspot story-nav-next" id="story-next-zone"></div>
-          <div class="story-slide" id="story-slide-content"></div>
+          <div class="story-slide" id="story-slide-content" aria-live="polite" aria-atomic="true"></div>
         </div>
       `;
       document.body.appendChild(overlay);
       armBackGuard();
+
+      const reelContainer = overlay.querySelector(".story-reel-container");
+      reelContainer?.addEventListener("mouseenter", () => clearInterval(slideTimer));
+      reelContainer?.addEventListener("mouseleave", () => startSlideTimer());
+      reelContainer?.addEventListener("focusin", () => clearInterval(slideTimer));
+      reelContainer?.addEventListener("focusout", () => startSlideTimer());
+
+      let touchStartX = 0;
+      let touchStartY = 0;
+      reelContainer?.addEventListener("touchstart", (e) => {
+        if (!e.touches.length) return;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+
+      reelContainer?.addEventListener("touchend", (e) => {
+        if (!e.changedTouches.length) return;
+        const deltaX = e.changedTouches[0].clientX - touchStartX;
+        const deltaY = e.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+          if (deltaX < 0) {
+            if (currentSlide < totalSlides - 1) { currentSlide++; renderCurrentSlide(); } else closeStory();
+          } else {
+            if (currentSlide > 0) { currentSlide--; renderCurrentSlide(); }
+          }
+        } else if (deltaY > 70 && Math.abs(deltaY) > Math.abs(deltaX)) {
+          closeStory();
+        }
+      }, { passive: true });
 
       const renderCurrentSlide = () => {
         const slide = slides[currentSlide];
@@ -20859,6 +20926,7 @@ var qrcode = function() {
       document.addEventListener("visibilitychange", onStoryVisibility);
 
       const onStoryKey = (e) => {
+        if (e.target.closest("button, [role='button'], input, textarea")) return;
         if (e.key === "Escape") closeStory();
         else if (e.key === "ArrowRight" || e.key === " ") {
           if (currentSlide < totalSlides - 1) { currentSlide++; renderCurrentSlide(); } else closeStory();
@@ -22394,6 +22462,7 @@ var qrcode = function() {
       window.addEventListener("deviceorientation", onHoloOrientation, { passive: true });
       document.addEventListener("touchmove", onHoloTouchMove, { passive: true });
       document.addEventListener("touchend", onHoloTouchEnd, { passive: true });
+      document.addEventListener("touchcancel", onHoloTouchEnd, { passive: true });
       cleanupResponsiveRender = () => {
         clearAllDiscussionTimers();
         cancelAnimationFrame(resizeFrame);
@@ -22405,6 +22474,7 @@ var qrcode = function() {
         window.removeEventListener("deviceorientation", onHoloOrientation);
         document.removeEventListener("touchmove", onHoloTouchMove);
         document.removeEventListener("touchend", onHoloTouchEnd);
+        document.removeEventListener("touchcancel", onHoloTouchEnd);
         if (holoFrame) { cancelAnimationFrame(holoFrame); holoFrame = 0; }
         if (holoTouchFrame) { cancelAnimationFrame(holoTouchFrame); holoTouchFrame = 0; }
       };
@@ -22567,8 +22637,7 @@ var qrcode = function() {
       }
     }, { passive: true });
 
-    document.addEventListener("click", (event) => {
-      // Resume audio on user interaction to satisfy browser autoplay policy.
+    const unlockAudio = () => {
       try {
         const running = audioEngine.ctx && audioEngine.ctx.state === "running";
         if (!running || (state.ambientMusicEnabled && !ambientSoundscape.generation)) {
@@ -22579,6 +22648,14 @@ var qrcode = function() {
       } catch (e) {
         // Prevent audio issues from blocking user interaction handlers
       }
+    };
+    ["touchend", "pointerdown"].forEach((evt) => {
+      document.addEventListener(evt, unlockAudio, { capture: true, passive: true });
+    });
+
+    document.addEventListener("click", (event) => {
+      // Resume audio on user interaction to satisfy browser autoplay policy.
+      unlockAudio();
 
       const activeDropdown = document.querySelector(".session-dropdown-container.open");
       if (activeDropdown && !event.target.closest(".session-dropdown-container")) {
@@ -22614,7 +22691,7 @@ var qrcode = function() {
           const level = audioEngine.musicBus.gain;
           const now = audioEngine.ctx.currentTime;
           level.cancelScheduledValues(now);
-          level.setValueAtTime(0.0001, now);
+          level.setValueAtTime(level.value, now);
           level.linearRampToValueAtTime(MUSIC_LEVEL, now + 0.8);
           audioEngine.ctx.resume().catch(() => {});
           armIdleSuspend();
