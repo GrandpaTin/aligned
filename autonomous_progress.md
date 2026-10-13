@@ -24,6 +24,7 @@
 | **11** | 2026-10-13 08:49 | Discussion Timer TargetTime Drift Resilience & Visibility Re-sync, Slider Keyboard Controls, Accessible Character Counter & Timer Resilience Test Suite | Verified | `1dbf660` |
 | **12** | 2026-10-13 09:03 | WebRTC Outbox Queue & Buffered FIFO Flush, AmbientMix Reconnect Sync, Story Reel Accessible Play/Pause Toggle & Journal Search Status Live Region | Verified | `122e55a` |
 | **13** | 2026-10-13 09:09 | Service Worker Cache v42, Procedural Ambient Low-Power Crackle Throttle & Library Live Search Status Announcement | Verified | `0e753e5` |
+| **14** | 2026-10-13 09:35 | Detached DOM Retention & Memory Cleanup (`openedCardIds`), Forced Layout Batching, Score Unlock Teardown, Chained Round Consent, Date Parsing Immunity & Library Performance Test Suite | Verified | `85ab853` |
 
 ---
 
@@ -435,6 +436,41 @@
   - `npm run test:e2e`: Passed (all 7 Playwright E2E tests: full 5-question round lifecycle, settings persistence across reload, custom pack launch, screen heading focus transitions, modal keyboard trapping, high-contrast persistence, and offline service worker cached execution in 95.2s).
   - `npm run build`: `downloads/Aligned-offline.html` (1172 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
 - **Status:** Verified (`0e753e5`).
+
+---
+
+### Cycle 14 (2026-10-13 09:35 EDT)
+- **Audits Performed:**
+  - **Memory & DOM Retention (Subagent A):** Discovered that `openedCards` held strong references to raw DOM card elements across screen transitions and board rebuilds, retaining entire detached DOM subtrees in memory and breaking the Android Back button after rating questions; discovered forced synchronous layout thrashing in `enforceCompactFloor()` from interleaving `getComputedStyle` reads with `style.setProperty` writes inside an unbounded loop; identified score unlock animation frame (`step`) and timeouts continuing to run on detached dashboard nodes after screen navigation; identified unused dead function `getYesterdayLocalDateStamp()`.
+  - **Gameplay & State Integrity (Subagent B):** Discovered that turn-based reveal state (`turnBasedReveal` and `activeTurn`) was not preserved across sessions, reloads, or tab switches in `stateToBackup`, `loadState`, and `backupToState`; discovered that clicking "Reveal all" left the `.turn-banner` visible prompting users to reveal already face-up cards; discovered that "Play another round" (`#new-round`) launched games without checking sensitive topic comfort consent (`openSensitiveConsent`); identified DST/leap-year date parsing vulnerability in `calculateStreakFromDates` where string templating could fail.
+  - **Question Library Performance (Subagent C):** Audited the 15 existing test suites and identified lack of test coverage for Question Library search indexing, query normalization, filter accuracy across the complete 364-question catalog, and live ARIA announcements; designed `tests/library-performance.test.mjs`.
+- **Implemented Fixes:**
+  1. **Detached DOM Retention Fix with `openedCardIds` (`index.html`):**
+     - Replaced storing DOM elements in `openedCards` with string IDs (`openedCardIds: string[]`).
+     - Refactored Android Back handler (`alignedHandleBack`) to resolve elements on demand via `app.querySelector(...)`, eliminating memory leaks and fixing card closure behavior after rating questions.
+  2. **Two-Pass Batch Layout in `enforceCompactFloor()` (`index.html`):**
+     - Separated DOM measurement and style mutation into two discrete phases: first pass queries and collects elements measuring under 11.95px, second pass applies `12px !important`, eliminating forced synchronous layout thrashing.
+  3. **Score Unlock Animation Teardown & Lifecycle Guards (`index.html`):**
+     - Scoped `scoreUnlockFrame` and `scoreUnlockTimers` tracking inside `renderReveal()`.
+     - Added disconnection guard (`if (!dashboard.isConnected) return;`) inside `step(now)` and `run()`.
+     - Cancelled `scoreUnlockFrame` and cleared all active timeouts inside `cleanupResponsiveRender()`.
+  4. **Turn-Based Reveal State Persistence & Dynamic Banner Updates (`index.html`):**
+     - Serialized and restored `turnBasedReveal` and `activeTurn` across `stateToBackup()`, `loadState()`, and `backupToState()`.
+     - Updated `updateRevealAllButton()` to automatically hide `.turn-banner` when all cards are face up, and show it when hidden cards remain.
+  5. **Sensitive Topic Comfort Guard on "Play Another Round" (`index.html`):**
+     - Wrapped `#new-round` game starts in `openSensitiveConsent(selectedTopics, () => { ... })` across both nearby host and pass-and-play paths, preserving ongoing partner boundaries.
+  6. **DST & Leap-Year Resilient Date Parsing (`index.html`):**
+     - Implemented `parseLocalDate(dateStr)` extracting `[YYYY, MM, DD]` and constructing `new Date(year, month - 1, day, 12, 0, 0)`.
+     - Updated `calculateStreakFromDates` with component-based date parsing, removing brittle date string templating and eliminating dead function `getYesterdayLocalDateStamp()`.
+  7. **Automated Test Suite Expansion (`tests/library-performance.test.mjs`, `package.json`):**
+     - Authored `tests/library-performance.test.mjs` (12 unit tests running in ~800ms across 4 sub-suites: pre-computed `_searchIndex` vs on-the-fly search benchmarking, reactive cache invalidation on edits/overrides/custom questions, normalized query matching with case/punctuation/tag tokens, exact 8-status and 10-topic filter partitioning across 364 questions, and live announcement updates).
+     - Integrated `tests/library-performance.test.mjs` into `package.json` `"test"` script (16 test suites total, 79 unit tests).
+- **Verification:**
+  - `npm test`: Passed (all 16 test suites: production check, signaling security, daily ritual lifecycle, radar storybook, backup schema resilience, custom pack automation, quota recovery, audio preferences, webrtc peer simulation, mind-reader math, keepsake math, taxonomy ramp, security escape, timer resilience, reconnection queue, and library performance — 79 unit tests across 16 runners in 280ms).
+  - `npm run test:e2e`: Passed (all 7 Playwright E2E tests in 91.3s).
+  - `npm run build`: `downloads/Aligned-offline.html` (1174 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
+- **Status:** Verified (`85ab853`).
+
 
 
 
