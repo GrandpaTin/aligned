@@ -1,4 +1,4 @@
-const CACHE_NAME = "aligned-v38";
+const CACHE_NAME = "aligned-v39";
 const NAVIGATION_TIMEOUT_MS = 3000;
 const APP_FILES = ["./", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./og-image.jpg", "./apple-touch-icon.png", "./icon-maskable-512.png"];
 
@@ -10,8 +10,11 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   // Cache Storage is shared by every app on this origin, so only this app's own old versions are removed.
-  caches.keys().then((keys) => Promise.all(keys.filter((key) => /^(aligned|we-align)-v\d+$/.test(key) && key !== CACHE_NAME).map((key) => caches.delete(key))))
-  self.clients.claim();
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((key) => /^(aligned|we-align)-v\d+$/.test(key) && key !== CACHE_NAME).map((key) => caches.delete(key))))
+      .then(() => self.clients.claim())
+  );
 });
 
 self.addEventListener("fetch", (event) => {

@@ -16,10 +16,14 @@ describe("End-to-End Round Lifecycle Simulation", () => {
   before(async () => {
     const html = readFileSync(resolve(root, "index.html"), "utf8");
     const sw = readFileSync(resolve(root, "sw.js"), "utf8");
+    const manifest = readFileSync(resolve(root, "manifest.webmanifest"), "utf8");
     server = createServer((req, res) => {
       if (req.url === "/sw.js") {
         res.writeHead(200, { "content-type": "application/javascript; charset=utf-8" });
         res.end(sw);
+      } else if (req.url === "/manifest.webmanifest") {
+        res.writeHead(200, { "content-type": "application/manifest+json; charset=utf-8" });
+        res.end(manifest);
       } else {
         res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
         res.end(html);
@@ -364,5 +368,87 @@ describe("End-to-End Round Lifecycle Simulation", () => {
 
     assert.equal(errors.length, 0, `Page errors: ${errors.join("; ")}`);
     await page.close();
+  });
+
+  it("toggles high contrast mode, applies high-contrast classes, and persists across reload", async () => {
+    const page = await browser.newPage();
+    const errors = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+
+    await page.addInitScript(() => {
+      if (!localStorage.getItem("aligned-state-v1")) {
+        const state = { version: 2, tutorialSeen: true, names: ["Alex", "Sam"] };
+        localStorage.setItem("aligned-state-v1", JSON.stringify(state));
+      }
+    });
+
+    await page.goto(baseUrl);
+    await page.waitForTimeout(300);
+
+    // Open Settings
+    await page.click("#settings-button");
+    await page.waitForSelector("#high-contrast", { timeout: 4000 });
+
+    // Enable High Contrast
+    await page.check("#high-contrast");
+    await page.waitForTimeout(300);
+
+    // Verify documentElement and body have high-contrast class
+    const hasHcClass = await page.evaluate(() => {
+      return document.documentElement.classList.contains("high-contrast") || document.body.classList.contains("high-contrast");
+    });
+    assert.equal(hasHcClass, true, "Enabling high-contrast must apply 'high-contrast' class to DOM");
+
+    // Verify localStorage persistence
+    const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("aligned-state-v1")));
+    assert.equal(saved.highContrast, true, "state.highContrast must be persisted as true");
+
+    // Reload page
+    await page.reload();
+    await page.waitForTimeout(500);
+
+    // Verify high-contrast class is immediately restored on reload
+    const hasHcRestored = await page.evaluate(() => {
+      return document.documentElement.classList.contains("high-contrast") || document.body.classList.contains("high-contrast");
+    });
+    assert.equal(hasHcRestored, true, "High-contrast styling must remain active after page reload");
+
+    assert.equal(errors.length, 0, `Page errors: ${errors.join("; ")}`);
+    await page.close();
+  });
+
+  it("loads and functions offline via service worker cache when network is disconnected", async () => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const errors = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+
+    // 1. Visit online to allow service worker installation
+    await page.goto(baseUrl);
+    await page.waitForTimeout(600);
+
+    // Wait for service worker to activate
+    await page.evaluate(async () => {
+      if ("serviceWorker" in navigator) {
+        await navigator.serviceWorker.ready;
+      }
+    });
+
+    // 2. Disconnect network completely
+    await context.setOffline(true);
+
+    // 3. Reload while completely offline
+    await page.reload();
+    await page.waitForTimeout(800);
+
+    // 4. Verify app successfully rendered from cache
+    const appVisible = await page.locator("#app").isVisible();
+    assert.equal(appVisible, true, "#app container must remain visible when offline");
+
+    const setupFormVisible = await page.locator("#setup-form").isVisible();
+    assert.equal(setupFormVisible, true, "Setup interface must be fully interactive from offline cache");
+
+    assert.equal(errors.length, 0, `Page errors encountered while offline: ${errors.join("; ")}`);
+    await context.close();
   });
 });

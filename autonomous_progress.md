@@ -202,3 +202,44 @@
 - **Status:** Verified (`dd5f7e2`).
 
 ---
+
+### Cycle 7 (2026-10-13 01:43 EDT)
+- **Audits Performed:**
+  - **Subagent A (Resource Lifecycles, Web Audio & SW Invalidation):** Identified service worker cache pruning occurring unawaited outside `event.waitUntil()`; detected unrevoked `URL.createObjectURL` references in Keepsake PNG export; identified lingering GPU VRAM buffers from detached `<canvas>` in keepsake rendering dialog; audited procedural ambient filter disconnections during rain/hearth teardown.
+  - **Subagent B (WebRTC Multi-Tab Lifecycle, Intuition Wagering Settle Guard & Live ARIA Announcements):** Audited two-phone multiplayer discovering same-device secondary tab session overwrite vulnerabilities; identified premature "Intuition Hit!" false positives on unrated written answers (`question.type === "text"`) where `matchInfo.isMatch` is default `false`; found missing boundary checks in `guessHit` for non-sliders and out-of-range guesses; audited screen-reader announcements during live gameplay (partner lock-in, card flips, and reveal-all).
+  - **Subagent C (Test Coverage & Automation Engineering):** Designed and built `tests/webrtc-peer.test.mjs` (6 unit tests simulating two-phone WebRTC message exchange and delivery receipts) and `tests/mind-reader.test.mjs` (5 unit tests covering intuition math and headline crown scoring); added 2 Playwright E2E tests for high-contrast mode persistence and service worker offline cached execution.
+- **Implemented Fixes:**
+  1. **Service Worker Activation & Invalidation Hardening (`sw.js`):**
+     - Wrapped obsolete cache deletion (`caches.keys().then(...)`) and `self.clients.claim()` in `event.waitUntil()`, preventing background worker thread termination before obsolete cache pruning completes.
+     - Bumped cache version to `aligned-v39`.
+  2. **Memory Leak & GPU Backing Store Deallocation (`index.html`):**
+     - Added explicit canvas backing buffer deallocation (`canvas.width = 0; canvas.height = 0`) in `openKeepsakeModal()` upon dialog close, immediately dropping up to 28.8 MB of hardware GPU texture memory.
+     - Added scheduled `URL.revokeObjectURL(objectUrl)` cleanup for exported Keepsake PNG blobs.
+     - Explicitly disconnected `r.filter?.disconnect()` and `h.filter?.disconnect()` on rain/hearth audio node teardown in `ProceduralAmbient`.
+     - Broadened `IS_OFFLINE_FILE` check to support both `file:` protocol and `Aligned-offline.html` HTTP serving.
+  3. **WebRTC Multi-Tab Protection & ICE Failure Handling (`index.html`):**
+     - Hardened `handleNearbyJoinLaunch` to inspect persistent storage (`loadNearbySession()`), preventing secondary tabs on the same device from overwriting the host's pairing session.
+     - Added `iceconnectionstatechange` listener to `RTCPeerConnection` alongside `connectionstatechange` for immediate failure detection across mobile Safari and WebView engines.
+     - Added explicit status and session cleanup for expired joiner rooms in `retryNearbyConnection`.
+     - Handled `nearbyRuntime.partnerLeft` explicitly in the Reveal screen's `#new-round` handler to avoid dead reconnection loops.
+  4. **Intuition Wagering Settle Guard & Mind-Reader Strict Bounds (`index.html`):**
+     - Guarded written prompts (`question.type === "text"`) against premature wager evaluation: displayed pending status (`<div class="wager-outcome-badge pending">⏳ Intuition bet saved — rate answers below to resolve</div>`) until rated by players.
+     - Suppressed card-front wager buttons on cards where answers are withheld (`!answerHeld`).
+     - Added `.wager-outcome-badge.pending` CSS styling across dark and high-contrast Pastel themes.
+     - Enforced strict question type (`question?.type !== "slider"`) and valid range bounds (`guess >= 1 && guess <= 10`) in `guessHit()`.
+  5. **Real-Time ARIA Live Region Gameplay Feedback (`index.html`):**
+     - Added polite live announcements when a remote partner completes and locks in answers while the local player is answering questions.
+     - Added dynamic screen-reader announcement in `toggleCard()` stating card number and reveal verdict ("answers aligned", "different answers", or "answers revealed, rate them below").
+     - Added live announcement to `#reveal-all` for bulk reveal/hide actions.
+  6. **Test Suite Expansion & Production Verification (`tests/webrtc-peer.test.mjs`, `tests/mind-reader.test.mjs`, `tests/round-lifecycle.test.mjs`):**
+     - Built `tests/webrtc-peer.test.mjs` (6 unit tests testing handshake, ambient mix sync, progress, delivery receipts, answer submission, and flip synchronization).
+     - Built `tests/mind-reader.test.mjs` (5 unit tests verifying slider tolerances, quick-pick parity, null safety, tallying, and headline crown thresholds).
+     - Expanded `tests/round-lifecycle.test.mjs` to 7 Playwright E2E tests by adding high-contrast theme toggling/persistence and Service Worker offline cached execution tests.
+     - Updated `package.json` `"test"` script to run all 10 unit/integration suites.
+- **Verification:**
+  - `npm test`: Passed (all 10 test suites: production check, signaling security, daily ritual lifecycle, radar storybook, backup schema resilience, custom pack automation, quota recovery, audio preferences, webrtc peer simulation, and mind-reader math — 36 unit tests across 10 test runners in 210ms).
+  - `npm run test:e2e`: Passed (all 7 Playwright E2E tests: full 5-question round lifecycle, settings persistence across reload, custom pack launch, screen heading focus transitions, modal keyboard trapping, high-contrast persistence, and offline service worker cached execution in 152.5s).
+  - `npm run build`: `downloads/Aligned-offline.html` (1152 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
+- **Status:** Verified.
+
+---

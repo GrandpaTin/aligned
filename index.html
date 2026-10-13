@@ -10848,6 +10848,15 @@ var qrcode = function() {
       border: 1px solid rgba(167, 139, 250, 0.4);
       color: #c4b5fd;
     }
+    .wager-outcome-badge.pending {
+      background: rgba(251, 191, 36, 0.16);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      color: #fde68a;
+    }
+    .high-contrast[data-theme="pastel"] .wager-outcome-badge.pending {
+      color: #78350f !important;
+      background: rgba(251, 191, 36, 0.25);
+    }
 
     /* Discussion Timer */
     .discussion-timer-area {
@@ -12334,7 +12343,7 @@ var qrcode = function() {
     const IS_ANDROID = /Android/i.test(USER_AGENT);
     const IS_MAC_SAFARI = /Macintosh/.test(USER_AGENT) && /Safari\//.test(USER_AGENT) && !/Chrome|Chromium|Edg\//.test(USER_AGENT) && !IS_IOS;
     const IS_FIREFOX_DESKTOP = /Firefox\//.test(USER_AGENT) && !IS_ANDROID;
-    const IS_OFFLINE_FILE = location.protocol === "file:";
+    const IS_OFFLINE_FILE = location.protocol === "file:" || location.pathname.endsWith("Aligned-offline.html");
     const isStandalone = () => window.matchMedia?.("(display-mode: standalone)").matches === true || navigator.standalone === true;
 
     if (IN_ANDROID_APP && !navigator.share) {
@@ -13392,6 +13401,13 @@ var qrcode = function() {
           answers: payload.answers, guesses: payload.guesses, comments: payload.comments, importance: payload.importance, notReady: payload.notReady
         };
         nearbyRuntime.partnerProgress = { answered: state.selectedQuestionIds.length, total: state.selectedQuestionIds.length };
+        const partnerName = state.names[payload.player === 0 ? 0 : 1] || "Partner";
+        if (state.screen === "question") {
+          if (typeof announce === "function") announce(`${partnerName} has finished and locked in their answers. Take your time completing yours.`);
+          if (typeof showToast === "function") showToast(`${partnerName} locked in their answers. Take your time finishing.`);
+        } else if (typeof announce === "function") {
+          announce(`${partnerName} has submitted their answers.`);
+        }
         saveState();
         if (state.screen === "nearby-wait") finishNearbyRoundIfReady();
       } else if (payload.type === "progress") {
@@ -13563,25 +13579,30 @@ var qrcode = function() {
       peer.addEventListener("icecandidate", (event) => {
         if (event.candidate) sendNearbySignal({ type: "candidate", candidate: event.candidate.toJSON?.() || event.candidate });
       });
-      peer.addEventListener("connectionstatechange", () => {
-        if (peer !== nearbyPeerConnection || peer.connectionState !== "failed") return;
-        // Some browsers keep the data channel "open" after the connection has failed; close it so both phones notice.
-        if (nearbyDataChannel?.readyState === "open") {
-          const failedChannel = nearbyDataChannel;
-          handleNearbyChannelLost(failedChannel);
-          try { failedChannel.close(); } catch {}
+      const onPeerStateChange = () => {
+        if (peer !== nearbyPeerConnection) return;
+        const connFailed = peer.connectionState === "failed" || peer.iceConnectionState === "failed";
+        if (connFailed) {
+          // Some browsers keep the data channel "open" after the connection has failed; close it so both phones notice.
+          if (nearbyDataChannel?.readyState === "open") {
+            const failedChannel = nearbyDataChannel;
+            handleNearbyChannelLost(failedChannel);
+            try { failedChannel.close(); } catch {}
+          }
+          nearbyNegotiationFailures += 1;
+          if (nearbyNegotiationFailures >= 3) {
+            setNearbyStatus("blocked");
+            return;
+          }
+          if (nearbyRuntime.role === "host" && nearbySignalingSocket?.readyState === WebSocket.OPEN) {
+            window.setTimeout(() => {
+              if (peer === nearbyPeerConnection) negotiateNearbyHost();
+            }, 700);
+          }
         }
-        nearbyNegotiationFailures += 1;
-        if (nearbyNegotiationFailures >= 3) {
-          setNearbyStatus("blocked");
-          return;
-        }
-        if (nearbyRuntime.role === "host" && nearbySignalingSocket?.readyState === WebSocket.OPEN) {
-          window.setTimeout(() => {
-            if (peer === nearbyPeerConnection) negotiateNearbyHost();
-          }, 700);
-        }
-      });
+      };
+      peer.addEventListener("connectionstatechange", onPeerStateChange);
+      peer.addEventListener("iceconnectionstatechange", onPeerStateChange);
       return peer;
     }
 
@@ -13693,10 +13714,15 @@ var qrcode = function() {
         else prepareNearbyHost();
         return;
       }
-      if (nearbyRuntime.role === "join" && nearbyRuntime.roomId && !nearbyRoomExpired()) {
-        // Reopening the joiner's room connection makes the host's phone start a fresh negotiation.
-        setNearbyStatus("waiting-host");
-        connectNearbySignaling("join", nearbyRuntime.roomId, nearbyRuntime.joinToken).catch(() => {});
+      if (nearbyRuntime.role === "join" && nearbyRuntime.roomId) {
+        if (!nearbyRoomExpired()) {
+          // Reopening the joiner's room connection makes the host's phone start a fresh negotiation.
+          setNearbyStatus("waiting-host");
+          connectNearbySignaling("join", nearbyRuntime.roomId, nearbyRuntime.joinToken).catch(() => {});
+        } else {
+          clearNearbySession();
+          setNearbyStatus("expired", "This pairing link has expired. Ask your partner to show a fresh QR.");
+        }
       }
     }
 
@@ -14918,7 +14944,7 @@ var qrcode = function() {
           try {
             r.out.gain.cancelScheduledValues(now);
             r.out.gain.linearRampToValueAtTime(0.0001, now + 1);
-            setTimeout(() => { try { r.source.stop(); r.source.disconnect(); r.out.disconnect(); } catch {} }, 1050);
+            setTimeout(() => { try { r.source.stop(); r.source.disconnect(); r.filter?.disconnect(); r.out.disconnect(); } catch {} }, 1050);
           } catch {}
         }
         if (this.hearthLayer) {
@@ -14928,7 +14954,7 @@ var qrcode = function() {
           try {
             h.out.gain.cancelScheduledValues(now);
             h.out.gain.linearRampToValueAtTime(0.0001, now + 1);
-            setTimeout(() => { try { h.source.stop(); h.source.disconnect(); h.out.disconnect(); } catch {} }, 1050);
+            setTimeout(() => { try { h.source.stop(); h.source.disconnect(); h.filter?.disconnect(); h.out.disconnect(); } catch {} }, 1050);
           } catch {}
         }
         armIdleSuspend();
@@ -19804,10 +19830,11 @@ var qrcode = function() {
     }
 
     function guessHit(question, playerIndex) {
+      if (question?.type !== "slider") return null;
       if (state.notReady?.[0]?.[question.id] || state.notReady?.[1]?.[question.id]) return null;
       const guess = state.guesses?.[playerIndex]?.[question.id];
       const actual = Number(state.answers?.[playerIndex === 0 ? 1 : 0]?.[question.id]);
-      if (typeof guess !== "number" || !Number.isFinite(actual)) return null;
+      if (typeof guess !== "number" || guess < 1 || guess > 10 || !Number.isFinite(actual)) return null;
       if (isQuickPickQuestion(question)) {
         const sameSide = (guess <= 5) === (actual <= 5);
         return { guess, actual, distance: sameSide ? 0 : 7, hit: sameSide, side: true };
@@ -20465,7 +20492,14 @@ var qrcode = function() {
         ctx.fillText("grandpatin.github.io/aligned", 400, 920);
       }
 
-      const close = () => { overlay.remove(); document.removeEventListener("keydown", onKeydown); };
+      const close = () => {
+        if (canvas) {
+          canvas.width = 0;
+          canvas.height = 0;
+        }
+        overlay.remove();
+        document.removeEventListener("keydown", onKeydown);
+      };
       const onKeydown = (e) => { if (e.key === "Escape") close(); };
       document.addEventListener("keydown", onKeydown);
       overlay.querySelector("#keepsake-close")?.addEventListener("click", close);
@@ -20501,8 +20535,10 @@ var qrcode = function() {
             } else {
               const link = document.createElement("a");
               link.download = file.name;
-              link.href = URL.createObjectURL(blob);
+              const objectUrl = URL.createObjectURL(blob);
+              link.href = objectUrl;
               link.click();
+              window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
               showToast("Keepsake saved to device.");
             }
           } catch {}
@@ -21268,11 +21304,13 @@ var qrcode = function() {
                   <span class="card-question">${escapeHTML(question.prompt)}</span>
                 </span>
                 ${question.id === goldenId ? `<span class="golden-ribbon"><span aria-hidden="true">✦</span> Golden card</span>` : ""}
+                ${!answerHeld ? `
                 <span class="card-wager-row" onclick="event.stopPropagation()">
                   <span class="wager-tag">Bet:</span>
                   <span role="button" tabindex="0" class="wager-chip ${state.cardWagers?.[question.id] === 'match' ? 'active' : ''}" data-wager-qid="${escapedQuestionId}" data-wager-type="match" aria-label="Match: bet answers match on question ${index + 1}">Match</span>
                   <span role="button" tabindex="0" class="wager-chip ${state.cardWagers?.[question.id] === 'diff' ? 'active' : ''}" data-wager-qid="${escapedQuestionId}" data-wager-type="diff" aria-label="Opposites: bet answers differ on question ${index + 1}">Opposites</span>
                 </span>
+                ` : ""}
                 <span class="tap-hint">${question.id === finalId ? escapeHTML(finalHintCopy(question)) : `${POINTER_VERB} to reveal`}</span>
                 <span class="card-pair" aria-hidden="true"><span></span><span></span></span>
                 <span class="final-glow" aria-hidden="true"></span>
@@ -21291,10 +21329,12 @@ var qrcode = function() {
                 ${opposite ? `<span class="spark-badge"><span class="spark-icon" aria-hidden="true">⇄</span>${sparkLabel}</span>` : ""}
                 ${answers}
                 ${state.cardWagers?.[question.id] && !answerHeld ? `
-                  <div class="wager-outcome-badge ${(state.cardWagers[question.id] === "match" && matchInfo.isMatch) || (state.cardWagers[question.id] === "diff" && !matchInfo.isMatch) ? "correct" : "different"}">
-                    ${(state.cardWagers[question.id] === "match" && matchInfo.isMatch) || (state.cardWagers[question.id] === "diff" && !matchInfo.isMatch)
-                      ? '<span aria-hidden="true">🎯</span> Intuition Hit! You called this'
-                      : `<span aria-hidden="true">🔮</span> Intuition Twist! You guessed ${state.cardWagers[question.id] === "match" ? "match" : "opposites"}`}
+                  <div class="wager-outcome-badge ${matchInfo.unrated ? "pending" : (state.cardWagers[question.id] === "match" && matchInfo.isMatch) || (state.cardWagers[question.id] === "diff" && !matchInfo.isMatch) ? "correct" : "different"}">
+                    ${matchInfo.unrated
+                      ? '<span aria-hidden="true">⏳</span> Intuition bet saved — rate answers below to resolve'
+                      : (state.cardWagers[question.id] === "match" && matchInfo.isMatch) || (state.cardWagers[question.id] === "diff" && !matchInfo.isMatch)
+                        ? '<span aria-hidden="true">🎯</span> Intuition Hit! You called this'
+                        : `<span aria-hidden="true">🔮</span> Intuition Twist! You guessed ${state.cardWagers[question.id] === "match" ? "match" : "opposites"}`}
                   </div>
                 ` : ""}
                 ${answerHeld ? `<div class="discussion-card"><strong>Gentle next step</strong><p>Would revisiting this later feel supportive, or is leaving it unanswered the right boundary?</p></div>` : matchInfo.unrated && question.type === "text" ? "" : question.id === goldenId ? goldenTaskMarkup() : discussionPromptMarkup(question, matchInfo, usedPrompts)}
@@ -21869,6 +21909,12 @@ var qrcode = function() {
           : state.revealedIds.filter((revealedId) => revealedId !== id);
         if (state.playStyle === "nearby") sendNearbyMessage({ type: "reveal-state", roundId: state.nearbyRoundId, change: { id, revealed: shouldReveal } });
         const matchInfo = matchInfoById.get(id);
+        if (shouldReveal) {
+          const qIdx = questions.findIndex((q) => q.id === id);
+          const qNum = qIdx >= 0 ? `Card ${qIdx + 1}` : "Card";
+          const matchVerdict = matchInfo?.unrated ? "answers revealed, rate them below" : matchInfo?.isMatch ? "answers aligned" : "different answers";
+          if (typeof announce === "function") announce(`${qNum} revealed: ${matchVerdict}.`);
+        }
         const streak = firstLook ? noteRevealStreak(matchInfo) : 0;
         const soundPlace = { pan: ((rect.left + rect.width / 2) / window.innerWidth - 0.5) * 0.8, topic: questions.find((item) => item.id === id)?.topic, degree: questions.findIndex((item) => item.id === id) };
         const isMatch = Boolean(shouldReveal && matchInfo?.isMatch);
@@ -22051,6 +22097,7 @@ var qrcode = function() {
         const goldenFresh = Boolean(goldenCard) && !cardSeen(goldenCard.dataset.questionId);
         state.revealedIds = shouldReveal ? questions.map((question) => question.id) : [];
         if (state.playStyle === "nearby") sendNearbyMessage({ type: "reveal-state", roundId: state.nearbyRoundId, all: shouldReveal });
+        if (typeof announce === "function") announce(shouldReveal ? `All ${questions.length} cards revealed.` : `All ${questions.length} cards hidden.`);
         const board = document.querySelector(".reveal-screen") || document.body;
         // Revealing everything cascades across the board, one card every ~70 ms (350 ms at most), each with its
         // own note, so every answer lands; the round's cue and confetti come with the last card. State is
@@ -22120,12 +22167,14 @@ var qrcode = function() {
 
         if (playStyle === "nearby") {
           if (!nearbyChannelOpen()) {
-            if (nearbyRuntime.roomId && !nearbyRoomExpired()) {
+            if (!nearbyRuntime.partnerLeft && nearbyRuntime.roomId && !nearbyRoomExpired()) {
               retryNearbyConnection();
               showToast("The other phone isn't connected. Reconnecting… try again in a moment.", { tone: "warning" });
-            } else if (state.nearbyRole === "join") {
+            } else if (state.nearbyRole === "join" || nearbyRuntime.partnerLeft) {
               const host = state.names[0] || "Your partner";
-              showToast(`${host}’s phone isn’t connected. Ask ${host} to tap “Play another round” and scan the new QR — or use “Switch vibe or players” to play on this phone.`, { tone: "warning" });
+              showToast(nearbyRuntime.partnerLeft
+                ? `${host} left the two-phone round. Use “Switch vibe or players” to start a new round on this phone.`
+                : `${host}’s phone isn’t connected. Ask ${host} to tap “Play another round” and scan the new QR — or use “Switch vibe or players” to play on this phone.`, { tone: "warning" });
             } else {
               if (!(await confirmLeavingReveal())) return;
               // A pack's ids are not replayed here, so the round must not keep the pack label (the linked branch does the same).
@@ -22290,13 +22339,13 @@ var qrcode = function() {
         history.replaceState(null, "", location.href.split("#")[0]);
         return true;
       }
-      if (nearbyRuntime.roomId === launchRoomId && nearbyRuntime.role === "host") {
+      const session = loadNearbySession();
+      if ((nearbyRuntime.roomId === launchRoomId && nearbyRuntime.role === "host") || (session?.role === "host" && session.roomId === launchRoomId)) {
         history.replaceState(null, "", location.href.split("#")[0]);
-        showToast("That's this phone's own QR. Scan it with your partner's phone instead.", { tone: "warning" });
+        showToast("That’s this device’s own pairing link. Scan it with your partner’s phone instead — or play on one device with Pass & Play.", { tone: "warning" });
         render();
         return true;
       }
-      const session = loadNearbySession();
       if (session?.role === "join" && session.roomId === launchRoomId && state.playStyle === "nearby" && state.screen !== "nearby") {
         // Re-opening the same link (e.g. scanning again) resumes the round already in progress.
         history.replaceState(null, "", location.href.split("#")[0]);
