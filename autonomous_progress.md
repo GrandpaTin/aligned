@@ -120,7 +120,7 @@
   - `npm test`: Passed (all 5 test suites: production-check, signaling security, daily ritual lifecycle, radar storybook, and backup schema resilience — 12 unit tests across 3 test runners in 160ms).
   - `npm run test:e2e`: Passed (78.7s Playwright headless simulation of full round lifecycle and Storybook modal).
   - `npm run build`: `downloads/Aligned-offline.html` (1143 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
-- **Status:** Verified and ready for commit.
+- **Status:** Verified (`9310705`).
 
 ---
 
