@@ -87,8 +87,40 @@
   - `npm test`: Passed (all 4 test suites: production check, signaling security, daily ritual lifecycle, and radar storybook suite).
   - `npm run test:e2e`: Passed (100% assertions, full lifecycle through Keepsake Storybook modal verified).
   - `npm run build`: `downloads/Aligned-offline.html` (1132 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
-- **Status:** Verified and ready for commit.
+- **Status:** Verified (`541c8c1`).
 
 ---
 
+### Cycle 4 (2026-10-13 01:05 EDT)
+- **Audits Performed:**
+  - **Subagent A (Audio & Sensor Power Consumption):** Identified continuous hardware IMU sensor polling (`window.addEventListener("deviceorientation")`) keeping mobile gyroscopes active across all screens; found background and resting Web Audio node thrashing in `ProceduralAmbient` (continuous scheduling during `ambient-rest` and background tabs).
+  - **Subagent B (A11y Radiogroups & Keyboard Navigation):** Screen reader audit revealed `.rating-option` buttons lacked proper radiogroup semantics (`role="radiogroup"`, `role="radio"`, `aria-checked`), causing screen readers to announce them as generic buttons without roving index; identified pointermove interrupt storms triggering redundant `wakeAmbient` re-arms.
+  - **Subagent C (State Deserialization Resilience):** Comprehensive audit of `backupToState()` and `loadState()` defensive schema sanitization; designed, verified, and benchmarked `tests/backup-schema.test.mjs` against corrupt backups, malformed player names, negative streaks, and out-of-bounds `ambientMix` volume values.
+- **Implemented Fixes:**
+  1. **W3C WAI-ARIA Radiogroup & Roving Arrow Navigation:**
+     - Refactored `.rating-option` chips into a semantic radiogroup (`role="radiogroup"`, `aria-labelledby`, `role="radio"`, `aria-checked="true|false"`).
+     - Implemented roving `tabindex="0|-1"` and bidirectional Arrow key roving navigation (`ArrowRight`, `ArrowDown`, `ArrowLeft`, `ArrowUp`) with cyclical wrapping and auto-selection.
+     - Removed `.rating-option` from `PRESSABLE_SELECTOR` to prevent invalid `aria-pressed` attributes on radio elements.
+  2. **Mobile Hardware Sensor Power Conservation:**
+     - Scoped `deviceorientation` (`onHoloOrientation`), `touchmove` (`onHoloTouchMove`), and `touchend` (`onHoloTouchEnd`) listeners exclusively to `renderReveal()`.
+     - Explicitly unregistered sensor and touch listeners in `cleanupResponsiveRender()`, completely powering down device IMU gyroscope sensors when navigating to setup, question, results, or settings screens.
+  3. **Web Audio Low-Power Scheduling & Background Throttling:**
+     - Added resting detection in `ProceduralAmbient.startHearth()`: crackles are reduced by ~85% with timer delays extended to 2000–3500ms when resting or tab is hidden.
+     - Added resting detection in `ProceduralAmbient.startSynth()`: melody notes pause during `ambient-rest`, reducing oscillator allocation.
+     - Implemented `wakeRest()` method on `ProceduralAmbient` invoked immediately by `wakeAmbient()` to seamlessly restore active soundscapes without wake latency.
+     - Removed `"pointermove"` from `wakeAmbient` capture array to eliminate 120Hz high-frequency pointer interrupt thrashing.
+  4. **Backup Payload Export & Deserialization Hardening:**
+     - Exported `ambientMix` and `relationshipProfile` in `createBackupPayload()`.
+     - Harmonized player name length clamping (`slice(0, 40)`) and string type verification across `backupToState` and `loadState`.
+     - Added deep validation for `dailyRitual.answers` supporting both numeric sliders (`[1, 10]`) and text responses (`slice(0, 600)`), clamped negative streaks to 0, and sanitized `ambientMix` gains to `[0, 1]`.
+  5. **Automated Test Suite Expansion (`tests/backup-schema.test.mjs`):**
+     - Created 7-test resilience suite verifying standard V2 backups, legacy V1 backups, malformed/tampered file rejection, out-of-bounds `ambientMix`, corrupt player names, daily ritual streak/answer sanitization, and end-to-end import flow (`backupToState -> localStorage -> loadState`).
+     - Integrated `tests/backup-schema.test.mjs` into `package.json` `"test"` script.
+- **Verification:**
+  - `npm test`: Passed (all 5 test suites: production-check, signaling security, daily ritual lifecycle, radar storybook, and backup schema resilience — 12 unit tests across 3 test runners in 160ms).
+  - `npm run test:e2e`: Passed (78.7s Playwright headless simulation of full round lifecycle and Storybook modal).
+  - `npm run build`: `downloads/Aligned-offline.html` (1143 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
+- **Status:** Verified and ready for commit.
+
+---
 

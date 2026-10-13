@@ -12783,7 +12783,7 @@ var qrcode = function() {
       updateNearbyBanner();
     }
 
-    const PRESSABLE_SELECTOR = ".rating-option, .follow-through-button, .library-filter:not(.saved-pack-chip), .topic-progress-card, .play-style-card, .preset-card, .importance-option, .feedback-actions .question-library-action";
+    const PRESSABLE_SELECTOR = ".follow-through-button, .library-filter:not(.saved-pack-chip), .topic-progress-card, .play-style-card, .preset-card, .importance-option, .feedback-actions .question-library-action";
     function syncPressedStates(root = app) {
       root.querySelectorAll(PRESSABLE_SELECTOR).forEach((button) => {
         const pressed = String(button.classList.contains("active"));
@@ -13748,6 +13748,8 @@ var qrcode = function() {
           soundTheme: state.soundTheme,
           soundVolume: state.soundVolume,
           ambientMusicEnabled: state.ambientMusicEnabled,
+          ambientMix: { ...(state.ambientMix || { synth: 0.8, rain: 0, hearth: 0 }) },
+          relationshipProfile: state.relationshipProfile || "romantic",
           hapticsEnabled: state.hapticsEnabled,
           visualTheme: state.visualTheme,
           textSize: state.textSize,
@@ -13799,61 +13801,152 @@ var qrcode = function() {
 
     function backupToState(payload) {
       if (BACKUP_APP_NAMES.has(payload?.app) && [1, 2].includes(Number(payload?.formatVersion))) {
+        const rawHistory = payload.history && typeof payload.history === "object" ? payload.history : {};
+        const rawLibrary = payload.library && typeof payload.library === "object" ? payload.library : {};
+        const rawSettings = payload.settings && typeof payload.settings === "object" ? payload.settings : {};
+        const rawCurrentGame = payload.currentGame && typeof payload.currentGame === "object" ? payload.currentGame : {};
+        const rawPlayers = payload.players && typeof payload.players === "object" ? payload.players : {};
+
+        const rawRounds = Array.isArray(rawHistory.completedRounds)
+          ? rawHistory.completedRounds
+          : (Array.isArray(rawLibrary.completedRounds) ? rawLibrary.completedRounds : []);
+        const safeCompletedRounds = rawRounds
+          .filter((round) => round && typeof round === "object")
+          .map((round) => {
+            const rawAlignment = round.alignment && typeof round.alignment === "object" ? round.alignment : {};
+            const rawTopics = Array.isArray(rawAlignment.topics) ? rawAlignment.topics : [];
+            const safeTopics = rawTopics
+              .filter((item) => item && typeof item === "object")
+              .map((item) => ({
+                topic: String(item.topic || "").slice(0, 40),
+                score: Math.max(0, Math.min(100, Math.round(Number(item.score) || 0))),
+                fitScore: Math.max(0, Math.min(100, Math.round(Number(item.fitScore ?? item.score) || 0))),
+                count: Math.max(0, Math.round(Number(item.count) || 0))
+              }));
+            return {
+              ...round,
+              id: String(round.id || "").slice(0, 60),
+              date: String(round.date || "").slice(0, 40),
+              names: Array.isArray(round.names) ? [String(round.names[0] || "").slice(0, 30), String(round.names[1] || "").slice(0, 30)] : ["", ""],
+              questionIds: Array.isArray(round.questionIds) ? round.questionIds.map((id) => String(id || "")).filter(Boolean) : [],
+              answers: Array.isArray(round.answers)
+                ? [round.answers[0] && typeof round.answers[0] === "object" ? { ...round.answers[0] } : {}, round.answers[1] && typeof round.answers[1] === "object" ? { ...round.answers[1] } : {}]
+                : [{}, {}],
+              comments: Array.isArray(round.comments)
+                ? [round.comments[0] && typeof round.comments[0] === "object" ? { ...round.comments[0] } : {}, round.comments[1] && typeof round.comments[1] === "object" ? { ...round.comments[1] } : {}]
+                : [{}, {}],
+              alignment: {
+                ...rawAlignment,
+                overall: Math.max(0, Math.min(100, Math.round(Number(rawAlignment.overall) || 0))),
+                fitOverall: Number.isFinite(Number(rawAlignment.fitOverall)) ? Math.max(0, Math.min(100, Math.round(Number(rawAlignment.fitOverall)))) : Math.max(0, Math.min(100, Math.round(Number(rawAlignment.overall) || 0))),
+                matchCount: Math.max(0, Math.round(Number(rawAlignment.matchCount) || 0)),
+                closeCount: Math.max(0, Math.round(Number(rawAlignment.closeCount) || 0)),
+                differenceCount: Math.max(0, Math.round(Number(rawAlignment.differenceCount) || 0)),
+                topics: safeTopics
+              }
+            };
+          });
+
+        const rawDaily = (rawHistory.dailyRitual && typeof rawHistory.dailyRitual === "object")
+          ? rawHistory.dailyRitual
+          : ((payload.dailyRitual && typeof payload.dailyRitual === "object") ? payload.dailyRitual : {});
+        const safeDailyAnswers = rawDaily.answers && typeof rawDaily.answers === "object" && !Array.isArray(rawDaily.answers)
+          ? Object.fromEntries(Object.entries(rawDaily.answers).filter(([k]) => typeof k === "string").flatMap(([k, v]) => {
+              if (typeof v === "number" && Number.isFinite(v)) return [[k.slice(0, 20), Math.max(1, Math.min(10, Math.round(v)))]];
+              if (typeof v === "string") return [[k.slice(0, 20), v.slice(0, 600)]];
+              return [];
+            }))
+          : {};
+        const safeDailyCompletedDates = Array.isArray(rawDaily.completedDates)
+          ? rawDaily.completedDates.filter((d) => typeof d === "string").map((d) => d.slice(0, 10)).slice(-365)
+          : [];
+        const safeDailyRitual = {
+          streak: Math.max(0, Math.round(Number(rawDaily.streak) || 0)),
+          lastDate: typeof rawDaily.lastDate === "string" ? rawDaily.lastDate.slice(0, 10) : "",
+          answers: safeDailyAnswers,
+          completedDates: safeDailyCompletedDates
+        };
+
+        const rawMix = (rawSettings.ambientMix && typeof rawSettings.ambientMix === "object")
+          ? rawSettings.ambientMix
+          : ((payload.ambientMix && typeof payload.ambientMix === "object") ? payload.ambientMix : {});
+        const safeAmbientMix = {
+          synth: Number.isFinite(Number(rawMix.synth)) ? Math.max(0, Math.min(1, Number(rawMix.synth))) : 0.8,
+          rain: Number.isFinite(Number(rawMix.rain)) ? Math.max(0, Math.min(1, Number(rawMix.rain))) : 0,
+          hearth: Number.isFinite(Number(rawMix.hearth)) ? Math.max(0, Math.min(1, Number(rawMix.hearth))) : 0
+        };
+
         return {
           version: 2,
-          screen: payload.currentGame?.screen || "setup",
-          names: Array.isArray(payload.players?.names) ? payload.players.names : ["", ""],
-          questionMode: payload.settings?.questionMode,
-          sessionPreset: payload.settings?.sessionPreset,
-          playStyle: payload.settings?.playStyle,
-          questionCount: payload.settings?.questionCount,
-          questionIntensity: payload.settings?.questionIntensity,
-          selectedTopics: payload.settings?.selectedTopics,
-          soundEnabled: payload.settings?.soundEnabled,
-          soundTheme: payload.settings?.soundTheme,
-          soundVolume: payload.settings?.soundVolume,
-          ambientMusicEnabled: payload.settings?.ambientMusicEnabled === true,
-          hapticsEnabled: payload.settings?.hapticsEnabled,
-          visualTheme: payload.settings?.visualTheme,
-          textSize: payload.settings?.textSize,
-          highContrast: payload.settings?.highContrast,
-          reducedMotion: payload.settings?.reducedMotion,
-          privatePinHash: payload.settings?.privatePinHash,
+          screen: typeof rawCurrentGame.screen === "string" ? rawCurrentGame.screen : "setup",
+          names: Array.isArray(rawPlayers.names) ? [typeof rawPlayers.names[0] === "string" ? rawPlayers.names[0].slice(0, 40) : "", typeof rawPlayers.names[1] === "string" ? rawPlayers.names[1].slice(0, 40) : ""] : ["", ""],
+          relationshipProfile: ["romantic", "early-dating", "friends", "spicy"].includes(rawSettings.relationshipProfile) ? rawSettings.relationshipProfile : "romantic",
+          questionMode: rawSettings.questionMode,
+          sessionPreset: rawSettings.sessionPreset,
+          playStyle: rawSettings.playStyle,
+          questionCount: rawSettings.questionCount,
+          questionIntensity: rawSettings.questionIntensity,
+          selectedTopics: Array.isArray(rawSettings.selectedTopics) ? rawSettings.selectedTopics : undefined,
+          soundEnabled: rawSettings.soundEnabled,
+          soundTheme: rawSettings.soundTheme,
+          soundVolume: Number.isFinite(Number(rawSettings.soundVolume)) ? Math.max(0, Math.min(1, Number(rawSettings.soundVolume))) : 0.8,
+          ambientMusicEnabled: rawSettings.ambientMusicEnabled === true,
+          ambientMix: safeAmbientMix,
+          hapticsEnabled: rawSettings.hapticsEnabled,
+          visualTheme: rawSettings.visualTheme,
+          textSize: rawSettings.textSize,
+          highContrast: rawSettings.highContrast === true,
+          reducedMotion: rawSettings.reducedMotion === true,
+          privatePinHash: typeof rawSettings.privatePinHash === "string" ? rawSettings.privatePinHash : "",
           tutorialSeen: true,
-          selectedQuestionIds: payload.currentGame?.selectedQuestionIds || [],
-          activePlayer: payload.currentGame?.activePlayer || 0,
-          questionIndex: payload.currentGame?.questionIndex || 0,
-          answers: payload.currentGame?.answers || [{}, {}],
-          comments: payload.currentGame?.comments || [{}, {}],
-          privateNotes: payload.currentGame?.privateNotes || [{}, {}],
-          importance: payload.currentGame?.importance || [{}, {}],
-          notReady: payload.currentGame?.notReady || [{}, {}],
-          textRatings: payload.currentGame?.textRatings || {},
-          conversationStatus: payload.currentGame?.conversationStatus || {},
-          sharedIntentions: payload.currentGame?.sharedIntentions || [],
-          resumeScreen: payload.currentGame?.resumeScreen || null,
-          revealedIds: payload.currentGame?.revealedIds || [],
-          completedPlayers: payload.currentGame?.completedPlayers || [false, false],
-          guesses: payload.currentGame?.guesses || [{}, {}],
-          seenIds: payload.currentGame?.seenIds || [],
-          revealCelebrated: payload.currentGame?.revealCelebrated || "",
-          textRatingTimes: payload.currentGame?.textRatingTimes || {},
-          conversationTimes: payload.currentGame?.conversationTimes || {},
-          cardPrompts: payload.currentGame?.cardPrompts || {},
-          answeredQuestionIds: payload.library?.answeredQuestionIds || [],
-          excludedQuestionIds: payload.library?.excludedQuestionIds || [],
-          neverQuestionIds: payload.library?.neverQuestionIds || [],
-          favoriteQuestionIds: payload.library?.favoriteQuestionIds || [],
-          questionEdits: payload.library?.questionEdits || {},
-          questionFlags: payload.library?.questionFlags || {},
-          questionTagOverrides: payload.library?.questionTagOverrides || {},
-          customQuestions: payload.library?.customQuestions || [],
-          customPacks: payload.library?.customPacks || [],
-          completedRounds: payload.history?.completedRounds || payload.library?.completedRounds || [],
-          dailyRitual: payload.history?.dailyRitual || payload.dailyRitual || { streak: 0, lastDate: "", answers: {}, completedDates: [] }
+          selectedQuestionIds: Array.isArray(rawCurrentGame.selectedQuestionIds) ? rawCurrentGame.selectedQuestionIds : [],
+          activePlayer: Number.isInteger(rawCurrentGame.activePlayer) ? rawCurrentGame.activePlayer : 0,
+          questionIndex: Number.isInteger(rawCurrentGame.questionIndex) ? rawCurrentGame.questionIndex : 0,
+          answers: Array.isArray(rawCurrentGame.answers) ? rawCurrentGame.answers : [{}, {}],
+          comments: Array.isArray(rawCurrentGame.comments) ? rawCurrentGame.comments : [{}, {}],
+          privateNotes: Array.isArray(rawCurrentGame.privateNotes) ? rawCurrentGame.privateNotes : [{}, {}],
+          importance: Array.isArray(rawCurrentGame.importance) ? rawCurrentGame.importance : [{}, {}],
+          notReady: Array.isArray(rawCurrentGame.notReady) ? rawCurrentGame.notReady : [{}, {}],
+          textRatings: rawCurrentGame.textRatings && typeof rawCurrentGame.textRatings === "object" ? rawCurrentGame.textRatings : {},
+          conversationStatus: rawCurrentGame.conversationStatus && typeof rawCurrentGame.conversationStatus === "object" ? rawCurrentGame.conversationStatus : {},
+          sharedIntentions: Array.isArray(rawCurrentGame.sharedIntentions) ? rawCurrentGame.sharedIntentions : [],
+          resumeScreen: rawCurrentGame.resumeScreen || null,
+          revealedIds: Array.isArray(rawCurrentGame.revealedIds) ? rawCurrentGame.revealedIds : [],
+          completedPlayers: Array.isArray(rawCurrentGame.completedPlayers) ? rawCurrentGame.completedPlayers : [false, false],
+          guesses: Array.isArray(rawCurrentGame.guesses) ? rawCurrentGame.guesses : [{}, {}],
+          seenIds: Array.isArray(rawCurrentGame.seenIds) ? rawCurrentGame.seenIds : [],
+          revealCelebrated: typeof rawCurrentGame.revealCelebrated === "string" ? rawCurrentGame.revealCelebrated : "",
+          textRatingTimes: rawCurrentGame.textRatingTimes && typeof rawCurrentGame.textRatingTimes === "object" ? rawCurrentGame.textRatingTimes : {},
+          conversationTimes: rawCurrentGame.conversationTimes && typeof rawCurrentGame.conversationTimes === "object" ? rawCurrentGame.conversationTimes : {},
+          cardPrompts: rawCurrentGame.cardPrompts && typeof rawCurrentGame.cardPrompts === "object" ? rawCurrentGame.cardPrompts : {},
+          answeredQuestionIds: Array.isArray(rawLibrary.answeredQuestionIds) ? rawLibrary.answeredQuestionIds : [],
+          excludedQuestionIds: Array.isArray(rawLibrary.excludedQuestionIds) ? rawLibrary.excludedQuestionIds : [],
+          neverQuestionIds: Array.isArray(rawLibrary.neverQuestionIds) ? rawLibrary.neverQuestionIds : [],
+          favoriteQuestionIds: Array.isArray(rawLibrary.favoriteQuestionIds) ? rawLibrary.favoriteQuestionIds : [],
+          questionEdits: rawLibrary.questionEdits && typeof rawLibrary.questionEdits === "object" ? rawLibrary.questionEdits : {},
+          questionFlags: rawLibrary.questionFlags && typeof rawLibrary.questionFlags === "object" ? rawLibrary.questionFlags : {},
+          questionTagOverrides: rawLibrary.questionTagOverrides && typeof rawLibrary.questionTagOverrides === "object" ? rawLibrary.questionTagOverrides : {},
+          customQuestions: Array.isArray(rawLibrary.customQuestions) ? rawLibrary.customQuestions : [],
+          customPacks: Array.isArray(rawLibrary.customPacks) ? rawLibrary.customPacks : [],
+          completedRounds: safeCompletedRounds,
+          dailyRitual: safeDailyRitual
         };
       }
-      if ([1, 2].includes(Number(payload?.version))) return { ...payload, version: 2 };
+      if ([1, 2].includes(Number(payload?.version))) {
+        const safeRounds = Array.isArray(payload.completedRounds) ? payload.completedRounds.filter((r) => r && typeof r === "object") : [];
+        const rawDaily = payload.dailyRitual && typeof payload.dailyRitual === "object" ? payload.dailyRitual : {};
+        return {
+          ...payload,
+          version: 2,
+          completedRounds: safeRounds,
+          dailyRitual: {
+            streak: Math.max(0, Math.round(Number(rawDaily.streak) || 0)),
+            lastDate: typeof rawDaily.lastDate === "string" ? rawDaily.lastDate.slice(0, 10) : "",
+            answers: rawDaily.answers && typeof rawDaily.answers === "object" && !Array.isArray(rawDaily.answers) ? { ...rawDaily.answers } : {},
+            completedDates: Array.isArray(rawDaily.completedDates) ? rawDaily.completedDates.filter((d) => typeof d === "string").map((d) => d.slice(0, 10)).slice(-365) : []
+          }
+        };
+      }
       throw new Error("This does not look like an Aligned backup file or a supported legacy backup.");
     }
 
@@ -14161,14 +14254,17 @@ var qrcode = function() {
     function wakeAmbient() {
       const root = document.documentElement;
       const now = Date.now();
-      // pointermove and scroll fire in bursts; re-arming once a second is plenty.
-      if (now - ambientWokeAt < 1000 && !root.classList.contains("ambient-rest")) return;
+      const wasResting = root.classList.contains("ambient-rest");
+      if (now - ambientWokeAt < 1000 && !wasResting) return;
       ambientWokeAt = now;
       root.classList.remove("ambient-rest");
       clearTimeout(ambientRestTimer);
       ambientRestTimer = window.setTimeout(() => root.classList.add("ambient-rest"), AMBIENT_REST_MS);
+      if (wasResting && ambientSoundscape) {
+        ambientSoundscape.wakeRest();
+      }
     }
-    ["pointerdown", "pointermove", "keydown", "wheel", "touchstart"].forEach((type) => document.addEventListener(type, wakeAmbient, { capture: true, passive: true }));
+    ["pointerdown", "keydown", "wheel", "touchstart"].forEach((type) => document.addEventListener(type, wakeAmbient, { capture: true, passive: true }));
     window.addEventListener("scroll", wakeAmbient, { passive: true });
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") wakeAmbient(); });
     wakeAmbient();
@@ -14515,27 +14611,33 @@ var qrcode = function() {
         let crackleTimer = 0;
         const scheduleCrackle = () => {
           if (!this.hearthLayer) return;
-          if (ctx.state === "running" && (state.ambientMix?.hearth ?? 0) > 0.02) {
-            const crackleGain = ctx.createGain();
-            const now = ctx.currentTime;
-            crackleGain.gain.setValueAtTime(0.0001, now);
-            crackleGain.gain.linearRampToValueAtTime((0.05 + Math.random() * 0.06) * (state.ambientMix?.hearth ?? 1), now + 0.005);
-            crackleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04 + Math.random() * 0.03);
-            const osc = ctx.createOscillator();
-            osc.type = "triangle";
-            osc.frequency.setValueAtTime(350 + Math.random() * 700, now);
-            osc.frequency.exponentialRampToValueAtTime(70, now + 0.04);
-            osc.connect(crackleGain);
-            crackleGain.connect(out);
-            osc.start(now);
-            osc.stop(now + 0.06);
-            osc.onended = () => { osc.disconnect(); crackleGain.disconnect(); };
+          const isResting = document.documentElement.classList.contains("ambient-rest");
+          const isHidden = document.hidden;
+          if (ctx.state === "running" && (state.ambientMix?.hearth ?? 0) > 0.02 && !isHidden) {
+            if (!isResting || Math.random() < 0.15) {
+              const crackleGain = ctx.createGain();
+              const now = ctx.currentTime;
+              crackleGain.gain.setValueAtTime(0.0001, now);
+              crackleGain.gain.linearRampToValueAtTime((0.05 + Math.random() * 0.06) * (state.ambientMix?.hearth ?? 1), now + 0.005);
+              crackleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04 + Math.random() * 0.03);
+              const osc = ctx.createOscillator();
+              osc.type = "triangle";
+              osc.frequency.setValueAtTime(350 + Math.random() * 700, now);
+              osc.frequency.exponentialRampToValueAtTime(70, now + 0.04);
+              osc.connect(crackleGain);
+              crackleGain.connect(out);
+              osc.start(now);
+              osc.stop(now + 0.06);
+              osc.onended = () => { osc.disconnect(); crackleGain.disconnect(); };
+            }
           }
-          crackleTimer = window.setTimeout(scheduleCrackle, 120 + Math.random() * 450);
+          const delay = isHidden ? 3000 : (isResting ? 2000 + Math.random() * 1500 : 120 + Math.random() * 450);
+          crackleTimer = window.setTimeout(scheduleCrackle, delay);
+          if (this.hearthLayer) this.hearthLayer.timer = crackleTimer;
         };
         scheduleCrackle();
 
-        this.hearthLayer = { source, out, filter, timer: crackleTimer };
+        this.hearthLayer = { source, out, filter, timer: crackleTimer, scheduleCrackle };
       }
 
       startSynth(ctx) {
@@ -14562,7 +14664,9 @@ var qrcode = function() {
         this.synthLayer = synthLayer;
         const schedule = () => {
           if (this.synthLayer !== synthLayer) return;
-          if (ctx.state === "running") {
+          const isResting = document.documentElement.classList.contains("ambient-rest");
+          const isHidden = document.hidden;
+          if (ctx.state === "running" && !isHidden) {
             const horizon = ctx.currentTime + 1.5;
             if (synthLayer.nextChordAt < ctx.currentTime) synthLayer.nextChordAt = ctx.currentTime + 0.05;
             if (synthLayer.nextNoteAt < ctx.currentTime) synthLayer.nextNoteAt = ctx.currentTime + 0.5;
@@ -14571,13 +14675,19 @@ var qrcode = function() {
               synthLayer.chord += 1;
               synthLayer.nextChordAt += CHORD_SECONDS;
             }
-            while (synthLayer.nextNoteAt < horizon) {
-              this.playNote(synthLayer, synthLayer.nextNoteAt);
-              synthLayer.nextNoteAt += 2 + Math.random() * 3;
+            if (!isResting) {
+              while (synthLayer.nextNoteAt < horizon) {
+                this.playNote(synthLayer, synthLayer.nextNoteAt);
+                synthLayer.nextNoteAt += 2 + Math.random() * 3;
+              }
+            } else {
+              synthLayer.nextNoteAt = ctx.currentTime + 2;
             }
           }
-          synthLayer.timer = window.setTimeout(schedule, 500);
+          const delay = isHidden ? 3000 : (isResting ? 2000 : 500);
+          synthLayer.timer = window.setTimeout(schedule, delay);
         };
+        synthLayer.schedule = schedule;
         schedule();
       }
 
@@ -14706,6 +14816,18 @@ var qrcode = function() {
           osc.start(at);
           osc.stop(at + 1.25);
         });
+      }
+
+      wakeRest() {
+        if (!this.generation || !this.ctx || this.ctx.state !== "running") return;
+        if (this.hearthLayer?.scheduleCrackle) {
+          window.clearTimeout(this.hearthLayer.timer);
+          this.hearthLayer.scheduleCrackle();
+        }
+        if (this.synthLayer?.schedule) {
+          window.clearTimeout(this.synthLayer.timer);
+          this.synthLayer.schedule();
+        }
       }
 
       stop() {
@@ -16811,6 +16933,55 @@ var qrcode = function() {
     }
     // The tilt shine skips its repaint while this key is unchanged; clearing it makes newly visible faces catch up.
     let holoApplied = "";
+    let holoTouchFrame = 0;
+    let holoTouchPoint = null;
+    let holoFrame = 0;
+    let holoX = 50;
+    let holoY = 50;
+
+    const paintHolo = () => {
+      holoFrame = 0;
+      const key = `${holoX},${holoY}`;
+      if (key === holoApplied) return;
+      holoApplied = key;
+      app.querySelectorAll(".flip-card:not(.flipped) .card-front, .flip-card.flipped .card-back").forEach((face) => {
+        face.style.setProperty("--holo-x", `${holoX}%`);
+        face.style.setProperty("--holo-y", `${holoY}%`);
+        face.style.setProperty("--holo-opacity", "0.45");
+      });
+    };
+
+    const onHoloTouchMove = (event) => {
+      if (state.screen !== "reveal" || !event.touches.length || motionReduced()) return;
+      holoTouchPoint = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+      if (holoTouchFrame) return;
+      holoTouchFrame = requestAnimationFrame(() => {
+        holoTouchFrame = 0;
+        const card = document.elementFromPoint(holoTouchPoint.x, holoTouchPoint.y)?.closest(".card-face");
+        if (!card) return;
+        const rect = card.getBoundingClientRect();
+        const x = ((holoTouchPoint.x - rect.left) / rect.width) * 100;
+        const y = ((holoTouchPoint.y - rect.top) / rect.height) * 100;
+        card.style.setProperty("--holo-x", `${x}%`);
+        card.style.setProperty("--holo-y", `${y}%`);
+        card.style.setProperty("--holo-opacity", "0.75");
+      });
+    };
+
+    const onHoloTouchEnd = () => {
+      if (holoTouchFrame) { cancelAnimationFrame(holoTouchFrame); holoTouchFrame = 0; }
+      document.querySelectorAll(".card-face").forEach((card) => {
+        card.style.setProperty("--holo-opacity", "0");
+      });
+      holoApplied = "";
+    };
+
+    const onHoloOrientation = (event) => {
+      if (state.screen !== "reveal" || motionReduced() || event.beta === null || event.gamma === null) return;
+      holoX = Math.round(((event.gamma + 45) / 90) * 50) * 2;
+      holoY = Math.round(((event.beta + 45) / 90) * 50) * 2;
+      if (!holoFrame) holoFrame = requestAnimationFrame(paintHolo);
+    };
     window.alignedHandleBack = () => {
       const openMenu = document.querySelector(".session-dropdown-container.open");
       if (openMenu) {
@@ -19719,9 +19890,13 @@ var qrcode = function() {
         </div>
         ${pastNoteMarkup}
         <div class="alignment-rating ${rating ? "rated" : "unrated"}">
-          <strong>${rating ? "You rated this together" : ratingHeadingCopy(question.id, lastRateId)}</strong>
-          <div class="rating-options">
-            ${ratings.map(([value, label, color]) => `<button class="rating-option ${rating === value ? "active" : ""}" style="--rating-color:${color}" type="button" data-text-rating="${value}" data-rating-question="${escapedQuestionId}">${label}</button>`).join("")}
+          <strong id="rating-heading-${escapedQuestionId}">${rating ? "You rated this together" : ratingHeadingCopy(question.id, lastRateId)}</strong>
+          <div class="rating-options" role="radiogroup" aria-labelledby="rating-heading-${escapedQuestionId}">
+            ${ratings.map(([value, label, color], index) => {
+              const isChecked = rating === value;
+              const tabIndex = (rating ? isChecked : index === 0) ? "0" : "-1";
+              return `<button class="rating-option ${isChecked ? "active" : ""}" style="--rating-color:${color}" type="button" role="radio" aria-checked="${isChecked ? "true" : "false"}" tabindex="${tabIndex}" data-text-rating="${value}" data-rating-question="${escapedQuestionId}">${label}</button>`;
+            }).join("")}
           </div>
         </div>
         ${beforeRating}
@@ -21168,7 +21343,12 @@ var qrcode = function() {
           // prompts all depend on the rating) after that frame, so the unlock tap never waits on a full render.
           const group = button.closest(".alignment-rating");
           if (group) {
-            group.querySelectorAll("[data-text-rating]").forEach((option) => option.classList.toggle("active", option === button));
+            group.querySelectorAll("[data-text-rating]").forEach((option) => {
+              const active = option === button;
+              option.classList.toggle("active", active);
+              option.setAttribute("aria-checked", active ? "true" : "false");
+              option.setAttribute("tabindex", active ? "0" : "-1");
+            });
             group.classList.replace("unrated", "rated");
             const heading = group.querySelector("strong");
             if (heading) heading.textContent = "You rated this together";
@@ -21192,6 +21372,23 @@ var qrcode = function() {
               }
             }
           }, 0));
+        });
+      });
+
+      document.querySelectorAll(".rating-options").forEach((group) => {
+        group.addEventListener("keydown", (event) => {
+          if (!["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"].includes(event.key)) return;
+          const options = Array.from(group.querySelectorAll(".rating-option"));
+          if (!options.length) return;
+          const currentIndex = options.indexOf(document.activeElement);
+          if (currentIndex === -1) return;
+          event.preventDefault();
+          const nextIndex = (event.key === "ArrowRight" || event.key === "ArrowDown")
+            ? (currentIndex + 1) % options.length
+            : (currentIndex - 1 + options.length) % options.length;
+          const nextOption = options[nextIndex];
+          nextOption.focus();
+          nextOption.click();
         });
       });
 
@@ -21908,6 +22105,9 @@ var qrcode = function() {
       window.addEventListener("resize", scheduleCardResize, { passive: true });
       window.addEventListener("orientationchange", scheduleCardResize, { passive: true });
       window.visualViewport?.addEventListener("resize", scheduleCardResize, { passive: true });
+      window.addEventListener("deviceorientation", onHoloOrientation, { passive: true });
+      document.addEventListener("touchmove", onHoloTouchMove, { passive: true });
+      document.addEventListener("touchend", onHoloTouchEnd, { passive: true });
       cleanupResponsiveRender = () => {
         clearAllDiscussionTimers();
         cancelAnimationFrame(resizeFrame);
@@ -21916,6 +22116,11 @@ var qrcode = function() {
         window.removeEventListener("orientationchange", scheduleCardResize);
         window.visualViewport?.removeEventListener("resize", scheduleCardResize);
         if (updateStickyBar) window.removeEventListener("scroll", updateStickyBar);
+        window.removeEventListener("deviceorientation", onHoloOrientation);
+        document.removeEventListener("touchmove", onHoloTouchMove);
+        document.removeEventListener("touchend", onHoloTouchEnd);
+        if (holoFrame) { cancelAnimationFrame(holoFrame); holoFrame = 0; }
+        if (holoTouchFrame) { cancelAnimationFrame(holoTouchFrame); holoTouchFrame = 0; }
       };
     }
 
@@ -22073,58 +22278,6 @@ var qrcode = function() {
       if (card) {
         card.style.setProperty("--holo-opacity", "0");
       }
-    }, { passive: true });
-
-    // Touch and tilt fire far faster than frames: keep the latest point and do the hit test once per frame.
-    let holoTouchFrame = 0;
-    let holoTouchPoint = null;
-    document.addEventListener("touchmove", (event) => {
-      if (state.screen !== "reveal" || !event.touches.length || motionReduced()) return;
-      holoTouchPoint = { x: event.touches[0].clientX, y: event.touches[0].clientY };
-      if (holoTouchFrame) return;
-      holoTouchFrame = requestAnimationFrame(() => {
-        holoTouchFrame = 0;
-        const card = document.elementFromPoint(holoTouchPoint.x, holoTouchPoint.y)?.closest(".card-face");
-        if (!card) return;
-        const rect = card.getBoundingClientRect();
-        const x = ((holoTouchPoint.x - rect.left) / rect.width) * 100;
-        const y = ((holoTouchPoint.y - rect.top) / rect.height) * 100;
-        card.style.setProperty("--holo-x", `${x}%`);
-        card.style.setProperty("--holo-y", `${y}%`);
-        card.style.setProperty("--holo-opacity", "0.75");
-      });
-    }, { passive: true });
-
-    document.addEventListener("touchend", () => {
-      // A frame still pending from the last move would relight the shine after it was cleared.
-      if (holoTouchFrame) { cancelAnimationFrame(holoTouchFrame); holoTouchFrame = 0; }
-      document.querySelectorAll(".card-face").forEach((card) => {
-        card.style.setProperty("--holo-opacity", "0");
-      });
-      holoApplied = "";
-    }, { passive: true });
-
-    let holoFrame = 0;
-    let holoX = 50;
-    let holoY = 50;
-    const paintHolo = () => {
-      holoFrame = 0;
-      const key = `${holoX},${holoY}`;
-      if (key === holoApplied) return;
-      holoApplied = key;
-      // Only the face each card currently shows; custom properties inherit, so every write restyles a whole face.
-      app.querySelectorAll(".flip-card:not(.flipped) .card-front, .flip-card.flipped .card-back").forEach((face) => {
-        face.style.setProperty("--holo-x", `${holoX}%`);
-        face.style.setProperty("--holo-y", `${holoY}%`);
-        face.style.setProperty("--holo-opacity", "0.45");
-      });
-    };
-    window.addEventListener("deviceorientation", (event) => {
-      if (state.screen !== "reveal" || motionReduced() || event.beta === null || event.gamma === null) return;
-      // 2% steps: hand tremor stops producing a new value (and a restyle and repaint) on every sensor tick.
-      holoX = Math.round(((event.gamma + 45) / 90) * 50) * 2;
-      holoY = Math.round(((event.beta + 45) / 90) * 50) * 2;
-      if (!holoFrame) holoFrame = requestAnimationFrame(paintHolo);
     }, { passive: true });
 
     document.addEventListener("click", (event) => {
