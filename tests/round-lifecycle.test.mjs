@@ -258,4 +258,111 @@ describe("End-to-End Round Lifecycle Simulation", () => {
     assert.equal(errors.length, 0, `Page errors encountered: ${errors.join("; ")}`);
     await page.close();
   });
+
+  it("shifts accessibility focus to screen heading across screen transitions", async () => {
+    const page = await browser.newPage();
+    const errors = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+
+    // Seed state with tutorialSeen to skip intro modal
+    await page.addInitScript(() => {
+      const state = { version: 2, screen: "setup", tutorialSeen: true, names: ["Alex", "Sam"] };
+      localStorage.setItem("aligned-state-v1", JSON.stringify(state));
+    });
+
+    await page.goto(baseUrl);
+    await page.waitForTimeout(400);
+
+    // 1. Navigate to Settings
+    await page.click("#settings-button");
+    await page.waitForSelector("#settings-heading, h1, h2", { timeout: 4000 });
+
+    const settingsFocusedTag = await page.evaluate(() => document.activeElement?.tagName.toLowerCase());
+    const settingsFocusedText = await page.evaluate(() => document.activeElement?.textContent?.trim());
+    assert(
+      ["h1", "h2"].includes(settingsFocusedTag),
+      `Expected activeElement to be heading (h1 or h2), got <${settingsFocusedTag}> ("${settingsFocusedText}")`
+    );
+
+    // 2. Navigate to Library
+    await page.click("#library-button");
+    await page.waitForSelector("h1, h2", { timeout: 4000 });
+
+    const libraryFocusedTag = await page.evaluate(() => document.activeElement?.tagName.toLowerCase());
+    assert(
+      ["h1", "h2"].includes(libraryFocusedTag),
+      `Expected activeElement in Library to be heading, got <${libraryFocusedTag}>`
+    );
+
+    // 3. Navigate to Results / Journal
+    await page.click("#results-button");
+    await page.waitForSelector("h1, h2", { timeout: 4000 });
+
+    const resultsFocusedTag = await page.evaluate(() => document.activeElement?.tagName.toLowerCase());
+    assert(
+      ["h1", "h2"].includes(resultsFocusedTag),
+      `Expected activeElement in Results to be heading, got <${resultsFocusedTag}>`
+    );
+
+    // 4. Return to Home
+    await page.click("#home-button");
+    await page.waitForSelector("h1, h2", { timeout: 4000 });
+    const homeFocusedTag = await page.evaluate(() => document.activeElement?.tagName.toLowerCase());
+    assert(
+      ["h1", "h2"].includes(homeFocusedTag),
+      `Expected activeElement on Home to be heading, got <${homeFocusedTag}>`
+    );
+
+    assert.equal(errors.length, 0, `Page errors: ${errors.join("; ")}`);
+    await page.close();
+  });
+
+  it("activates kbd-nav mode and traps focus in modal dialogs", async () => {
+    const page = await browser.newPage();
+    const errors = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+
+    await page.addInitScript(() => {
+      const state = { version: 2, screen: "setup", tutorialSeen: true, names: ["Alex", "Sam"] };
+      localStorage.setItem("aligned-state-v1", JSON.stringify(state));
+    });
+
+    await page.goto(baseUrl);
+    await page.waitForTimeout(400);
+
+    // Press Tab key: documentElement must receive 'kbd-nav' class for focus indicator rings
+    await page.keyboard.press("Tab");
+    const hasKbdNav = await page.evaluate(() => document.documentElement.classList.contains("kbd-nav"));
+    assert.equal(hasKbdNav, true, "Pressing Tab must add 'kbd-nav' class to documentElement");
+
+    // Open Daily Connection Ritual modal
+    const dailyCard = page.locator("#daily-ritual-card");
+    if (await dailyCard.count()) {
+      await dailyCard.click();
+      await page.waitForSelector(".modal-backdrop", { timeout: 3000 });
+
+      // Active element must be inside modal backdrop
+      const isInsideModal = await page.evaluate(() => {
+        const modal = document.querySelector(".modal-backdrop");
+        return modal && modal.contains(document.activeElement);
+      });
+      assert.equal(isInsideModal, true, "Focus must land inside the opened modal dialog");
+
+      // Background app container must be inert
+      const appInert = await page.evaluate(() => document.getElementById("app")?.inert);
+      assert.equal(appInert, true, "#app container must be inert while modal is open");
+
+      // Close modal
+      const closeBtn = page.locator('.modal-backdrop [data-modal-cancel], .modal-backdrop button');
+      await closeBtn.first().click();
+      await page.waitForSelector(".modal-backdrop", { state: "detached", timeout: 3000 });
+
+      // After closing, #app must no longer be inert
+      const appInertAfter = await page.evaluate(() => document.getElementById("app")?.inert);
+      assert.equal(appInertAfter, false, "#app must not be inert after modal closes");
+    }
+
+    assert.equal(errors.length, 0, `Page errors: ${errors.join("; ")}`);
+    await page.close();
+  });
 });

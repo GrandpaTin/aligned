@@ -8087,6 +8087,58 @@ var qrcode = function() {
       color: #111827 !important;
     }
 
+    /* WCAG AAA High-Contrast Enhancements across Midnight, Sunset, Cosmic & Pastel */
+    .high-contrast .wager-chip.active {
+      background: #ffffff !important;
+      color: #000000 !important;
+      border-color: #ffffff !important;
+      font-weight: 900 !important;
+    }
+    [data-theme="pastel"].high-contrast .wager-chip.active {
+      background: #000000 !important;
+      color: #ffffff !important;
+      border-color: #000000 !important;
+    }
+
+    .high-contrast .text-btn {
+      color: #ffffff !important;
+      text-decoration: underline !important;
+      text-underline-offset: 3px !important;
+      font-weight: 850 !important;
+    }
+    [data-theme="pastel"].high-contrast .text-btn {
+      color: #000000 !important;
+      text-decoration: underline !important;
+      text-underline-offset: 3px !important;
+    }
+
+    .high-contrast .range-input::-webkit-slider-runnable-track {
+      border: 1.5px solid #ffffff !important;
+    }
+    .high-contrast .range-input::-moz-range-track {
+      border: 1.5px solid #ffffff !important;
+    }
+    [data-theme="pastel"].high-contrast .range-input::-webkit-slider-runnable-track {
+      border: 1.5px solid #000000 !important;
+    }
+    [data-theme="pastel"].high-contrast .range-input::-moz-range-track {
+      border: 1.5px solid #000000 !important;
+    }
+
+    /* Resonance Compass Radar High Contrast & Pastel Contrast */
+    .high-contrast .radar-grid { stroke: rgba(255, 255, 255, 0.4) !important; stroke-dasharray: 3 3; }
+    .high-contrast .radar-axis { stroke: #ffffff !important; stroke-width: 1.5; }
+    .high-contrast .radar-label { fill: #ffffff !important; font-weight: 850; }
+    .high-contrast .radar-polygon { stroke: #4ade80 !important; stroke-width: 3.5; fill: rgba(74, 222, 128, 0.35) !important; }
+
+    [data-theme="pastel"] .radar-grid { stroke: rgba(15, 23, 42, 0.22); }
+    [data-theme="pastel"] .radar-axis { stroke: rgba(15, 23, 42, 0.35); }
+    [data-theme="pastel"] .radar-label { fill: #0f172a; }
+    [data-theme="pastel"].high-contrast .radar-grid { stroke: rgba(0, 0, 0, 0.45) !important; }
+    [data-theme="pastel"].high-contrast .radar-axis { stroke: #000000 !important; stroke-width: 1.5; }
+    [data-theme="pastel"].high-contrast .radar-label { fill: #000000 !important; font-weight: 850; }
+    [data-theme="pastel"].high-contrast .radar-polygon { stroke: #15803d !important; stroke-width: 3.5; fill: rgba(21, 128, 61, 0.3) !important; }
+
     .reduced-motion *,
     .reduced-motion *::before,
     .reduced-motion *::after {
@@ -13690,11 +13742,15 @@ var qrcode = function() {
         const edit = state.questionEdits?.[question.id] || {};
         const automaticTags = QUESTION_TAG_RULES.filter(([, pattern]) => pattern.test(edit.prompt || question.prompt)).map(([tag]) => tag);
         const overrideTags = Array.isArray(state.questionTagOverrides?.[question.id]) ? state.questionTagOverrides[question.id] : [];
+        const tags = [...new Set([question.topic, ...automaticTags, ...overrideTags])];
+        const prompt = edit.prompt || question.prompt;
+        const category = question.category || "";
         return {
           ...question,
           ...edit,
           labels: question.type === "slider" ? (edit.labels || question.labels) : undefined,
-          tags: [...new Set([question.topic, ...automaticTags, ...overrideTags])]
+          tags,
+          _searchIndex: normalizeAnswer(`${prompt} ${category} ${tags.join(" ")}`)
         };
       });
       return questionCatalogCache.slice();
@@ -13999,7 +14055,9 @@ var qrcode = function() {
       anchor.click();
       anchor.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-      showToast("The unreadable save was downloaded as it was stored.");
+      keys.forEach((key) => { try { localStorage.removeItem(key); } catch {} });
+      if (state.screen === "settings") renderSettings();
+      showToast("The unreadable save was downloaded and removed from storage.");
     }
 
     function bytesToBase64(bytes) {
@@ -14944,6 +15002,7 @@ var qrcode = function() {
       }
     }
 
+    let storageQuotaAlerted = false;
     function saveState() {
       if (Array.isArray(state.revealedIds) && state.revealedIds.length) {
         const round = new Set(state.selectedQuestionIds);
@@ -14951,8 +15010,38 @@ var qrcode = function() {
       }
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch {
-        // The game still works when storage is unavailable.
+        if (typeof LEGACY_STORAGE_KEYS !== "undefined" && Array.isArray(LEGACY_STORAGE_KEYS)) {
+          LEGACY_STORAGE_KEYS.forEach((key) => { try { localStorage.removeItem(key); } catch {} });
+        }
+      } catch (err) {
+        try {
+          if (typeof LEGACY_STORAGE_KEYS !== "undefined" && Array.isArray(LEGACY_STORAGE_KEYS)) {
+            LEGACY_STORAGE_KEYS.forEach((key) => { try { localStorage.removeItem(key); } catch {} });
+          }
+          try { localStorage.removeItem(`${STORAGE_KEY}-unreadable-2`); } catch {}
+
+          if (Array.isArray(state.completedRounds) && state.completedRounds.length > 5) {
+            state.completedRounds = state.completedRounds.slice(-Math.floor(state.completedRounds.length / 2));
+          }
+
+          if (state.voiceNotes && typeof state.voiceNotes === "object") {
+            const voiceKeys = Object.keys(state.voiceNotes);
+            if (voiceKeys.length > 8) {
+              voiceKeys.slice(0, voiceKeys.length - 8).forEach((k) => delete state.voiceNotes[k]);
+            }
+          }
+
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (exhaustedErr) {
+          if (typeof storageQuotaAlerted !== "undefined" ? !storageQuotaAlerted : true) {
+            if (typeof storageQuotaAlerted !== "undefined") storageQuotaAlerted = true;
+            if (typeof showToast === "function" && typeof window !== "undefined") {
+              window.setTimeout(() => {
+                showToast("Storage quota full! Export your backup from Settings to prevent data loss.", { tone: "warning", duration: 8000 });
+              }, 300);
+            }
+          }
+        }
       }
     }
 
@@ -15588,6 +15677,7 @@ var qrcode = function() {
         state.screen = screen;
         saveState();
         render();
+        focusScreenHeading();
         return;
       }
       if (screen === "setup" && isLiveRoundScreen()) {
@@ -15617,6 +15707,7 @@ var qrcode = function() {
       saveState();
       playSound("tap");
       applyPreferences();
+      showToast(state.soundEnabled ? "Game sounds turned on." : "Game sounds muted.");
     });
 
     function escapeHTML(value) {
@@ -16886,7 +16977,7 @@ var qrcode = function() {
       }
       lastRenderedQuestionKey = questionKey;
       const focusLost = !document.activeElement || document.activeElement === document.body || !document.contains(document.activeElement);
-      if (hasRenderedOnce && focusLost && !document.querySelector(".modal-backdrop")) {
+      if (hasRenderedOnce && (screenChanged || focusLost) && !document.querySelector(".modal-backdrop")) {
         let restored = null;
         if (!screenChanged && !questionChanged && previousFocusKey && !(questionKey && previousFocusKey.includes("submit"))) {
           try { restored = app.querySelector(previousFocusKey); } catch {}
@@ -17187,7 +17278,7 @@ var qrcode = function() {
             || (libraryView.filter === "valuable" && (state.questionFlags[question.id] || []).includes("valuable"))
             || (libraryView.filter === "uncomfortable" && (state.questionFlags[question.id] || []).includes("uncomfortable"));
           const matchesTopic = libraryView.topic === "all" || question.topic === libraryView.topic;
-          const matchesSearch = !search || normalizeAnswer(`${question.prompt} ${question.category} ${(question.tags || []).join(" ")}`).includes(search);
+          const matchesSearch = !search || (question._searchIndex ? question._searchIndex.includes(search) : normalizeAnswer(`${question.prompt} ${question.category} ${(question.tags || []).join(" ")}`).includes(search));
           return matchesStatus && matchesTopic && matchesSearch;
         });
 
@@ -17220,11 +17311,16 @@ var qrcode = function() {
         }
 
         const visible = filtered.slice(0, libraryView.limit);
+        const visibleIds = new Set(visible.map((q) => q.id));
         const roundsByQuestion = new Map();
-        state.completedRounds.forEach((round) => new Set(round.questionIds).forEach((id) => {
-          if (!roundsByQuestion.has(id)) roundsByQuestion.set(id, []);
-          roundsByQuestion.get(id).push(round);
-        }));
+        state.completedRounds.forEach((round) => {
+          (round.questionIds || []).forEach((id) => {
+            if (visibleIds.has(id)) {
+              if (!roundsByQuestion.has(id)) roundsByQuestion.set(id, []);
+              roundsByQuestion.get(id).push(round);
+            }
+          });
+        });
         list.innerHTML = visible.map((question) => {
           const answered = answeredIds.has(question.id);
           const excluded = excludedIds.has(question.id);
@@ -22292,6 +22388,7 @@ var qrcode = function() {
       saveState();
       playSound("tap");
       applyPreferences();
+      showToast(state.ambientMusicEnabled ? "Ambient music turned on." : "Ambient music turned off.");
     });
 
     document.addEventListener("mousemove", (event) => {
