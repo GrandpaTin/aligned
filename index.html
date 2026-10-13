@@ -12216,6 +12216,8 @@ var qrcode = function() {
           ? [...new Set(restored.selectedTopics.filter((topic) => validTopics.has(topic)))]
           : [...DEFAULT_TOPICS];
         if (!restored.selectedTopics.length) restored.selectedTopics = [...DEFAULT_TOPICS];
+        restored.turnBasedReveal = cached.turnBasedReveal === true;
+        restored.activeTurn = [0, 1].includes(Number(cached.activeTurn)) ? Number(cached.activeTurn) : 0;
         const isRoundScreen = ["question", "intermission", "celebration", "reveal"].includes(restored.screen);
         if (isRoundScreen && (!idsAreValid || restored.names.some((name) => !name.trim()))) {
           return {
@@ -12251,7 +12253,9 @@ var qrcode = function() {
             customPacks: restored.customPacks,
             completedRounds: restored.completedRounds,
             conversationStatus: restored.conversationStatus,
-            sharedIntentions: restored.sharedIntentions
+            sharedIntentions: restored.sharedIntentions,
+            turnBasedReveal: restored.turnBasedReveal,
+            activeTurn: restored.activeTurn
           };
         }
 
@@ -13944,7 +13948,9 @@ var qrcode = function() {
           revealCelebrated: state.revealCelebrated || "",
           textRatingTimes: { ...(state.textRatingTimes || {}) },
           conversationTimes: { ...(state.conversationTimes || {}) },
-          cardPrompts: { ...(state.cardPrompts || {}) }
+          cardPrompts: { ...(state.cardPrompts || {}) },
+          turnBasedReveal: state.turnBasedReveal === true,
+          activeTurn: state.activeTurn === 1 ? 1 : 0
         }
       };
     }
@@ -14069,6 +14075,8 @@ var qrcode = function() {
           textRatingTimes: rawCurrentGame.textRatingTimes && typeof rawCurrentGame.textRatingTimes === "object" ? rawCurrentGame.textRatingTimes : {},
           conversationTimes: rawCurrentGame.conversationTimes && typeof rawCurrentGame.conversationTimes === "object" ? rawCurrentGame.conversationTimes : {},
           cardPrompts: rawCurrentGame.cardPrompts && typeof rawCurrentGame.cardPrompts === "object" ? rawCurrentGame.cardPrompts : {},
+          turnBasedReveal: rawCurrentGame.turnBasedReveal === true,
+          activeTurn: rawCurrentGame.activeTurn === 1 ? 1 : 0,
           answeredQuestionIds: Array.isArray(rawLibrary.answeredQuestionIds) ? rawLibrary.answeredQuestionIds : [],
           excludedQuestionIds: Array.isArray(rawLibrary.excludedQuestionIds) ? rawLibrary.excludedQuestionIds : [],
           neverQuestionIds: Array.isArray(rawLibrary.neverQuestionIds) ? rawLibrary.neverQuestionIds : [],
@@ -17072,12 +17080,16 @@ var qrcode = function() {
       document.querySelectorAll("[data-compact-floor]").forEach((element) => { element.style.removeProperty("font-size"); element.removeAttribute("data-compact-floor"); });
       if (state.textSize !== "small") return;
       document.documentElement.classList.add("measuring-text");
+      const belowFloor = [];
       document.querySelectorAll("#app *, .topbar *, .bottom-nav *").forEach((element) => {
         if (element.closest(".text-size-option, svg, .reveal-buddy, .progress-star, .pass-person, .card-spark, .question-decor") || element.matches(".type-chip") || !element.textContent.trim()) return;
         if (parseFloat(getComputedStyle(element).fontSize) < 11.95) {
-          element.style.setProperty("font-size", "12px", "important");
-          element.setAttribute("data-compact-floor", "");
+          belowFloor.push(element);
         }
+      });
+      belowFloor.forEach((element) => {
+        element.style.setProperty("font-size", "12px", "important");
+        element.setAttribute("data-compact-floor", "");
       });
       document.documentElement.classList.remove("measuring-text");
     }
@@ -17130,7 +17142,7 @@ var qrcode = function() {
         "nearby-wait": "Waiting for your partner — Aligned"
       }[state.screen] || "Aligned — Discover How Well You Align";
 
-      if (state.screen !== "reveal") openedCards = [];
+      if (state.screen !== "reveal") openedCardIds = [];
       if (state.screen === "question") renderQuestion();
       else if (state.screen === "intermission") renderIntermission();
       else if (state.screen === "celebration") renderCelebration();
@@ -17207,7 +17219,7 @@ var qrcode = function() {
 
     // Android app shell: the hardware Back button closes dialogs first, then returns to Home.
     // Cards opened by hand on the reveal board, oldest first; Back closes the newest before leaving the board.
-    let openedCards = [];
+    let openedCardIds = [];
     // Back-to-back matches on first looks build a streak. Runtime only, and module level because rating a card rebuilds the board.
     // Every new round (Replay round included, which reuses the exact question list) builds a fresh state object.
     let revealStreak = { owner: null, key: "", count: 0 };
@@ -17299,10 +17311,11 @@ var qrcode = function() {
         return true;
       }
       const focusedCard = document.activeElement?.closest?.(".flip-card.flipped");
-      openedCards = openedCards.filter((card) => card.isConnected && card.classList.contains("flipped"));
-      const lastCard = openedCards.pop() || null;
+      openedCardIds = openedCardIds.filter((id) => app.querySelector(`.flip-card[data-question-id="${CSS.escape(id)}"].flipped`));
+      const lastCardId = openedCardIds.pop() || null;
+      const lastCard = lastCardId ? app.querySelector(`.flip-card[data-question-id="${CSS.escape(lastCardId)}"].flipped`) : null;
       // Cards opened by hand close one Back at a time (newest first); "Reveal all" cards don't hold Back hostage.
-      const openCard = state.screen === "reveal" ? focusedCard || lastCard : null;
+      const openCard = state.screen === "reveal" ? (focusedCard || lastCard) : null;
       if (openCard) {
         openCard.querySelector(".card-close-button")?.click();
         return true;
@@ -18656,17 +18669,19 @@ var qrcode = function() {
       return questions[Math.abs(hash) % questions.length];
     }
 
-    function getYesterdayLocalDateStamp() {
-      const d = new Date();
-      d.setDate(d.getDate() - 1);
-      return localDateStamp(d);
+    function parseLocalDate(dateStr) {
+      if (typeof dateStr !== "string") return null;
+      const parts = dateStr.split("-").map(Number);
+      if (parts.length !== 3 || parts.some(isNaN)) return null;
+      return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
     }
 
     function calculateStreakFromDates(completedDates = [], referenceDate = localDateStamp()) {
       if (!Array.isArray(completedDates) || !completedDates.length) return 0;
       const dateSet = new Set(completedDates);
       let streak = 0;
-      const curr = new Date(`${referenceDate}T12:00:00`);
+      const parts = typeof referenceDate === "string" ? referenceDate.split("-").map(Number) : [];
+      const curr = parts.length === 3 && !parts.some(isNaN) ? new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0) : new Date(referenceDate);
       if (!dateSet.has(localDateStamp(curr))) {
         curr.setDate(curr.getDate() - 1);
         if (!dateSet.has(localDateStamp(curr))) return 0;
@@ -21522,6 +21537,13 @@ var qrcode = function() {
     }
 
     function renderReveal() {
+      let scoreUnlockFrame = 0;
+      let scoreUnlockTimers = [];
+      const trackScoreTimer = (fn, ms) => {
+        const id = window.setTimeout(fn, ms);
+        scoreUnlockTimers.push(id);
+        return id;
+      };
       const questions = getSelectedQuestions();
       const alignment = calculateAlignmentSummary(questions);
       const alignmentCopy = alignmentDescriptor(alignment.overall);
@@ -21839,8 +21861,8 @@ var qrcode = function() {
       });
 
       const flipCards = [...document.querySelectorAll(".flip-card")];
-      // Re-point Back's open-card history at this board; holding the replaced cards would keep every old board alive.
-      openedCards = [...new Set(openedCards.map((old) => flipCards.find((card) => card.dataset.questionId && card.dataset.questionId === old.dataset.questionId)))].filter((card) => card && card.classList.contains("flipped"));
+      // Re-point Back's open-card history at this board; keeping IDs prevents retaining detached DOM subtrees.
+      openedCardIds = openedCardIds.filter((id) => flipCards.some((card) => card.dataset.questionId === id && card.classList.contains("flipped")));
       holoApplied = "";
       // Scores unlocked by the partner's phone, by a rating, or before a reload still get their moment.
       if (allRevealed && state.revealCelebrated !== state.selectedQuestionIds.join("|")) {
@@ -22079,6 +22101,11 @@ var qrcode = function() {
         const everyCardUp = questions.every((question) => cardSeen(question.id));
         const everything = everyCardUp && !unratedWrittenIds(questions).length;
         label.textContent = questions.every((question) => state.revealedIds.includes(question.id)) ? "Hide all" : "Reveal all";
+        const turnBanner = document.querySelector(".turn-banner");
+        if (turnBanner) {
+          const allRevealed = questions.every((question) => state.revealedIds.includes(question.id));
+          turnBanner.style.display = allRevealed ? "none" : "";
+        }
         document.getElementById("round-highlights")?.classList.toggle("locked", !everything);
         document.querySelectorAll("#round-highlights .highlight-locked small").forEach((item) => { item.textContent = everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"; });
         const count = document.getElementById("reveal-count");
@@ -22146,8 +22173,8 @@ var qrcode = function() {
           const sinceMatch = Date.now() - (audioEngine.lastMatchAt || 0);
           const sinceReveal = Date.now() - (audioEngine.lastRevealAt || 0);
           const finaleDelay = Math.max(0, 650 - sinceMatch, 300 - sinceReveal);
-          window.setTimeout(() => playSound("celebrate", { finale: true }), finaleDelay);
-          window.setTimeout(() => {
+          trackScoreTimer(() => playSound("celebrate", { finale: true }), finaleDelay);
+          trackScoreTimer(() => {
             // The call is printed now, before the scroll, but its chime waits until the finale has rung out.
             revealScoreCall(dashboard, Math.max(0, finaleDelay - 150) + 1400);
             dashboard.scrollIntoView({ block: "center", behavior: "auto" });
@@ -22176,7 +22203,7 @@ var qrcode = function() {
           // A dashboard replaced before the count-up must release its observer, or the old board is kept alive.
           if (!dashboard.isConnected) { observer?.disconnect(); return; }
           const sinceMatch = Date.now() - (audioEngine.lastMatchAt || 0);
-          if (sinceMatch < 600) { window.setTimeout(run, 650 - sinceMatch); return; }
+          if (sinceMatch < 600) { trackScoreTimer(run, 650 - sinceMatch); return; }
           started = true;
           observer?.disconnect();
           const heading = dashboard.querySelector("#alignment-title");
@@ -22187,6 +22214,7 @@ var qrcode = function() {
           playSound("countup");
           const begin = performance.now();
           const step = (now) => {
+            if (!dashboard.isConnected) return;
             const progress = Math.max(0, Math.min(1, (now - begin) / 1100));
             const eased = 1 - Math.pow(1 - progress, 3);
             rings.forEach((item) => {
@@ -22196,10 +22224,10 @@ var qrcode = function() {
               item.ring.style.setProperty("--ring-score", String(value));
               if (item.text) item.text.nodeValue = `${value}%`;
             });
-            if (progress < 1) requestAnimationFrame(step);
+            if (progress < 1) scoreUnlockFrame = requestAnimationFrame(step);
           };
-          requestAnimationFrame(step);
-          window.setTimeout(() => {
+          scoreUnlockFrame = requestAnimationFrame(step);
+          trackScoreTimer(() => {
             if (!dashboard.isConnected) return;
             const heading = dashboard.querySelector("#alignment-title");
             if (heading && document.activeElement && document.activeElement !== document.body && app.contains(document.activeElement)) {
@@ -22213,16 +22241,16 @@ var qrcode = function() {
         };
         if ("IntersectionObserver" in window) {
           observer = new IntersectionObserver((entries) => {
-            if (entries.some((entry) => entry.intersectionRatio >= 0.55)) window.setTimeout(run, 120);
+            if (entries.some((entry) => entry.intersectionRatio >= 0.55)) trackScoreTimer(run, 120);
           }, { threshold: [0.55] });
         }
         // Let a partner-triggered re-render restore its scroll position before moving the page.
-        window.setTimeout(() => {
+        trackScoreTimer(() => {
           if (!dashboard.isConnected) return;
           dashboard.scrollIntoView({ block: "center", behavior: "smooth" });
           observer?.observe(dashboard);
         }, 160);
-        window.setTimeout(run, observer ? 2200 : 700);
+        trackScoreTimer(run, observer ? 2200 : 700);
       }
 
       function applyCardState(card, shouldReveal) {
@@ -22314,8 +22342,11 @@ var qrcode = function() {
           requestAnimationFrame(() => window.setTimeout(() => feedback(true), 0));
         }
         updateRevealAllButton();
-        openedCards = openedCards.filter((other) => other !== card && other.isConnected);
-        if (card.classList.contains("flipped")) openedCards.push(card);
+        const qid = card.dataset.questionId;
+        if (qid) {
+          openedCardIds = openedCardIds.filter((id) => id !== qid);
+          if (card.classList.contains("flipped")) openedCardIds.push(qid);
+        }
         requestAnimationFrame(() => {
           sizeCard(card);
           if (!card.classList.contains("flipped")) {
@@ -22559,17 +22590,19 @@ var qrcode = function() {
               showToast("Not enough questions to start another round with these settings.");
               return;
             }
-            startGame({
-              names: state.names, questionMode, questionCount: newIds.length,
-              selectedTopics, selectedQuestionIds: newIds, playStyle: "nearby"
+            openSensitiveConsent(selectedTopics, () => {
+              startGame({
+                names: state.names, questionMode, questionCount: newIds.length,
+                selectedTopics, selectedQuestionIds: newIds, playStyle: "nearby"
+              });
+              state.activePlayer = 0;
+              state.nearbyRole = "host";
+              state.nearbyRoundId = newNearbyRoundId();
+              saveState();
+              nearbyRuntime.roundStarted = true;
+              nearbyRuntime.partnerProgress = null;
+              sendNearbyMessage(nearbyRoundInitPayload({ newRound: true }));
             });
-            state.activePlayer = 0;
-            state.nearbyRole = "host";
-            state.nearbyRoundId = newNearbyRoundId();
-            saveState();
-            nearbyRuntime.roundStarted = true;
-            nearbyRuntime.partnerProgress = null;
-            sendNearbyMessage(nearbyRoundInitPayload({ newRound: true }));
             return;
           } else {
             showToast(`Waiting for ${state.names[0] || "your partner"} to start the next round…`);
@@ -22585,7 +22618,9 @@ var qrcode = function() {
           showToast("Not enough questions to start another round with these settings.");
           return;
         }
-        startGame({ names: state.names, questionMode, questionCount, selectedTopics, selectedQuestionIds, playStyle: "pass-and-play" });
+        openSensitiveConsent(selectedTopics, () => {
+          startGame({ names: state.names, questionMode, questionCount, selectedTopics, selectedQuestionIds, playStyle: "pass-and-play" });
+        });
       });
 
       document.getElementById("start-over").addEventListener("click", async () => {
@@ -22667,6 +22702,9 @@ var qrcode = function() {
         document.removeEventListener("touchcancel", onHoloTouchEnd);
         if (holoFrame) { cancelAnimationFrame(holoFrame); holoFrame = 0; }
         if (holoTouchFrame) { cancelAnimationFrame(holoTouchFrame); holoTouchFrame = 0; }
+        if (scoreUnlockFrame) { cancelAnimationFrame(scoreUnlockFrame); scoreUnlockFrame = 0; }
+        scoreUnlockTimers.forEach((id) => clearTimeout(id));
+        scoreUnlockTimers = [];
       };
     }
 
