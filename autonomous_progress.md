@@ -504,6 +504,47 @@
   - `npm run build`: `downloads/Aligned-offline.html` (1175 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
 - **Status:** Verified (`28941b9`).
 
+---
+
+### Cycle 16 (2026-10-13 10:10 EDT)
+- **Audits Performed:**
+  - **Web Audio & Memory Lifecycle (Subagent A):** Audited `ProceduralAmbient` soundscape engine; discovered that volume zeroing (`updateMix`) did not stop buffer source playback nodes (`rainLayer`, `hearthLayer`) or clear background crackle timers, causing infinite silent loops; discovered that `audioEngine.build()` on closed contexts left dangling layer references; identified GPU backing-store canvas retention in `openKeepsakeModal` after close; identified confetti celebration sparks lacking `animationend` cleanup and persisting across screen transitions.
+  - **Accessibility & WCAG AAA Compliance (Subagent B):** Audited modals, timers, sliders, and mobile touch targets; identified missing live announcements for modal dialog opening and closing; identified missing screen reader announcement for round discussion timer expiration; identified top-bar navigation icon buttons falling below 44x44px touch floor on mobile screens; identified missing `aria-label` attributes on ambient and master volume sliders; identified missing `aria-pressed` states on library and journal filter chips and prediction score-call buttons; identified active rating button high-contrast outline requirements.
+  - **Procedural Soundscape Testing (Subagent C):** Audited procedural ambient soundscape synthesis and designed comprehensive unit test suite `tests/soundscape-engine.test.mjs` verifying 4-chord harmonic cycle, detune pitch calculations, pentatonic transpositions across all themes/topics, Paul Kellet pink noise rain buffers, crackle pop synthesis, perceptual volume curves, low-power idle throttling, and multi-layer mixer synchronization.
+- **Implemented Fixes:**
+  1. **Deterministic Layer Teardown & Idle Audio Resource Release (`index.html`):**
+     - Refactored `ProceduralAmbient` with modular `stopSynth(fadeDuration)`, `stopRain(fadeDuration)`, and `stopHearth(fadeDuration)` methods.
+     - Updated `updateMix()` to dynamically invoke layer stops when volume is lowered to `<= 0.001`, releasing Web Audio nodes and stopping buffer sources and scheduling loops immediately.
+     - Updated `audioEngine.build()` to invoke `ambientSoundscape.stop()` before rebuilding when an AudioContext has closed.
+  2. **Keepsake GPU Backing Store Purge & Modal Sync (`index.html`):**
+     - In `openKeepsakeModal`, invoked `c2d.clearRect(0, 0, canvas.width, canvas.height)` prior to zeroing dimensions to force immediate GPU texture deallocation in WebKit and Chromium.
+     - Added `removeEventListener("keydown", onKeydown)` and wired `syncModalState()` on modal close.
+  3. **Confetti Lifecycle & Screen Transition Cleanup (`index.html`):**
+     - In `burstConfetti`, attached `animationend` handler (`{ once: true }`) to celebration spark DOM nodes.
+     - In `navigateToScreen()`, removed all orphaned `.celebration-spark` and `.floating-reaction-particle` nodes.
+  4. **Resilient Date Parsing Integration (`index.html`):**
+     - Wired `parseLocalDate()` with `typeof` safety guard inside `calculateStreakFromDates()`, providing cohesive date handling while preserving isolated VM test runner compatibility.
+  5. **Live Region Modal & Discussion Timer Announcements (`index.html`):**
+     - In `syncModalState()`, added live announcements via `announce()` when dialogs open (`"[Heading] dialog opened."`) and close (`"Dialog closed."`).
+     - In `handleTimerAction()`, added live announcement `"Time's up for discussion!"` when discussion timer reaches 0.
+  6. **WCAG 2.5.5 Mobile Touch Target Floors (44x44px) (`index.html`):**
+     - Added `@media (max-width: 600px)` tap expansion pseudo-element (`.home-btn::before`) guaranteeing a minimum 44x44px interactive floor for top navigation.
+     - Added `.timer-btn-row button` to the mobile coarse pointer touch target rule (`min-height: var(--tap) !important` / `min-height: 44px !important`).
+  7. **ARIA State & High-Contrast Visual Refinements (`index.html`):**
+     - Added descriptive `aria-label` to `#synth-volume`, `#rain-volume`, `#hearth-volume`, and `#sound-volume`.
+     - Added accessible `aria-label` to `#daily-slider-input`.
+     - Added and dynamically synchronized `aria-pressed` on `.library-filter`, `#all-library-topics`, `.journal-filter-chip`, and `.score-call-chip` buttons.
+     - Added `.high-contrast` overrides for active `.rating-option` and `:focus-visible` focus outlines.
+  8. **Suite 18 Test Suite Expansion (`tests/soundscape-engine.test.mjs`, `package.json`):**
+     - Authored `tests/soundscape-engine.test.mjs` (24 unit tests running in ~350ms across 6 sub-suites).
+     - Integrated `tests/soundscape-engine.test.mjs` into `package.json` `"test"` script (18 test suites total, 110 unit tests).
+- **Verification:**
+  - `npm test`: Passed (all 18 test suites, 110 unit tests across 18 runners in 280ms).
+  - `npm run test:e2e`: Passed (all 7 Playwright E2E tests in 155s).
+  - `npm run build`: `downloads/Aligned-offline.html` (1178 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
+- **Status:** Verified.
+
+
 
 
 

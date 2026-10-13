@@ -8146,6 +8146,24 @@ var qrcode = function() {
     [data-theme="pastel"].high-contrast .radar-polygon { stroke: #15803d !important; stroke-width: 3.5; fill: rgba(21, 128, 61, 0.3) !important; }
     .high-contrast .heat-gradient { border: 1.5px solid #ffffff !important; }
     [data-theme="pastel"].high-contrast .heat-gradient { border: 1.5px solid #000000 !important; }
+    .high-contrast .rating-option.active {
+      border: 2px solid #ffffff !important;
+      outline: 2px solid #ffffff !important;
+      outline-offset: 2px;
+    }
+    [data-theme="pastel"].high-contrast .rating-option.active {
+      border: 2px solid #000000 !important;
+      outline: 2px solid #000000 !important;
+      outline-offset: 2px;
+    }
+    .high-contrast :focus-visible {
+      outline: 3px solid #ffffff !important;
+      outline-offset: 3px !important;
+    }
+    [data-theme="pastel"].high-contrast :focus-visible {
+      outline: 3px solid #000000 !important;
+      outline-offset: 3px !important;
+    }
 
     .reduced-motion *,
     .reduced-motion *::before,
@@ -10480,7 +10498,7 @@ var qrcode = function() {
       .follow-through-button, .rating-option, .text-btn, .secondary-btn, .primary-btn, .next-card-button,
       .custom-input, .text-input, input[type="text"], .data-tool, .reveal-all-btn, .setting-row,
       .library-filter, .question-library-action, .quick-guess-option, .text-size-option, .count-option, .mode-option, .topic-option,
-      .intensity-option, .play-style-card, .vibe-tile, .card-close-button, .saved-pack-chip, [data-delete-pack] { min-height: var(--tap) !important; }
+      .intensity-option, .play-style-card, .vibe-tile, .card-close-button, .saved-pack-chip, [data-delete-pack], .timer-btn-row button { min-height: var(--tap) !important; }
       .favorite-button { flex: 0 0 var(--tap) !important; min-width: var(--tap) !important; min-height: var(--tap) !important; }
       .mini-action { padding-inline: 12px !important; }
       details > summary { display: flex; align-items: center; min-height: var(--tap); }
@@ -10513,6 +10531,19 @@ var qrcode = function() {
 
     @media (max-width: 600px) {
       .topbar { top: 0 !important; border-top-left-radius: 0 !important; border-top-right-radius: 0 !important; }
+      .home-btn { position: relative; }
+      .home-btn::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        min-width: 44px;
+        min-height: 44px;
+        width: 100%;
+        height: 100%;
+      }
+      .timer-btn-row button { min-height: 44px !important; }
       .screen.question-screen { margin-top: 0; }
       .setup-start-actions { background: rgba(15, 23, 42, 0.97) !important; background: color-mix(in srgb, var(--card) 97%, transparent) !important; }
       [data-theme="pastel"] .setup-start-actions { background: rgba(255, 248, 246, 0.97) !important; }
@@ -14307,12 +14338,17 @@ var qrcode = function() {
       });
       if (top) {
         armBackGuard();
+        if (!modalWasOpen) {
+          const heading = top.querySelector("h2, h3, [role='heading']")?.textContent?.trim();
+          if (typeof announce === "function") announce(heading ? `${heading} dialog opened.` : "Dialog opened.");
+        }
         if (!top.contains(document.activeElement)) {
           (top.querySelector("[data-modal-cancel], .primary-btn, button") || top.querySelector("[tabindex]"))?.focus({ preventScroll: true });
         }
         modalWasOpen = true;
       }
       if (!top && modalWasOpen) {
+        if (typeof announce === "function") announce("Dialog closed.");
         const target = modalReturnFocus;
         const key = modalReturnKey;
         modalReturnFocus = null;
@@ -14527,7 +14563,7 @@ var qrcode = function() {
         if (this.ctx && this.ctx.state === "closed") {
           this.ctx = null;
           if (ambientSoundscape) {
-            ambientSoundscape.generation = null;
+            try { ambientSoundscape.stop(); } catch {}
             if (state.ambientMusicEnabled && !document.hidden) window.setTimeout(() => { try { ambientSoundscape.start(); } catch {} }, 0);
           }
         }
@@ -14800,6 +14836,50 @@ var qrcode = function() {
         schedule();
       }
 
+      stopSynth(fadeDuration = 1) {
+        if (!this.synthLayer) return;
+        const s = this.synthLayer;
+        this.synthLayer = null;
+        window.clearTimeout(s.timer);
+        const ctx = audioEngine.ctx;
+        const now = ctx ? ctx.currentTime : 0;
+        try {
+          s.out.gain.cancelScheduledValues(now);
+          s.out.gain.setValueAtTime(s.out.gain.value, now);
+          s.out.gain.linearRampToValueAtTime(0.0001, now + fadeDuration);
+          setTimeout(() => { try { s.lfo.stop(); [s.lfo, s.lfoDepth, s.filter, s.out].forEach((n) => n?.disconnect()); } catch {} }, (fadeDuration * 1000) + 50);
+        } catch {}
+      }
+
+      stopRain(fadeDuration = 1) {
+        if (!this.rainLayer) return;
+        const r = this.rainLayer;
+        this.rainLayer = null;
+        const ctx = audioEngine.ctx;
+        const now = ctx ? ctx.currentTime : 0;
+        try {
+          r.out.gain.cancelScheduledValues(now);
+          r.out.gain.setValueAtTime(r.out.gain.value, now);
+          r.out.gain.linearRampToValueAtTime(0.0001, now + fadeDuration);
+          setTimeout(() => { try { r.source.stop(); r.source.disconnect(); r.filter?.disconnect(); r.out.disconnect(); } catch {} }, (fadeDuration * 1000) + 50);
+        } catch {}
+      }
+
+      stopHearth(fadeDuration = 1) {
+        if (!this.hearthLayer) return;
+        const h = this.hearthLayer;
+        this.hearthLayer = null;
+        window.clearTimeout(h.timer);
+        const ctx = audioEngine.ctx;
+        const now = ctx ? ctx.currentTime : 0;
+        try {
+          h.out.gain.cancelScheduledValues(now);
+          h.out.gain.setValueAtTime(h.out.gain.value, now);
+          h.out.gain.linearRampToValueAtTime(0.0001, now + fadeDuration);
+          setTimeout(() => { try { h.source.stop(); h.source.disconnect(); h.filter?.disconnect(); h.out.disconnect(); } catch {} }, (fadeDuration * 1000) + 50);
+        } catch {}
+      }
+
       updateMix(mix) {
         if (mix && typeof mix === "object") {
           state.ambientMix = { ...state.ambientMix, ...mix };
@@ -14809,19 +14889,25 @@ var qrcode = function() {
         const now = ctx.currentTime;
         const m = state.ambientMix || { synth: 0.8, rain: 0, hearth: 0 };
         if (m.synth > 0 && !this.synthLayer) this.startSynth(ctx);
-        else if (this.synthLayer?.out) {
+        else if (m.synth <= 0.001 && this.synthLayer) {
+          this.stopSynth(0.3);
+        } else if (this.synthLayer?.out) {
           this.synthLayer.out.gain.cancelScheduledValues(now);
           this.synthLayer.out.gain.setValueAtTime(this.synthLayer.out.gain.value, now);
           this.synthLayer.out.gain.linearRampToValueAtTime(Math.max(0.0001, m.synth), now + 0.3);
         }
         if (m.rain > 0 && !this.rainLayer) this.startRain(ctx);
-        else if (this.rainLayer?.out) {
+        else if (m.rain <= 0.001 && this.rainLayer) {
+          this.stopRain(0.3);
+        } else if (this.rainLayer?.out) {
           this.rainLayer.out.gain.cancelScheduledValues(now);
           this.rainLayer.out.gain.setValueAtTime(this.rainLayer.out.gain.value, now);
           this.rainLayer.out.gain.linearRampToValueAtTime(Math.max(0.0001, m.rain * 0.7), now + 0.3);
         }
         if (m.hearth > 0 && !this.hearthLayer) this.startHearth(ctx);
-        else if (this.hearthLayer?.out) {
+        else if (m.hearth <= 0.001 && this.hearthLayer) {
+          this.stopHearth(0.3);
+        } else if (this.hearthLayer?.out) {
           this.hearthLayer.out.gain.cancelScheduledValues(now);
           this.hearthLayer.out.gain.setValueAtTime(this.hearthLayer.out.gain.value, now);
           this.hearthLayer.out.gain.linearRampToValueAtTime(Math.max(0.0001, m.hearth * 0.65), now + 0.3);
@@ -14957,40 +15043,9 @@ var qrcode = function() {
       stop() {
         if (!this.generation) return;
         this.generation = null;
-        const ctx = audioEngine.ctx;
-        const now = ctx ? ctx.currentTime : 0;
-        if (this.synthLayer) {
-          const s = this.synthLayer;
-          this.synthLayer = null;
-          window.clearTimeout(s.timer);
-          try {
-            s.out.gain.cancelScheduledValues(now);
-            s.out.gain.setValueAtTime(s.out.gain.value, now);
-            s.out.gain.linearRampToValueAtTime(0.0001, now + 1);
-            setTimeout(() => { try { s.lfo.stop(); [s.lfo, s.lfoDepth, s.filter, s.out].forEach((n) => n?.disconnect()); } catch {} }, 1050);
-          } catch {}
-        }
-        if (this.rainLayer) {
-          const r = this.rainLayer;
-          this.rainLayer = null;
-          try {
-            r.out.gain.cancelScheduledValues(now);
-            r.out.gain.setValueAtTime(r.out.gain.value, now);
-            r.out.gain.linearRampToValueAtTime(0.0001, now + 1);
-            setTimeout(() => { try { r.source.stop(); r.source.disconnect(); r.filter?.disconnect(); r.out.disconnect(); } catch {} }, 1050);
-          } catch {}
-        }
-        if (this.hearthLayer) {
-          const h = this.hearthLayer;
-          this.hearthLayer = null;
-          window.clearTimeout(h.timer);
-          try {
-            h.out.gain.cancelScheduledValues(now);
-            h.out.gain.setValueAtTime(h.out.gain.value, now);
-            h.out.gain.linearRampToValueAtTime(0.0001, now + 1);
-            setTimeout(() => { try { h.source.stop(); h.source.disconnect(); h.filter?.disconnect(); h.out.disconnect(); } catch {} }, 1050);
-          } catch {}
-        }
+        this.stopSynth(1);
+        this.stopRain(1);
+        this.stopHearth(1);
         armIdleSuspend();
       }
 
@@ -15793,6 +15848,7 @@ var qrcode = function() {
 
     function navigateToScreen(screen) {
       if (typeof stopVoiceRecording === "function") stopVoiceRecording({ cancel: true });
+      document.querySelectorAll(".celebration-spark, .floating-reaction-particle").forEach((s) => s.remove());
       if (state.screen === "nearby") {
         // Nothing is in progress on the pairing screen; leaving it closes the room so a late scan can't hang.
         closeNearbyConnection({ notifyPartner: true });
@@ -16121,6 +16177,7 @@ var qrcode = function() {
         spark.style.animationDelay = `${randomIndex(70)}ms`;
         if (index % 3 === 0) spark.style.borderRadius = "50%";
         document.body.appendChild(spark);
+        spark.addEventListener("animationend", () => spark.remove(), { once: true });
         window.setTimeout(() => spark.remove(), 1200);
       }
     }
@@ -17402,8 +17459,8 @@ var qrcode = function() {
                 ["never", "Never ask"],
                 ["valuable", "Valuable"],
                 ["uncomfortable", "Uncomfortable"]
-              ].map(([value, label]) => `<button class="library-filter ${libraryView.filter === value ? "active" : ""}" type="button" data-library-filter="${value}">${label}</button>`).join("")}
-              <button class="library-filter ${libraryView.topic === "all" ? "active" : ""}" id="all-library-topics" type="button">All packs</button>
+              ].map(([value, label]) => `<button class="library-filter ${libraryView.filter === value ? "active" : ""}" type="button" data-library-filter="${value}" aria-pressed="${libraryView.filter === value}">${label}</button>`).join("")}
+              <button class="library-filter ${libraryView.topic === "all" ? "active" : ""}" id="all-library-topics" type="button" aria-pressed="${libraryView.topic === "all"}">All packs</button>
             </div>
           </div>
           <div class="question-library-list" id="question-library-list" aria-live="polite"></div>
@@ -17647,7 +17704,11 @@ var qrcode = function() {
         button.addEventListener("click", () => {
           libraryView.filter = button.dataset.libraryFilter;
           libraryView.limit = 40;
-          document.querySelectorAll("[data-library-filter]").forEach((item) => item.classList.toggle("active", item === button));
+          document.querySelectorAll("[data-library-filter]").forEach((item) => {
+            const isActive = item === button;
+            item.classList.toggle("active", isActive);
+            item.setAttribute("aria-pressed", String(isActive));
+          });
           playSound("tap");
           renderQuestionList();
         });
@@ -17658,6 +17719,7 @@ var qrcode = function() {
         libraryView.limit = 40;
         document.querySelectorAll("[data-library-topic]").forEach((card) => card.classList.remove("active"));
         event.currentTarget.classList.add("active");
+        event.currentTarget.setAttribute("aria-pressed", "true");
         playSound("tap");
         renderQuestionList();
       });
@@ -17667,7 +17729,9 @@ var qrcode = function() {
           libraryView.topic = card.dataset.libraryTopic;
           libraryView.limit = 40;
           document.querySelectorAll("[data-library-topic]").forEach((item) => item.classList.toggle("active", item === card));
-          document.getElementById("all-library-topics").classList.remove("active");
+          const allTopicsBtn = document.getElementById("all-library-topics");
+          allTopicsBtn?.classList.remove("active");
+          allTopicsBtn?.setAttribute("aria-pressed", "false");
           playSound("tap");
           renderQuestionList();
         });
@@ -18109,10 +18173,10 @@ var qrcode = function() {
               <input type="search" class="journal-search" id="journal-search-input" placeholder="Search prompts, notes, and topics…" aria-label="Search saved rounds" aria-describedby="journal-search-status">
               <div id="journal-search-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
               <div class="journal-filters" role="group" aria-label="Journal filters">
-                <button type="button" class="journal-filter-chip active" data-journal-filter="all">All rounds</button>
-                <button type="button" class="journal-filter-chip" data-journal-filter="high">90%+ Aligned</button>
-                <button type="button" class="journal-filter-chip" data-journal-filter="gaps">Deep talks (&lt;70%)</button>
-                <button type="button" class="journal-filter-chip" data-journal-filter="notes">With notes</button>
+                <button type="button" class="journal-filter-chip active" data-journal-filter="all" aria-pressed="true">All rounds</button>
+                <button type="button" class="journal-filter-chip" data-journal-filter="high" aria-pressed="false">90%+ Aligned</button>
+                <button type="button" class="journal-filter-chip" data-journal-filter="gaps" aria-pressed="false">Deep talks (&lt;70%)</button>
+                <button type="button" class="journal-filter-chip" data-journal-filter="notes" aria-pressed="false">With notes</button>
               </div>
             </div>
             <div class="round-history-list" id="round-history-container">
@@ -18218,8 +18282,12 @@ var qrcode = function() {
       };
       searchInput?.addEventListener("input", applyJournalFilter);
       filterChips.forEach((chip) => chip.addEventListener("click", () => {
-        filterChips.forEach((c) => c.classList.remove("active"));
+        filterChips.forEach((c) => {
+          c.classList.remove("active");
+          c.setAttribute("aria-pressed", "false");
+        });
         chip.classList.add("active");
+        chip.setAttribute("aria-pressed", "true");
         applyJournalFilter();
       }));
 
@@ -18339,17 +18407,17 @@ var qrcode = function() {
               <div class="setting-row"><label for="soundscape-mode">Ambient soundscape</label><select class="custom-select" id="soundscape-mode"><option value="synth" ${state.ambientSoundscape === "synth" ? "selected" : ""}>Harmonic Synth Chords</option><option value="rain" ${state.ambientSoundscape === "rain" ? "selected" : ""}>Gentle Rain Shower</option><option value="hearth" ${state.ambientSoundscape === "hearth" ? "selected" : ""}>Warm Crackling Hearth</option></select></div>
               <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:6px">
                 <div style="display:flex;justify-content:space-between;font-size:0.8rem"><span>Synth chords</span><span id="synth-vol-val">${Math.round((state.ambientMix?.synth ?? 0.8) * 100)}%</span></div>
-                <input id="synth-volume" class="range-input volume-input" type="range" min="0" max="1" step="0.05" value="${state.ambientMix?.synth ?? 0.8}" style="--range-progress:${Math.round((state.ambientMix?.synth ?? 0.8) * 100)}%">
+                <input id="synth-volume" aria-label="Synth chords volume" class="range-input volume-input" type="range" min="0" max="1" step="0.05" value="${state.ambientMix?.synth ?? 0.8}" style="--range-progress:${Math.round((state.ambientMix?.synth ?? 0.8) * 100)}%">
               </div>
               <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:6px">
                 <div style="display:flex;justify-content:space-between;font-size:0.8rem"><span>Gentle rain</span><span id="rain-vol-val">${Math.round((state.ambientMix?.rain ?? 0) * 100)}%</span></div>
-                <input id="rain-volume" class="range-input volume-input" type="range" min="0" max="1" step="0.05" value="${state.ambientMix?.rain ?? 0}" style="--range-progress:${Math.round((state.ambientMix?.rain ?? 0) * 100)}%">
+                <input id="rain-volume" aria-label="Gentle rain volume" class="range-input volume-input" type="range" min="0" max="1" step="0.05" value="${state.ambientMix?.rain ?? 0}" style="--range-progress:${Math.round((state.ambientMix?.rain ?? 0) * 100)}%">
               </div>
               <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:6px">
                 <div style="display:flex;justify-content:space-between;font-size:0.8rem"><span>Crackling hearth</span><span id="hearth-vol-val">${Math.round((state.ambientMix?.hearth ?? 0) * 100)}%</span></div>
-                <input id="hearth-volume" class="range-input volume-input" type="range" min="0" max="1" step="0.05" value="${state.ambientMix?.hearth ?? 0}" style="--range-progress:${Math.round((state.ambientMix?.hearth ?? 0) * 100)}%">
+                <input id="hearth-volume" aria-label="Crackling hearth volume" class="range-input volume-input" type="range" min="0" max="1" step="0.05" value="${state.ambientMix?.hearth ?? 0}" style="--range-progress:${Math.round((state.ambientMix?.hearth ?? 0) * 100)}%">
               </div>
-              <div class="setting-row"><label for="sound-volume">Volume</label><input id="sound-volume" class="range-input volume-input" type="range" min="0" max="1" step="0.05" value="${state.soundVolume}" style="--range-progress: ${Math.round(state.soundVolume * 100)}%"></div>
+              <div class="setting-row"><label for="sound-volume">Volume</label><input id="sound-volume" aria-label="Master volume" class="range-input volume-input" type="range" min="0" max="1" step="0.05" value="${state.soundVolume}" style="--range-progress: ${Math.round(state.soundVolume * 100)}%"></div>
               <label class="setting-row" for="settings-haptics" ${typeof navigator.vibrate === "function" ? "" : "hidden"}><span>Vibration (on phones)</span><input id="settings-haptics" type="checkbox" role="switch" ${state.hapticsEnabled ? "checked" : ""}></label>
               <button class="secondary-btn" id="test-sound" type="button" style="margin-top:12px">Test the sound</button>
             </article>
@@ -18621,8 +18689,9 @@ var qrcode = function() {
       if (!Array.isArray(completedDates) || !completedDates.length) return 0;
       const dateSet = new Set(completedDates);
       let streak = 0;
-      const parts = typeof referenceDate === "string" ? referenceDate.split("-").map(Number) : [];
-      const curr = parts.length === 3 && !parts.some(isNaN) ? new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0) : new Date(referenceDate);
+      const parsed = typeof parseLocalDate === "function" ? parseLocalDate(referenceDate) : null;
+      const parts = !parsed && typeof referenceDate === "string" ? referenceDate.split("-").map(Number) : [];
+      const curr = parsed || (parts.length === 3 && !parts.some(isNaN) ? new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0) : new Date(referenceDate));
       if (!dateSet.has(localDateStamp(curr))) {
         curr.setDate(curr.getDate() - 1);
         if (!dateSet.has(localDateStamp(curr))) return 0;
@@ -18684,7 +18753,7 @@ var qrcode = function() {
                   <span id="daily-slider-val">5</span>
                   <span>${escapeHTML(q.labels?.[1] || "High")}</span>
                 </div>
-                <input type="range" min="1" max="10" step="1" value="5" id="daily-slider-input" class="range-input" style="--range-progress:50%">
+                <input type="range" min="1" max="10" step="1" value="5" id="daily-slider-input" aria-label="${escapeHTML(q.prompt || "Daily ritual rating")}" class="range-input" style="--range-progress:50%">
               ` : `
                 <textarea id="daily-text-input" class="name-input" rows="3" placeholder="Your quick thoughts…" style="width:100%"></textarea>
               `}
@@ -20449,7 +20518,7 @@ var qrcode = function() {
       const calls = roundScoreCalls();
       const rows = players.map((player) => {
         const name = state.names[player] || `Player ${player + 1}`;
-        const chips = SCORE_CALLS.map(([value, label, long]) => `<button class="library-filter score-call-chip${calls[player] === value ? " active" : ""}" type="button" data-score-call="${value}" data-score-player="${player}" aria-label="${escapeHTML(label)}: ${long}">${escapeHTML(label)}</button>`).join("");
+        const chips = SCORE_CALLS.map(([value, label, long]) => `<button class="library-filter score-call-chip${calls[player] === value ? " active" : ""}" type="button" data-score-call="${value}" data-score-player="${player}" aria-pressed="${calls[player] === value}" aria-label="${escapeHTML(label)}: ${long}">${escapeHTML(label)}</button>`).join("");
         return `<div class="score-call" role="group" aria-label="${escapeHTML(name)}’s call"><span class="reveal-buddy ${player ? "two" : "one"}" aria-hidden="true">${escapeHTML(initials(name))}</span>${chips}</div>`;
       }).join("");
       return `<div class="score-call-panel"><p class="score-call-title"><span aria-hidden="true">🎯</span> ${escapeHTML(title)}</p>${rows}<small>Optional · just for fun · revealed when your scores count up</small></div>`;
@@ -20465,7 +20534,11 @@ var qrcode = function() {
         calls[player] = calls[player] === value ? null : value;
         state.scoreCall = { key: state.selectedQuestionIds.join("|"), calls };
         saveState();
-        app.querySelectorAll(`[data-score-player="${player}"]`).forEach((chip) => chip.classList.toggle("active", Number(chip.dataset.scoreCall) === calls[player]));
+        app.querySelectorAll(`[data-score-player="${player}"]`).forEach((chip) => {
+          const active = Number(chip.dataset.scoreCall) === calls[player];
+          chip.classList.toggle("active", active);
+          chip.setAttribute("aria-pressed", String(active));
+        });
         // The tap climbs the scale with the bracket, so a high call sounds hopeful.
         playSound("tap", { value: 2 + 2 * index });
       }));
@@ -20559,6 +20632,7 @@ var qrcode = function() {
               timer.interval = null;
               playSound("chime");
               pulseHaptic("celebrate");
+              if (typeof announce === "function") announce("Time's up for discussion!");
               updateUI();
             }
           }
@@ -20743,11 +20817,16 @@ var qrcode = function() {
 
       const close = () => {
         if (canvas) {
+          try {
+            const c2d = canvas.getContext?.("2d");
+            c2d?.clearRect?.(0, 0, canvas.width, canvas.height);
+          } catch {}
           canvas.width = 0;
           canvas.height = 0;
         }
-        overlay.remove();
         document.removeEventListener("keydown", onKeydown);
+        overlay.remove();
+        if (typeof syncModalState === "function") syncModalState();
       };
       const onKeydown = (e) => { if (e.key === "Escape") close(); };
       document.addEventListener("keydown", onKeydown);
