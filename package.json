@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node scripts/serve.mjs",
     "test": "node tests/production-check.mjs && node tests/signaling-check.mjs",
+    "test:e2e": "node --test tests/round-lifecycle.test.mjs",
     "deploy:signal": "wrangler deploy --config worker/wrangler.jsonc",
     "build:offline": "node scripts/build-offline.mjs",
     "build:android": "node scripts/build-android.mjs",

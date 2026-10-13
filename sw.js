@@ -42,26 +42,52 @@ self.addEventListener("fetch", (event) => {
   const fromCache = async () => {
     const cached = await caches.match(request, { ignoreSearch: request.mode === "navigate" });
     if (cached) return cached;
-    if (request.mode === "navigate") return caches.match("./");
+    if (request.mode === "navigate") {
+      return (await caches.match("./", { ignoreSearch: true })) || (await caches.match("index.html", { ignoreSearch: true }));
+    }
     return undefined;
   };
   if (request.mode !== "navigate") {
     event.respondWith(network.catch(async () => (await fromCache()) || Response.error()));
     return;
   }
-  // Network-first, but a slow connection never leaves the installed app on a blank screen.
+  // Network-first with fast cache fallback, guarded against long network drops
   event.respondWith(new Promise((resolve) => {
     let settled = false;
-    const finish = (response) => { if (!settled && response) { settled = true; resolve(response); } };
-    const timer = setTimeout(async () => finish(await fromCache()), NAVIGATION_TIMEOUT_MS);
-    // An HTTP error (Pages outage, 404) falls back to the installed copy; manual-mode redirects pass through.
+    const finish = (response) => {
+      if (!settled && response) {
+        settled = true;
+        clearTimeout(quickTimer);
+        clearTimeout(hardDeadlineTimer);
+        resolve(response);
+      }
+    };
+
+    const offlineFallback = () => new Response(
+      `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Aligned — Offline</title><style>body{background:#0c0f17;color:#f8fafc;font-family:system-ui,-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;height:100dvh;margin:0;padding:24px;box-sizing:border-box;text-align:center}h1{font-size:1.4rem;margin:0 0 10px;color:#fb7185}p{color:#94a3b8;font-size:0.95rem;margin:0 0 20px;line-height:1.5}button{background:#fb7185;color:#fff;border:0;padding:12px 24px;border-radius:12px;font-size:0.95rem;font-weight:600;cursor:pointer}</style></head><body><div><h1>Waiting for connection</h1><p>Aligned couldn’t be loaded because you’re offline and no saved copy is available yet.</p><button onclick="location.reload()">Retry Connection</button></div></body></html>`,
+      { status: 503, headers: { "content-type": "text/html; charset=utf-8" } }
+    );
+
+    // If a cached copy exists, serve it after NAVIGATION_TIMEOUT_MS (3s) to beat slow networks
+    const quickTimer = setTimeout(async () => {
+      const cached = await fromCache();
+      if (cached) finish(cached);
+    }, NAVIGATION_TIMEOUT_MS);
+
+    // Hard ceiling (8s): if network hangs and no cache exists, prevent 60-120s blank screen
+    const hardDeadlineTimer = setTimeout(async () => {
+      const cached = await fromCache();
+      finish(cached || offlineFallback());
+    }, 8000);
+
     network.then(async (response) => {
-      clearTimeout(timer);
-      // A failing cache read must not swallow the response: the timer is already cleared, so nothing else would settle it.
+      clearTimeout(quickTimer);
+      clearTimeout(hardDeadlineTimer);
       finish(response.ok || response.type === "opaqueredirect" ? response : ((await fromCache().catch(() => undefined)) || response));
     }).catch(async () => {
-      clearTimeout(timer);
-      finish((await fromCache()) || Response.error());
+      clearTimeout(quickTimer);
+      clearTimeout(hardDeadlineTimer);
+      finish((await fromCache()) || offlineFallback());
     });
   }));
 });

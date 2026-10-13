@@ -73,4 +73,104 @@ assert.equal(validJoin.status, 200, "The QR join token must open its room");
 const joinPayload = await validJoin.json();
 assert.equal(joinPayload.roomId, room.roomId, "Join response must target the created room");
 
-console.log("Signaling checks passed: origin protection, expiring rooms, strong tokens, and one-scan join validation verified.");
+// --- PairingRoom Durable Object Security & Anti-Hijack Suite ---
+const { PairingRoom } = await import("../worker/src/index.js");
+
+const OriginalResponse = globalThis.Response;
+class WorkerResponse extends OriginalResponse {
+  constructor(body, init) {
+    if (init && init.status === 101) {
+      super(null, { ...init, status: 200 });
+      Object.defineProperty(this, "status", { value: 101 });
+      this.webSocket = init.webSocket;
+      return;
+    }
+    super(body, init);
+  }
+}
+globalThis.Response = WorkerResponse;
+
+class MockWebSocket {
+  constructor() {
+    this.attachment = null;
+    this.sent = [];
+    this.closed = null;
+  }
+  serializeAttachment(att) { this.attachment = att; }
+  deserializeAttachment() { return this.attachment; }
+  send(data) { this.sent.push(data); }
+  close(code, reason) { this.closed = { code, reason }; }
+}
+
+globalThis.WebSocketPair = function() {
+  return [new MockWebSocket(), new MockWebSocket()];
+};
+
+class MockStorage {
+  constructor() { this.data = new Map(); this.alarmAt = null; }
+  async get(k) { return this.data.get(k) ?? null; }
+  async put(k, v) { this.data.set(k, v); }
+  async deleteAll() { this.data.clear(); }
+  async setAlarm(time) { this.alarmAt = time; }
+}
+
+// 1. Signal Payload Size Limit (MAX_SIGNAL_BYTES = 96 KB)
+{
+  const storage = new MockStorage();
+  const sockets = [];
+  const ctx = { storage, getWebSockets: () => sockets, acceptWebSocket: (ws) => sockets.push(ws) };
+  const room = new PairingRoom(ctx);
+  await storage.put("configuration", { hostToken: "host-token-12345", joinToken: "join-token-12345", expiresAt: Date.now() + 60000 });
+
+  const hostSocket = new MockWebSocket();
+  hostSocket.serializeAttachment({ role: "host" });
+  sockets.push(hostSocket);
+
+  const oversized = JSON.stringify({ type: "offer", sdp: "a".repeat(98 * 1024) });
+  await room.webSocketMessage(hostSocket, oversized);
+  assert.equal(hostSocket.closed?.code, 1009, "Oversized signal (>96KB) must close socket with code 1009");
+  assert.equal(hostSocket.closed?.reason, "Signal too large");
+}
+
+// 2. Anti-Hijack Device Locking (Prevent Rogue Third-Device Link Usurping)
+{
+  const storage = new MockStorage();
+  const sockets = [];
+  const ctx = { storage, getWebSockets: () => sockets, acceptWebSocket: (ws) => sockets.push(ws) };
+  const room = new PairingRoom(ctx);
+  const expiresAt = Date.now() + 60000;
+  const tokens = {
+    hostToken: "h-tok-1234567890123456789012345678901234567890",
+    joinToken: "j-tok-1234567890123456789012345678901234567890"
+  };
+  await storage.put("configuration", { ...tokens, expiresAt });
+
+  // 1. Initial joiner connects with device A
+  const req1 = new Request(`https://signal.example/api/rooms/test-room-1/socket?role=join&token=${tokens.joinToken}&device=device-phone-A`, {
+    headers: { upgrade: "websocket" }
+  });
+  const res1 = await room.fetch(req1);
+  assert.equal(res1.status, 101, "First join connection must succeed with status 101");
+  const storedConfig = await storage.get("configuration");
+  assert.equal(storedConfig.joinDevice, "device-phone-A", "Configuration must lock to device-phone-A");
+
+  // 2. Legitimate reconnect from same device A
+  const req2 = new Request(`https://signal.example/api/rooms/test-room-1/socket?role=join&token=${tokens.joinToken}&device=device-phone-A`, {
+    headers: { upgrade: "websocket" }
+  });
+  const res2 = await room.fetch(req2);
+  assert.equal(res2.status, 101, "Reconnect from device-phone-A must succeed");
+  assert.equal(sockets[0].closed?.code, 4001, "Prior socket must be replaced with code 4001");
+
+  // 3. Rogue third phone connects with device B using the same join link
+  const req3 = new Request(`https://signal.example/api/rooms/test-room-1/socket?role=join&token=${tokens.joinToken}&device=device-intruder-B`, {
+    headers: { upgrade: "websocket" }
+  });
+  const res3 = await room.fetch(req3);
+  assert.equal(res3.status, 101, "Upgrade initiated for rejection closure");
+  const intruderSocket = sockets[sockets.length - 1];
+  assert.equal(intruderSocket.closed?.code, 4009, "Rogue device must be rejected with close code 4009");
+  assert.equal(intruderSocket.closed?.reason, "This link is already in use");
+}
+
+console.log("Signaling checks passed: origin protection, expiring rooms, strong tokens, device-locking anti-hijack, and 96KB payload caps verified.");

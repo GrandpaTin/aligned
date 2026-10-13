@@ -12,7 +12,8 @@
 | Cycle | Timestamp (EDT) | Target Focus | Status | Commit / Notes |
 |:---:|:---:|:---|:---:|:---|
 | **Init** | 2026-10-13 00:07 | v1.6.0 Feature Complete & Verified | Verified | `4e1bb25` Floating reactions, nudges, soundscape mixer, daily ritual, radar compass, journal search, storybook, couple lore pack |
-| **1** | 2026-10-13 00:23 | Subagent Tri-Audit Improvements (Card DOM nesting, Debounced saves, Timer cleanup, Ritual streak fix, Modal a11y, Test assertions) | Implemented & Verified | `index.html`, `tests/production-check.mjs`, `downloads/` rebuilt |
+| **1** | 2026-10-13 00:23 | Subagent Tri-Audit Improvements (Card DOM nesting, Debounced saves, Timer cleanup, Ritual streak fix, Modal a11y, Test assertions) | Verified | `80b82ef` |
+| **2** | 2026-10-13 00:34 | Service Worker Hardening, Static A11y Live Regions, Targeted Reveal DOM Updates, WCAG AAA Touch Targets, WebRTC Tab Teardown & Playwright E2E Simulation | Verified | Commit pending |
 
 ---
 
@@ -45,3 +46,27 @@
 - **Status:** Implemented & Verified.
 
 ---
+
+### Cycle 2 (2026-10-13 00:34 EDT)
+- **Audits Performed:**
+  - **Subagent A (SW & Performance):** Service worker network resilience audit; identified network fetch timeouts on spotty mobile data stranding the app for 60-120s; identified unnecessary full-board re-renders on follow-through toggling.
+  - **Subagent B (A11y, Contrast & WebRTC):** Static ARIA live region audit; high-contrast border overrides for themed color modes; WCAG AAA 44x44px touch target compliance for wager chips, reaction chips, and nudge buttons; WebRTC graceful teardown on tab close (`pagehide`); intermission unlink playStyle preservation.
+  - **Subagent C (E2E Test Automation):** Complete round lifecycle test using Playwright with MS Edge headless simulation across setup, 5-question round with slider and written prompts, intermission handoff, reveal card flipping, rating unlock, and Journal resonance compass rendering.
+- **Implemented Fixes:**
+  1. **Service Worker Hardening (`sw.js`):** Added 8-second hard ceiling (`hardDeadlineTimer`) with fallback to cache, expanded cache lookup (`./`, `index.html`), and branded offline fallback HTML page preventing browser network error pages.
+  2. **Static Live Accessibility Region (`index.html`):** Pre-rendered static `<div id="toast-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>` before scripts so screen readers detect live regions upon DOM parse.
+  3. **Targeted Reveal Follow-Through Updates:** Replaced full `render()` on follow-through taps with in-place DOM updates, preserving scroll position and card focus.
+  4. **High Contrast Overrides across Themes:** Added explicit `!important` border overrides (`rgba(255, 255, 255, 0.65)` for dark, `rgba(17, 24, 39, 0.85)` for pastel) ensuring high contrast visibility regardless of active theme.
+  5. **WCAG AAA Touch Target Sizing:** Enforced minimum 44x44px dimensions on `.wager-chip`, `.wildcard-btn`, `.reaction-chip`, and `.nudge-btn`.
+  6. **WebRTC Tab Close Signal (`pagehide`):** Added `pagehide` event listener sending `{ type: "leave", reason: "tab-closed" }` over WebRTC data channel, eliminating 40-second timeout stalls on partner devices.
+  7. **Intermission Unlink Preservation:** Updated `confirmEndingLink()` so unlinking an in-progress round automatically defaults `state.playStyle = "pass-and-play"`, preventing stranded rounds.
+  8. **Signaling Security & Rate Limiting Verification (`tests/signaling-check.mjs`):** Integrated 96KB payload caps and joiner device-locking tests.
+  9. **End-to-End Simulation Test (`tests/round-lifecycle.test.mjs`):** Added complete 5-question round lifecycle test using Playwright in `node:test` covering setup, Player 1 & 2 answers, intermission handoff, card flipping, score unlock rating, and Journal resonance compass rendering.
+- **Verification:**
+  - `npm test`: Passed (production checks & signaling checks).
+  - `npm run test:e2e`: Passed (100% assertions satisfied, full lifecycle verified).
+  - `npm run build`: `downloads/Aligned-offline.html` (1128 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
+- **Status:** Verified and ready for commit.
+
+---
+
