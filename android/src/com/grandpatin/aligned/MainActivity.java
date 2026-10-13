@@ -1,5 +1,6 @@
 package com.grandpatin.aligned;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
@@ -18,6 +19,7 @@ import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.View;
 import android.webkit.JavascriptInterface;
+import android.webkit.PermissionRequest;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -48,11 +50,13 @@ public class MainActivity extends Activity {
     static final String HOME_URL = "https://" + SITE_HOST + SITE_PATH;
     private static final int FILE_CHOOSER_REQUEST = 41;
     private static final int SAVE_FILE_REQUEST = 42;
+    private static final int MIC_REQUEST = 43;
 
     private WebView web;
     private ValueCallback<Uri[]> pendingFileCallback;
     private byte[] pendingSaveBytes;
     private String pendingSaveName;
+    private PermissionRequest pendingMicRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +151,22 @@ public class MainActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == MIC_REQUEST) {
+            PermissionRequest request = pendingMicRequest;
+            pendingMicRequest = null;
+            if (request == null) return;
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                request.grant(new String[] { PermissionRequest.RESOURCE_AUDIO_CAPTURE });
+            } else {
+                request.deny();
+            }
+            return;
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
     private String startUrl(Intent intent) {
         Uri data = intent == null ? null : intent.getData();
         if (data != null && isAppUri(data)) {
@@ -226,6 +246,33 @@ public class MainActivity extends Activity {
                 pendingFileCallback = null;
                 return false;
             }
+        }
+
+        // WebView denies getUserMedia by default; grant only the microphone, and only to the app's own origin.
+        @Override
+        public void onPermissionRequest(final PermissionRequest request) {
+            Uri origin = request.getOrigin();
+            boolean ownOrigin = origin != null && "https".equals(origin.getScheme()) && SITE_HOST.equalsIgnoreCase(origin.getHost());
+            boolean wantsMic = false;
+            for (String resource : request.getResources()) {
+                if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(resource)) wantsMic = true;
+            }
+            if (!ownOrigin || !wantsMic) {
+                request.deny();
+                return;
+            }
+            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                request.grant(new String[] { PermissionRequest.RESOURCE_AUDIO_CAPTURE });
+                return;
+            }
+            if (pendingMicRequest != null) pendingMicRequest.deny();
+            pendingMicRequest = request;
+            requestPermissions(new String[] { Manifest.permission.RECORD_AUDIO }, MIC_REQUEST);
+        }
+
+        @Override
+        public void onPermissionRequestCanceled(PermissionRequest request) {
+            if (request == pendingMicRequest) pendingMicRequest = null;
         }
     }
 

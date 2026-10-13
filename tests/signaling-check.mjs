@@ -171,6 +171,26 @@ class MockStorage {
   const intruderSocket = sockets[sockets.length - 1];
   assert.equal(intruderSocket.closed?.code, 4009, "Rogue device must be rejected with close code 4009");
   assert.equal(intruderSocket.closed?.reason, "This link is already in use");
+
+  // 4. A scripted join that omits (or blanks) the device id must not bypass the binding and evict device A
+  const boundSocket = sockets.find((socket) => !socket.closed && socket.deserializeAttachment()?.role === "join");
+  assert(boundSocket, "device-phone-A must hold an open join socket");
+  for (const suffix of ["", "&device=", "&device=short"]) {
+    const before = sockets.length;
+    const res = await room.fetch(new Request(`https://signal.example/api/rooms/test-room-1/socket?role=join&token=${tokens.joinToken}${suffix}`, {
+      headers: { upgrade: "websocket" }
+    }));
+    assert.equal(res.status, 403, `Join without a valid device id (${suffix || "none"}) must be refused`);
+    assert.equal(sockets.length, before, "A refused join must not accept a socket");
+    assert.equal(boundSocket.closed, null, "The bound partner socket must stay open");
+  }
+  assert.equal((await storage.get("configuration")).joinDevice, "device-phone-A", "Binding must not change");
+
+  // 5. Tokens are still compared exactly
+  const wrongToken = await room.fetch(new Request(`https://signal.example/api/rooms/test-room-1/socket?role=join&token=${tokens.joinToken.slice(0, -1)}x&device=device-phone-A`, {
+    headers: { upgrade: "websocket" }
+  }));
+  assert.equal(wrongToken.status, 403, "A near-miss token must be refused");
 }
 
 console.log("Signaling checks passed: origin protection, expiring rooms, strong tokens, device-locking anti-hijack, and 96KB payload caps verified.");

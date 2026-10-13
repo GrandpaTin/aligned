@@ -231,6 +231,8 @@ describe("Privacy Shield & Confidential Reflections Test Suite", () => {
     const createCompletedRoundSnapshot = vm.runInNewContext(`(${snapshotMatch[0]})`, {
       state,
       calculateAlignmentSummary,
+      // Snapshots now store each round's Mind-Reader hits; the tally itself is covered in state-persist.test.mjs.
+      mindReaderTally: () => [{ player: 0, made: 0, hits: 0 }, { player: 1, made: 0, hits: 0 }],
       getSelectedQuestions,
       randomIndex,
       Date,

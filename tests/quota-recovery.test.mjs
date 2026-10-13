@@ -82,8 +82,8 @@ describe("LocalStorage Quota Exceeded & Storage Failure Recovery", () => {
     assert.equal(mockStorage.getItem("aligned-state-v1"), null, "Failed write must not leave corrupted partial data");
   });
 
-  it("recovers via defensive pruning of oldest completed rounds when payload exceeds quota", () => {
-    // Generate 30 completed rounds to simulate long-history couple
+  it("never prunes completed rounds to fit the quota; reports the failed save instead", () => {
+    // Halving the Journal silently was data loss; the contract is now: keep history, return false, warn.
     const rounds = [];
     for (let i = 0; i < 30; i++) {
       rounds.push({
@@ -95,21 +95,38 @@ describe("LocalStorage Quota Exceeded & Storage Failure Recovery", () => {
       });
     }
     vmContext.state.completedRounds = rounds;
-
-    // Set quota threshold that allows ~15 rounds (~3500 chars) but fails on 30 rounds (~7000 chars)
     maxStorageChars = 4000;
 
     const saveStateFn = vm.runInNewContext(`(${saveStateMatch[0]})`, vmContext);
+    let result;
+    assert.doesNotThrow(() => { result = saveStateFn(); });
 
-    // Execute saveState: first write fails, prunes oldest 15 rounds, retries, and succeeds
-    assert.doesNotThrow(() => {
-      saveStateFn();
-    });
+    assert.equal(quotaTriggered, true, "QuotaExceededError occurred");
+    assert.equal(result, false, "saveState reports the failed write");
+    assert.equal(vmContext.state.completedRounds.length, 30, "History is kept in memory");
+    assert.equal(vmContext.state.completedRounds[0].id, "round_0");
+    assert.equal(mockStorage.getItem(vmContext.STORAGE_KEY), null, "No partial write");
+  });
 
-    assert.equal(quotaTriggered, true, "QuotaExceededError occurred initially");
-    assert.equal(vmContext.state.completedRounds.length, 15, "Oldest rounds pruned to fit within quota");
-    assert.equal(vmContext.state.completedRounds[0].id, "round_15", "Kept most recent rounds");
-    assert.notEqual(mockStorage.getItem(vmContext.STORAGE_KEY), null, "Successfully persisted pruned state");
+  it("keeps the unreadable-save recovery slot when the quota is hit", () => {
+    mockStorage.setItem("aligned-state-v1-unreadable-2", "{bad");
+    mockStorage.setItem("aligned-state-v1-unreadable", "{bad");
+    maxStorageChars = 50;
+    const saveStateFn = vm.runInNewContext(`(${saveStateMatch[0]})`, vmContext);
+    assert.equal(saveStateFn(), false);
+    assert.equal(mockStorage.getItem("aligned-state-v1-unreadable-2"), "{bad");
+    assert.equal(mockStorage.getItem("aligned-state-v1-unreadable"), "{bad");
+  });
+
+  it("returns true on success and trims only the oldest voice memories beyond eight on retry", () => {
+    const voiceNotes = {};
+    for (let i = 0; i < 10; i++) voiceNotes[`q${i}`] = "data:audio/webm;base64," + "A".repeat(300);
+    vmContext.state.voiceNotes = voiceNotes;
+    maxStorageChars = 3000; // 10 notes (~3.3k) fail, 8 notes (~2.7k) fit
+    const saveStateFn = vm.runInNewContext(`(${saveStateMatch[0]})`, vmContext);
+    assert.equal(saveStateFn(), true);
+    assert.deepEqual(Object.keys(vmContext.state.voiceNotes), ["q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9"]);
+    assert.notEqual(mockStorage.getItem(vmContext.STORAGE_KEY), null);
   });
 
   it("handles storage restoration after transient storage unavailability", () => {

@@ -39,6 +39,16 @@ function isAllowedRequest(request, env) {
   return Boolean(origin && allowedOrigins(env).has(origin));
 }
 
+// Constant-time comparison so response timing can't leak how much of a pairing token matched.
+function tokensEqual(a, b) {
+  const left = new TextEncoder().encode(String(a || ""));
+  const right = new TextEncoder().encode(String(b || ""));
+  if (!left.length || left.length !== right.length) return false;
+  let diff = 0;
+  for (let index = 0; index < left.length; index += 1) diff |= left[index] ^ right[index];
+  return diff === 0;
+}
+
 function randomToken(bytes = 24) {
   const data = crypto.getRandomValues(new Uint8Array(bytes));
   return btoa(String.fromCharCode(...data)).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
@@ -155,7 +165,7 @@ export class PairingRoom {
 
     if (request.method === "POST" && url.pathname === "/validate-join") {
       const { token = "" } = await request.json();
-      return token === configuration.joinToken ? json({ ok: true, expiresAt: configuration.expiresAt }) : json({ error: "Invalid token" }, 403);
+      return tokensEqual(token, configuration.joinToken) ? json({ ok: true, expiresAt: configuration.expiresAt }) : json({ error: "Invalid token" }, 403);
     }
 
     if (url.pathname !== "/api/rooms/" + url.pathname.split("/")[3] + "/socket" && !url.pathname.endsWith("/socket")) {
@@ -164,7 +174,7 @@ export class PairingRoom {
     const role = url.searchParams.get("role");
     const token = url.searchParams.get("token") || "";
     const expectedToken = role === "host" ? configuration.hostToken : role === "join" ? configuration.joinToken : "";
-    if (!expectedToken || token !== expectedToken) return json({ error: "Invalid socket token" }, 403);
+    if (!expectedToken || !tokensEqual(token, expectedToken)) return json({ error: "Invalid socket token" }, 403);
 
     const pair = new WebSocketPair();
     const client = pair[0];
@@ -172,14 +182,16 @@ export class PairingRoom {
     // The same phone reconnecting (same device id) replaces its old socket. A different phone using the
     // same join link is refused, so a third device can never take over a room.
     const device = (url.searchParams.get("device") || "").slice(0, 64);
+    // A join socket without a device id would skip the binding below and evict the bound partner.
+    if (role === "join" && !/^[A-Za-z0-9_-]{8,64}$/.test(device)) return json({ error: "Missing device id" }, 403);
     const existing = this.ctx.getWebSockets().filter((socket) => socket.deserializeAttachment()?.role === role);
-    if (role === "join" && device && configuration.joinDevice && configuration.joinDevice !== device) {
+    if (role === "join" && configuration.joinDevice && configuration.joinDevice !== device) {
       this.ctx.acceptWebSocket(server);
       server.serializeAttachment({ role: "rejected" });
       server.close(4009, "This link is already in use");
       return new Response(null, { status: 101, webSocket: client });
     }
-    if (role === "join" && device && configuration.joinDevice !== device) {
+    if (role === "join" && !configuration.joinDevice) {
       configuration.joinDevice = device;
       await this.ctx.storage.put("configuration", configuration);
     }

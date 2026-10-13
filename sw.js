@@ -1,6 +1,8 @@
-const CACHE_NAME = "aligned-v45";
+const CACHE_NAME = "aligned-v46";
 const NAVIGATION_TIMEOUT_MS = 3000;
-const APP_FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./og-image.jpg", "./apple-touch-icon.png", "./icon-maskable-512.png"];
+// "./" is the page itself (index.html would store the same 1.1 MB twice; the navigate fallback serves "./" for /index.html).
+// og-image.jpg is only for link-preview crawlers, which never go through this worker.
+const APP_FILES = ["./", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./icon-maskable-512.png"];
 
 function getNormalizedNavUrl(requestUrl) {
   const url = new URL(requestUrl);

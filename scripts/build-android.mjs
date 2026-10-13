@@ -46,8 +46,9 @@ for (const required of [javaBin("javac"), exe("aapt2"), androidJar]) {
 rmSync(out, { recursive: true, force: true });
 for (const folder of ["compiled-res", "gen", "classes", "dex", "assets/www"]) mkdirSync(join(out, folder), { recursive: true });
 
-// The APK ships the same files the website serves, minus the service worker (assets are already local).
-for (const file of ["index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png"]) {
+// The APK ships only what the WebView can request: no service worker, and no install/home-screen icons
+// (WebView ignores manifests and apple-touch-icon; the launcher icon comes from res/mipmap). A missing file 404s cleanly in shouldInterceptRequest.
+for (const file of ["index.html", "manifest.webmanifest", "icon-192.png"]) {
   copyFileSync(join(root, file), join(out, "assets", "www", file));
 }
 
