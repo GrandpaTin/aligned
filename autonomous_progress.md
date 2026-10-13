@@ -471,6 +471,40 @@
   - `npm run build`: `downloads/Aligned-offline.html` (1174 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
 - **Status:** Verified (`85ab853`).
 
+---
+
+### Cycle 15 (2026-10-13 09:50 EDT)
+- **Audits Performed:**
+  - **Memory & Resource Lifecycle (Subagent A):** Identified microphone audio stream tracks and recording interval timer not being stopped when user closes a card face-down, changes screens, or closes the tab; identified dead orphaned CSS classes (`.voice-note-panel` and camera scanner `.qr-scanner-dialog`, `.qr-camera-wrap`, etc.).
+  - **Security & Privacy Isolation (Subagent B):** Identified that in `openPrivateReflections`, reflections were rendered into the DOM with only a `hidden` attribute before identity/PIN unlock, allowing screen readers and DOM inspectors to read sensitive content; identified that resuming mid-turn pass-and-play questions (`#resume-round`) lacked active player handoff confirmation; identified that stacked modal backdrops were not marked `inert` when secondary modals open on top; confirmed cancel recovery in `openSensitiveConsent`.
+  - **Automated Test Coverage (Subagent C):** Designed `tests/privacy-shield.test.mjs` verifying DOM reflection shielding, cryptographic PIN hashing with SHA-256 and salt prefix, fallback deterministic hash, PBKDF2 250,000-iteration key derivation, round snapshot deep-copy isolation, and network payload privacy exclusion.
+- **Implemented Fixes:**
+  1. **Hardware Microphone & Voice Recorder Teardown Lifecycle (`index.html`):**
+     - Introduced `stopVoiceRecording({ cancel = false } = {})` with `activeVoiceStream` track release (`stream.getTracks().forEach(t => t.stop())`), `recordingTimer` clearance, and button state reset.
+     - Wired guarded teardowns (`if (typeof stopVoiceRecording === "function") stopVoiceRecording({ cancel: true })`) into card flipping (`toggleCard`), screen navigation (`navigateToScreen`), modal openings (`openKeepsakeModal`, `openStoryReelModal`), and page lifecycle (`handleUnloadTeardown` for `pagehide` and `beforeunload`).
+  2. **Secure DOM Isolation for Private Reflections (`index.html`):**
+     - Updated `openPrivateReflections` template to render `<div id="private-note-content" hidden></div>` completely empty upon modal construction.
+     - Deferred note list generation and DOM injection strictly to the `#unlock-reflections` click handler after identity confirmation and PIN verification succeed.
+  3. **Active Player Handoff Gate on Mid-Turn Pass-and-Play `#resume-round` (`index.html`):**
+     - Gated `#resume-round` when resuming a pass-and-play round paused on a question screen with an `openConfirmDialog` confirmation ("Resume [Player Name]'s turn?"), preventing accidental answer leakage.
+  4. **Stacked Modal Inertness (`index.html`):**
+     - Enhanced `syncModalState` so that when multiple `.modal-backdrop` elements exist, underlying backdrops are marked `child.inert = child !== top`, preventing keyboard navigation or screen reader escapes into covered modals.
+  5. **Dead CSS Elimination (`index.html`):**
+     - Removed unused `.voice-note-panel` rule and removed legacy QR camera scanner CSS rules (`.qr-scanner-dialog`, `.qr-camera-wrap`, `.qr-camera-frame`, `.qr-scanner-status`).
+  6. **Service Worker v43 & Subresource Cache-First Dispatch (`sw.js`):**
+     - Bumped cache version to `aligned-v43`.
+     - Eliminated eager background network requests for non-navigation static assets (manifest, icons, images) by checking cache first and fetching only on cache misses.
+     - Scoped cache matching to `CACHE_NAME` and unified navigation URL normalization via `getNormalizedNavUrl`.
+  7. **Suite 17 Test Suite Expansion (`tests/privacy-shield.test.mjs`, `package.json`):**
+     - Authored `tests/privacy-shield.test.mjs` (7 unit tests running in ~350ms covering DOM isolation, Web Crypto SHA-256 PIN hashing, fallback FNV hashing, PBKDF2 AES-GCM derivation/decryption, snapshot mutation isolation, and WebRTC network payload privacy).
+     - Added `tests/privacy-shield.test.mjs` to `package.json` `test` script (17 test suites total, 86 unit tests).
+- **Verification:**
+  - `npm test`: Passed (all 17 test suites: production check, signaling security, daily ritual lifecycle, radar storybook, backup schema resilience, custom pack automation, quota recovery, audio preferences, webrtc peer simulation, mind-reader math, keepsake math, taxonomy ramp, security escape, timer resilience, reconnection queue, library performance, and privacy shield — 86 unit tests across 17 runners in 290ms).
+  - `npm run test:e2e`: Passed (all 7 Playwright E2E tests in 94.0s).
+  - `npm run build`: `downloads/Aligned-offline.html` (1175 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
+- **Status:** Verified (`28941b9`).
+
+
 
 
 
