@@ -20,6 +20,7 @@
 | **7** | 2026-10-13 01:43 | SW Invalidation waitUntil, Keepsake GPU Buffer Purge, WebRTC Multi-Tab Guard, Mind-Reader Settle Guard & Live ARIA Announcements | Verified | `b76cf85` |
 | **8** | 2026-10-13 01:56 | Service Worker Navigation Preload, Audio Voice Scheduler Jitter & Deallocation, Modal Disconnect-Safe Guard, While-You-Wait In-Place Sync & Dual Intuition Payoff, Pack Builder A11y & Keepsake Math Suite | Verified | `e26d8d5` |
 | **9** | 2026-10-13 02:15 | Service Worker Preload Consumption (v41), Web Audio Linear Ramping & iOS Unlock, Story Reel Gestures & A11y, Keepsake SR Table, High-Contrast Radar Tokens & Taxonomy Ramp Test Suite | Verified | `fc17ce1` |
+| **10** | 2026-10-13 08:45 | Cross-Tab BroadcastChannel & Storage Sync, WebRTC Beforeunload Teardown, Double-Click Setup Locks, While-You-Wait XSS Escaping & Security Escaping Test Suite | Verified | `a6182af` |
 
 ---
 
@@ -322,5 +323,36 @@
   - `npm run test:e2e`: Passed (all 7 Playwright E2E tests: full 5-question round lifecycle, settings persistence across reload, custom pack launch, screen heading focus transitions, modal keyboard trapping, high-contrast persistence, and offline service worker cached execution in 91.3s).
   - `npm run build`: `downloads/Aligned-offline.html` (1162 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
 - **Status:** Verified (`fc17ce1`).
+
+---
+
+### Cycle 10 (2026-10-13 08:45 EDT)
+- **Audits Performed:**
+  - **Cross-Tab & Network Resilience:** Audited multi-tab state synchronization discovering that updating preferences, daily connection rituals, or custom packs in one tab left other open tabs with stale in-memory state; subsequent saves from inactive tabs clobbered newly completed daily rituals and packs; audited WebRTC teardown on window exit.
+  - **Interaction & A11y Flow:** Audited setup round launch and custom pack chips discovering lack of debouncing/locks on async start handlers (`confirmEndingLink()`, `confirmStartingOver()`, `openSensitiveConsent()`); rapid double-tapping triggered concurrent dialog cascades and duplicate round starts; audited comfort check dialog cancellation.
+  - **Security & Template Escaping Audit:** Audited all string interpolation templates across `index.html` for unescaped user inputs; discovered that `wyw.bolder` (`bolderLabel`) interpolated raw player names without `escapeHTML`, and `scoreCallPanel` interpolated `title` unescaped; designed and authored `tests/security-escape.test.mjs` verifying strict sanitization across players, packs, notes, and import hashes.
+- **Implemented Fixes:**
+  1. **Cross-Tab State Synchronization (`BroadcastChannel` & `storage` event):**
+     - Initialized `tabSyncChannel = new BroadcastChannel("aligned-sync")` broadcasting a lightweight ping `{ type: "state-saved", timestamp }` upon every `saveState()`.
+     - Added cross-tab synchronization listener with 60ms debounce listening on both `tabSyncChannel` and `window.addEventListener("storage")`.
+     - In `handleCrossTabSync()`: automatically synchronizes global preferences (`visualTheme`, `textSize`, `highContrast`, `reducedMotion`, `soundEnabled`, `ambientMusicEnabled`, `soundVolume`, `ambientMix`, `hapticsEnabled`), `dailyRitual`, `customQuestions`, `customPacks`, `completedRounds`, and favorites without clobbering active gameplay.
+  2. **WebRTC Dual Teardown Listener (`index.html`):**
+     - Attached shared `handleUnloadTeardown` to both `pagehide` and `beforeunload` events, ensuring data channels close and notify peers with reason `"tab-closed"` across both desktop and mobile browsers.
+  3. **Double-Click & Rapid-Tap Protection on Setup & Pack Launch (`index.html`):**
+     - Added `isStartingRound` lock to `document.querySelectorAll("[data-start-pack]")` and `form.addEventListener("submit")`.
+     - Disabled `#start-round` button during async checks and guaranteed lock release via `releaseSubmit()` / `releaseStart()` on error or user cancellation.
+     - Added `onCancel` callback parameter to `openSensitiveConsent` to reliably restore submit locks if the comfort check modal is dismissed.
+  4. **While-You-Wait & Score-Call XSS Prevention (`index.html`):**
+     - Wrapped `bolderLabel` with `escapeHTML(bolderLabel)` in While-You-Wait intuition payoff card.
+     - Wrapped `title` with `escapeHTML(title)` in `scoreCallPanel`.
+  5. **Automated Test Suite Expansion (`tests/security-escape.test.mjs`, `package.json`):**
+     - Authored `tests/security-escape.test.mjs` (5 unit tests running in 12ms verifying special character escaping, malicious player names in saved rounds, score call panel safety, bolderLabel XSS immunity, and pack import hash filtering).
+     - Integrated `tests/security-escape.test.mjs` into `package.json` `"test"` script (13 test suites total).
+- **Verification:**
+  - `npm test`: Passed (all 13 test suites: production check, signaling security, daily ritual lifecycle, radar storybook, backup schema resilience, custom pack automation, quota recovery, audio preferences, webrtc peer simulation, mind-reader math, keepsake math, taxonomy ramp, and security escape — 50 unit tests across 13 runners in 250ms).
+  - `npm run test:e2e`: Passed (all 7 Playwright E2E tests: full 5-question round lifecycle, settings persistence across reload, custom pack launch, screen heading focus transitions, modal keyboard trapping, high-contrast persistence, and offline service worker cached execution in 153.8s).
+  - `npm run build`: `downloads/Aligned-offline.html` (1166 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
+- **Status:** Verified (`a6182af`).
+
 
 

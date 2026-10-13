@@ -15132,12 +15132,78 @@ var qrcode = function() {
           }
         }
       }
+      try {
+        if (tabSyncChannel) {
+          tabSyncChannel.postMessage({ type: "state-saved", timestamp: Date.now() });
+        }
+      } catch {}
     }
 
     let saveStateTimer = 0;
     function scheduleSaveState(delayMs = 200) {
       clearTimeout(saveStateTimer);
       saveStateTimer = window.setTimeout(saveState, delayMs);
+    }
+
+    const tabSyncChannel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("aligned-sync") : null;
+    let syncThrottleTimer = 0;
+    function handleCrossTabSync() {
+      clearTimeout(syncThrottleTimer);
+      syncThrottleTimer = window.setTimeout(() => {
+        try {
+          const fresh = loadState();
+          if (!fresh) return;
+
+          // Sync appearance and audio preferences
+          state.visualTheme = fresh.visualTheme;
+          state.textSize = fresh.textSize;
+          state.highContrast = fresh.highContrast;
+          state.reducedMotion = fresh.reducedMotion;
+          state.soundEnabled = fresh.soundEnabled;
+          state.ambientMusicEnabled = fresh.ambientMusicEnabled;
+          state.soundVolume = fresh.soundVolume;
+          state.ambientMix = fresh.ambientMix;
+          state.hapticsEnabled = fresh.hapticsEnabled;
+
+          // Sync saved collections, daily connection ritual, and library state
+          state.dailyRitual = fresh.dailyRitual;
+          state.customQuestions = fresh.customQuestions;
+          state.customPacks = fresh.customPacks;
+          state.favoriteQuestionIds = fresh.favoriteQuestionIds;
+          state.neverQuestionIds = fresh.neverQuestionIds;
+          state.excludedQuestionIds = fresh.excludedQuestionIds;
+          state.completedRounds = fresh.completedRounds;
+          state.answeredQuestionIds = fresh.answeredQuestionIds;
+          state.relationshipProfile = fresh.relationshipProfile;
+          state.sessionPreset = fresh.sessionPreset;
+
+          // If not in the middle of answering a live local round, sync screen & setup state
+          const inActiveRound = state.screen === "question" || state.screen === "intermission" || (state.screen === "nearby" && nearbyLinked());
+          if (!inActiveRound) {
+            state.screen = fresh.screen;
+            state.names = fresh.names;
+            state.selectedTopics = fresh.selectedTopics;
+            state.questionCount = fresh.questionCount;
+            state.questionMode = fresh.questionMode;
+            state.questionIntensity = fresh.questionIntensity;
+            applyPreferences();
+            render();
+          } else {
+            applyPreferences();
+          }
+        } catch {}
+      }, 60);
+    }
+
+    if (tabSyncChannel) {
+      tabSyncChannel.addEventListener("message", (event) => {
+        if (event.data?.type === "state-saved") handleCrossTabSync();
+      });
+    }
+    if (typeof window !== "undefined") {
+      window.addEventListener("storage", (event) => {
+        if (event.key === STORAGE_KEY) handleCrossTabSync();
+      });
     }
 
     // Each Compact floor pass restyles the whole document, so every request in a frame shares one pass. It runs
@@ -16490,7 +16556,7 @@ var qrcode = function() {
       render();
     }
 
-    function openSensitiveConsent(topics, onConfirm) {
+    function openSensitiveConsent(topics, onConfirm, onCancel) {
       const labels = topics
         .filter((topic) => SENSITIVE_TOPICS.has(topic))
         .map((id) => TOPIC_OPTIONS.find((topic) => topic.id === id)?.label)
@@ -16513,10 +16579,15 @@ var qrcode = function() {
           </div>
         </section>
       `;
-      const close = () => overlay.remove();
+      let confirmed = false;
+      const close = () => {
+        overlay.remove();
+        if (!confirmed && typeof onCancel === "function") onCancel();
+      };
       overlay.addEventListener("click", (event) => { if (event.target === overlay) close(); });
       overlay.querySelector("#sensitive-cancel").addEventListener("click", close);
       overlay.querySelector("#sensitive-confirm").addEventListener("click", () => {
+        confirmed = true;
         close();
         onConfirm();
       });
@@ -19164,23 +19235,29 @@ var qrcode = function() {
         playSound("error");
         showToast(hidden ? "This pack’s questions are all hidden — allow some again in the Library." : "This pack has no questions yet — favourite some in the Library and save it again.");
       }));
+      let isStartingRound = false;
       document.querySelectorAll("[data-start-pack]").forEach((button) => {
         button.addEventListener("click", async () => {
+          if (isStartingRound) return;
+          isStartingRound = true;
+          const releaseStart = () => { isStartingRound = false; };
           const pack = state.customPacks.find((item) => item.id === button.dataset.startPack);
           const names = [playerOne.value.trim(), playerTwo.value.trim()];
           if (!pack || names.some((name) => !name)) {
+            releaseStart();
             playSound("error"); error.textContent = "Add both names before starting a custom pack.";
             (names[0] ? playerTwo : playerOne).focus();
             showToast(`Add both names first, then ${POINTER_VERB.toLowerCase()} your pack again.`);
             return;
           }
-          if (rejectDuplicateNames(names)) return;
+          if (rejectDuplicateNames(names)) { releaseStart(); return; }
           const byId = new Map(getQuestionCatalog().map((question) => [question.id, question]));
           const selectedQuestionIds = orderRoundAsRamp(selectFreshQuestionIds(
             pack.questionIds.filter((id) => byId.has(id) && !state.neverQuestionIds.includes(id)),
             15
           ));
           if (!selectedQuestionIds.length) {
+            releaseStart();
             playSound("error"); error.textContent = "This pack has no available questions yet.";
             return;
           }
@@ -19190,9 +19267,9 @@ var qrcode = function() {
           }
           const sharedRound = nearbyChannelOpen() && state.playStyle === "nearby" && state.nearbyRole === "host";
           const endLink = sharedRound ? () => {} : await confirmEndingLink();
-          if (!endLink) return;
+          if (!endLink) { releaseStart(); return; }
           const commitLeave = nearbyLinked() && !sharedRound ? () => {} : await confirmStartingOver();
-          if (!commitLeave) return;
+          if (!commitLeave) { releaseStart(); return; }
           openSensitiveConsent(selectedTopics, () => {
             if (endLink()) names.reverse();
             commitLeave();
@@ -19220,7 +19297,7 @@ var qrcode = function() {
               selectedQuestionIds
             });
             restoreSetup();
-          });
+          }, releaseStart);
         });
       });
 
@@ -19228,11 +19305,20 @@ var qrcode = function() {
 
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
+        if (isStartingRound) return;
+        isStartingRound = true;
+        const startBtn = document.getElementById("start-round");
+        if (startBtn) startBtn.disabled = true;
+        const releaseSubmit = () => {
+          isStartingRound = false;
+          if (startBtn) startBtn.disabled = false;
+        };
         const names = [playerOne.value.trim(), playerTwo.value.trim()];
         const questionMode = form.elements["question-mode"].value;
         const questionCount = Number(form.elements["question-count"].value) || ([5, 10, 15].includes(Number(state.questionCount)) ? Number(state.questionCount) : 5);
         const selectedTopics = topicInputs.filter((input) => input.checked && !input.disabled).map((input) => input.value);
         if (names.some((name) => !name)) {
+          releaseSubmit();
           playSound("error"); error.textContent = "Add both names to begin.";
           const nameError = document.getElementById("name-error");
           if (nameError) nameError.textContent = "Add both names to begin.";
@@ -19240,8 +19326,9 @@ var qrcode = function() {
           (names[0] ? playerTwo : playerOne).focus();
           return;
         }
-        if (rejectDuplicateNames(names)) return;
+        if (rejectDuplicateNames(names)) { releaseSubmit(); return; }
         if (!selectedTopics.length) {
+          releaseSubmit();
           playSound("error"); error.textContent = "Choose at least one question pack.";
           // One scroll, to the message itself: centring the picker leaves the error under the sticky Start bar on short phones.
           error.scrollIntoView({ block: "center", behavior: motionReduced() ? "auto" : "smooth" });
@@ -19250,6 +19337,7 @@ var qrcode = function() {
 
         const selectedQuestionIds = chooseRoundQuestions(questionMode, questionCount, selectedTopics);
         if (!selectedQuestionIds.length || selectedQuestionIds.length !== questionCount) {
+          releaseSubmit();
           const topicSet = new Set(selectedTopics);
           const hidden = getQuestionCatalog().filter((question) => topicSet.has(question.topic) && (state.neverQuestionIds.includes(question.id) || state.excludedQuestionIds.includes(question.id))).length;
           playSound("error");
@@ -19262,7 +19350,7 @@ var qrcode = function() {
         let linkWarned = false;
         if (state.playStyle !== "nearby" && nearbyLinked()) {
           const confirmed = await confirmEndingLink();
-          if (!confirmed) return;
+          if (!confirmed) { releaseSubmit(); return; }
           endLocalLink = confirmed;
           linkWarned = true;
         }
@@ -19270,12 +19358,12 @@ var qrcode = function() {
           const host = state.names[0] || "your partner";
           const unfinished = revealUnfinished() ? " Your scores haven’t been revealed yet — leaving skips the count-up and its scores go straight to your Journal." : "";
           const leave = await openConfirmDialog({ title: "Leave the two-phone round?", copy: `${host} starts the next two-phone round from their phone.${unfinished} Leave to start your own round here?`, confirmLabel: "Leave and start", cancelLabel: "Stay", safeFirst: true, tag: "link" });
-          if (!leave) return;
+          if (!leave) { releaseSubmit(); return; }
           leaveJoinedRound = true;
           if (names[1] === state.names[1] && names[0] === state.names[0]) names.reverse();
         }
         const commitLeave = leaveJoinedRound ? () => {} : await confirmStartingOver({ alreadyWarned: linkWarned });
-        if (!commitLeave) return;
+        if (!commitLeave) { releaseSubmit(); return; }
 
         openSensitiveConsent(selectedTopics, () => animateRoundSelection(form.querySelector('button[type="submit"]'), () => {
           // Navigating away during the mixing animation cancels the start; nothing has been committed yet.
@@ -19307,7 +19395,7 @@ var qrcode = function() {
             return;
           }
           startGame({ names, questionMode, questionCount, selectedTopics, selectedQuestionIds });
-        }));
+        }), releaseSubmit);
       });
 
       if (!state.tutorialSeen) requestAnimationFrame(openTutorial);
@@ -20325,7 +20413,7 @@ var qrcode = function() {
         const chips = SCORE_CALLS.map(([value, label, long]) => `<button class="library-filter score-call-chip${calls[player] === value ? " active" : ""}" type="button" data-score-call="${value}" data-score-player="${player}" aria-label="${escapeHTML(label)}: ${long}">${escapeHTML(label)}</button>`).join("");
         return `<div class="score-call" role="group" aria-label="${escapeHTML(name)}’s call"><span class="reveal-buddy ${player ? "two" : "one"}" aria-hidden="true">${escapeHTML(initials(name))}</span>${chips}</div>`;
       }).join("");
-      return `<div class="score-call-panel"><p class="score-call-title"><span aria-hidden="true">🎯</span> ${title}</p>${rows}<small>Optional · just for fun · revealed when your scores count up</small></div>`;
+      return `<div class="score-call-panel"><p class="score-call-title"><span aria-hidden="true">🎯</span> ${escapeHTML(title)}</p>${rows}<small>Optional · just for fun · revealed when your scores count up</small></div>`;
     }
 
     function bindScoreCalls() {
@@ -21620,7 +21708,7 @@ var qrcode = function() {
                   <span>✦ While-you-wait intuition</span>
                   <div class="highlight-answer" style="display:flex;flex-direction:column;gap:4px">
                     ${syncGuessLabel ? `<div>Sync forecast: <strong>${syncGuessLabel}</strong> <small class="highlight-note">· Actual: ${alignment.overall}% (${syncHit ? "Spot on! 🎯" : "Plot twist! 💫"})</small></div>` : ""}
-                    ${wyw.bolder ? `<div>Bolder answers: <strong>${bolderLabel}</strong> <small class="highlight-note">· ${bolderHit ? "Called it! 🎯" : "Plot twist! 💫"}</small></div>` : ""}
+                    ${wyw.bolder ? `<div>Bolder answers: <strong>${escapeHTML(bolderLabel)}</strong> <small class="highlight-note">· ${bolderHit ? "Called it! 🎯" : "Plot twist! 💫"}</small></div>` : ""}
                   </div>
                   <strong class="highlight-locked"><small>${everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"}</small></strong>
                 </article>
@@ -22706,11 +22794,13 @@ var qrcode = function() {
       }
       if (document.visibilityState === "visible") reconnectNearbyNow();
     });
-    window.addEventListener("pagehide", () => {
+    const handleUnloadTeardown = () => {
       if (nearbyLinked()) {
         closeNearbyConnection({ notifyPartner: true, reason: "tab-closed" });
       }
-    });
+    };
+    window.addEventListener("pagehide", handleUnloadTeardown);
+    window.addEventListener("beforeunload", handleUnloadTeardown);
     window.addEventListener("hashchange", handleNearbyJoinLaunch);
     window.addEventListener("hashchange", checkPackImportHash);
     window.addEventListener("pageshow", (event) => {
