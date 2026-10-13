@@ -240,6 +240,6 @@
   - `npm test`: Passed (all 10 test suites: production check, signaling security, daily ritual lifecycle, radar storybook, backup schema resilience, custom pack automation, quota recovery, audio preferences, webrtc peer simulation, and mind-reader math — 36 unit tests across 10 test runners in 210ms).
   - `npm run test:e2e`: Passed (all 7 Playwright E2E tests: full 5-question round lifecycle, settings persistence across reload, custom pack launch, screen heading focus transitions, modal keyboard trapping, high-contrast persistence, and offline service worker cached execution in 152.5s).
   - `npm run build`: `downloads/Aligned-offline.html` (1152 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
-- **Status:** Verified.
+- **Status:** Verified (`b76cf85`).
 
 ---
