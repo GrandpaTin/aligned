@@ -570,7 +570,7 @@
   - `npm test`: Passed (all 19 test suites, 126 unit tests across 19 runners in 290ms).
   - `npm run test:e2e`: Passed (all 7 Playwright E2E tests in 92.4s).
   - `npm run build`: `downloads/Aligned-offline.html` (1179 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
-- **Status:** Verified.
+- **Status:** Verified (`ee4daf7`).
 
 
 
