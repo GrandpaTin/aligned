@@ -14796,7 +14796,8 @@ var qrcode = function() {
               osc.onended = () => { osc.disconnect(); crackleGain.disconnect(); };
             }
           }
-          const delay = isHidden ? 3000 : (isResting ? 2000 + Math.random() * 1500 : 120 + Math.random() * 450);
+          const isMuted = (state.ambientMix?.hearth ?? 0) <= 0.02;
+          const delay = isHidden ? 3000 : (isMuted ? 5000 : (isResting ? 2000 + Math.random() * 1500 : 120 + Math.random() * 450));
           crackleTimer = window.setTimeout(scheduleCrackle, delay);
           if (this.hearthLayer) this.hearthLayer.timer = crackleTimer;
         };
@@ -17440,7 +17441,8 @@ var qrcode = function() {
           </details>
 
           <div class="library-controls">
-            <input class="library-search" id="library-search" type="search" placeholder="Search all ${catalog.length} questions…" value="${escapeHTML(libraryView.search)}" aria-label="Search questions">
+            <input class="library-search" id="library-search" type="search" placeholder="Search all ${catalog.length} questions…" value="${escapeHTML(libraryView.search)}" aria-label="Search questions" aria-describedby="library-search-status">
+            <div id="library-search-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
             <div class="library-filters" aria-label="Question status filters">
               ${[
                 ["all", "All"],
@@ -17480,6 +17482,13 @@ var qrcode = function() {
           const matchesSearch = !search || (question._searchIndex ? question._searchIndex.includes(search) : normalizeAnswer(`${question.prompt} ${question.category} ${(question.tags || []).join(" ")}`).includes(search));
           return matchesStatus && matchesTopic && matchesSearch;
         });
+
+        const statusEl = document.getElementById("library-search-status");
+        if (statusEl) {
+          statusEl.textContent = filtered.length === 0
+            ? "No questions match your search or filter."
+            : `Showing ${Math.min(filtered.length, libraryView.limit)} of ${filtered.length} matching questions.`;
+        }
 
         if (!filtered.length) {
           // Say what is actually narrowing the list, and offer one click back to everything.

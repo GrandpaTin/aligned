@@ -23,6 +23,7 @@
 | **10** | 2026-10-13 08:45 | Cross-Tab BroadcastChannel & Storage Sync, WebRTC Beforeunload Teardown, Double-Click Setup Locks, While-You-Wait XSS Escaping & Security Escaping Test Suite | Verified | `d167e13` |
 | **11** | 2026-10-13 08:49 | Discussion Timer TargetTime Drift Resilience & Visibility Re-sync, Slider Keyboard Controls, Accessible Character Counter & Timer Resilience Test Suite | Verified | `1dbf660` |
 | **12** | 2026-10-13 09:03 | WebRTC Outbox Queue & Buffered FIFO Flush, AmbientMix Reconnect Sync, Story Reel Accessible Play/Pause Toggle & Journal Search Status Live Region | Verified | `122e55a` |
+| **13** | 2026-10-13 09:09 | Service Worker Cache v42, Procedural Ambient Low-Power Crackle Throttle & Library Live Search Status Announcement | Verified | `PENDING_COMMIT` |
 
 ---
 
@@ -412,6 +413,29 @@
   - `npm run test:e2e`: Passed (all 7 Playwright E2E tests: full 5-question round lifecycle, settings persistence across reload, custom pack launch, screen heading focus transitions, modal keyboard trapping, high-contrast persistence, and offline service worker cached execution in 152.7s).
   - `npm run build`: `downloads/Aligned-offline.html` (1171 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
 - **Status:** Verified (`122e55a`).
+
+---
+
+### Cycle 13 (2026-10-13 09:09 EDT)
+- **Audits Performed:**
+  - **Service Worker Lifecycle & Cache Refresh:** Audited PWA cache invalidation and client claim lifecycle; identified cache version bump requirement to propagate WebRTC outbox and Story Reel accessibility updates to installed offline clients.
+  - **Web Audio Energy Efficiency & Low-Power Throttling:** Audited `ProceduralAmbient` soundscape scheduler discovering that when hearth layer volume was set to 0% (`(ambientMix.hearth ?? 0) <= 0.02`), `scheduleCrackle()` continued scheduling empty oscillator callbacks every 120-570ms on the main JavaScript thread, wasting mobile battery and CPU cycles.
+  - **Universal Screen-Reader Library Feedback:** Audited Question Library search and filtering discovering that while the Journal search received live region announcements in Cycle 12, the Library search lacked an equivalent `aria-describedby` connection and live region status element.
+- **Implemented Fixes:**
+  1. **Service Worker Cache Invalidation (`sw.js`):**
+     - Bumped cache version from `aligned-v41` to `aligned-v42`, guaranteeing that installed PWAs and returning clients immediately retrieve the updated bundle.
+  2. **Procedural Ambient Low-Power Idle Throttle (`index.html`):**
+     - Updated `scheduleCrackle()` in `ProceduralAmbient.startHearth()`: when hearth layer is muted (`(state.ambientMix?.hearth ?? 0) <= 0.02`), throttled reschedule delay from 120ms to 5000ms, completely halting unnecessary main-thread timer loops.
+  3. **Library Search Live Status Region & Accessible Announcement (`index.html`):**
+     - Added `aria-describedby="library-search-status"` to `#library-search` input.
+     - Added `<div id="library-search-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>` directly below search input.
+     - Updated `renderQuestionList()` to dynamically announce result counts (`"Showing X of Y matching questions."` / `"No questions match your search or filter."`) upon every keystroke, filter switch, and topic selection.
+- **Verification:**
+  - `npm test`: Passed (all 15 test suites: production check, signaling security, daily ritual lifecycle, radar storybook, backup schema resilience, custom pack automation, quota recovery, audio preferences, webrtc peer simulation, mind-reader math, keepsake math, taxonomy ramp, security escape, timer resilience, and reconnection queue — 67 unit tests across 15 runners in 270ms).
+  - `npm run test:e2e`: Passed (all 7 Playwright E2E tests: full 5-question round lifecycle, settings persistence across reload, custom pack launch, screen heading focus transitions, modal keyboard trapping, high-contrast persistence, and offline service worker cached execution in 95.2s).
+  - `npm run build`: `downloads/Aligned-offline.html` (1172 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
+- **Status:** Verified (`PENDING_COMMIT`).
+
 
 
 
