@@ -3325,15 +3325,7 @@ var qrcode = function() {
       position: relative;
       z-index: 10;
     }
-
     /* Voice Note Memory Recorder */
-    .voice-note-panel {
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
     .voice-record-btn {
       display: inline-flex;
       align-items: center;
@@ -8344,67 +8336,6 @@ var qrcode = function() {
       text-align: center;
       font-size: .72rem;
       line-height: 1.5;
-    }
-
-    .qr-scanner-dialog {
-      width: min(100%, 560px);
-    }
-
-    .qr-camera-wrap {
-      position: relative;
-      margin-top: 18px;
-      overflow: hidden;
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      aspect-ratio: 1;
-      background: #020617;
-    }
-
-    .qr-camera-wrap video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .qr-camera-frame {
-      position: absolute;
-      inset: 16%;
-      border: 3px solid #ffffff;
-      border-radius: 24px;
-      pointer-events: none;
-      box-shadow: 0 0 0 999px rgba(2, 6, 23, 0.34), 0 0 28px rgba(96, 165, 250, 0.42);
-    }
-
-    .qr-camera-frame::before,
-    .qr-camera-frame::after {
-      position: absolute;
-      width: 34px;
-      height: 34px;
-      content: "";
-    }
-
-    .qr-camera-frame::before {
-      top: -4px;
-      left: -4px;
-      border-top: 7px solid var(--coral);
-      border-left: 7px solid var(--coral);
-      border-radius: 13px 0 0;
-    }
-
-    .qr-camera-frame::after {
-      right: -4px;
-      bottom: -4px;
-      border-right: 7px solid var(--blue);
-      border-bottom: 7px solid var(--blue);
-      border-radius: 0 0 13px;
-    }
-
-    .qr-scanner-status {
-      min-height: 1.5em;
-      margin: 12px 0 0;
-      color: var(--muted);
-      text-align: center;
-      font-size: .72rem;
     }
 
     [data-theme="pastel"] .qr-pairing-panel {
@@ -14366,7 +14297,11 @@ var qrcode = function() {
       const overlays = [...document.querySelectorAll(".modal-backdrop")];
       const top = overlays[overlays.length - 1];
       [...document.body.children].forEach((child) => {
-        if (child.matches(".modal-backdrop, .modal-ghost, .app-toast, #toast-live, #nearby-banner, script")) return;
+        if (child.matches(".modal-ghost, .app-toast, #toast-live, #nearby-banner, script")) return;
+        if (child.classList?.contains("modal-backdrop")) {
+          child.inert = child !== top;
+          return;
+        }
         child.inert = Boolean(top);
       });
       if (top) {
@@ -15856,6 +15791,7 @@ var qrcode = function() {
     }
 
     function navigateToScreen(screen) {
+      if (typeof stopVoiceRecording === "function") stopVoiceRecording({ cancel: true });
       if (state.screen === "nearby") {
         // Nothing is in progress on the pairing screen; leaving it closes the room so a late scan can't hang.
         closeNearbyConnection({ notifyPartner: true });
@@ -18342,14 +18278,7 @@ var qrcode = function() {
           <p class="eyebrow">Private reflection</p>
           <h2 id="reflection-title">Pass the device to ${escapeHTML(round.names[playerIndex])}</h2>
           <p class="dialog-copy" id="reflection-lock-copy">These notes were intentionally hidden from the shared reveal board. Only continue when ${escapeHTML(round.names[playerIndex])} has the screen.</p>
-          <div id="private-note-content" hidden>
-          <div class="saved-round-list" style="margin-top:16px;max-height:42vh">
-            ${entries.length ? entries.map(([id, value]) => {
-              const question = byId.get(id);
-              return `<div class="saved-round"><strong style="display:block;font-size:.72rem">${escapeHTML(question?.prompt || "Saved question")}</strong><p class="answer-copy" style="margin-top:7px">${escapeHTML(value)}</p></div>`;
-            }).join("") : '<p class="topic-note">No private reflections were saved in this round.</p>'}
-          </div>
-          </div>
+          <div id="private-note-content" hidden></div>
           <div class="dialog-actions"><button class="secondary-btn" id="close-reflections" type="button">Close</button><button class="primary-btn" id="unlock-reflections" type="button">I’m ${escapeHTML(round.names[playerIndex])} — show notes</button></div>
         </section>
       `;
@@ -18361,8 +18290,20 @@ var qrcode = function() {
           if (!pin) return;
           if (await hashPin(pin) !== state.privatePinHash) { showToast("That PIN did not match.", { tone: "warning" }); unlockButton.focus(); return; }
         }
-        document.getElementById("reflection-lock-copy").hidden = true;
-        document.getElementById("private-note-content").hidden = false;
+        const noteContainer = overlay.querySelector("#private-note-content");
+        if (noteContainer) {
+          noteContainer.innerHTML = `
+            <div class="saved-round-list" style="margin-top:16px;max-height:42vh">
+              ${entries.length ? entries.map(([id, value]) => {
+                const question = byId.get(id);
+                return `<div class="saved-round"><strong style="display:block;font-size:.72rem">${escapeHTML(question?.prompt || "Saved question")}</strong><p class="answer-copy" style="margin-top:7px">${escapeHTML(value)}</p></div>`;
+              }).join("") : '<p class="topic-note">No private reflections were saved in this round.</p>'}
+            </div>
+          `;
+          noteContainer.hidden = false;
+        }
+        const lockCopy = overlay.querySelector("#reflection-lock-copy");
+        if (lockCopy) lockCopy.hidden = true;
         unlockButton.remove();
         overlay.querySelector("#close-reflections")?.focus();
         playSound("unlock");
@@ -19203,8 +19144,19 @@ var qrcode = function() {
           document.getElementById("session-select-trigger")?.focus({ preventScroll: true });
         });
       });
-      document.getElementById("resume-round")?.addEventListener("click", () => {
+      document.getElementById("resume-round")?.addEventListener("click", async () => {
         if (!state.resumeScreen) { render(); return; }
+        if (state.playStyle !== "nearby" && state.resumeScreen === "question") {
+          const activeName = state.names[state.activePlayer] || `Player ${state.activePlayer + 1}`;
+          const ok = await openConfirmDialog({
+            title: `Resume ${escapeHTML(activeName)}’s turn?`,
+            copy: `This round is currently paused on ${escapeHTML(activeName)}’s turn. Make sure only ${escapeHTML(activeName)} is viewing the screen before resuming.`,
+            confirmLabel: `I am ${escapeHTML(activeName)}`,
+            cancelLabel: "Not now",
+            safeFirst: true
+          });
+          if (!ok) return;
+        }
         state.screen = state.resumeScreen;
         state.resumeScreen = null;
         saveState();
@@ -20630,6 +20582,7 @@ var qrcode = function() {
     }
 
     function openKeepsakeModal(questions, alignment) {
+      if (typeof stopVoiceRecording === "function") stopVoiceRecording({ cancel: true });
       const overlay = document.createElement("div");
       overlay.className = "modal-overlay modal-backdrop";
       const profile = currentRelationshipProfile();
@@ -20848,13 +20801,39 @@ var qrcode = function() {
     let voiceMediaRecorder = null;
     let voiceAudioChunks = [];
     let recordingTimer = null;
+    let activeVoiceStream = null;
+
+    function stopVoiceRecording({ cancel = false } = {}) {
+      if (recordingTimer) {
+        clearInterval(recordingTimer);
+        recordingTimer = null;
+      }
+      if (activeVoiceStream) {
+        activeVoiceStream.getTracks().forEach((track) => track.stop());
+        activeVoiceStream = null;
+      }
+      if (voiceMediaRecorder) {
+        if (cancel) {
+          voiceMediaRecorder.ondataavailable = null;
+          voiceMediaRecorder.onstop = null;
+        }
+        if (voiceMediaRecorder.state === "recording") {
+          try { voiceMediaRecorder.stop(); } catch {}
+        }
+        voiceMediaRecorder = null;
+      }
+      document.querySelectorAll(".voice-record-btn.recording").forEach((btn) => {
+        btn.classList.remove("recording");
+        btn.textContent = "Record Voice Memory";
+      });
+    }
 
     async function toggleVoiceRecording(questionId, button) {
       if (voiceMediaRecorder && voiceMediaRecorder.state === "recording") {
-        voiceMediaRecorder.stop();
-        if (recordingTimer) clearInterval(recordingTimer);
         button.classList.remove("recording");
         button.textContent = "Processing audio…";
+        if (recordingTimer) { clearInterval(recordingTimer); recordingTimer = null; }
+        voiceMediaRecorder.stop();
         return;
       }
       try {
@@ -20862,7 +20841,9 @@ var qrcode = function() {
           showToast("Microphone recording is not supported on this browser.");
           return;
         }
+        stopVoiceRecording({ cancel: true });
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        activeVoiceStream = stream;
         voiceAudioChunks = [];
         voiceMediaRecorder = new MediaRecorder(stream);
         voiceMediaRecorder.ondataavailable = (e) => {
@@ -20878,7 +20859,7 @@ var qrcode = function() {
             saveState();
             playSound("spark");
             showToast("Voice memory saved! 🎙️");
-            stream.getTracks().forEach((track) => track.stop());
+            stopVoiceRecording({ cancel: true });
             render();
           };
           reader.readAsDataURL(blob);
@@ -20891,13 +20872,18 @@ var qrcode = function() {
         recordingTimer = setInterval(() => {
           timeLeft--;
           if (timeLeft <= 0) {
-            clearInterval(recordingTimer);
-            if (voiceMediaRecorder && voiceMediaRecorder.state === "recording") voiceMediaRecorder.stop();
+            if (recordingTimer) { clearInterval(recordingTimer); recordingTimer = null; }
+            if (voiceMediaRecorder && voiceMediaRecorder.state === "recording") {
+              button.classList.remove("recording");
+              button.textContent = "Processing audio…";
+              voiceMediaRecorder.stop();
+            }
           } else {
             button.textContent = `Recording… (${timeLeft}s)`;
           }
         }, 1000);
       } catch (err) {
+        stopVoiceRecording({ cancel: true });
         showToast("Microphone access was denied or unavailable.");
       }
     }
@@ -20941,6 +20927,7 @@ var qrcode = function() {
     // 30-SECOND "ROUND WRAPPED" STORY REEL
     // ----------------------------------------------------
     function openStoryReelModal(questions, alignment, tally) {
+      if (typeof stopVoiceRecording === "function") stopVoiceRecording({ cancel: true });
       const overlay = document.createElement("div");
       overlay.className = "story-reel-modal modal-backdrop";
       overlay.setAttribute("role", "dialog");
@@ -22285,6 +22272,7 @@ var qrcode = function() {
         // Read layout before the class flip so the tap doesn't force a restyle of the board.
         const rect = card.getBoundingClientRect();
         applyCardState(card, shouldReveal);
+        if (!shouldReveal && typeof stopVoiceRecording === "function") stopVoiceRecording({ cancel: true });
         if (shouldReveal && state.turnBasedReveal) {
           state.activeTurn = state.activeTurn === 0 ? 1 : 0;
           const banner = document.querySelector(".turn-banner strong");
@@ -22947,6 +22935,7 @@ var qrcode = function() {
       }
     });
     const handleUnloadTeardown = () => {
+      if (typeof stopVoiceRecording === "function") stopVoiceRecording({ cancel: true });
       if (nearbyLinked()) {
         closeNearbyConnection({ notifyPartner: true, reason: "tab-closed" });
       }
