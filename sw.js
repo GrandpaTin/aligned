@@ -1,6 +1,6 @@
-const CACHE_NAME = "aligned-v43";
+const CACHE_NAME = "aligned-v44";
 const NAVIGATION_TIMEOUT_MS = 3000;
-const APP_FILES = ["./", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./og-image.jpg", "./apple-touch-icon.png", "./icon-maskable-512.png"];
+const APP_FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./og-image.jpg", "./apple-touch-icon.png", "./icon-maskable-512.png"];
 
 function getNormalizedNavUrl(requestUrl) {
   const url = new URL(requestUrl);
@@ -38,6 +38,9 @@ self.addEventListener("fetch", (event) => {
     const cache = await caches.open(CACHE_NAME);
     const cached = await cache.match(request, { ignoreSearch: request.mode === "navigate" });
     if (cached) return cached;
+    if (request.url.endsWith("/manifest.json")) {
+      return cache.match("./manifest.webmanifest");
+    }
     if (request.mode === "navigate") {
       return (await cache.match("./", { ignoreSearch: true })) || (await cache.match("./index.html", { ignoreSearch: true })) || (await cache.match("index.html", { ignoreSearch: true }));
     }

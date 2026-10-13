@@ -544,6 +544,35 @@
   - `npm run build`: `downloads/Aligned-offline.html` (1178 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
 - **Status:** Verified (`00b32af`).
 
+---
+
+### Cycle 17 (2026-10-13 10:20 EDT)
+- **Audits Performed:**
+  - **Service Worker & PWA Freshness (Subagent A):** Audited `sw.js` and `index.html`; identified cache invalidation requirement for Cycle 16/17 production updates; bumped cache name to `aligned-v44`; identified missing explicit `./index.html` navigation target in `PRECACHE_ASSETS`; added manifest fallback alias matching for `manifest.json` -> `manifest.webmanifest`.
+  - **Reliability & Error Boundary Audit (Subagent B):** Audited JSON deserialization pathways and event boundaries in `index.html`; identified unhandled exception vulnerability in `storedStateJSON` where a single corrupt legacy storage key aborted iteration across all keys; identified potential `TypeError` in WebSocket signaling handler when receiving valid JSON primitives (`"null"`, `123`, `true`) without object checking; identified unhandled promise rejection risk on async `handleNearbySignal(payload)`; identified lack of prominent mobile toast feedback on backup file import failures (`showToast(errorMessage, { tone: "warning" })`).
+  - **Accessibility Test Suite Architect (Subagent C):** Designed comprehensive test suite `tests/a11y-keyboard-flow.test.mjs` verifying WCAG AAA focus trap management in stacked dialogs, LIFO dialog inertness restoration, `aria-pressed` / `aria-expanded` state synchronization, 44x44px touch target floors, screen reader live announcements with 60ms debounce, and keyboard shortcut navigation (Arrow, Space, Escape, Tab).
+- **Implemented Fixes:**
+  1. **PWA Cache Invalidation & Precache Robustness (`sw.js`):**
+     - Bumped cache identifier to `aligned-v44`.
+     - Explicitly precached `./index.html` alongside `./`.
+     - Added transparent fallback matching for `manifest.json` in cache-first asset resolution.
+  2. **Storage Migration Exception Safety (`index.html`):**
+     - Wrapped `JSON.parse(legacy)` in isolated `try/catch` inside `storedStateJSON()`, ensuring that any corrupted or truncated legacy key does not terminate migration across remaining fallback keys.
+  3. **WebRTC Signaling Boundary Protection (`index.html`):**
+     - In `socket.addEventListener("message")`, added non-null object validation guard (`if (!payload || typeof payload !== "object") return;`) to defend against arbitrary JSON primitive frames.
+     - Added async rejection catch handler `.catch(() => {})` on `handleNearbySignal(payload)` to prevent uncaught signaling negotiation rejections.
+  4. **Backup Import Failure Feedback (`index.html`):**
+     - Enhanced backup file import handler to dispatch `showToast(errorMessage, { tone: "warning" })` alongside updating inline `status.textContent`, guaranteeing visible feedback on mobile screens where status element is scrolled out of view.
+  5. **Suite 19 Test Suite Expansion (`tests/a11y-keyboard-flow.test.mjs`, `package.json`):**
+     - Authored `tests/a11y-keyboard-flow.test.mjs` featuring 16 comprehensive unit tests across 5 sub-suites.
+     - Added `tests/a11y-keyboard-flow.test.mjs` to `package.json` `"test"` script (19 test suites total, 126 unit tests).
+- **Verification:**
+  - `npm test`: Passed (all 19 test suites, 126 unit tests across 19 runners in 290ms).
+  - `npm run test:e2e`: Passed (all 7 Playwright E2E tests in 92.4s).
+  - `npm run build`: `downloads/Aligned-offline.html` (1179 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
+- **Status:** Verified.
+
+
 
 
 

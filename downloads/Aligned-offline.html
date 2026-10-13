@@ -12030,9 +12030,11 @@ var qrcode = function() {
       for (const legacyKey of LEGACY_STORAGE_KEYS) {
         const legacy = localStorage.getItem(legacyKey);
         if (!legacy) continue;
-        JSON.parse(legacy);
-        localStorage.setItem(STORAGE_KEY, legacy);
-        return legacy;
+        try {
+          JSON.parse(legacy);
+          localStorage.setItem(STORAGE_KEY, legacy);
+          return legacy;
+        } catch {}
       }
       return null;
     }
@@ -12721,7 +12723,8 @@ var qrcode = function() {
           if (socket !== nearbySignalingSocket || socket.__manualClose) return;
           let payload;
           try { payload = JSON.parse(event.data); } catch { return; }
-          handleNearbySignal(payload);
+          if (!payload || typeof payload !== "object") return;
+          handleNearbySignal(payload).catch(() => {});
         });
         socket.addEventListener("error", () => {
           if (socket.readyState !== WebSocket.OPEN) reject(new Error("The connection service could not be reached."));
@@ -18614,11 +18617,13 @@ var qrcode = function() {
             return;
           }
           status.style.color = "var(--coral)";
-          status.textContent = importError instanceof SyntaxError
+          const errorMessage = importError instanceof SyntaxError
             ? "That file isn't a readable Aligned backup. Choose a .json or .aligned file exported from Aligned."
             : /quota/i.test(message)
               ? "This browser is out of storage space for the backup. Free some space or export fewer rounds."
               : message || "That backup could not be imported.";
+          status.textContent = errorMessage;
+          showToast(errorMessage, { tone: "warning" });
         } finally {
           importInput.value = "";
         }
