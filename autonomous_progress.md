@@ -124,3 +124,42 @@
 
 ---
 
+### Cycle 5 (2026-10-13 01:20 EDT)
+- **Audits Performed:**
+  - **Subagent A (PWA Caching, Socket Lifecycle & CLS Elimination):** Audited `sw.js` cache bifurcation where navigation to `/index.html` created duplicate cache entries vs canonical `./` scope root; discovered zombie WebSocket `onmessage` event listener leaks on replaced/reconnecting sockets delivering out-of-order signals to new peer connections; found layout shifts (CLS) on radar compass SVG and screen vertical bounce.
+  - **Subagent B (Custom Packs, Foldables & Modal A11y):** Audited custom question pack import pipeline: identified runtime crash risks on malformed item objects, unconstrained prompt lengths, corrupt Base64 URL hashes lingering without cleanup, and duplicate Storybook buttons inside the Storybook modal; identified initial modal focus bug in `syncModalState()` leaving focus on background inert elements; identified 280px-320px ultra-narrow display button wrapping issues.
+  - **Subagent C (Test Coverage & Automation Expansion):** Created dedicated custom pack unit test suite (`tests/custom-packs.test.mjs`); added static manifest integrity, service worker precache disk matching, and procedural Web Audio constraints into `tests/production-check.mjs`; expanded `tests/round-lifecycle.test.mjs` with Playwright settings persistence and custom pack launch E2E tests.
+- **Implemented Fixes:**
+  1. **PWA Service Worker Canonical Cache Key Normalization (`sw.js`):**
+     - Normalized navigation request keys ending with `/index.html` to the canonical precached scope root URL.
+     - Bumped cache version to `aligned-v38`.
+     - Enhanced `fromCache` fallback cascade checking `./`, `./index.html`, and `index.html`.
+  2. **WebRTC Signaling Socket Lifecycle & Identity Guard (`index.html`):**
+     - Added strict socket identity verification in `connectNearbySignaling`: `if (socket !== nearbySignalingSocket || socket.__manualClose) return;`, eliminating phantom WebRTC offers, duplicate answers, and spurious room teardown from superseded TCP connections.
+  3. **Cumulative Layout Shift (CLS) & Responsive Layout Stabilization (`index.html`):**
+     - Added `aspect-ratio: 1 / 1;` to `.radar-svg` to prevent container collapse prior to SVG layout computation.
+     - Replaced `margin: auto 0;` on `.screen` with `margin: 0; padding-bottom: 24px;`, eliminating vertical layout bouncing between screens of varying height.
+     - Added `overscroll-behavior: contain;` to `.storybook-modal` to prevent mobile background scroll bleed.
+     - Added `@media (max-width: 360px)` rules enforcing full-width primary action buttons on ultra-narrow displays (e.g. Galaxy Z Fold cover screens) and compact Storybook padding.
+     - Made landscape action unpinning universal across all devices under 520px height by dropping the `(pointer: coarse)` constraint.
+  4. **Universal Modal Initial Focus & Accessibility Hardening (`index.html`):**
+     - Fixed `syncModalState()` so newly opened modals immediately place focus on their cancel or primary button: `if (!top.contains(document.activeElement)) ...`, preventing trapped focus on inert background elements.
+     - Added `aria-labelledby="pack-share-title"` to Pack Share Modal, and `aria-labelledby="pack-import-title"` to Pack Import Dialog.
+     - Conditionally suppressed the duplicate "Keepsake Storybook" button when the Resonance Compass is rendered inside `openStorybookModal()`.
+  5. **Defensive Custom Pack Import Pipeline (`index.html`):**
+     - Sanitized imported prompts: minimum 5 characters, clamped to 500 characters, validated slider labels, and validated topics against `TOPIC_OPTIONS` with safe fallback to `"connection"`.
+     - Added intra-pack prompt deduplication.
+     - Cleaned up corrupt URL hashes with `history.replaceState` in catch block and provided friendly user-facing toast feedback.
+     - Purged `state.seenIds` when deleting custom questions from Library.
+  6. **Test Suite Expansion & Production Verification (`tests/custom-packs.test.mjs`, `tests/production-check.mjs`, `tests/round-lifecycle.test.mjs`):**
+     - Created `tests/custom-packs.test.mjs` (7 unit tests covering creation, sanitization, XSS escaping, ID collision, topic fallback, and ramp generation).
+     - Enhanced `tests/production-check.mjs` to verify manifest theme color `#0f172a`, icon disk sizes, `sw.js` precache disk matching, and procedural Web Audio constraints.
+     - Added 2 Playwright E2E tests verifying visual/sound theme persistence across reload and custom pack round launching from the Home UI.
+     - Integrated `tests/custom-packs.test.mjs` into `package.json` `"test"` script.
+- **Verification:**
+  - `npm test`: Passed (all 6 test suites: production check, signaling security, daily ritual lifecycle, radar storybook, backup schema resilience, and custom pack automation — 19 unit tests across 4 test runners in 165ms).
+  - `npm run test:e2e`: Passed (all 3 Playwright E2E tests: full 5-question round lifecycle, settings persistence across reload, and custom pack launch in 85.5s).
+  - `npm run build`: `downloads/Aligned-offline.html` (1144 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
+- **Status:** Verified and ready for commit.
+
+---

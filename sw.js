@@ -1,4 +1,4 @@
-const CACHE_NAME = "aligned-v37";
+const CACHE_NAME = "aligned-v38";
 const NAVIGATION_TIMEOUT_MS = 3000;
 const APP_FILES = ["./", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./og-image.jpg", "./apple-touch-icon.png", "./icon-maskable-512.png"];
 
@@ -9,10 +9,8 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    // Cache Storage is shared by every app on this origin, so only this app's own old versions are removed.
-    caches.keys().then((keys) => Promise.all(keys.filter((key) => /^(aligned|we-align)-v\d+$/.test(key) && key !== CACHE_NAME).map((key) => caches.delete(key))))
-  );
+  // Cache Storage is shared by every app on this origin, so only this app's own old versions are removed.
+  caches.keys().then((keys) => Promise.all(keys.filter((key) => /^(aligned|we-align)-v\d+$/.test(key) && key !== CACHE_NAME).map((key) => caches.delete(key))))
   self.clients.claim();
 });
 
@@ -27,7 +25,15 @@ self.addEventListener("fetch", (event) => {
         if (response.ok && response.type === "basic" && new URL(request.url).origin === self.location.origin) {
           // Shared links carry unique tracking queries (fbclid, utm_*); one entry per page keeps the cache from piling up copies.
           let key = request;
-          if (request.mode === "navigate") { const url = new URL(request.url); url.search = ""; url.hash = ""; key = url.href; }
+          if (request.mode === "navigate") {
+            const url = new URL(request.url);
+            url.search = "";
+            url.hash = "";
+            if (url.pathname.endsWith("/index.html")) {
+              url.pathname = url.pathname.slice(0, -"index.html".length);
+            }
+            key = url.href;
+          }
           try {
             const cache = await caches.open(CACHE_NAME);
             await cache.put(key, response.clone());
@@ -43,7 +49,7 @@ self.addEventListener("fetch", (event) => {
     const cached = await caches.match(request, { ignoreSearch: request.mode === "navigate" });
     if (cached) return cached;
     if (request.mode === "navigate") {
-      return (await caches.match("./", { ignoreSearch: true })) || (await caches.match("index.html", { ignoreSearch: true }));
+      return (await caches.match("./", { ignoreSearch: true })) || (await caches.match("./index.html", { ignoreSearch: true })) || (await caches.match("index.html", { ignoreSearch: true }));
     }
     return undefined;
   };

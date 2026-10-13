@@ -181,6 +181,39 @@ assert(compassHtml.includes('class="radar-polygon"'), "Resonance compass must re
 assert(compassHtml.includes('class="radar-axis"'), "Resonance compass must render radar axes");
 assert(compassHtml.includes('Depth'), "Resonance compass must include Depth axis for specialty topics");
 
+// Manifest Theme Color & Icon Integrity
+const metaThemeColorMatch = html.match(/<meta\s+name="theme-color"\s+content="([^"]+)"/i);
+assert(metaThemeColorMatch, "HTML must contain <meta name=\"theme-color\">");
+assert.equal(manifest.theme_color, metaThemeColorMatch[1], "Manifest theme_color must match HTML meta theme-color");
+assert.equal(manifest.theme_color, "#0f172a", "Theme color must match midnight theme #0f172a");
+assert.equal(manifest.background_color, "#0f172a", "Background color must match midnight theme #0f172a");
+
+assert(manifest.icons.some((i) => i.sizes === "192x192" && i.type === "image/png"), "Manifest must include 192x192 png icon");
+assert(manifest.icons.some((i) => i.sizes === "512x512" && i.type === "image/png" && i.purpose === "any"), "Manifest must include 512x512 png icon");
+for (const icon of manifest.icons) {
+  const filePath = resolve(root, icon.src.replace(/^\.\//, ""));
+  assert(existsSync(filePath) && readFileSync(filePath).length > 0, `Icon file must exist and be non-empty: ${filePath}`);
+}
+
+// Service Worker Precache Integrity
+const appFilesMatch = serviceWorker.match(/const\s+APP_FILES\s*=\s*(\[[^\]]+\]);/);
+assert(appFilesMatch, "sw.js must define APP_FILES array");
+const appFiles = vm.runInNewContext(appFilesMatch[1]);
+assert(Array.isArray(appFiles) && appFiles.length >= 5, "APP_FILES must contain precached files");
+appFiles.forEach((file) => {
+  const diskPath = file === "./" ? resolve(root, "index.html") : resolve(root, file.replace(/^\.\//, ""));
+  assert(existsSync(diskPath), `Service worker precached file missing from disk: ${file} -> ${diskPath}`);
+});
+manifest.icons.forEach((icon) => {
+  assert(appFiles.includes(icon.src), `Manifest icon ${icon.src} must be precached in sw.js APP_FILES for offline PWA reliability`);
+});
+
+// Sound Asset & Synthesis Architecture
+const externalAudio = html.match(/["'](?:https?:\/\/|\/|\.\/)[^"']+\.(?:mp3|wav|ogg|m4a|aac)["']/gi);
+assert(!externalAudio, `Found external audio file references; sound must remain self-contained procedural Web Audio: ${externalAudio}`);
+assert(html.includes("cute: { semitones: 0, spacing: 1 }") && html.includes("dreamy:") && html.includes("arcade:"), "SOUND_THEMES must define cute, dreamy, arcade");
+assert(html.includes('["synth", "rain", "hearth"]'), "Ambient soundscapes must support synth, rain, hearth");
+
 const sliderCount = questions.filter((question) => question.type === "slider").length;
 const textCount = questions.length - sliderCount;
 console.log(`Production checks passed: ${questions.length} questions (${sliderCount} sliders, ${textCount} written), ${manifest.icons.length} app icons, QR generation verified.`);

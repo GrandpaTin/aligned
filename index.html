@@ -2709,7 +2709,8 @@ var qrcode = function() {
 
     .screen {
       width: 100%;
-      margin: auto 0;
+      margin: 0;
+      padding-bottom: 24px;
       animation: enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 
@@ -3591,6 +3592,7 @@ var qrcode = function() {
     .radar-svg {
       max-width: 320px;
       width: 100%;
+      aspect-ratio: 1 / 1;
       height: auto;
       overflow: visible;
     }
@@ -3704,6 +3706,7 @@ var qrcode = function() {
       z-index: 2500;
       background: #030712;
       overflow-y: auto;
+      overscroll-behavior: contain;
       padding: 24px 16px;
       display: flex;
       justify-content: center;
@@ -10245,6 +10248,11 @@ var qrcode = function() {
       /* !important: the phone compaction block pins every .secondary-btn to padding 0 10px !important. */
       .question-actions #back-question { flex: 0 0 auto; padding-inline: 14px !important; }
     }
+    @media (max-width: 360px) {
+      .question-actions .primary-btn { width: 100% !important; margin-left: 0 !important; }
+      .storybook-modal { padding: 12px 8px !important; }
+      .storybook-sheet { padding: 16px 10px !important; }
+    }
     .screen.question-screen { margin-top: 0; }
     .quick-pick-hint { margin: 4px 0 0; color: var(--muted); font-size: max(12px, .78rem); }
     @media (min-width: 601px) {
@@ -10360,7 +10368,7 @@ var qrcode = function() {
     @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) { .intensity-option:hover .intensity-card { transform: none; } }
     @media (hover: hover) and (pointer: fine) { :where(.reduced-motion) .intensity-option:hover .intensity-card { transform: none; } }
     /* Phone landscape: the sticky action bar would cover the prompt itself, so it scrolls with the card. */
-    @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+    @media (orientation: landscape) and (max-height: 520px) {
       .question-screen .turn-name { font-size: 1.15rem !important; line-height: 1.2; }
       .question-screen .question-header .eyebrow { margin-bottom: 0; }
       .question-screen .quick-guess, .question-screen .guess-panel { margin-top: 8px; padding: 6px 10px; }
@@ -12669,6 +12677,7 @@ var qrcode = function() {
           resolve();
         }, { once: true });
         socket.addEventListener("message", (event) => {
+          if (socket !== nearbySignalingSocket || socket.__manualClose) return;
           let payload;
           try { payload = JSON.parse(event.data); } catch { return; }
           handleNearbySignal(payload);
@@ -14212,7 +14221,7 @@ var qrcode = function() {
       });
       if (top) {
         armBackGuard();
-        if (modalWasOpen && !top.contains(document.activeElement)) {
+        if (!top.contains(document.activeElement)) {
           (top.querySelector("[data-modal-cancel], .primary-btn, button") || top.querySelector("[tabindex]"))?.focus({ preventScroll: true });
         }
         modalWasOpen = true;
@@ -17364,6 +17373,7 @@ var qrcode = function() {
             delete state.questionTagOverrides[id];
             state.customPacks = state.customPacks.map((pack) => ({ ...pack, questionIds: pack.questionIds.filter((questionId) => questionId !== id) }));
             state.answeredQuestionIds = state.answeredQuestionIds.filter((questionId) => questionId !== id);
+            state.seenIds = (state.seenIds || []).filter((questionId) => questionId !== id);
             saveState();
             playSound("delete");
             renderLibrary();
@@ -17612,6 +17622,7 @@ var qrcode = function() {
 
       const summaryText = points.map((p) => `${p.label}: ${p.val}%`).join(", ");
 
+      const inStorybook = Boolean(arguments[1]?.inStorybook);
       return `
         <article class="journal-card radar-compass-card" style="margin-top:16px" aria-labelledby="radar-heading">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
@@ -17619,7 +17630,7 @@ var qrcode = function() {
               <h3 id="radar-heading" style="margin:0 0 2px">Resonance Compass</h3>
               <p style="margin:0;font-size:0.82rem;color:var(--text-2)">6-axis balance across relationship dimensions</p>
             </div>
-            <button class="secondary-btn" id="open-storybook-btn" type="button" style="padding:6px 14px;font-size:0.8rem">📖 Keepsake Storybook</button>
+            ${inStorybook ? "" : '<button class="secondary-btn" id="open-storybook-btn" type="button" style="padding:6px 14px;font-size:0.8rem">📖 Keepsake Storybook</button>'}
           </div>
           <div class="radar-container">
             <svg class="radar-svg" viewBox="0 0 220 220" role="img" aria-label="Resonance Compass: ${escapeHTML(summaryText)}" aria-describedby="resonance-compass-table">
@@ -17676,7 +17687,7 @@ var qrcode = function() {
           <div class="storybook-section">
             <h4><span aria-hidden="true">🧭</span> Resonance Compass</h4>
             <div style="display:flex;justify-content:center">
-              ${resonanceCompassMarkup(rounds)}
+              ${resonanceCompassMarkup(rounds, { inStorybook: true })}
             </div>
           </div>
 
@@ -20824,9 +20835,9 @@ var qrcode = function() {
       const qrSvg = qr.createSvgTag(5);
 
       overlay.innerHTML = `
-        <section class="exit-dialog" role="dialog" aria-modal="true" style="max-width:440px;text-align:center">
+        <section class="exit-dialog" role="dialog" aria-modal="true" aria-labelledby="pack-share-title" style="max-width:440px;text-align:center">
           <p class="eyebrow">Share Questions</p>
-          <h2>${escapeHTML(packTitle)} QR Code</h2>
+          <h2 id="pack-share-title">${escapeHTML(packTitle)} QR Code</h2>
           <p class="dialog-copy">Scan with a phone camera to import ${questionsToShare.length} question${questionsToShare.length === 1 ? "" : "s"} instantly into another library.</p>
           <div style="background:#fff;padding:14px;border-radius:16px;display:inline-block;margin:10px auto">
             ${qrSvg}
@@ -20857,10 +20868,31 @@ var qrcode = function() {
       try {
         const raw = decodeURIComponent(escape(atob(decodeURIComponent(match[1]))));
         const items = JSON.parse(raw);
-        if (!Array.isArray(items) || !items.length) return;
         history.replaceState(null, "", window.location.pathname + window.location.search);
+        if (!Array.isArray(items) || !items.length) {
+          showToast("This pack link contained no questions.", { tone: "warning" });
+          return;
+        }
         const existingPrompts = new Set(getQuestionCatalog().map((q) => q.prompt.trim().toLowerCase()));
-        const newItems = items.filter((item) => item.prompt && !existingPrompts.has(item.prompt.trim().toLowerCase()));
+        const seenInImport = new Set();
+        const validTopics = new Set(TOPIC_OPTIONS.map((t) => t.id));
+        const newItems = items.filter((item) => {
+          if (!item || typeof item !== "object" || typeof item.prompt !== "string") return false;
+          const cleanPrompt = item.prompt.trim();
+          if (cleanPrompt.length < 5) return false;
+          const key = cleanPrompt.toLowerCase();
+          if (existingPrompts.has(key) || seenInImport.has(key)) return false;
+          seenInImport.add(key);
+          return true;
+        }).map((item) => ({
+          prompt: item.prompt.trim().slice(0, 500),
+          type: item.type === "text" ? "text" : "slider",
+          labels: Array.isArray(item.labels) && item.labels.length === 2
+            ? [String(item.labels[0] || "Low").slice(0, 40), String(item.labels[1] || "High").slice(0, 40)]
+            : ["Low", "High"],
+          topic: validTopics.has(item.topic) ? item.topic : "connection"
+        }));
+
         if (!newItems.length) {
           showToast("These questions are already in your library!");
           return;
@@ -20868,9 +20900,9 @@ var qrcode = function() {
         const overlay = document.createElement("div");
         overlay.className = "modal-backdrop";
         overlay.innerHTML = `
-          <section class="exit-dialog" role="dialog" aria-modal="true" style="max-width:440px;text-align:center">
+          <section class="exit-dialog" role="dialog" aria-modal="true" aria-labelledby="pack-import-title" style="max-width:440px;text-align:center">
             <p class="eyebrow">Import Pack</p>
-            <h2>Shared Questions Found</h2>
+            <h2 id="pack-import-title">Shared Questions Found</h2>
             <p class="dialog-copy">Your partner shared ${newItems.length} question${newItems.length === 1 ? "" : "s"} with you. Add them to your library?</p>
             <div style="max-height:160px;overflow-y:auto;text-align:left;padding:8px 12px;background:rgba(255,255,255,0.05);border-radius:10px;margin:10px 0;font-size:0.84rem">
               ${newItems.map((q) => `<div>• ${escapeHTML(q.prompt)}</div>`).join("")}
@@ -20884,13 +20916,13 @@ var qrcode = function() {
         document.body.appendChild(overlay);
         overlay.querySelector("#confirm-import-pack")?.addEventListener("click", () => {
           state.customQuestions = state.customQuestions || [];
-          newItems.forEach((item) => {
+          newItems.forEach((item, idx) => {
             state.customQuestions.push({
-              id: `custom_${Date.now()}_${randomIndex(100000)}`,
-              prompt: item.prompt.trim(),
-              type: item.type === "text" ? "text" : "slider",
-              labels: Array.isArray(item.labels) && item.labels.length === 2 ? item.labels : ["Low", "High"],
-              topic: item.topic || "connection",
+              id: `custom_${Date.now()}_${idx}_${randomIndex(1000000)}`,
+              prompt: item.prompt,
+              type: item.type,
+              labels: item.labels,
+              topic: item.topic,
               category: "Custom",
               custom: true
             });
@@ -20903,7 +20935,8 @@ var qrcode = function() {
         });
         overlay.querySelector("[data-modal-cancel]")?.addEventListener("click", () => overlay.remove());
       } catch (e) {
-        console.error("Pack import error:", e);
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+        showToast("This pack link could not be read.", { tone: "warning" });
       }
     }
 

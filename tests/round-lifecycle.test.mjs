@@ -141,4 +141,121 @@ describe("End-to-End Round Lifecycle Simulation", () => {
 
     await page.close();
   });
+
+  it("persists visual theme, sound theme, and ambient mix across page reload", async () => {
+    const page = await browser.newPage();
+    const errors = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+
+    await page.goto(baseUrl);
+    await page.evaluate(() => {
+      const state = JSON.parse(localStorage.getItem("aligned-state-v1") || "{}");
+      state.version = 2;
+      state.tutorialSeen = true;
+      localStorage.setItem("aligned-state-v1", JSON.stringify(state));
+      document.querySelector("#tutorial-finish")?.closest(".modal-backdrop")?.remove();
+    });
+    await page.waitForTimeout(300);
+
+    // Open Settings via header #settings-button
+    await page.click("#settings-button");
+    await page.waitForSelector("#sound-theme", { timeout: 4000 });
+
+    // Change sound theme to dreamy
+    await page.selectOption("#sound-theme", "dreamy");
+
+    // Adjust synth ambient slider
+    const synthSlider = page.locator("#synth-volume");
+    if (await synthSlider.count()) {
+      await synthSlider.fill("0.4");
+      await synthSlider.dispatchEvent("change");
+    }
+
+    await page.waitForTimeout(500);
+
+    // Reload page
+    await page.reload();
+    await page.waitForTimeout(600);
+
+    // Verify localStorage persistence
+    const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("aligned-state-v1")));
+    assert.equal(saved.soundTheme, "dreamy", "Sound theme must persist as dreamy");
+    if (saved.ambientMix) {
+      assert.equal(saved.ambientMix.synth, 0.4, "Ambient synth volume must persist as 0.4");
+    }
+
+    // Verify UI reflects restored preferences
+    await page.click("#settings-button");
+    await page.waitForSelector("#sound-theme", { timeout: 4000 });
+    const selectedSound = await page.locator("#sound-theme").inputValue();
+    assert.equal(selectedSound, "dreamy", "Settings UI sound theme dropdown must be restored to dreamy");
+
+    assert.equal(errors.length, 0, `Page errors encountered: ${errors.join("; ")}`);
+    await page.close();
+  });
+
+  it("launches a custom pack round when selected from Home setup", async () => {
+    const page = await browser.newPage();
+    const errors = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+
+    await page.goto(baseUrl);
+    await page.waitForTimeout(300);
+
+    // Dismiss tutorial if active
+    const tut = page.locator("#tutorial-finish");
+    if (await tut.isVisible({ timeout: 1200 }).catch(() => false)) {
+      await tut.click();
+      await page.waitForTimeout(300);
+    }
+
+    // Seed state with custom pack and names directly into localStorage
+    await page.evaluate(() => {
+      const state = JSON.parse(localStorage.getItem("aligned-state-v1") || "{}");
+      state.version = 2;
+      state.screen = "setup";
+      state.tutorialSeen = true;
+      state.names = ["Robin", "Terry"];
+      state.customQuestions = [
+        { id: "cq_test_1", prompt: "Our best memory this summer?", type: "text", topic: "fun", category: "Custom · Fun" },
+        { id: "cq_test_2", prompt: "How adventurous should we be this weekend?", type: "slider", labels: ["Chill", "Wild"], topic: "lifestyle", category: "Custom · Lifestyle" },
+        { id: "cq_test_3", prompt: "What makes you feel loved most?", type: "text", topic: "love", category: "Custom · Love" }
+      ];
+      state.customPacks = [
+        {
+          id: "pack_test_e2e",
+          name: "Test E2E Adventure Pack",
+          questionIds: ["cq_test_1", "cq_test_2", "cq_test_3"]
+        }
+      ];
+      localStorage.setItem("aligned-state-v1", JSON.stringify(state));
+    });
+
+    await page.reload();
+    await page.waitForTimeout(600);
+
+    // Verify pack appears under "Your packs" on Home
+    const packButton = page.locator('[data-start-pack="pack_test_e2e"]');
+    await packButton.waitFor({ state: "visible", timeout: 4000 });
+    assert(await packButton.isVisible(), "Custom pack start button must be visible under Your Packs");
+
+    // Click to start round with the custom pack
+    await packButton.click();
+    await page.waitForTimeout(600);
+
+    // Verify round launched directly into question screen
+    await page.waitForSelector("#question-form", { timeout: 6000 });
+    assert(await page.locator("#question-form").isVisible(), "Question form must appear for active round");
+
+    // Verify active game state
+    const roundState = await page.evaluate(() => JSON.parse(localStorage.getItem("aligned-state-v1")));
+    assert.equal(roundState.sessionPreset, "pack", "Session preset must be pack");
+    assert.equal(roundState.selectedQuestionIds.length, 3, "Selected questions must match custom pack questions");
+    assert(roundState.selectedQuestionIds.includes("cq_test_1"), "Must include custom question 1");
+    assert(roundState.selectedQuestionIds.includes("cq_test_2"), "Must include custom question 2");
+    assert(roundState.selectedQuestionIds.includes("cq_test_3"), "Must include custom question 3");
+
+    assert.equal(errors.length, 0, `Page errors encountered: ${errors.join("; ")}`);
+    await page.close();
+  });
 });
