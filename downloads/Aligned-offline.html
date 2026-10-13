@@ -12832,7 +12832,7 @@ var qrcode = function() {
       nearbyPeerConnection = null;
       nearbyIceServers = [];
       nearbyPendingCandidates = [];
-      nearbyOutbox = [];
+      if (forgetSession) nearbyOutbox = [];
       nearbyNegotiationFailures = 0;
       nearbyRuntime = freshNearbyRuntime();
       if (forgetSession) clearNearbySession();
@@ -12851,8 +12851,8 @@ var qrcode = function() {
         let key = `${payload.type}:${payload.questionId || payload.change?.id || ""}`;
         if (payload.type === "reaction" || payload.type === "nudge") {
           key = `${payload.type}:${Date.now()}_${Math.random()}`;
-        } else if (payload.type === "reveal-state" && payload.all !== undefined) {
-          key = "reveal-state:all";
+        } else if (payload.type === "reveal-state" && (payload.all !== undefined || payload.revealedIds !== undefined)) {
+          key = payload.all !== undefined ? "reveal-state:all" : "reveal-state:snapshot";
           nearbyOutbox = nearbyOutbox.filter((item) => !item.key.startsWith("reveal-state:"));
         }
         nearbyOutbox = [...nearbyOutbox.filter((item) => item.key !== key), { key, payload }].slice(-60);
@@ -12862,8 +12862,22 @@ var qrcode = function() {
     }
 
     function flushNearbyOutbox() {
-      const pending = nearbyOutbox.splice(0);
-      pending.forEach(({ payload }) => sendNearbyMessage(payload));
+      if (!nearbyChannelOpen() || !nearbyOutbox.length) return;
+      if (nearbyDataChannel?.bufferedAmount > 65536) {
+        nearbyDataChannel.addEventListener("bufferedamountlow", () => flushNearbyOutbox(), { once: true });
+        return;
+      }
+      const pending = [...nearbyOutbox];
+      nearbyOutbox = [];
+      for (let i = 0; i < pending.length; i++) {
+        const { payload } = pending[i];
+        try {
+          nearbyDataChannel.send(JSON.stringify(payload));
+        } catch {
+          nearbyOutbox = [...pending.slice(i), ...nearbyOutbox].slice(-60);
+          break;
+        }
+      }
       updateNearbyBanner();
     }
 
@@ -13104,7 +13118,8 @@ var qrcode = function() {
         dailyRitual: {
           completedDates: state.dailyRitual?.completedDates || [],
           answers: state.dailyRitual?.answers || {}
-        }
+        },
+        ambientMix: state.ambientMix || { synth: 0.8, rain: 0, hearth: 0 }
       }, { queue: false });
       if (!state.nearbyRoundId || state.playStyle !== "nearby") return;
       if (state.screen === "question") sendNearbyMessage({ type: "progress", roundId: state.nearbyRoundId, answered: state.questionIndex, total: state.selectedQuestionIds.length });
@@ -13367,6 +13382,15 @@ var qrcode = function() {
         if (payload.dailyRitual && typeof payload.dailyRitual === "object") {
           mergeNearbyDailyRitual(payload.dailyRitual);
         }
+        if (payload.ambientMix && typeof payload.ambientMix === "object") {
+          state.ambientMix = {
+            synth: Math.max(0, Math.min(1, Number(payload.ambientMix.synth) || 0)),
+            rain: Math.max(0, Math.min(1, Number(payload.ambientMix.rain) || 0)),
+            hearth: Math.max(0, Math.min(1, Number(payload.ambientMix.hearth) || 0))
+          };
+          saveState();
+          if (ambientSoundscape && ambientSoundscape.isPlaying) ambientSoundscape.updateMix();
+        }
         if (typeof payload.appVersion === "string" && payload.appVersion !== APP_VERSION && compareVersions(payload.appVersion, APP_VERSION) > 0) {
           showToast(`The other phone has a newer Aligned (${payload.appVersion.slice(0, 12)}). Everything still works; update this one when you can.`);
         } else if (typeof payload.appVersion === "string" && payload.appVersion !== APP_VERSION && compareVersions(payload.appVersion, APP_VERSION) < 0) {
@@ -13551,8 +13575,8 @@ var qrcode = function() {
 
     function attachNearbyChannel(channel) {
       nearbyDataChannel = channel;
-      channel.addEventListener("open", () => {
-        if (nearbyDataChannel !== channel) return;
+      const onChannelOpen = () => {
+        if (nearbyDataChannel !== channel || channel.__lost) return;
         nearbyNegotiationFailures = 0;
         nearbyRuntime.partnerLeft = false;
         clearTimeout(nearbyPeerLostTimer);
@@ -13566,18 +13590,6 @@ var qrcode = function() {
         }
         setNearbyStatus("connected");
         playSound("match");
-        sendNearbyHello();
-        flushNearbyOutbox();
-        if (nearbyRuntime.role === "host" && state.screen === "nearby" && !nearbyRuntime.roundStarted && !state.nearbyRepairScreen) {
-          clearTimeout(nearbyAutoStartTimer);
-          nearbyAutoStartTimer = window.setTimeout(startNearbyRound, 650);
-        }
-      });
-      channel.addEventListener("message", (message) => {
-        nearbyLastPeerMessageAt = Date.now();
-        handleNearbyMessage(message);
-      });
-      channel.addEventListener("open", () => {
         nearbyLastPeerMessageAt = Date.now();
         clearInterval(nearbyPeerWatchTimer);
         nearbyPeerWatchTimer = window.setInterval(() => {
@@ -13592,6 +13604,21 @@ var qrcode = function() {
             try { channel.close(); } catch {}
           }
         }, 5000);
+        sendNearbyHello();
+        flushNearbyOutbox();
+        if (nearbyRuntime.role === "host" && state.screen === "nearby" && !nearbyRuntime.roundStarted && !state.nearbyRepairScreen) {
+          clearTimeout(nearbyAutoStartTimer);
+          nearbyAutoStartTimer = window.setTimeout(startNearbyRound, 650);
+        }
+      };
+      if (channel.readyState === "open") {
+        onChannelOpen();
+      } else {
+        channel.addEventListener("open", onChannelOpen);
+      }
+      channel.addEventListener("message", (message) => {
+        nearbyLastPeerMessageAt = Date.now();
+        handleNearbyMessage(message);
       });
       channel.addEventListener("close", () => handleNearbyChannelLost(channel));
     }
@@ -18120,7 +18147,8 @@ var qrcode = function() {
               </div>
             </div>
             <div class="journal-controls">
-              <input type="search" class="journal-search" id="journal-search-input" placeholder="Search prompts, notes, and topics…">
+              <input type="search" class="journal-search" id="journal-search-input" placeholder="Search prompts, notes, and topics…" aria-label="Search saved rounds" aria-describedby="journal-search-status">
+              <div id="journal-search-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
               <div class="journal-filters" role="group" aria-label="Journal filters">
                 <button type="button" class="journal-filter-chip active" data-journal-filter="all">All rounds</button>
                 <button type="button" class="journal-filter-chip" data-journal-filter="high">90%+ Aligned</button>
@@ -18129,6 +18157,7 @@ var qrcode = function() {
               </div>
             </div>
             <div class="round-history-list" id="round-history-container">
+              <p id="journal-empty-results" class="topic-note" style="display:none;padding:16px 0;text-align:center;">No matching rounds found.</p>
               ${rounds.map((round) => {
                 const overall = Number(round.alignment.overall) || 0;
                 const fit = Number(round.alignment.fitOverall ?? round.alignment.overall) || 0;
@@ -18201,7 +18230,10 @@ var qrcode = function() {
       const applyJournalFilter = () => {
         const q = (searchInput?.value || "").toLowerCase().trim();
         const activeChip = document.querySelector(".journal-filter-chip.active")?.dataset.journalFilter || "all";
+        let matchCount = 0;
+        let totalCount = 0;
         document.querySelectorAll("#round-history-container .round-history-item").forEach((el) => {
+          totalCount++;
           const score = Number(el.dataset.roundScore || 0);
           const hasNotes = el.dataset.hasNotes === "true";
           const searchData = el.dataset.roundSearch || "";
@@ -18210,8 +18242,20 @@ var qrcode = function() {
           if (activeChip === "high") matchF = score >= 90;
           else if (activeChip === "gaps") matchF = score < 70;
           else if (activeChip === "notes") matchF = hasNotes;
-          el.style.display = (matchQ && matchF) ? "" : "none";
+          const visible = matchQ && matchF;
+          el.style.display = visible ? "" : "none";
+          if (visible) matchCount++;
         });
+        const emptyEl = document.getElementById("journal-empty-results");
+        if (emptyEl) emptyEl.style.display = (matchCount === 0 && totalCount > 0) ? "" : "none";
+        const liveStatus = document.getElementById("journal-search-status");
+        if (liveStatus) {
+          if (!q && activeChip === "all") {
+            liveStatus.textContent = `Showing all ${totalCount} saved ${totalCount === 1 ? "round" : "rounds"}.`;
+          } else {
+            liveStatus.textContent = matchCount === 0 ? "No matching rounds found." : `${matchCount} ${matchCount === 1 ? "round" : "rounds"} found.`;
+          }
+        }
       };
       searchInput?.addEventListener("input", applyJournalFilter);
       filterChips.forEach((chip) => chip.addEventListener("click", () => {
@@ -18418,8 +18462,8 @@ var qrcode = function() {
           state.ambientMix[layer] = val;
           scheduleSaveState();
           if (ambientSoundscape) ambientSoundscape.updateMix();
-          if (state.playStyle === "nearby" && nearbyChannelOpen()) {
-            sendNearbyMessage({ type: "ambient-mix", mix: state.ambientMix }, { queue: false });
+          if (state.playStyle === "nearby") {
+            sendNearbyMessage({ type: "ambient-mix", mix: state.ambientMix }, { queue: true });
           }
         });
         input?.addEventListener("change", saveState);
@@ -20934,6 +20978,9 @@ var qrcode = function() {
 
       let currentSlide = 0;
       let slideTimer = null;
+      let isPaused = false;
+      let elapsed = 0;
+      const duration = 5000;
       const totalSlides = slides.length;
 
       overlay.innerHTML = `
@@ -20943,7 +20990,12 @@ var qrcode = function() {
           </div>
           <div class="story-top-row">
             <div class="story-header-title"><span aria-hidden="true">✦</span> Aligned Wrapped</div>
-            <button class="story-close-btn" id="story-close-btn" data-modal-cancel type="button" aria-label="Close Story Reel">✕</button>
+            <div class="story-header-actions" style="display:flex;align-items:center;gap:8px">
+              <button class="story-close-btn" id="story-play-pause-btn" type="button" aria-pressed="false" aria-label="Pause story" title="Pause auto-advance">
+                <span aria-hidden="true">⏸</span>
+              </button>
+              <button class="story-close-btn" id="story-close-btn" data-modal-cancel type="button" aria-label="Close Story Reel">✕</button>
+            </div>
           </div>
           <div class="story-nav-hotspot story-nav-prev" id="story-prev-zone"></div>
           <div class="story-nav-hotspot story-nav-next" id="story-next-zone"></div>
@@ -20955,9 +21007,9 @@ var qrcode = function() {
 
       const reelContainer = overlay.querySelector(".story-reel-container");
       reelContainer?.addEventListener("mouseenter", () => clearInterval(slideTimer));
-      reelContainer?.addEventListener("mouseleave", () => startSlideTimer());
+      reelContainer?.addEventListener("mouseleave", () => { if (!isPaused) startSlideTimer(); });
       reelContainer?.addEventListener("focusin", () => clearInterval(slideTimer));
-      reelContainer?.addEventListener("focusout", () => startSlideTimer());
+      reelContainer?.addEventListener("focusout", () => { if (!isPaused) startSlideTimer(); });
 
       let touchStartX = 0;
       let touchStartY = 0;
@@ -20993,19 +21045,18 @@ var qrcode = function() {
             <div class="story-highlight-box">${slide.box}</div>
           `;
         }
+        elapsed = 0;
         overlay.querySelectorAll(".story-progress-fill").forEach((fill, idx) => {
           fill.classList.toggle("done", idx < currentSlide);
           fill.style.width = idx === currentSlide ? "0%" : idx < currentSlide ? "100%" : "0%";
         });
         playSound("tap");
-        startSlideTimer();
+        if (!isPaused) startSlideTimer();
       };
 
       const startSlideTimer = () => {
         clearInterval(slideTimer);
         const fill = overlay.querySelector(`#story-fill-${currentSlide}`);
-        let elapsed = 0;
-        const duration = 5000;
         slideTimer = setInterval(() => {
           elapsed += 100;
           if (fill) fill.style.width = `${Math.min(100, (elapsed / duration) * 100)}%`;
@@ -21031,7 +21082,7 @@ var qrcode = function() {
       const onStoryVisibility = () => {
         if (document.hidden) {
           clearInterval(slideTimer);
-        } else {
+        } else if (!isPaused) {
           startSlideTimer();
         }
       };
@@ -21048,6 +21099,23 @@ var qrcode = function() {
       };
       document.addEventListener("keydown", onStoryKey);
 
+      overlay.querySelector("#story-play-pause-btn")?.addEventListener("click", () => {
+        const btn = overlay.querySelector("#story-play-pause-btn");
+        isPaused = !isPaused;
+        if (isPaused) {
+          clearInterval(slideTimer);
+          btn?.setAttribute("aria-pressed", "true");
+          btn?.setAttribute("aria-label", "Play story");
+          if (btn) btn.title = "Play auto-advance";
+          if (btn) btn.innerHTML = '<span aria-hidden="true">▶</span>';
+        } else {
+          btn?.setAttribute("aria-pressed", "false");
+          btn?.setAttribute("aria-label", "Pause story");
+          if (btn) btn.title = "Pause auto-advance";
+          if (btn) btn.innerHTML = '<span aria-hidden="true">⏸</span>';
+          startSlideTimer();
+        }
+      });
       overlay.querySelector("#story-close-btn")?.addEventListener("click", closeStory);
       overlay.querySelector("#story-next-zone")?.addEventListener("click", () => {
         if (currentSlide < totalSlides - 1) { currentSlide++; renderCurrentSlide(); } else closeStory();

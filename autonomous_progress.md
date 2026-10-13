@@ -22,6 +22,7 @@
 | **9** | 2026-10-13 02:15 | Service Worker Preload Consumption (v41), Web Audio Linear Ramping & iOS Unlock, Story Reel Gestures & A11y, Keepsake SR Table, High-Contrast Radar Tokens & Taxonomy Ramp Test Suite | Verified | `fc17ce1` |
 | **10** | 2026-10-13 08:45 | Cross-Tab BroadcastChannel & Storage Sync, WebRTC Beforeunload Teardown, Double-Click Setup Locks, While-You-Wait XSS Escaping & Security Escaping Test Suite | Verified | `d167e13` |
 | **11** | 2026-10-13 08:49 | Discussion Timer TargetTime Drift Resilience & Visibility Re-sync, Slider Keyboard Controls, Accessible Character Counter & Timer Resilience Test Suite | Verified | `1dbf660` |
+| **12** | 2026-10-13 09:03 | WebRTC Outbox Queue & Buffered FIFO Flush, AmbientMix Reconnect Sync, Story Reel Accessible Play/Pause Toggle & Journal Search Status Live Region | Verified | `PENDING_COMMIT` |
 
 ---
 
@@ -380,6 +381,38 @@
   - `npm run test:e2e`: Passed (all 7 Playwright E2E tests: full 5-question round lifecycle, settings persistence across reload, custom pack launch, screen heading focus transitions, modal keyboard trapping, high-contrast persistence, and offline service worker cached execution in 32.2s).
   - `npm run build`: `downloads/Aligned-offline.html` (1168 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
 - **Status:** Verified (`1dbf660`).
+
+---
+
+### Cycle 12 (2026-10-13 09:03 EDT)
+- **Audits Performed:**
+  - **WebRTC Network Resilience & Outbox Queue:** Audited WebRTC transmission layer discovering that `closeNearbyConnection` unconditionally wiped `nearbyOutbox` on transient peer refreshes; full reveal snapshots collided with card-level flips; `flushNearbyOutbox` risked scrambling FIFO ordering on send exceptions without checking SCTP `bufferedAmount`; `attachNearbyChannel` missed `open` events if channels were already opened prior to listener attachment; ambientMix adjustments made while disconnected were permanently lost.
+  - **Accessibility & Controls (WCAG 2.2.2, 2.2.1, 4.1.3, 4.1.2):** Audited Story Reel carousel discovering lack of persistent Play/Pause controls for touch/screen-reader users where hover/focus listeners are ineffective; audited Journal search discovering lack of `aria-label`, empty state, and live status announcement (`aria-live="polite"`) when filtering saved rounds.
+  - **Test Automation Architecture:** Designed and implemented `tests/reconnection-queue.test.mjs` verifying outbox queueing across disconnects, FIFO flush, key deduplication, 60-item queue bounding, monotonic CRDT convergence, and markup assertions.
+- **Implemented Fixes:**
+  1. **WebRTC Outbox Resilience & Buffered FIFO Flush (`index.html`):**
+     - Guarded `nearbyOutbox = []` in `closeNearbyConnection` behind `if (forgetSession)`, preserving in-flight state across temporary disconnects and peer reconnects.
+     - Refined key generation in `sendNearbyMessage()`: bulk `reveal-state:all` and `reveal-state:snapshot` cleanly purge individual card-level flip keys (`reveal-state:card:`), eliminating redundant replays and audio glitch cascades.
+     - Hardened `flushNearbyOutbox()` to inspect `nearbyDataChannel.bufferedAmount > 65536` (registering a one-shot `bufferedamountlow` event if backed up) and restored un-sent messages preserving strict chronological FIFO ordering.
+     - Enhanced `attachNearbyChannel(channel)` to immediately invoke `onChannelOpen` if `channel.readyState === "open"`, unifying duplicate event listeners into a single clean callback.
+     - Allowed `ambientMix` to queue in outbox across disconnects (`queue: true`), and added `ambientMix: state.ambientMix` into `sendNearbyHello()` and `handleNearbyMessage()` hello receipt for instantaneous audio harmonization on reconnect.
+  2. **Story Reel Accessible Play/Pause Toggle (`index.html`):**
+     - Added `#story-play-pause-btn` toggle button with `aria-pressed="false"`, `aria-label="Pause story"`, `title="Pause auto-advance"` in `.story-top-row`.
+     - Maintained `isPaused` state: clicking pauses the interval and updates to `▶` ("Play story"); resuming restores `⏸` ("Pause story").
+     - Guarded `mouseleave`, `focusout`, and `visibilitychange` auto-resumes so they strictly honor user-initiated pauses.
+  3. **Journal Live Search Status & Empty State (`index.html`):**
+     - Added `aria-label="Search saved rounds"` and `aria-describedby="journal-search-status"` to `#journal-search-input`.
+     - Added `<div id="journal-search-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>`.
+     - Updated `applyJournalFilter()` to tally matches, display `#journal-empty-results` when zero rounds match, and announce live match counts to screen readers.
+  4. **Automated Test Suite Expansion (`tests/reconnection-queue.test.mjs`, `package.json`):**
+     - Authored `tests/reconnection-queue.test.mjs` (11 unit tests running in 27ms covering stateful queueing, ephemeral bypassing, lost channel recovery, FIFO flush, idempotent re-flush, ambientMix and answer deduplication, wager coalescing, 60-item clamping, monotonic timestamp CRDT convergence, and markup verification).
+     - Integrated `tests/reconnection-queue.test.mjs` into `package.json` `"test"` script (15 test suites total, 67 unit tests).
+- **Verification:**
+  - `npm test`: Passed (all 15 test suites: production check, signaling security, daily ritual lifecycle, radar storybook, backup schema resilience, custom pack automation, quota recovery, audio preferences, webrtc peer simulation, mind-reader math, keepsake math, taxonomy ramp, security escape, timer resilience, and reconnection queue — 67 unit tests across 15 runners in 270ms).
+  - `npm run test:e2e`: Passed (all 7 Playwright E2E tests: full 5-question round lifecycle, settings persistence across reload, custom pack launch, screen heading focus transitions, modal keyboard trapping, high-contrast persistence, and offline service worker cached execution in 152.7s).
+  - `npm run build`: `downloads/Aligned-offline.html` (1171 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
+- **Status:** Verified (`PENDING_COMMIT`).
+
 
 
 
