@@ -11928,6 +11928,7 @@ var qrcode = function() {
         ambientSoundscape: "synth",
         ambientMix: { synth: 0.8, rain: 0, hearth: 0 },
         dailyRitual: { streak: 0, lastDate: "", answers: {}, completedDates: [] },
+        seenLightningIds: [],
         revealCelebrated: "",
         nearbyRole: "",
         nearbyRoundId: "",
@@ -12150,7 +12151,10 @@ var qrcode = function() {
             lastDate: String(cached.dailyRitual.lastDate || "").slice(0, 10),
             answers: cached.dailyRitual.answers && typeof cached.dailyRitual.answers === "object" ? cleanAnswerMap(cached.dailyRitual.answers) : {},
             completedDates: Array.isArray(cached.dailyRitual.completedDates) ? cached.dailyRitual.completedDates.map((d) => String(d).slice(0, 10)).slice(-365) : []
-          } : { streak: 0, lastDate: "", answers: {}, completedDates: [] }
+          } : { streak: 0, lastDate: "", answers: {}, completedDates: [] },
+          seenLightningIds: Array.isArray(cached.seenLightningIds)
+            ? [...new Set(cached.seenLightningIds.filter((id) => typeof id === "string" && /^[\w-]{1,40}$/.test(id)))]
+            : []
         };
 
         if (!validScreens.includes(restored.screen)) restored.screen = "setup";
@@ -13889,7 +13893,8 @@ var qrcode = function() {
         },
         history: {
           completedRounds: JSON.parse(JSON.stringify(state.completedRounds)),
-          dailyRitual: JSON.parse(JSON.stringify(state.dailyRitual || { streak: 0, lastDate: "", answers: {}, completedDates: [] }))
+          dailyRitual: JSON.parse(JSON.stringify(state.dailyRitual || { streak: 0, lastDate: "", answers: {}, completedDates: [] })),
+          seenLightningIds: [...(state.seenLightningIds || [])]
         },
         currentGame: {
           screen: state.screen,
@@ -14051,7 +14056,8 @@ var qrcode = function() {
           customQuestions: Array.isArray(rawLibrary.customQuestions) ? rawLibrary.customQuestions : [],
           customPacks: Array.isArray(rawLibrary.customPacks) ? rawLibrary.customPacks : [],
           completedRounds: safeCompletedRounds,
-          dailyRitual: safeDailyRitual
+          dailyRitual: safeDailyRitual,
+          seenLightningIds: Array.isArray(rawHistory.seenLightningIds) ? rawHistory.seenLightningIds : (Array.isArray(payload.seenLightningIds) ? payload.seenLightningIds : [])
         };
       }
       if ([1, 2].includes(Number(payload?.version))) {
@@ -14066,7 +14072,8 @@ var qrcode = function() {
             lastDate: typeof rawDaily.lastDate === "string" ? rawDaily.lastDate.slice(0, 10) : "",
             answers: rawDaily.answers && typeof rawDaily.answers === "object" && !Array.isArray(rawDaily.answers) ? { ...rawDaily.answers } : {},
             completedDates: Array.isArray(rawDaily.completedDates) ? rawDaily.completedDates.filter((d) => typeof d === "string").map((d) => d.slice(0, 10)).slice(-365) : []
-          }
+          },
+          seenLightningIds: Array.isArray(payload.seenLightningIds) ? payload.seenLightningIds : []
         };
       }
       throw new Error("This does not look like an Aligned backup file or a supported legacy backup.");
@@ -21236,17 +21243,68 @@ var qrcode = function() {
     // RAPID-FIRE "THIS OR THAT" WARMUP
     // ----------------------------------------------------
     const LIGHTNING_PAIRS = [
-      { a: "Night in on the couch", b: "Night out on the town" },
-      { a: "Plan every hour of the trip", b: "Zero itinerary, pure spontaneous" },
-      { a: "Talk it out right away", b: "Need 20 minutes of quiet first" },
-      { a: "Early morning coffee together", b: "Midnight night owl snacking" },
-      { a: "Cook dinner together at home", b: "Order takeout & watch a movie" },
-      { a: "Tell a blunt honest truth", b: "Gentle white lie to protect feelings" },
-      { a: "Big rowdy group of friends", b: "Intimate one-on-one date" },
-      { a: "Texting throughout the day", b: "One long phone call before bed" },
-      { a: "Save for a rainy day", b: "Splurge on a memorable experience" },
-      { a: "Edge-of-your-seat thriller", b: "Cozy comforting comedy" }
+      { id: "lp_1", a: "Night in on the couch", b: "Night out on the town" },
+      { id: "lp_2", a: "Plan every hour of the trip", b: "Zero itinerary, pure spontaneous" },
+      { id: "lp_3", a: "Talk it out right away", b: "Need 20 minutes of quiet first" },
+      { id: "lp_4", a: "Early morning coffee together", b: "Midnight night owl snacking" },
+      { id: "lp_5", a: "Cook dinner together at home", b: "Order takeout & watch a movie" },
+      { id: "lp_6", a: "Tell a blunt honest truth", b: "Gentle white lie to protect feelings" },
+      { id: "lp_7", a: "Big rowdy group of friends", b: "Intimate one-on-one date" },
+      { id: "lp_8", a: "Texting throughout the day", b: "One long phone call before bed" },
+      { id: "lp_9", a: "Save for a rainy day", b: "Splurge on a memorable experience" },
+      { id: "lp_10", a: "Edge-of-your-seat thriller", b: "Cozy comforting comedy" },
+      { id: "lp_11", a: "Warm beach with ocean waves", b: "Chilly mountain cabin with snow" },
+      { id: "lp_12", a: "Road trip with playlist singalongs", b: "Quick flight & maximize destination time" },
+      { id: "lp_13", a: "Snooze alarm three times", b: "Feet on the floor the second it rings" },
+      { id: "lp_14", a: "Arrive 15 minutes early everywhere", b: "Slide in exactly on the minute" },
+      { id: "lp_15", a: "Share food and try each other’s bites", b: "Hands off — each ordered what they wanted" },
+      { id: "lp_16", a: "Sweet decadent dessert", b: "Salty savory late-night snack" },
+      { id: "lp_17", a: "Deep spontaneous debrief right in bed", b: "Save heavy thoughts for morning walks" },
+      { id: "lp_18", a: "Physical touch & long lingering hugs", b: "Words of appreciation & loving affirmations" },
+      { id: "lp_19", a: "Surprise gifts with zero occasion", b: "Quality uninterrupted weekend together" },
+      { id: "lp_20", a: "Hand holding & PDA in public", b: "Subtle private connection behind closed doors" },
+      { id: "lp_21", a: "Clean the kitchen as you cook", b: "Feast first, tackle dishes together later" },
+      { id: "lp_22", a: "Listen to music in the car", b: "Engaging podcast or fascinating audiobook" },
+      { id: "lp_23", a: "Dress up fancy for date night", b: "Comfy oversized hoodies & sweatpants" },
+      { id: "lp_24", a: "High-energy amusement park / concert", b: "Quiet botanical garden / art museum" },
+      { id: "lp_25", a: "Check every online review before buying", b: "Follow gut instinct and take a chance" },
+      { id: "lp_26", a: "Detailed budget spreadsheet", b: "General mental math & intuitive balance" },
+      { id: "lp_27", a: "Tidy space right as mess appears", b: "Weekend cleaning marathon all at once" },
+      { id: "lp_28", a: "Ask for directions right away", b: "Figure it out ourselves first" },
+      { id: "lp_29", a: "Host game night at our place", b: "Be guests and let someone else host" },
+      { id: "lp_30", a: "Binge all episodes in one weekend", b: "Savor one episode per week" },
+      { id: "lp_31", a: "Spontaneous surprise weekend getaway", b: "Well-anticipated trip booked months ahead" },
+      { id: "lp_32", a: "Always split the bill evenly", b: "Alternate who treats whom" },
+      { id: "lp_33", a: "Re-read or re-watch favorite classics", b: "Always crave something brand new" },
+      { id: "lp_34", a: "Share phone passcodes freely", b: "Healthy mutual digital privacy" },
+      { id: "lp_35", a: "Dog person with boundless energy", b: "Cat person with cozy independence" },
+      { id: "lp_36", a: "Shower in the morning to wake up", b: "Shower at night to wash the day away" },
+      { id: "lp_37", a: "Voice notes with all the tone & nuance", b: "Quick snappy text messages" },
+      { id: "lp_38", a: "Express sadness or stress openly", b: "Process internally before sharing thoughts" },
+      { id: "lp_39", a: "Warm sunny summer afternoon", b: "Crisp sweater-weather autumn breeze" },
+      { id: "lp_40", a: "Sleep with the window cracked open", b: "Snug room tightly sealed from drafts" },
+      { id: "lp_41", a: "Dancing in the kitchen while cooking", b: "Quiet candlelit focus and deep talks" },
+      { id: "lp_42", a: "Try the weirdest item on the menu", b: "Order the tried-and-true reliable favorite" },
+      { id: "lp_43", a: "Write sweet thoughtful handwritten cards", b: "Express feelings through loving actions" },
+      { id: "lp_44", a: "Board games & playful competition", b: "Cooperative multiplayer team gaming" },
+      { id: "lp_45", a: "Say goodbye with a quick kiss", b: "Long theatrical hug at the doorway" },
+      { id: "lp_46", a: "Have a designated side of the bed", b: "Flexible sleeper, either side works" },
+      { id: "lp_47", a: "Big breakfast with all the fixings", b: "Quick espresso & grab-and-go pastry" },
+      { id: "lp_48", a: "Live right in the bustling heart of the city", b: "Peaceful quiet retreat with lots of green space" },
+      { id: "lp_49", a: "Unpack luggage the minute you get home", b: "Live out of the suitcase for three days" },
+      { id: "lp_50", a: "Confess an awkward crush/memory first", b: "Wait until partner shares their story first" }
     ];
+
+    function selectLightningPairs(count = 10) {
+      state.seenLightningIds = Array.isArray(state.seenLightningIds) ? state.seenLightningIds : [];
+      const seenSet = new Set(state.seenLightningIds);
+      let available = LIGHTNING_PAIRS.filter((pair) => !seenSet.has(pair.id));
+      if (available.length < count) {
+        state.seenLightningIds = [];
+        available = [...LIGHTNING_PAIRS];
+      }
+      return shuffled(available).slice(0, count);
+    }
 
     function openLightningRoundModal() {
       const overlay = document.createElement("div");
@@ -21254,6 +21312,7 @@ var qrcode = function() {
       overlay.setAttribute("role", "dialog");
       overlay.setAttribute("aria-modal", "true");
 
+      const pairs = selectLightningPairs(10);
       let currentStep = "p0";
       let p0Answers = [];
       let p1Answers = [];
@@ -21262,15 +21321,20 @@ var qrcode = function() {
       const p0Name = escapeHTML(state.names[0] || "Player 1");
       const p1Name = escapeHTML(state.names[1] || "Player 2");
 
+      const close = () => {
+        overlay.remove();
+        if (typeof syncModalState === "function") syncModalState();
+      };
+
       const render = () => {
         if (currentStep === "p0" || currentStep === "p1") {
           const activeName = currentStep === "p0" ? p0Name : p1Name;
-          const pair = LIGHTNING_PAIRS[qIndex];
+          const pair = pairs[qIndex];
           overlay.innerHTML = `
             <section class="exit-dialog lightning-panel" style="max-width:520px;text-align:center">
               <span class="eyebrow">⚡ 60-Second Speed Warmup</span>
               <h2>${activeName}’s Turn</h2>
-              <p class="dialog-copy">Pick on instinct — question ${qIndex + 1} of ${LIGHTNING_PAIRS.length}:</p>
+              <p class="dialog-copy">Pick on instinct — question ${qIndex + 1} of ${pairs.length}:</p>
               <div class="lightning-choice-grid">
                 <button type="button" class="lightning-btn" data-choice="a">${escapeHTML(pair.a)}</button>
                 <button type="button" class="lightning-btn" data-choice="b">${escapeHTML(pair.b)}</button>
@@ -21284,7 +21348,7 @@ var qrcode = function() {
               playSound("tap");
               if (currentStep === "p0") {
                 p0Answers.push(choice);
-                if (qIndex < LIGHTNING_PAIRS.length - 1) {
+                if (qIndex < pairs.length - 1) {
                   qIndex++;
                   render();
                 } else {
@@ -21294,7 +21358,7 @@ var qrcode = function() {
                 }
               } else {
                 p1Answers.push(choice);
-                if (qIndex < LIGHTNING_PAIRS.length - 1) {
+                if (qIndex < pairs.length - 1) {
                   qIndex++;
                   render();
                 } else {
@@ -21304,7 +21368,7 @@ var qrcode = function() {
               }
             });
           });
-          overlay.querySelector("[data-modal-cancel]")?.addEventListener("click", () => overlay.remove());
+          overlay.querySelector("[data-modal-cancel]")?.addEventListener("click", close);
         } else if (currentStep === "handoff") {
           overlay.innerHTML = `
             <section class="exit-dialog lightning-panel" style="max-width:480px;text-align:center">
@@ -21321,18 +21385,28 @@ var qrcode = function() {
             render();
           });
         } else if (currentStep === "results") {
+          // Record pairs as seen so couples get fresh pairs in subsequent warmups
+          state.seenLightningIds = Array.isArray(state.seenLightningIds) ? state.seenLightningIds : [];
+          pairs.forEach((pair) => {
+            if (!state.seenLightningIds.includes(pair.id)) {
+              state.seenLightningIds.push(pair.id);
+            }
+          });
+          saveState();
+
           let matches = 0;
-          LIGHTNING_PAIRS.forEach((_, i) => {
+          pairs.forEach((_, i) => {
             if (p0Answers[i] === p1Answers[i]) matches++;
           });
-          const matchPct = Math.round((matches / LIGHTNING_PAIRS.length) * 100);
+          const matchPct = Math.round((matches / pairs.length) * 100);
           overlay.innerHTML = `
             <section class="exit-dialog lightning-panel" style="max-width:540px;text-align:center">
               <div class="celebration-orb" aria-hidden="true">⚡</div>
-              <h2>${matches} of ${LIGHTNING_PAIRS.length} in Sync! (${matchPct}%)</h2>
+              <p class="eyebrow" style="color:var(--text-muted);font-size:0.75rem;margin-bottom:4px">Warmup deck progress · ${state.seenLightningIds.length} of ${LIGHTNING_PAIRS.length} pairs explored</p>
+              <h2>${matches} of ${pairs.length} in Sync! (${matchPct}%)</h2>
               <p class="dialog-copy">${matchPct >= 80 ? "Telepathic instincts! You are primed for the main round." : matchPct >= 50 ? "Balanced dynamics — lovely blend of shared habits and unique tastes." : "Fascinating opposites! The main round will have great debate."}</p>
               <div style="max-height:220px;overflow-y:auto;text-align:left;margin:14px 0;padding:8px 12px;background:rgba(15,23,42,0.6);border-radius:12px;border:1px solid var(--line);font-size:0.8rem">
-                ${LIGHTNING_PAIRS.map((pair, i) => {
+                ${pairs.map((pair, i) => {
                   const same = p0Answers[i] === p1Answers[i];
                   return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06)">
                     <span>${pair[p0Answers[i]]}</span>
@@ -21346,13 +21420,14 @@ var qrcode = function() {
             </section>
           `;
           overlay.querySelector("#finish-lightning-btn")?.addEventListener("click", () => {
-            overlay.remove();
+            close();
             document.getElementById("start-round")?.click();
           });
         }
       };
 
       document.body.appendChild(overlay);
+      if (typeof syncModalState === "function") syncModalState();
       render();
     }
 

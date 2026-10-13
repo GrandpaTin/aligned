@@ -572,6 +572,32 @@
   - `npm run build`: `downloads/Aligned-offline.html` (1179 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
 - **Status:** Verified (`ee4daf7`).
 
+---
+
+### Cycle 18 (2026-10-13 14:10 EDT)
+- **Feature & Content Enhancements:**
+  - **Rapid-Fire "This or That" Catalog Expansion (`index.html`):**
+    - Expanded `LIGHTNING_PAIRS` from 10 hardcoded questions to a curated catalog of 50 distinct, diverse pairs (`lp_1` through `lp_50`) spanning lifestyle, intimacy, quirks, travel, habits, communication, and emotional dynamics.
+  - **Dynamic Randomization & Non-Repeat Engine (`selectLightningPairs`):**
+    - Added `selectLightningPairs(count = 10)` utilizing cryptographic Fisher-Yates shuffle (`shuffled()`).
+    - Filtered out questions matching `state.seenLightningIds`, guaranteeing couples never encounter repeated warmup questions across consecutive sessions until the full 50-card bank has been explored.
+    - Added automatic graceful deck recycling when fewer than 10 unplayed pairs remain, resetting history seamlessly without disrupting play.
+  - **State Persistence & Backup Integration (`initialState`, `loadState`, `backupToState`, `createBackupPayload`):**
+    - Initialized `seenLightningIds: []` in `initialState()`.
+    - Added storage deserialization and format sanitization in `loadState()`.
+    - Integrated `seenLightningIds` into JSON backup payloads (`createBackupPayload()`) and restored it across both structured and legacy imports (`backupToState()`).
+    - Added live deck progress indicator on results panel: `Warmup deck progress · X of 50 pairs explored`.
+  - **PWA Service Worker Update (`sw.js`):**
+    - Bumped service worker cache identifier to `aligned-v45`.
+  - **Suite 20 Test Harness Expansion (`tests/rapid-fire-warmup.test.mjs`, `package.json`):**
+    - Authored `tests/rapid-fire-warmup.test.mjs` containing 9 unit tests across 3 sub-suites verifying catalog taxonomy, unique ID format, non-repeat guarantees, smooth recycling, and backup schema integration.
+    - Registered Suite 20 in `package.json` `"test"` script (20 test suites total, 135 unit tests).
+- **Verification:**
+  - `npm test`: Passed (all 20 test suites, 135 unit tests across 20 runners in 280ms).
+  - `npm run build`: `downloads/Aligned-offline.html` (1185 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
+- **Status:** Verified.
+
+
 
 
 
