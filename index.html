@@ -33,7 +33,7 @@
   <script>
 (function() {
       try {
-        var raw = localStorage.getItem("aligned_state_v1");
+        var raw = localStorage.getItem("aligned-state-v1") || localStorage.getItem("are-we-compatible-state-v1") || localStorage.getItem("aligned_state_v1");
         if (raw) {
           var s = JSON.parse(raw);
           if (s && s.visualTheme) {
@@ -11277,13 +11277,6 @@ var qrcode = function() {
     // Keep the prior key readable so existing players retain names, history, preferences, and in-progress rounds.
     const LEGACY_STORAGE_KEYS = ["are-we-compatible-state-v1"];
     const BACKUP_APP_NAMES = new Set(["Aligned", "Are We Compatible?"]);
-    const CATEGORIES = [
-      "Intimacy",
-      "Values & Lifestyle",
-      "Planning for the Future",
-      "Expressing Love",
-      "Wild Cards"
-    ];
     const CLASSIC_TOPIC_MAP = {
       "Intimacy": "connection",
       "Values & Lifestyle": "lifestyle",
@@ -13681,7 +13674,8 @@ var qrcode = function() {
           customPacks: JSON.parse(JSON.stringify(state.customPacks))
         },
         history: {
-          completedRounds: JSON.parse(JSON.stringify(state.completedRounds))
+          completedRounds: JSON.parse(JSON.stringify(state.completedRounds)),
+          dailyRitual: JSON.parse(JSON.stringify(state.dailyRitual || { streak: 0, lastDate: "", answers: {}, completedDates: [] }))
         },
         currentGame: {
           screen: state.screen,
@@ -13761,7 +13755,8 @@ var qrcode = function() {
           questionTagOverrides: payload.library?.questionTagOverrides || {},
           customQuestions: payload.library?.customQuestions || [],
           customPacks: payload.library?.customPacks || [],
-          completedRounds: payload.history?.completedRounds || payload.library?.completedRounds || []
+          completedRounds: payload.history?.completedRounds || payload.library?.completedRounds || [],
+          dailyRitual: payload.history?.dailyRitual || payload.dailyRitual || { streak: 0, lastDate: "", answers: {}, completedDates: [] }
         };
       }
       if ([1, 2].includes(Number(payload?.version))) return { ...payload, version: 2 };
@@ -14735,6 +14730,12 @@ var qrcode = function() {
       } catch {
         // The game still works when storage is unavailable.
       }
+    }
+
+    let saveStateTimer = 0;
+    function scheduleSaveState(delayMs = 200) {
+      clearTimeout(saveStateTimer);
+      saveStateTimer = window.setTimeout(saveState, delayMs);
     }
 
     // Each Compact floor pass restyles the whole document, so every request in a frame shares one pass. It runs
@@ -15715,23 +15716,6 @@ var qrcode = function() {
       return copy;
     }
 
-    function drawBalanced(pool, count) {
-      const remaining = [...pool];
-      const selected = [];
-      while (selected.length < count && remaining.length) {
-        const topics = shuffled([...new Set(remaining.map((question) => question.topic))]);
-        for (const topic of topics) {
-          if (selected.length >= count) break;
-          const candidates = remaining.filter((question) => question.topic === topic);
-          if (!candidates.length) continue;
-          const chosen = candidates[randomIndex(candidates.length)];
-          selected.push(chosen);
-          remaining.splice(remaining.findIndex((question) => question.id === chosen.id), 1);
-        }
-      }
-      return selected;
-    }
-
     function questionLastUsedMap() {
       const lastUsed = new Map();
       state.completedRounds.forEach((round, roundIndex) => {
@@ -15866,13 +15850,6 @@ var qrcode = function() {
       // A distinctive word ("affection", "jealousy") that only a couple of prompts use marks a twin on its own.
       const rareMatch = sharedWords.some((word) => word.length >= 5 && promptWordFrequency(word) <= 2);
       return rareMatch || (shared >= 2 && shared / Math.min(mine.size, theirs.size) >= 0.6);
-    }
-
-    function playedTonightTwin(question, inRound = []) {
-      const catalogById = new Map(getQuestionCatalog().map((item) => [item.id, item]));
-      const ids = new Set([...state.completedRounds.filter(isTonightRound).flatMap((round) => round.questionIds || []), ...inRound]);
-      ids.delete(question.id);
-      return [...ids].some((id) => promptsAreTwins(question, catalogById.get(id)));
     }
 
     function chooseRoundQuestions(
@@ -17386,7 +17363,7 @@ var qrcode = function() {
       const today = new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 
       const modal = document.createElement("div");
-      modal.className = "storybook-modal";
+      modal.className = "storybook-modal modal-backdrop";
       modal.setAttribute("role", "dialog");
       modal.setAttribute("aria-modal", "true");
       modal.setAttribute("aria-label", "Keepsake Couple Storybook");
@@ -17842,20 +17819,21 @@ var qrcode = function() {
           if (label) label.textContent = `${Math.round(val * 100)}%`;
           state.ambientMix = state.ambientMix || { synth: 0.8, rain: 0, hearth: 0 };
           state.ambientMix[layer] = val;
-          saveState();
+          scheduleSaveState();
           if (ambientSoundscape) ambientSoundscape.updateMix();
           if (state.playStyle === "nearby" && nearbyChannelOpen()) {
             sendNearbyMessage({ type: "ambient-mix", mix: state.ambientMix }, { queue: false });
           }
         });
+        input?.addEventListener("change", saveState);
       });
       document.getElementById("sound-volume").addEventListener("input", (event) => {
         event.currentTarget.style.setProperty("--range-progress", `${Math.round(Number(event.currentTarget.value) * 100)}%`);
         state.soundVolume = Number(event.currentTarget.value);
-        saveState();
+        scheduleSaveState();
         audioEngine.setVolume(state.soundVolume);
       });
-      document.getElementById("sound-volume").addEventListener("change", () => playSound("reveal"));
+      document.getElementById("sound-volume").addEventListener("change", () => { saveState(); playSound("reveal"); });
       document.getElementById("settings-haptics").addEventListener("change", (event) => { state.hapticsEnabled = event.currentTarget.checked; saveState(); pulseHaptic("tap"); });
       document.getElementById("text-size-toggle").addEventListener("click", (event) => {
         const btn = event.target.closest(".text-size-option");
@@ -18027,10 +18005,18 @@ var qrcode = function() {
       return questions[Math.abs(hash) % questions.length];
     }
 
+    function getYesterdayLocalDateStamp() {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return localDateStamp(d);
+    }
+
     function renderDailyRitualCard() {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDateStamp();
+      const yesterday = getYesterdayLocalDateStamp();
       const isDone = state.dailyRitual?.completedDates?.includes(today);
-      const streak = state.dailyRitual?.streak || 0;
+      const streakActive = state.dailyRitual?.lastDate === today || state.dailyRitual?.lastDate === yesterday;
+      const streak = streakActive ? (state.dailyRitual?.streak || 0) : 0;
       const q = dailyQuestionForDate(today);
       return `
         <div class="daily-ritual-card">
@@ -18045,7 +18031,7 @@ var qrcode = function() {
     }
 
     function openDailyRitualModal() {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDateStamp();
       const isDone = state.dailyRitual?.completedDates?.includes(today);
       const q = dailyQuestionForDate(today);
       if (!q) return;
@@ -18113,7 +18099,7 @@ var qrcode = function() {
         if (!state.dailyRitual.completedDates.includes(today)) state.dailyRitual.completedDates.push(today);
 
         // Update streak
-        const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+        const yesterday = getYesterdayLocalDateStamp();
         if (state.dailyRitual.lastDate === yesterday) {
           state.dailyRitual.streak = (state.dailyRitual.streak || 0) + 1;
         } else if (state.dailyRitual.lastDate !== today) {
@@ -18351,7 +18337,7 @@ var qrcode = function() {
             </details>
             <p class="error" id="setup-error" role="alert"></p>
             <div class="actions setup-start-actions">
-              <button class="primary-btn" type="submit">Start your round</button>
+              <button class="primary-btn" id="start-round" type="submit">Start your round</button>
               <button class="secondary-btn" id="start-lightning-btn" type="button" style="display:inline-flex;align-items:center;gap:6px"><span aria-hidden="true">⚡</span> Rapid-Fire "This or That" (60s Warmup)</button>
             </div>
             <p class="privacy-note"><span aria-hidden="true">⌁</span><span>Your data stays in this browser unless you choose to export a backup.</span></p>
@@ -19069,10 +19055,12 @@ var qrcode = function() {
         });
       });
 
-      document.getElementById("private-note-input").addEventListener("input", (event) => {
+      const noteInput = document.getElementById("private-note-input");
+      noteInput.addEventListener("input", (event) => {
         state.privateNotes[state.activePlayer][question.id] = event.currentTarget.value;
-        saveState();
+        scheduleSaveState();
       });
+      noteInput.addEventListener("blur", saveState);
 
       document.querySelectorAll("[data-importance]").forEach((button) => button.addEventListener("click", () => {
         state.importance[state.activePlayer][question.id] = Number(button.dataset.importance);
@@ -19117,7 +19105,8 @@ var qrcode = function() {
         render();
       });
 
-      if (question.type === "slider") input.addEventListener("change", () => playSound("tap", { value: Number(input.value) }));
+      if (question.type === "slider") input.addEventListener("change", () => { saveState(); playSound("tap", { value: Number(input.value) }); });
+      input.addEventListener("blur", saveState);
       input.addEventListener("input", () => {
         if (error.textContent && error.className === "error") error.textContent = "";
         const value = question.type === "slider" ? Number(input.value) : input.value;
@@ -19128,7 +19117,7 @@ var qrcode = function() {
           document.getElementById("not-ready-answer").setAttribute("aria-pressed", "false");
           document.getElementById("not-ready-answer").textContent = "I’m not ready to answer this";
         }
-        saveState();
+        scheduleSaveState();
 
         if (question.type === "slider") {
           document.getElementById("slider-value").textContent = input.value;
@@ -19141,8 +19130,9 @@ var qrcode = function() {
         const commentInput = document.getElementById("comment-input");
         commentInput.addEventListener("input", () => {
           state.comments[state.activePlayer][question.id] = commentInput.value;
-          saveState();
+          scheduleSaveState();
         });
+        commentInput.addEventListener("blur", saveState);
       }
 
       // Ctrl/Cmd+Enter in a text box continues (plain Enter stays a new line), as in most desktop editors.
@@ -19857,6 +19847,16 @@ var qrcode = function() {
 
     let discussionTimers = {};
 
+    function clearAllDiscussionTimers() {
+      Object.values(discussionTimers).forEach((timer) => {
+        if (timer && timer.interval) {
+          clearInterval(timer.interval);
+          timer.interval = null;
+          timer.running = false;
+        }
+      });
+    }
+
     function handleTimerAction(qid, action) {
       if (!discussionTimers[qid]) {
         discussionTimers[qid] = { seconds: 120, interval: null, running: false, isOpen: true };
@@ -19909,7 +19909,7 @@ var qrcode = function() {
 
     function openKeepsakeModal(questions, alignment) {
       const overlay = document.createElement("div");
-      overlay.className = "modal-overlay";
+      overlay.className = "modal-overlay modal-backdrop";
       const profile = currentRelationshipProfile();
       const duoTitles = [
         [90, "Telepathic Duo ✦"],
@@ -20178,7 +20178,7 @@ var qrcode = function() {
     // ----------------------------------------------------
     function openStoryReelModal(questions, alignment, tally) {
       const overlay = document.createElement("div");
-      overlay.className = "story-reel-modal";
+      overlay.className = "story-reel-modal modal-backdrop";
       overlay.setAttribute("role", "dialog");
       overlay.setAttribute("aria-modal", "true");
       overlay.setAttribute("aria-label", "Round Wrapped Story Reel");
@@ -20805,8 +20805,8 @@ var qrcode = function() {
                 ${question.id === goldenId ? `<span class="golden-ribbon"><span aria-hidden="true">✦</span> Golden card</span>` : ""}
                 <span class="card-wager-row" onclick="event.stopPropagation()">
                   <span class="wager-tag">Bet:</span>
-                  <button type="button" class="wager-chip ${state.cardWagers?.[question.id] === 'match' ? 'active' : ''}" data-wager-qid="${escapedQuestionId}" data-wager-type="match" aria-label="Match: bet answers match on question ${index + 1}">Match</button>
-                  <button type="button" class="wager-chip ${state.cardWagers?.[question.id] === 'diff' ? 'active' : ''}" data-wager-qid="${escapedQuestionId}" data-wager-type="diff" aria-label="Opposites: bet answers differ on question ${index + 1}">Opposites</button>
+                  <span role="button" tabindex="0" class="wager-chip ${state.cardWagers?.[question.id] === 'match' ? 'active' : ''}" data-wager-qid="${escapedQuestionId}" data-wager-type="match" aria-label="Match: bet answers match on question ${index + 1}">Match</span>
+                  <span role="button" tabindex="0" class="wager-chip ${state.cardWagers?.[question.id] === 'diff' ? 'active' : ''}" data-wager-qid="${escapedQuestionId}" data-wager-type="diff" aria-label="Opposites: bet answers differ on question ${index + 1}">Opposites</span>
                 </span>
                 <span class="tap-hint">${question.id === finalId ? escapeHTML(finalHintCopy(question)) : `${POINTER_VERB} to reveal`}</span>
                 <span class="card-pair" aria-hidden="true"><span></span><span></span></span>
@@ -20825,7 +20825,7 @@ var qrcode = function() {
                 ${!answerHeld && matchInfo.isMatch && !(pickLabel(question, firstAnswer) && pickLabel(question, secondAnswer)) ? `<span class="match-badge"><span class="match-star" aria-hidden="true">★</span>${matchInfo.exact ? "Exact match" : "Close match"}</span>` : ""}
                 ${opposite ? `<span class="spark-badge"><span class="spark-icon" aria-hidden="true">⇄</span>${sparkLabel}</span>` : ""}
                 ${answers}
-                ${state.cardWagers?.[question.id] ? `
+                ${state.cardWagers?.[question.id] && !answerHeld ? `
                   <div class="wager-outcome-badge ${(state.cardWagers[question.id] === "match" && matchInfo.isMatch) || (state.cardWagers[question.id] === "diff" && !matchInfo.isMatch) ? "correct" : "different"}">
                     ${(state.cardWagers[question.id] === "match" && matchInfo.isMatch) || (state.cardWagers[question.id] === "diff" && !matchInfo.isMatch)
                       ? '<span aria-hidden="true">🎯</span> Intuition Hit! You called this'
@@ -21482,7 +21482,7 @@ var qrcode = function() {
         render();
       });
       document.querySelectorAll("[data-wager-qid]").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
+        const toggleWager = (e) => {
           e.stopPropagation();
           const qid = btn.dataset.wagerQid;
           const wager = btn.dataset.wagerType;
@@ -21491,6 +21491,13 @@ var qrcode = function() {
           saveState();
           playSound("tap");
           render();
+        };
+        btn.addEventListener("click", toggleWager);
+        btn.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            toggleWager(e);
+          }
         });
       });
       document.querySelectorAll("[data-timer-toggle]").forEach((btn) => {
@@ -21708,6 +21715,7 @@ var qrcode = function() {
       window.addEventListener("orientationchange", scheduleCardResize, { passive: true });
       window.visualViewport?.addEventListener("resize", scheduleCardResize, { passive: true });
       cleanupResponsiveRender = () => {
+        clearAllDiscussionTimers();
         cancelAnimationFrame(resizeFrame);
         cardResizeObserver?.disconnect();
         window.removeEventListener("resize", scheduleCardResize);

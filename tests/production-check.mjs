@@ -129,6 +129,54 @@ assert(!html.includes("Scan response QR"), "The retired second-QR step must not 
 assert(html.includes('https://are-we-compatible-signal.bdaytin.workers.dev'), "Production signaling endpoint must be configured");
 assert(!html.includes("__SIGNALING_SERVICE_URL__"), "A signaling placeholder must never reach production");
 
+// Feature coverage: Couple Lore questions & presets
+assert(questions.length >= 350, `Expected catalog >= 350 questions; found ${questions.length}`);
+const loreQuestions = questions.filter((q) => q.topic === "lore" || q.category === "Couple Lore");
+assert.equal(loreQuestions.length, 20, "Expected exactly 20 Couple Lore questions");
+assert.equal(loreQuestions.filter((q) => q.type === "slider").length, 15, "Expected 15 Couple Lore slider questions");
+assert.equal(loreQuestions.filter((q) => q.type === "text").length, 5, "Expected 5 Couple Lore written questions");
+
+const topicOptions = arraySource("TOPIC_OPTIONS");
+assert(topicOptions.some((t) => t.id === "lore" && t.label === "Lore"), "TOPIC_OPTIONS must include Lore");
+
+const sessionPresets = arraySource("SESSION_PRESETS");
+const lorePreset = sessionPresets.find((p) => p.id === "couple-lore");
+assert(lorePreset, "SESSION_PRESETS must include couple-lore preset");
+assert.deepEqual(Array.from(lorePreset.topics), ["lore", "connection", "fun"], "Couple-lore preset must configure lore, connection, fun");
+
+// Feature coverage: Daily Connection Ritual determinism & default state
+const dailyQuestionFnMatch = scripts[1].match(/function dailyQuestionForDate\(dateStr\) \{[\s\S]*?\n    \}/);
+assert(dailyQuestionFnMatch, "Could not locate dailyQuestionForDate");
+const dailyQuestionForDate = vm.runInNewContext(`(${dailyQuestionFnMatch[0]})`, {
+  ALL_QUESTIONS: questions
+});
+const qDay1 = dailyQuestionForDate("2026-10-13");
+const qDay1Repeat = dailyQuestionForDate("2026-10-13");
+const qDay2 = dailyQuestionForDate("2026-10-14");
+assert.equal(qDay1.id, qDay1Repeat.id, "Daily question must be deterministic for identical dates");
+assert(qDay1.prompt && qDay2.prompt, "Daily question must return valid prompt");
+assert(html.includes('dailyRitual: { streak: 0, lastDate: "", answers: {}, completedDates: [] }'), "Initial state must define default dailyRitual");
+
+// Feature coverage: Multi-layer soundscape mixer UI & WebRTC sync
+assert(html.includes('ambientMix: { synth: 0.8, rain: 0, hearth: 0 }'), "Initial state must define default ambientMix");
+assert(html.includes('id="synth-volume"'), "Settings must contain synth volume slider");
+assert(html.includes('id="rain-volume"'), "Settings must contain rain volume slider");
+assert(html.includes('id="hearth-volume"'), "Settings must contain hearth volume slider");
+assert(html.includes('payload.type === "ambient-mix"'), "Signaling / data-channel must handle ambient-mix sync");
+
+// Feature coverage: Resonance Compass SVG Radar Polygon
+const compassFnMatch = scripts[1].match(/function resonanceCompassMarkup\(rounds\) \{[\s\S]*?\n    \}/);
+assert(compassFnMatch, "Could not locate resonanceCompassMarkup");
+const resonanceCompassMarkup = vm.runInNewContext(`(${compassFnMatch[0]})`);
+const sampleRounds = [
+  { alignment: { overall: 88, topics: [{ topic: "lore", score: 90 }, { topic: "connection", score: 85 }] } }
+];
+const compassHtml = resonanceCompassMarkup(sampleRounds);
+assert(compassHtml.includes('<svg class="radar-svg"'), "Resonance compass must render radar SVG");
+assert(compassHtml.includes('class="radar-polygon"'), "Resonance compass must render radar polygon");
+assert(compassHtml.includes('class="radar-axis"'), "Resonance compass must render radar axes");
+assert(compassHtml.includes('Depth'), "Resonance compass must include Depth axis for specialty topics");
+
 const sliderCount = questions.filter((question) => question.type === "slider").length;
 const textCount = questions.length - sliderCount;
 console.log(`Production checks passed: ${questions.length} questions (${sliderCount} sliders, ${textCount} written), ${manifest.icons.length} app icons, QR generation verified.`);
