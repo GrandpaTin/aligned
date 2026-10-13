@@ -3746,9 +3746,19 @@ var qrcode = function() {
     @media print {
       body * { visibility: hidden; }
       .storybook-sheet, .storybook-sheet * { visibility: visible; }
-      .storybook-modal { position: static; background: #fff; color: #000; padding: 0; }
-      .storybook-sheet { border: none; box-shadow: none; max-width: 100%; width: 100%; background: #fff; color: #000; }
+      .storybook-modal { position: static; background: #fff !important; color: #0f172a !important; padding: 0; }
+      .storybook-sheet { border: none; box-shadow: none; max-width: 100%; width: 100%; background: #fff !important; color: #0f172a !important; }
+      .storybook-sheet h2, .storybook-sheet .storybook-title { color: #0f172a !important; }
+      .storybook-sheet strong, .storybook-sheet .storybook-round-heading { color: #0f172a !important; }
+      .storybook-sheet p { color: #475569 !important; }
+      .storybook-section h4 { color: #4338ca !important; }
+      .storybook-section div { background: #f8fafc !important; border-color: #e2e8f0 !important; color: #0f172a !important; }
       .storybook-actions { display: none !important; }
+      .radar-grid { stroke: #cbd5e1 !important; }
+      .radar-axis { stroke: #94a3b8 !important; }
+      .radar-label { fill: #0f172a !important; font-weight: 750; }
+      .radar-polygon { stroke: #16a34a !important; fill: rgba(22, 163, 74, 0.15) !important; filter: none !important; }
+      .radar-vertex { fill: #16a34a !important; stroke: #fff !important; }
     }
 
     .session-dropdown-container {
@@ -13412,7 +13422,24 @@ var qrcode = function() {
       } else if (payload.type === "progress") {
         if (!sameRound) return;
         nearbyRuntime.partnerProgress = { answered: Math.max(0, Number(payload.answered) || 0), total: Math.max(1, Number(payload.total) || state.selectedQuestionIds.length) };
-        if (state.screen === "nearby-wait") render();
+        if (state.screen === "nearby-wait") {
+          const bar = document.querySelector(".partner-progress-bar");
+          const label = document.querySelector(".partner-progress-label span:last-child");
+          if (bar && label) {
+            const answered = nearbyRuntime.partnerProgress.answered;
+            const total = nearbyRuntime.partnerProgress.total;
+            const almost = total > 1 && answered === total - 1;
+            label.textContent = `${answered} of ${total}${almost ? " · on the last one…" : " answered"}`;
+            bar.setAttribute("aria-valuenow", String(answered));
+            const fill = bar.querySelector("span");
+            if (fill) {
+              fill.style.width = `${(answered / Math.max(1, total)) * 100}%`;
+              fill.classList.toggle("almost", almost);
+            }
+          } else {
+            render();
+          }
+        }
       } else if (payload.type === "typing") {
         if (!sameRound) return;
         nearbyRuntime.partnerTyping = Boolean(payload.isTyping);
@@ -14468,10 +14495,23 @@ var qrcode = function() {
               <button class="${safeFirst ? `secondary-btn ${danger ? "danger-btn" : ""}` : `primary-btn ${danger ? "danger-btn" : ""}`}" type="button" data-modal-confirm>${escapeHTML(confirmLabel)}</button>
             </div>
           </section>`;
+        let settled = false;
         const finish = (value) => {
+          if (settled) return;
+          settled = true;
+          observer.disconnect();
           overlay.remove();
           resolve(value);
         };
+        const observer = new MutationObserver(() => {
+          if (!overlay.isConnected && !settled) {
+            settled = true;
+            observer.disconnect();
+            resolve(false);
+          }
+        });
+        observer.observe(document.body, { childList: true });
+
         overlay.addEventListener("click", (event) => { if (event.target === overlay) finish(false); });
         overlay.querySelector("[data-modal-cancel]").addEventListener("click", () => finish(false));
         overlay.querySelector("[data-modal-confirm]").addEventListener("click", () => finish(true));
@@ -14760,8 +14800,8 @@ var qrcode = function() {
           const isHidden = document.hidden;
           if (ctx.state === "running" && !isHidden) {
             const horizon = ctx.currentTime + 1.5;
-            if (synthLayer.nextChordAt < ctx.currentTime) synthLayer.nextChordAt = ctx.currentTime + 0.05;
-            if (synthLayer.nextNoteAt < ctx.currentTime) synthLayer.nextNoteAt = ctx.currentTime + 0.5;
+            if (synthLayer.nextChordAt < ctx.currentTime - 0.4) synthLayer.nextChordAt = ctx.currentTime + 0.05;
+            if (synthLayer.nextNoteAt < ctx.currentTime - 0.4) synthLayer.nextNoteAt = ctx.currentTime + 0.5;
             while (synthLayer.nextChordAt < horizon) {
               this.playChord(synthLayer, AMBIENT_CHORDS[synthLayer.chord % AMBIENT_CHORDS.length], synthLayer.nextChordAt);
               synthLayer.chord += 1;
@@ -14897,6 +14937,14 @@ var qrcode = function() {
         gain.gain.exponentialRampToValueAtTime(0.07, at + 0.005);
         gain.gain.exponentialRampToValueAtTime(0.0001, at + 1.2);
         if (panner) { gain.connect(panner); panner.connect(generation.out); } else gain.connect(generation.out);
+        let activePartials = 2;
+        const releaseVoice = () => {
+          activePartials -= 1;
+          if (activePartials <= 0) {
+            gain.disconnect();
+            panner?.disconnect();
+          }
+        };
         [[1, 1], [3, 0.2]].forEach(([multiple, level]) => {
           const osc = ctx.createOscillator();
           const partial = ctx.createGain();
@@ -14904,7 +14952,11 @@ var qrcode = function() {
           partial.gain.value = level;
           osc.connect(partial);
           partial.connect(gain);
-          osc.onended = () => { osc.disconnect(); partial.disconnect(); if (multiple === 1) { gain.disconnect(); panner?.disconnect(); } };
+          osc.onended = () => {
+            osc.disconnect();
+            partial.disconnect();
+            releaseVoice();
+          };
           osc.start(at);
           osc.stop(at + 1.25);
         });
@@ -16731,19 +16783,19 @@ var qrcode = function() {
           <h3>Test your partner intuition</h3>
           <p class="wyw-sub">Predict how your answers will compare. We’ll reveal your intuition score on the reveal board!</p>
           <div class="wyw-question">
-            <label>1. Overall sync forecast</label>
-            <div class="wyw-options">
-              <button type="button" class="wyw-btn ${syncVal === "high" ? "active" : ""}" data-wyw-sync="high">High sync (80%+)</button>
-              <button type="button" class="wyw-btn ${syncVal === "balanced" ? "active" : ""}" data-wyw-sync="balanced">Balanced (60–79%)</button>
-              <button type="button" class="wyw-btn ${syncVal === "sparks" ? "active" : ""}" data-wyw-sync="sparks">Dynamic opposites (&lt;60%)</button>
+            <label id="wyw-sync-label">1. Overall sync forecast</label>
+            <div class="wyw-options" role="group" aria-labelledby="wyw-sync-label">
+              <button type="button" class="wyw-btn ${syncVal === "high" ? "active" : ""}" data-wyw-sync="high" aria-pressed="${syncVal === "high"}">High sync (80%+)</button>
+              <button type="button" class="wyw-btn ${syncVal === "balanced" ? "active" : ""}" data-wyw-sync="balanced" aria-pressed="${syncVal === "balanced"}">Balanced (60–79%)</button>
+              <button type="button" class="wyw-btn ${syncVal === "sparks" ? "active" : ""}" data-wyw-sync="sparks" aria-pressed="${syncVal === "sparks"}">Dynamic opposites (&lt;60%)</button>
             </div>
           </div>
           <div class="wyw-question">
-            <label>2. Who had bolder answers?</label>
-            <div class="wyw-options">
-              <button type="button" class="wyw-btn ${bolderVal === "me" ? "active" : ""}" data-wyw-bolder="me">Me</button>
-              <button type="button" class="wyw-btn ${bolderVal === "partner" ? "active" : ""}" data-wyw-bolder="partner">${partner}</button>
-              <button type="button" class="wyw-btn ${bolderVal === "equal" ? "active" : ""}" data-wyw-bolder="equal">Equally bold</button>
+            <label id="wyw-bolder-label">2. Who had bolder answers?</label>
+            <div class="wyw-options" role="group" aria-labelledby="wyw-bolder-label">
+              <button type="button" class="wyw-btn ${bolderVal === "me" ? "active" : ""}" data-wyw-bolder="me" aria-pressed="${bolderVal === "me"}">Me</button>
+              <button type="button" class="wyw-btn ${bolderVal === "partner" ? "active" : ""}" data-wyw-bolder="partner" aria-pressed="${bolderVal === "partner"}">${partner}</button>
+              <button type="button" class="wyw-btn ${bolderVal === "equal" ? "active" : ""}" data-wyw-bolder="equal" aria-pressed="${bolderVal === "equal"}">Equally bold</button>
             </div>
           </div>
           ${isSaved ? '<p class="wyw-saved-note">✓ Predictions saved! They’ll unlock when you reveal.</p>' : ""}
@@ -17379,13 +17431,13 @@ var qrcode = function() {
                 ` : ""}
               </div>
               <div class="question-library-actions">
-                <button class="favorite-button ${favorite ? "active" : ""}" type="button" data-favorite-question="${escapedQuestionId}" aria-label="${favorite ? "Remove from" : "Add to"} favorites" aria-pressed="${favorite}">★</button>
-                <button class="question-library-action" type="button" data-exclude-question="${escapedQuestionId}">${excluded ? "Include" : "Exclude"}</button>
-                <button class="question-library-action" type="button" data-never-question="${escapedQuestionId}">${never ? "Allow again" : "Never ask"}</button>
-                <button class="question-library-action" type="button" data-edit-question="${escapedQuestionId}">Edit</button>
-                <button class="question-library-action" type="button" data-duplicate-question="${escapedQuestionId}">Make a variation</button>
-                <details class="feedback-menu"><summary>Feedback</summary><div class="feedback-actions">${[["valuable", "Valuable"], ["uncomfortable", "Uncomfortable"], ["rewrite", "Needs rewrite"]].map(([value, label]) => `<button class="question-library-action ${(state.questionFlags[question.id] || []).includes(value) ? "active" : ""}" type="button" data-question-flag="${value}" data-flag-question="${escapedQuestionId}">${label}</button>`).join("")}</div></details>
-                ${custom ? `<button class="question-library-action" type="button" data-delete-question="${escapedQuestionId}">Delete</button>` : ""}
+                <button class="favorite-button ${favorite ? "active" : ""}" type="button" data-favorite-question="${escapedQuestionId}" aria-label="${favorite ? "Remove from" : "Add to"} favorites: “${escapeHTML(question.prompt.slice(0, 45))}…”" aria-pressed="${favorite}">★</button>
+                <button class="question-library-action" type="button" data-exclude-question="${escapedQuestionId}" aria-label="${excluded ? "Include" : "Exclude"} “${escapeHTML(question.prompt.slice(0, 45))}…”">${excluded ? "Include" : "Exclude"}</button>
+                <button class="question-library-action" type="button" data-never-question="${escapedQuestionId}" aria-label="${never ? "Allow again" : "Never ask"} “${escapeHTML(question.prompt.slice(0, 45))}…”">${never ? "Allow again" : "Never ask"}</button>
+                <button class="question-library-action" type="button" data-edit-question="${escapedQuestionId}" aria-label="Edit question “${escapeHTML(question.prompt.slice(0, 45))}…”">Edit</button>
+                <button class="question-library-action" type="button" data-duplicate-question="${escapedQuestionId}" aria-label="Make a variation of “${escapeHTML(question.prompt.slice(0, 45))}…”">Make a variation</button>
+                <details class="feedback-menu"><summary aria-label="Feedback on “${escapeHTML(question.prompt.slice(0, 45))}…”">Feedback</summary><div class="feedback-actions">${[["valuable", "Valuable"], ["uncomfortable", "Uncomfortable"], ["rewrite", "Needs rewrite"]].map(([value, label]) => `<button class="question-library-action ${(state.questionFlags[question.id] || []).includes(value) ? "active" : ""}" type="button" data-question-flag="${value}" data-flag-question="${escapedQuestionId}">${label}</button>`).join("")}</div></details>
+                ${custom ? `<button class="question-library-action" type="button" data-delete-question="${escapedQuestionId}" aria-label="Delete custom question “${escapeHTML(question.prompt.slice(0, 45))}…”">Delete</button>` : ""}
               </div>
             </article>
           `;
@@ -17586,7 +17638,22 @@ var qrcode = function() {
         showToast("Added to your library. It’s shown below — clear the search to see everything.");
       });
 
-      document.getElementById("pack-name")?.addEventListener("input", () => { const packError = document.getElementById("pack-error"); if (packError) packError.textContent = ""; });
+      const packBuilderEl = document.getElementById("pack-builder");
+      packBuilderEl?.addEventListener("toggle", (e) => {
+        libraryView.packBuilderOpen = e.currentTarget.open;
+      });
+
+      const packNameInput = document.getElementById("pack-name");
+      packNameInput?.addEventListener("input", () => {
+        const packError = document.getElementById("pack-error");
+        if (packError) packError.textContent = "";
+      });
+      packNameInput?.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          document.getElementById("save-favorite-pack")?.click();
+        }
+      });
       document.getElementById("save-favorite-pack").addEventListener("click", () => {
         const name = document.getElementById("pack-name").value.trim();
         const error = document.getElementById("pack-error");
@@ -17604,7 +17671,10 @@ var qrcode = function() {
           const pack = state.customPacks.find((item) => item.id === button.dataset.deletePack);
           if (!pack) return;
           const sure = await openConfirmDialog({ eyebrow: "Your packs", title: `Delete “${pack.name}”?`, copy: "The questions stay in your library; only this saved pack is removed.", confirmLabel: "Delete pack", cancelLabel: "Keep it", danger: true, safeFirst: true });
-          if (!sure) return;
+          if (!sure) {
+            button.focus({ preventScroll: true });
+            return;
+          }
           state.customPacks = state.customPacks.filter((item) => item.id !== pack.id);
           libraryView.packBuilderOpen = true;
           saveState(); playSound("delete"); renderLibrary();
@@ -17642,7 +17712,7 @@ var qrcode = function() {
           <label class="custom-label" style="margin-top:12px">Search tags<input class="custom-input" id="edit-question-tags" maxlength="180" value="${escapeHTML(existingTags.join(", "))}" placeholder="communication, travel, boundaries"></label>
           <p class="topic-note">Separate tags with commas. ${draft ? "Your variation is saved as a new custom question; the original stays unchanged." : "Editing keeps the original question ID, history, and saved answers intact."}</p>
           <p class="error" id="edit-question-error" role="alert"></p>
-          <div class="dialog-actions"><button class="secondary-btn" id="cancel-question-edit" type="button">Cancel</button>${!isCustom && state.questionEdits[question.id] ? '<button class="text-btn" id="restore-question" type="button">Restore original</button>' : ""}<button class="primary-btn" id="save-question-edit" type="button">Save changes</button></div>
+          <div class="dialog-actions"><button class="secondary-btn" id="cancel-question-edit" data-modal-cancel type="button">Cancel</button>${!isCustom && state.questionEdits[question.id] ? '<button class="text-btn" id="restore-question" type="button">Restore original</button>' : ""}<button class="primary-btn" id="save-question-edit" type="button">Save changes</button></div>
         </section>`;
       overlay.querySelector("#cancel-question-edit").addEventListener("click", () => overlay.remove());
       overlay.querySelector("#restore-question")?.addEventListener("click", () => {
@@ -17796,7 +17866,7 @@ var qrcode = function() {
         <div class="storybook-sheet">
           <div class="storybook-header">
             <p class="eyebrow" style="color:var(--coral);font-weight:800;letter-spacing:0.08em">ALIGNED · OUR STORYBOOK</p>
-            <h2 style="font-size:1.8rem;margin:6px 0 10px;color:#fff">${p1} & ${p2}</h2>
+            <h2 class="storybook-title" style="font-size:1.8rem;margin:6px 0 10px">${p1} & ${p2}</h2>
             <p style="margin:0;color:var(--text-2);font-size:0.88rem">Archived on ${today} · ${rounds.length} ${rounds.length === 1 ? "round" : "rounds"} played</p>
             <div style="display:flex;justify-content:center;gap:20px;margin-top:16px">
               <div><strong style="font-size:1.4rem;color:#4ade80">${average}%</strong><div style="font-size:0.75rem;color:var(--text-2)">Similarity</div></div>
@@ -17826,7 +17896,7 @@ var qrcode = function() {
             <div style="display:flex;flex-direction:column;gap:10px">
               ${rounds.slice(0, 5).map((r) => `
                 <div style="padding:10px 14px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08)">
-                  <strong style="font-size:0.85rem;color:#e2e8f0">${escapeHTML(formatRoundDate(r.completedAt))} · ${Number(r.alignment.overall)}% Alignment</strong>
+                  <strong class="storybook-round-heading" style="font-size:0.85rem">${escapeHTML(formatRoundDate(r.completedAt))} · ${Number(r.alignment.overall)}% Alignment</strong>
                   <div style="font-size:0.78rem;color:var(--text-2);margin-top:3px">${r.questionIds.length} questions explored</div>
                 </div>
               `).join("")}
@@ -17842,8 +17912,17 @@ var qrcode = function() {
 
       document.body.appendChild(modal);
       armBackGuard();
+      const close = () => {
+        document.removeEventListener("keydown", onKeydown);
+        modal.remove();
+        syncModalState();
+      };
+      const onKeydown = (e) => { if (e.key === "Escape") close(); };
+      document.addEventListener("keydown", onKeydown);
+      modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
       modal.querySelector("#storybook-print-btn").addEventListener("click", () => window.print());
-      modal.querySelector("#storybook-close-btn").addEventListener("click", () => modal.remove());
+      modal.querySelector("#storybook-close-btn").addEventListener("click", close);
+      syncModalState();
     }
 
     function renderResults() {
@@ -20797,7 +20876,9 @@ var qrcode = function() {
         if (currentSlide > 0) { currentSlide--; renderCurrentSlide(); }
       });
       overlay.addEventListener("click", (e) => {
-        if (e.target.id === "story-open-keepsake") {
+        if (e.target === overlay) {
+          closeStory();
+        } else if (e.target.id === "story-open-keepsake") {
           closeStory();
           openKeepsakeModal(questions, alignment);
         } else if (e.target.id === "story-close-finish") {
@@ -21446,16 +21527,37 @@ var qrcode = function() {
             ${highlightCard(surpriseNote && surpriseHighlight?.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No big surprises this round.", surpriseNote, guessSurprise ? "Someone is in for a surprise…" : surpriseHighlight ? "The widest gap is waiting…" : "Will anything surprise you?")}
             ${conversationHighlight ? highlightCard("Best conversation starter", conversationHighlight, "", "", "There is a story waiting in one card…") : ""}
             ${tally.some((item) => item.made) ? `<article class="highlight-card mind-reader"><span>🔮 Mind-reader ${allRevealed && bestGuesser && bestGuesser.hits > 0 ? '<span class="crown-drop" aria-label="Winner crown">👑</span>' : ""}</span><strong class="highlight-answer">${mindReaderHeadline(tally)}<small class="highlight-note">${tally.filter((item) => item.made).map((item) => `${escapeHTML(state.names[item.player])} read ${escapeHTML(state.names[item.player === 0 ? 1 : 0])} ${item.hits}/${item.made}`).join(" · ")}</small></strong><strong class="highlight-locked">${tally.some((item) => item.hits) ? "Someone read the other’s mind… " : "Did anyone read minds tonight? "}<small>${everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"}</small></strong></article>` : ""}
-            ${state.whileYouWait?.answered ? `
-              <article class="highlight-card" style="border-color:rgba(167,139,250,0.4)">
-                <span>✦ While-you-wait intuition</span>
-                <strong class="highlight-answer">
-                  Sync guess: ${state.whileYouWait.sync === "high" ? "High (80%+)" : state.whileYouWait.sync === "balanced" ? "Balanced (60–79%)" : "Opposites (&lt;60%)"}
-                  <small class="highlight-note">Actual similarity: ${alignment.overall}% · ${(state.whileYouWait.sync === "high" && alignment.overall >= 80) || (state.whileYouWait.sync === "balanced" && alignment.overall >= 60 && alignment.overall < 80) || (state.whileYouWait.sync === "sparks" && alignment.overall < 60) ? "Spot on! 🎯" : "Plot twist! 🔮"}</small>
-                </strong>
-                <strong class="highlight-locked"><small>${everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"}</small></strong>
-              </article>
-            ` : ""}
+            ${state.whileYouWait?.answered ? (() => {
+              const wyw = state.whileYouWait;
+              const syncGuessLabel = wyw.sync === "high" ? "High (80%+)" : wyw.sync === "balanced" ? "Balanced (60–79%)" : wyw.sync === "sparks" ? "Opposites (<60%)" : "";
+              const syncHit = (wyw.sync === "high" && alignment.overall >= 80) || (wyw.sync === "balanced" && alignment.overall >= 60 && alignment.overall < 80) || (wyw.sync === "sparks" && alignment.overall < 60);
+
+              // Calculate boldness from slider distance from center (5.5)
+              let p0Bold = 0, p1Bold = 0;
+              questions.filter((q) => q.type === "slider").forEach((q) => {
+                const a0 = Number(state.answers[0]?.[q.id]);
+                const a1 = Number(state.answers[1]?.[q.id]);
+                if (Number.isFinite(a0)) p0Bold += Math.abs(a0 - 5.5);
+                if (Number.isFinite(a1)) p1Bold += Math.abs(a1 - 5.5);
+              });
+              const localPlayer = nearbyLocalPlayer();
+              const myBold = localPlayer === 0 ? p0Bold : p1Bold;
+              const partnerBold = localPlayer === 0 ? p1Bold : p0Bold;
+              const bolderActual = Math.abs(myBold - partnerBold) < 1.5 ? "equal" : myBold > partnerBold ? "me" : "partner";
+              const bolderHit = wyw.bolder === bolderActual;
+              const bolderLabel = wyw.bolder === "me" ? "You" : wyw.bolder === "partner" ? (state.names[localPlayer === 0 ? 1 : 0] || "Partner") : "Equally bold";
+
+              return `
+                <article class="highlight-card" style="border-color:rgba(167,139,250,0.4)">
+                  <span>✦ While-you-wait intuition</span>
+                  <div class="highlight-answer" style="display:flex;flex-direction:column;gap:4px">
+                    ${syncGuessLabel ? `<div>Sync forecast: <strong>${syncGuessLabel}</strong> <small class="highlight-note">· Actual: ${alignment.overall}% (${syncHit ? "Spot on! 🎯" : "Plot twist! 💫"})</small></div>` : ""}
+                    ${wyw.bolder ? `<div>Bolder answers: <strong>${bolderLabel}</strong> <small class="highlight-note">· ${bolderHit ? "Called it! 🎯" : "Plot twist! 💫"}</small></div>` : ""}
+                  </div>
+                  <strong class="highlight-locked"><small>${everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"}</small></strong>
+                </article>
+              `;
+            })() : ""}
           </section>
           <div class="actions reveal-actions">
             <button class="secondary-btn" id="open-library-journey-btn" type="button"><span aria-hidden="true">🗺️</span> Explore Library Progress</button>
@@ -22232,7 +22334,14 @@ var qrcode = function() {
         if (state.playStyle === "nearby" && nearbyChannelOpen()) {
           const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "your partner";
           const unfinished = revealUnfinished() ? `Your scores haven’t been revealed yet${revealRemainingCopy() ? ` (${revealRemainingCopy()})` : ""} — leaving skips the count-up and its scores go straight to your Journal. ` : "";
-          const leave = await openConfirmDialog({ title: "Leave the two-phone round?", copy: `${unfinished}${partner}’s phone will be told you left. Your results stay saved on both phones.`, confirmLabel: "Leave anyway", cancelLabel: "Stay", safeFirst: true });
+          const leave = await openConfirmDialog({
+            title: "Leave the two-phone round?",
+            copy: `${unfinished}${partner}’s phone will be told you left. Your results stay saved on both phones.`,
+            confirmLabel: "Leave anyway",
+            cancelLabel: "Stay",
+            safeFirst: true,
+            tag: "link"
+          });
           if (!leave) return;
         } else if (!(await confirmLeavingReveal("Switch anyway"))) return;
         closeNearbyConnection({ notifyPartner: state.playStyle === "nearby" });

@@ -17,7 +17,8 @@
 | **3** | 2026-10-13 00:47 | Resonance Compass Screen-Reader Accessible Table, Android Back-Button Teardown, High-DPI Keepsake Export (Android Bridge), Daily Ritual WebRTC Sync & Multi-Suite Testing | Verified | `3baed81` |
 | **4** | 2026-10-13 01:05 | Rating ARIA Radiogroup, Motion Gyroscope Scoping, Procedural Web Audio Throttling & Backup Schema Suite | Verified | `9310705` |
 | **5** | 2026-10-13 01:20 | PWA Cache Key Normalization, WebRTC Identity Guard, Layout Stabilization, Modal Focus Hardening & Custom Pack Test Suite | Verified | `e3661ad` |
-| **6** | 2026-10-13 01:32 | LocalStorage Quota Recovery, WCAG AAA High-Contrast Readability, Screen Heading Focus Transition & Audio Preference Independence Suites | Verified | `dd5f7e2` |
+| **7** | 2026-10-13 01:43 | SW Invalidation waitUntil, Keepsake GPU Buffer Purge, WebRTC Multi-Tab Guard, Mind-Reader Settle Guard & Live ARIA Announcements | Verified | `b76cf85` |
+| **8** | 2026-10-13 01:56 | Service Worker Navigation Preload, Audio Voice Scheduler Jitter & Deallocation, Modal Disconnect-Safe Guard, While-You-Wait In-Place Sync & Dual Intuition Payoff, Pack Builder A11y & Keepsake Math Suite | Verified | `8fb9b95` |
 
 ---
 
@@ -242,4 +243,42 @@
   - `npm run build`: `downloads/Aligned-offline.html` (1152 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
 - **Status:** Verified (`b76cf85`).
 
+### Cycle 8 (2026-10-13 01:56 EDT)
+- **Audits Performed:**
+  - **Subagent A (Resource Lifecycles & SW Performance):** Audited Service Worker navigation preload capabilities, cache-first matching for precached static assets, Web Audio scheduler jitter on main-thread blocking, dual-oscillator voice release counter to eliminate disconnection pops/clicks, and print stylesheet overrides for Storybook modals.
+  - **Subagent B (Gameplay Logic, Modal Teardowns & Pack Builder A11y):** Audited modal lifecycle and detected hanging Promises in `openConfirmDialog` when dialogs are removed by concurrent DOM events; identified missing `tag: "link"` in Reveal `#start-over` dialog; detected full-screen DOM re-renders (`render()`) on incoming WebRTC `progress` messages blowing away user inputs in While-You-Wait; identified unannounced prediction button states (`aria-pressed`, `role="group"`) and missing Question 2 ("bolder answers") intuition payoff; audited pack builder discovering missing `<details id="pack-builder">` toggle event listener causing auto-collapse when favoriting questions, dead Enter key on `#pack-name`, and uncontextualized screen reader action buttons.
+  - **Subagent C (Test Coverage & Mathematical Rigor):** Built dedicated unit test suite (`tests/keepsake-math.test.mjs`) verifying 4:5 aspect ratio, 800x1000 coordinate bounds, high-DPI canvas scaling [2, 3], memory purge on close, score ring arc angles, and SVG Resonance Compass geometry clamping.
+- **Implemented Fixes:**
+  1. **Service Worker Navigation Preload & Cache Optimization (`sw.js`):**
+     - Added `self.registration.navigationPreload.enable()` during activation.
+     - Bumped cache name to `aligned-v40`.
+     - Implemented cache-first lookup for precached static assets (`manifest.webmanifest`, icons, offline bundle).
+  2. **Web Audio Voice Release & Main-Thread Jitter Tolerance (`index.html`):**
+     - Added 400ms main-thread jitter tolerance to `ProceduralAmbient.startSynth` chord/note scheduler.
+     - Coordinated dual-oscillator voice release counter in `playNote` with exponential gain decay to avoid pop/clicks on disconnection.
+  3. **Disconnect-Safe Modal Promise Lifecycle & Tagging (`index.html`):**
+     - Added `MutationObserver` on `document.body` in `openConfirmDialog()` so externally detached dialogs resolve `false` cleanly rather than hanging async functions permanently.
+     - Added `tag: "link"` to Reveal `#start-over` confirm dialog for partner disconnect teardown.
+     - Added `data-modal-cancel` to `#cancel-question-edit` for modal manager tracking.
+     - Added backdrop click and Escape key dismissal to Storybook and Story Reel modals.
+     - Enhanced Storybook print styling (`@media print`) with high-contrast text and border overrides.
+  4. **While-You-Wait In-Place Progress Synchronization (`index.html`):**
+     - Updated `handleNearbyMessage` (`payload.type === "progress"`) to update `.partner-progress-bar` and label in-place without triggering full-screen `render()`, preserving active focus, ongoing prediction inputs, and aura spark clicker animations.
+     - Added `role="group"`, `aria-labelledby`, and `aria-pressed` to While-You-Wait sync forecast and boldness prediction buttons.
+     - Enhanced Reveal screen while-you-wait intuition payoff card to display both the overall sync forecast AND Question 2 bolder answers intuition prediction (calculated from slider distance from center).
+  5. **Custom Pack Builder Auto-Collapse Fix & Accessible Actions (`index.html`):**
+     - Added `"toggle"` event listener to `<details id="pack-builder">` syncing `libraryView.packBuilderOpen` to prevent auto-collapse when favoriting questions.
+     - Added Enter key submit handler to `#pack-name` input.
+     - Restored focus to delete button upon pack delete cancellation.
+     - Added contextual `aria-label` to all question action buttons ("Edit", "Make a variation", "Delete", "Include/Exclude", "Never ask", and "Favorites").
+  6. **Automated Test Suite Expansion (`tests/keepsake-math.test.mjs`, `package.json`):**
+     - Authored `tests/keepsake-math.test.mjs` (4 unit tests verifying 4:5 aspect ratio, 800x1000 coordinate bounds, high-DPI scaling [2, 3], memory purge, score ring arc angles, and SVG geometry bounds).
+     - Integrated `tests/keepsake-math.test.mjs` into `package.json` `"test"` script (11 test suites total).
+- **Verification:**
+  - `npm test`: Passed (all 11 test suites: production check, signaling security, daily ritual lifecycle, radar storybook, backup schema resilience, custom pack automation, quota recovery, audio preferences, webrtc peer simulation, mind-reader math, and keepsake math — 40 unit tests across 11 runners in 215ms).
+  - `npm run test:e2e`: Passed (all 7 Playwright E2E tests: full 5-question round lifecycle, settings persistence across reload, custom pack launch, screen heading focus transitions, modal keyboard trapping, high-contrast persistence, and offline service worker cached execution in 94.2s).
+  - `npm run build`: `downloads/Aligned-offline.html` (1157 KB) and `downloads/Aligned.apk` 1.6.0 (10600) built cleanly.
+- **Status:** Verified (`8fb9b95`).
+
 ---
+

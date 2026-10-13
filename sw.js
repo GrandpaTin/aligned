@@ -1,4 +1,4 @@
-const CACHE_NAME = "aligned-v39";
+const CACHE_NAME = "aligned-v40";
 const NAVIGATION_TIMEOUT_MS = 3000;
 const APP_FILES = ["./", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./og-image.jpg", "./apple-touch-icon.png", "./icon-maskable-512.png"];
 
@@ -11,9 +11,10 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   // Cache Storage is shared by every app on this origin, so only this app's own old versions are removed.
   event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((key) => /^(aligned|we-align)-v\d+$/.test(key) && key !== CACHE_NAME).map((key) => caches.delete(key))))
-      .then(() => self.clients.claim())
+    Promise.all([
+      caches.keys().then((keys) => Promise.all(keys.filter((key) => /^(aligned|we-align)-v\d+$/.test(key) && key !== CACHE_NAME).map((key) => caches.delete(key)))),
+      self.registration.navigationPreload ? self.registration.navigationPreload.enable().catch(() => {}) : Promise.resolve()
+    ]).then(() => self.clients.claim())
   );
 });
 
@@ -57,7 +58,11 @@ self.addEventListener("fetch", (event) => {
     return undefined;
   };
   if (request.mode !== "navigate") {
-    event.respondWith(network.catch(async () => (await fromCache()) || Response.error()));
+    event.respondWith((async () => {
+      const cached = await fromCache();
+      if (cached) return cached;
+      return network.catch(() => Response.error());
+    })());
     return;
   }
   // Network-first with fast cache fallback, guarded against long network drops
