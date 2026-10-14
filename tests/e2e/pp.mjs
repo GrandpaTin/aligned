@@ -10,7 +10,8 @@ await p.screenshot({ path: `pp-${tag}-q1.png` });
 const ow = await p.evaluate(() => [document.documentElement.scrollWidth, innerWidth]); console.log("overflow", ow);
 console.log("p1", await answerAll(p, "A"));
 await p.screenshot({ path: `pp-${tag}-lock.png` });
-await p.click("#unlock-turn"); await p.waitForTimeout(300);
+// A tap within 400 ms of a screen change is swallowed by design (double-tap guard), and no one hands a phone over that fast.
+await p.waitForTimeout(450); await p.click("#unlock-turn"); await p.waitForTimeout(300);
 console.log("skip visible for p2:", await p.locator("#skip-question").count());
 console.log("p2", await answerAll(p, "J"));
 console.log("screen", await screenOf(p)); await p.screenshot({ path: `pp-${tag}-celebrate.png` });

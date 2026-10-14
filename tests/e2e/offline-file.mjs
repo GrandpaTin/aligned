@@ -6,7 +6,7 @@ const p = await ctx.newPage(); p.on("pageerror", e => errors.push(String(e))); p
 await p.goto(pathToFileURL(fileURLToPath(new URL("../../downloads/Aligned-offline.html", import.meta.url))).href);
 await p.waitForTimeout(600); await dismissTutorial(p);
 await p.fill("#player-one","Avery"); await p.fill("#player-two","Jordan"); await p.locator('#setup-form button[type="submit"]').click(); await p.waitForTimeout(300);
-console.log("p1", await answerAll(p,"A")); await p.click("#unlock-turn"); console.log("p2", await answerAll(p,"J")); console.log(await screenOf(p));
+console.log("p1", await answerAll(p,"A")); await p.waitForTimeout(450); await p.click("#unlock-turn"); console.log("p2", await answerAll(p,"J")); console.log(await screenOf(p));
 await p.click("#settings-button"); await p.waitForTimeout(300); console.log((await p.locator("#offline-card").innerText()).slice(0,300));
 await p.click("#home-button"); await p.waitForTimeout(600); await p.click('[data-play-style="nearby"]', { force: true }); await p.waitForTimeout(300);
 console.log("two-phone tap:", await p.evaluate(() => [document.querySelector(".app-toast")?.textContent, JSON.parse(localStorage.getItem("aligned-state-v1")).playStyle]));

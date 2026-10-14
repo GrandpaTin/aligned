@@ -20,9 +20,11 @@ const scan = async (label) => {
 };
 await p.goto(BASE); await p.waitForTimeout(500); await dismissTutorial(p); await scan("setup");
 await p.fill("#player-one", "Avery"); await p.fill("#player-two", "Jordan");
-await p.locator('#setup-form button[type="submit"]').click(); await p.waitForSelector("#question-form"); await scan("question");
-await answerAll(p, "A"); await scan("lock"); await p.click("#unlock-turn", { force: true }); await answerAll(p, "J"); await scan("celebration");
-await p.click("#open-reveal-board", { force: true }); await p.waitForTimeout(800); await p.click("#reveal-all", { force: true }); await p.waitForTimeout(800); await scan("reveal");
+await p.locator('#setup-form button[type="submit"]').click(); await p.waitForTimeout(400);
+if (await p.locator("#sensitive-confirm").isVisible().catch(() => false)) await p.click("#sensitive-confirm");
+await p.waitForSelector("#question-form"); await scan("question");
+await answerAll(p, "A"); await scan("lock"); await p.waitForTimeout(450); await p.click("#unlock-turn", { force: true }); await p.waitForSelector("#question-form", { timeout: 10000 }); await answerAll(p, "J"); await p.waitForSelector("#open-reveal-board", { timeout: 15000 }); await scan("celebration");
+await p.waitForTimeout(450); await p.click("#open-reveal-board", { force: true }); await p.waitForTimeout(800); await p.click("#reveal-all", { force: true }); await p.waitForTimeout(800); await scan("reveal");
 await p.click("#results-button", { force: true }); await p.waitForTimeout(500); await scan("results");
 await p.click("#library-button", { force: true }); await p.waitForTimeout(500); await scan("library");
 await p.click("#settings-button", { force: true }); await p.waitForTimeout(500); await scan("settings");

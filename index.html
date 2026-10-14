@@ -5041,6 +5041,22 @@ var qrcode = function() {
       line-height: 1.65;
     }
 
+    .lock-tease {
+      max-width: 34ch;
+      margin: 10px auto 0;
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: rgba(167, 139, 250, 0.14);
+      color: var(--text);
+      font-weight: 700;
+      font-size: max(13px, .85rem);
+      line-height: 1.45;
+    }
+    @supports (color: color-mix(in srgb, red, blue)) {
+      .lock-tease { background: color-mix(in srgb, var(--violet) 14%, transparent); }
+    }
+    .high-contrast .lock-tease { background: none; border: 1px solid currentColor; }
+
     .pass-visual {
       display: flex;
       width: min(100%, 330px);
@@ -5901,6 +5917,20 @@ var qrcode = function() {
       background: #334155;
       transition: width 650ms cubic-bezier(0.22, 1, 0.36, 1);
     }
+
+    /* No `to` steps: each animation ends on the element’s own computed left/width, so there is no end snap. */
+    @keyframes marker-land { from { left: 50%; opacity: 0; } }
+    @keyframes gap-grow { from { opacity: 0; } }
+    @keyframes mask-fill { from { width: 100%; } }
+    @keyframes pick-drop { from { opacity: 0; transform: translateY(-6px); } }
+    .flip-card.first-look .marker:not(.ghost-marker) { animation: marker-land 460ms cubic-bezier(0.16, 1, 0.3, 1) 240ms both; }
+    /* Keeps magnetic-snap in the list so adding or removing first-look matches it by name instead of restarting it (and ghost markers keep theirs untouched). */
+    .flip-card.first-look .magnetic-collision .marker:not(.ghost-marker) { animation: marker-land 460ms cubic-bezier(0.16, 1, 0.3, 1) 240ms both, magnetic-snap 480ms cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .flip-card.first-look .comparison-gap { animation: gap-grow 220ms ease 640ms both; }
+    .flip-card.first-look .difference-mask { animation: mask-fill 600ms cubic-bezier(0.22, 1, 0.36, 1) 560ms both; }
+    .flip-card.first-look .pick-name { animation: pick-drop 360ms cubic-bezier(0.16, 1, 0.3, 1) 300ms both; }
+    .reduced-motion .flip-card.first-look * { animation: none !important; }
+    @media (prefers-reduced-motion: reduce) { .flip-card.first-look * { animation: none !important; } }
 
     .match-badge {
       display: inline-flex;
@@ -10816,6 +10846,8 @@ var qrcode = function() {
     .guess-line.hit { background: color-mix(in srgb, var(--violet) 20%, transparent); font-weight: 750; }
     .card-more { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 6px; }
     .card-more > summary { cursor: pointer; font-weight: 750; padding: 8px 0; }
+    .card-more .discussion-timer-area { margin: 6px 0 10px; }
+    .card-more .voice-memory-section { margin: 0 0 10px; }
     .card-back-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; }
     .alignment-rating.unrated { border: 1px solid color-mix(in srgb, var(--violet) 55%, transparent); border-radius: 16px; padding: 12px; background: color-mix(in srgb, var(--violet) 8%, transparent); }
     .reveal-progress { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; }
@@ -10827,6 +10859,8 @@ var qrcode = function() {
     .streak-pop { position: absolute; top: -9px; right: 12px; z-index: 4; padding: 4px 10px; border-radius: 999px; border: 1px solid #f59e0b; color: #422006; background: linear-gradient(135deg, #fde68a, #fbbf24); box-shadow: 0 6px 18px rgba(251, 191, 36, 0.35); font-size: max(12px, 0.74rem); font-weight: 900; white-space: nowrap; pointer-events: none; animation: streak-pop 2.4s cubic-bezier(0.3, 1.5, 0.5, 1) forwards; }
     @keyframes streak-pop { 0% { opacity: 0; transform: scale(0.4) rotate(-8deg); } 14% { opacity: 1; transform: scale(1.12) rotate(3deg); } 24% { transform: none; } 82% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-6px); } }
     .high-contrast .streak-pop { border-color: #422006; box-shadow: none; }
+    /* Two 30-character names would push a nowrap read chip off a 360px card. */
+    .streak-pop.read-pop { max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis; }
     /* Without an explicit none, the global reduced-motion rules jump this forwards animation to its invisible last frame. */
     .reduced-motion .streak-pop { animation: none !important; }
     @media (prefers-reduced-motion: reduce) { .streak-pop { animation: none !important; } }
@@ -10903,6 +10937,7 @@ var qrcode = function() {
       .lock-screen #lock-title .accent-text::before { content: " "; }
       .lock-screen .lock-card { padding-block: 14px !important; }
       .lock-screen .lock-copy { margin-block: 6px 10px; }
+      .lock-screen .lock-tease { margin-block: 4px 8px; }
     }
     /* The in-app reduced-motion class sits on <html>, which `.reduced-motion *` never matches, so behavior "auto" scrolls stayed smooth. */
     html.reduced-motion { scroll-behavior: auto; }
@@ -12742,7 +12777,7 @@ var qrcode = function() {
     let nearbyLastPeerMessageAt = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.7.0";
+    const APP_VERSION = "1.7.1";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -17868,15 +17903,15 @@ var qrcode = function() {
       return revealStreak.count;
     }
     // The chip sits on the .flip-card itself, outside both faces, so card sizing never sees it.
-    function showStreakPop(card, streak, { speak = true } = {}) {
+    function showStreakPop(card, streak, { speak = true, text = "" } = {}) {
       card.querySelector(".streak-pop")?.remove();
       const pop = document.createElement("span");
-      pop.className = "streak-pop";
+      pop.className = text ? "streak-pop read-pop" : "streak-pop";
       pop.setAttribute("aria-hidden", "true");
-      pop.textContent = streak === 2 ? "✦ 2 in a row" : streak === 3 ? "Hat trick! ✦ 3 in a row" : `🔥 ${streak} in a row!`;
+      pop.textContent = text || (streak === 2 ? "✦ 2 in a row" : streak === 3 ? "Hat trick! ✦ 3 in a row" : `🔥 ${streak} in a row!`);
       card.appendChild(pop);
       window.setTimeout(() => pop.remove(), 2400);
-      if (speak) announce(`${streak} matches in a row!`);
+      if (speak) announce(text || `${streak} matches in a row!`);
     }
     // The tilt shine skips its repaint while this key is unchanged; clearing it makes newly visible faces catch up.
     let holoApplied = "";
@@ -18857,7 +18892,7 @@ var qrcode = function() {
                 return saved.length ? saved.slice(0, 30).map(({ id, status, round }) => {
                   const question = catalogById.get(id);
                   return `<div class="round-history-item"><span class="round-copy"><strong>${escapeHTML(question?.prompt || "Saved conversation")}</strong><span>${status === "talk" ? "Talk about this" : "Revisit later"} · ${escapeHTML(formatRoundDate(round.completedAt))}</span></span><span class="round-actions"><button class="question-library-action" type="button" data-replay-round="${escapeHTML(round.id)}">Replay round</button></span></div>`;
-                }).join("") : '<p class="topic-note">Open “Save for later” on any revealed card to keep a conversation for another night.</p>';
+                }).join("") : '<p class="topic-note">Open “Keep talking” on any revealed card to keep a conversation for another night.</p>';
               })()}
             </div>
           </article>
@@ -20644,6 +20679,17 @@ var qrcode = function() {
       if (question.type === "text" && !COARSE_POINTER) input.focus();
     }
 
+    // Count only, never values or question ids: the lock screen must not leak what was guessed.
+    function handoffTease(finishedIndex, finishedPlayer) {
+      const roundIds = new Set(state.selectedQuestionIds || []);
+      const guessCount = Object.entries(state.guesses?.[finishedIndex] || {}).filter(([id, value]) => roundIds.has(id) && typeof value === "number").length;
+      if (!guessCount) return "";
+      // Only a guess resolves a double down (see guessHit), so a wildcard parked on an unguessed card is not one.
+      const wildcardId = state.wildcards?.[finishedIndex];
+      const doubled = roundIds.has(wildcardId) && typeof state.guesses?.[finishedIndex]?.[wildcardId] === "number";
+      return `<p class="lock-tease"><span aria-hidden="true">🔮</span> ${escapeHTML(finishedPlayer)} made ${guessCount === 1 ? "a guess" : `${guessCount} guesses`} about you${doubled ? " and doubled down on one" : ""}. Guess back on the sliders to take the mind-reader crown.</p>`;
+    }
+
     function renderIntermission() {
       const finishedIndex = state.activePlayer;
       const nextIndex = finishedIndex === 0 ? 1 : 0;
@@ -20656,6 +20702,7 @@ var qrcode = function() {
             <p class="eyebrow">Answers locked</p>
             <h2 id="lock-title">Pass the device to<br><span class="accent-text">${escapeHTML(nextPlayer)}</span></h2>
             <p class="lock-copy">${escapeHTML(finishedPlayer)}’s answers are safely hidden. When ${escapeHTML(nextPlayer)} has the device, unlock the next turn.</p>
+            ${handoffTease(finishedIndex, finishedPlayer)}
             <div class="pass-visual" aria-hidden="true">
               <span class="pass-person one">${escapeHTML(initials(finishedPlayer))}</span>
               <span class="pass-path"></span>
@@ -20809,12 +20856,14 @@ var qrcode = function() {
       return `<div class="difference-panel" style="--match-color:var(--violet);--match-percent:0%"><div class="difference-topline"><span class="difference-label">♡ Answer held privately</span><span class="difference-score">Not scored</span></div><p class="topic-note" style="margin-top:9px">${escapeHTML(players.join(" and "))} chose not to answer yet. Curiosity can wait until everyone feels ready.</p></div>${importanceMarkup(question)}`;
     }
 
-    function followThroughMarkup(question) {
+    function followThroughMarkup(question, tools = "") {
       const status = state.conversationStatus[question.id] || "";
+      const open = status || discussionTimers[question.id]?.isOpen || state.voiceNotes?.[question.id] || keepTalkingOpen.has(question.id);
       const escapedQuestionId = escapeHTML(question.id);
       return `
-        <details class="card-more" ${status ? "open" : ""}>
-        <summary><span class="summary-title">Save for later</span> <small>next steps · how much it matters · rate the question</small></summary>
+        <details class="card-more" ${open ? "open" : ""}>
+        <summary><span class="summary-title">Keep talking</span> <small>2-min timer · voice memory · next steps · rate the question</small></summary>
+        ${tools}
         ${importanceMarkup(question)}
         <div class="follow-through">
           <strong>What should happen next?</strong>
@@ -20839,6 +20888,17 @@ var qrcode = function() {
         return { guess, actual, distance: sameSide ? 0 : 7, hit: sameSide, side: true };
       }
       return { guess, actual, distance: Math.abs(guess - actual), hit: Math.abs(guess - actual) <= 1 };
+    }
+
+    // The flip's "you read them" chip; plain text, set via textContent, so names need no escaping here.
+    function guessReadText(question) {
+      if (!question) return "";
+      const readers = [0, 1].filter((player) => guessHit(question, player)?.hit);
+      if (!readers.length) return "";
+      const name = (player) => state.names?.[player] || `Player ${player + 1}`;
+      const doubled = readers.some((player) => state.wildcards?.[player] === question.id);
+      const line = readers.length > 1 ? `${name(0)} & ${name(1)} read each other!` : `${name(readers[0])} read ${name(readers[0] ? 0 : 1)}!`;
+      return (doubled ? "★ " : "🔮 ") + line + (doubled ? " Double Down paid off" : "");
     }
 
     // Quick picks are shown by the side someone chose, never as a number nobody saw.
@@ -21115,6 +21175,16 @@ var qrcode = function() {
         || state.revealCelebrated === state.selectedQuestionIds.join("|");
     }
 
+    // A face-down card the pair already looked at says so, so a folded board still reads as progress.
+    function closedCardHint(seen, verb) {
+      return seen ? `✓ Seen · ${String(verb).toLowerCase()} to reopen` : `${verb} to reveal`;
+    }
+
+    // "Next card" folds the finished card only on a one-column board, and never while something on it is unfinished.
+    function shouldFoldOnNext({ singleColumn, flipped, unrated, recording, timerRunning }) {
+      return Boolean(singleColumn && flipped && !unrated && !recording && !timerRunning);
+    }
+
     // The golden card is derived only from data both phones already hold once both answers are in
     // (round ids, preset, answers, not-ready flags), so both boards agree without a wire message or saved state.
     function goldenHash() {
@@ -21299,6 +21369,9 @@ var qrcode = function() {
     let ratingRenderQueued = false;
 
     let discussionTimers = {};
+    // A drawer opened by hand survives re-renders (a partner’s flip rebuilds the board), or the timer and recorder slam shut mid-use.
+    const keepTalkingOpen = new Set();
+    let keepTalkingRound = "";
 
     function clearAllDiscussionTimers() {
       Object.values(discussionTimers).forEach((timer) => {
@@ -22557,6 +22630,11 @@ var qrcode = function() {
       const allRevealed = everyCardUp && !pendingRatings.length;
       const tally = mindReaderTally(questions);
       const rivalry = calculateTonightRivalry();
+      // Round one's Mind-reader highlight already carries this tally; the rivalry only means something from a second round tonight.
+      const tonightRounds = roundsPlayedToday();
+      // Open drawers belong to this round; a replayed round reuses the same question ids.
+      const keepTalkingKey = `${state.nearbyRoundId || ""}|${state.completedRounds?.[state.completedRounds.length - 1]?.id || ""}|${state.selectedQuestionIds.join("|")}`;
+      if (keepTalkingRound !== keepTalkingKey) { keepTalkingOpen.clear(); keepTalkingRound = keepTalkingKey; }
       const bestGuesser = [...tally.filter((item) => item.made)].sort((a, b) => b.hits - a.hits || (b.hits / b.made) - (a.hits / a.made))[0];
       // Same tie rule as mindReaderHeadline, so no one is crowned above "A tie".
       const mindReaderTied = tally.filter((item) => item.made).length === 2 && tally[0].hits === tally[1].hits;
@@ -22632,6 +22710,32 @@ var qrcode = function() {
           ? sliderReveal(question, firstAnswer, secondAnswer, matchInfo)
           : textReveal(question, firstAnswer, secondAnswer, matchInfo, matchInfo.unrated ? discussionPromptMarkup(question, matchInfo, usedPrompts) : "", lastRateId);
 
+        const tools = `
+                <div class="discussion-timer-area" data-timer-area="${escapedQuestionId}">
+                  <button class="discussion-timer-toggle text-btn" data-timer-toggle="${escapedQuestionId}" type="button">
+                    <span aria-hidden="true">⏱</span> 2-min discussion timer
+                  </button>
+                  <div class="discussion-timer-box" id="timer-box-${escapedQuestionId}" ${discussionTimers[question.id]?.isOpen ? "" : "hidden"}>
+                    <div class="timer-time-display" id="timer-display-${escapedQuestionId}">${(() => {
+                      const t = discussionTimers[question.id];
+                      if (!t) return "02:00";
+                      if (t.seconds === 0) return "Time's up! ✦";
+                      const mins = String(Math.floor(t.seconds / 60)).padStart(2, "0");
+                      const secs = String(t.seconds % 60).padStart(2, "0");
+                      return `${mins}:${secs}`;
+                    })()}</div>
+                    <div class="timer-track"><div class="timer-fill" id="timer-fill-${escapedQuestionId}" style="width:${((discussionTimers[question.id]?.seconds ?? 120) / 120) * 100}%"></div></div>
+                    <div class="timer-btn-row">
+                      <button class="secondary-btn" data-timer-btn="start" data-timer-qid="${escapedQuestionId}" type="button">Start</button>
+                      <button class="secondary-btn" data-timer-btn="pause" data-timer-qid="${escapedQuestionId}" type="button">Pause</button>
+                      <button class="text-btn" data-timer-btn="reset" data-timer-qid="${escapedQuestionId}" type="button">Reset</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="voice-memory-section">
+                  ${voiceNoteMarkup(question.id)}
+                </div>
+        `;
         return `
           <article
             class="flip-card${isFlipped ? " flipped" : ""}${question.id === finalId ? " final-card" : ""}${question.id === goldenId ? " golden" : ""}${!answerHeld && (state.completedRounds?.length || 0) > 1 ? " has-wager" : ""}"
@@ -22652,7 +22756,7 @@ var qrcode = function() {
                   <span class="card-question">${escapeHTML(question.prompt)}</span>
                 </span>
                 ${question.id === goldenId ? `<span class="golden-ribbon"><span aria-hidden="true">✦</span> Golden card</span>` : ""}
-                <span class="tap-hint">${question.id === finalId ? escapeHTML(finalHintCopy(question)) : `${POINTER_VERB} to reveal`}</span>
+                <span class="tap-hint">${question.id === finalId ? escapeHTML(finalHintCopy(question)) : closedCardHint(cardSeen(question.id), POINTER_VERB)}</span>
                 <span class="card-pair" aria-hidden="true"><span></span><span></span></span>
                 <span class="final-glow" aria-hidden="true"></span>
               </button>
@@ -22686,31 +22790,7 @@ var qrcode = function() {
                   </div>
                 ` : ""}
                 ${answerHeld ? `<div class="discussion-card"><strong>Gentle next step</strong><p>Would revisiting this later feel supportive, or is leaving it unanswered the right boundary?</p></div>` : matchInfo.unrated && question.type === "text" ? "" : question.id === goldenId ? goldenTaskMarkup() : discussionPromptMarkup(question, matchInfo, usedPrompts)}
-                ${followThroughMarkup(question)}
-                <div class="discussion-timer-area" data-timer-area="${escapedQuestionId}">
-                  <button class="discussion-timer-toggle text-btn" data-timer-toggle="${escapedQuestionId}" type="button">
-                    <span aria-hidden="true">⏱</span> 2-min discussion timer
-                  </button>
-                  <div class="discussion-timer-box" id="timer-box-${escapedQuestionId}" ${discussionTimers[question.id]?.isOpen ? "" : "hidden"}>
-                    <div class="timer-time-display" id="timer-display-${escapedQuestionId}">${(() => {
-                      const t = discussionTimers[question.id];
-                      if (!t) return "02:00";
-                      if (t.seconds === 0) return "Time's up! ✦";
-                      const mins = String(Math.floor(t.seconds / 60)).padStart(2, "0");
-                      const secs = String(t.seconds % 60).padStart(2, "0");
-                      return `${mins}:${secs}`;
-                    })()}</div>
-                    <div class="timer-track"><div class="timer-fill" id="timer-fill-${escapedQuestionId}" style="width:${((discussionTimers[question.id]?.seconds ?? 120) / 120) * 100}%"></div></div>
-                    <div class="timer-btn-row">
-                      <button class="secondary-btn" data-timer-btn="start" data-timer-qid="${escapedQuestionId}" type="button">Start</button>
-                      <button class="secondary-btn" data-timer-btn="pause" data-timer-qid="${escapedQuestionId}" type="button">Pause</button>
-                      <button class="text-btn" data-timer-btn="reset" data-timer-qid="${escapedQuestionId}" type="button">Reset</button>
-                    </div>
-                  </div>
-                </div>
-                <div class="voice-memory-section" style="margin-top:10px">
-                  ${voiceNoteMarkup(question.id)}
-                </div>
+                ${followThroughMarkup(question, tools)}
                 <div class="card-back-actions">
                   <button class="tap-hint card-close-button" type="button">${POINTER_VERB} to close</button>
                   ${index < questions.length - 1 ? `<button class="secondary-btn next-card-button" type="button" data-next-card="${index + 1}">Next card →</button>` : ""}
@@ -22745,13 +22825,15 @@ var qrcode = function() {
               <button class="secondary-btn reveal-all-btn" id="reveal-all" type="button"><span aria-hidden="true">✦</span><span>${state.revealedIds.length === questions.length ? "Hide all" : "Reveal all"}</span></button>
             </div>
           </div>
-          <div class="reaction-bar" aria-label="Reactions">
-            <button type="button" class="reaction-chip" data-reaction="💖" title="Love">💖</button>
-            <button type="button" class="reaction-chip" data-reaction="😂" title="Laugh">😂</button>
-            <button type="button" class="reaction-chip" data-reaction="🥺" title="Sweet">🥺</button>
-            <button type="button" class="reaction-chip" data-reaction="🔥" title="Fiery">🔥</button>
-            <button type="button" class="reaction-chip" data-reaction="🥂" title="Cheers">🥂</button>
-          </div>
+          ${state.playStyle === "nearby" ? `
+            <div class="reaction-bar" aria-label="Reactions">
+              <button type="button" class="reaction-chip" data-reaction="💖" title="Love">💖</button>
+              <button type="button" class="reaction-chip" data-reaction="😂" title="Laugh">😂</button>
+              <button type="button" class="reaction-chip" data-reaction="🥺" title="Sweet">🥺</button>
+              <button type="button" class="reaction-chip" data-reaction="🔥" title="Fiery">🔥</button>
+              <button type="button" class="reaction-chip" data-reaction="🥂" title="Cheers">🥂</button>
+            </div>
+          ` : ""}
           <div class="reveal-grid">${cards}</div>
           <section class="alignment-dashboard ${allRevealed ? "" : "locked"}" id="alignment-dashboard" style="--overall-color: ${overallColor}" aria-label="Your scores">
             <div class="score-lock" aria-hidden="${allRevealed}"><span aria-hidden="true">✦</span><strong>Your scores are hiding</strong><small id="score-lock-hint">${scoreLockHint(questions)}</small><button class="secondary-btn rate-next-btn" id="rate-next" type="button" ${everyCardUp && pendingRatings.length ? "" : "hidden"}>Rate the next one →</button></div>
@@ -22774,7 +22856,7 @@ var qrcode = function() {
               </div>
             </div>
             ${allRevealed ? tonightLine() : ""}
-            ${allRevealed && (rivalry.hits0 > 0 || rivalry.hits1 > 0) ? `
+            ${allRevealed && tonightRounds >= 2 && (rivalry.hits0 > 0 || rivalry.hits1 > 0) ? `
               <div class="rivalry-banner" id="rivalry-banner">
                 <div>
                   <span class="rivalry-title"><span aria-hidden="true">🔮</span> Mind-Reader Rivalry · Tonight</span>
@@ -22828,7 +22910,7 @@ var qrcode = function() {
             })() : ""}
           </section>
           <div class="actions reveal-actions">
-            <button class="secondary-btn" id="open-library-journey-btn" type="button"><span aria-hidden="true">🗺️</span> Explore Library Progress</button>
+            ${(state.completedRounds?.length || 0) >= 2 ? `<button class="secondary-btn" id="open-library-journey-btn" type="button"><span aria-hidden="true">🗺️</span> Explore Library Progress</button>` : ""}
             ${allRevealed ? `<button class="secondary-btn" id="open-story-reel-btn" type="button"><span aria-hidden="true">🎬</span> Watch Round Wrapped</button><button class="secondary-btn" id="open-keepsake-btn" type="button"><span aria-hidden="true">✦</span> Save / Share Keepsake Card</button>` : ""}
             ${state.playStyle === "nearby" && state.nearbyRole === "join" && nearbyChannelOpen()
               ? `<button class="primary-btn" id="new-round" type="button" disabled style="opacity:0.6;cursor:not-allowed">Waiting for ${escapeHTML(state.names[0] || "your partner")} to start…</button>`
@@ -23118,7 +23200,7 @@ var qrcode = function() {
           const question = questions.find((item) => item && item.id === card.dataset.questionId);
           const front = card.querySelector(".card-front");
           const tapHint = front?.querySelector(".tap-hint");
-          if (tapHint && question) tapHint.textContent = isFinal ? finalHintCopy(question) : `${POINTER_VERB} to reveal`;
+          if (tapHint && question) tapHint.textContent = isFinal ? finalHintCopy(question) : closedCardHint(cardSeen(question.id), POINTER_VERB);
           front?.setAttribute("aria-label", revealCardLabel(index, isFinal, card.classList.contains("golden")));
         });
         document.querySelectorAll("[data-dot]").forEach((dot) => dot.classList.toggle("final", Boolean(finalId) && dot.dataset.dot === finalId));
@@ -23258,6 +23340,10 @@ var qrcode = function() {
         // The bet row is a sibling of the front button (buttons can't nest), so it follows the front's state.
         const wagerRow = card.querySelector(".card-wager-row");
         if (wagerRow) { wagerRow.setAttribute("aria-hidden", String(shouldReveal)); wagerRow.inert = shouldReveal; }
+        if (!shouldReveal && !card.classList.contains("final-card")) {
+          const hint = front.querySelector(".tap-hint");
+          if (hint) hint.textContent = closedCardHint(cardSeen(card.dataset.questionId), POINTER_VERB);
+        }
         holoApplied = "";
       }
 
@@ -23272,7 +23358,7 @@ var qrcode = function() {
         sparkFreshTimers.set(card, window.setTimeout(() => card.classList.remove("spark-fresh"), 1100));
       }
 
-      function toggleCard(card, { focus = true, scroll = true } = {}) {
+      function toggleCard(card, { focus = true, scroll = true, quiet = false } = {}) {
         const id = card.dataset.questionId;
         const shouldReveal = !card.classList.contains("flipped");
         // Seen-ness is one-way, so re-flips (and Reveal all, which skips this path) can never farm a streak.
@@ -23282,8 +23368,14 @@ var qrcode = function() {
         // Read layout before the class flip so the tap doesn't force a restyle of the board.
         const rect = card.getBoundingClientRect();
         applyCardState(card, shouldReveal);
+        // The markers glide in from the midpoint only on the first look; a re-flip shows the result at once.
+        if (firstLook && !motionReduced()) {
+          card.classList.add("first-look");
+          window.setTimeout(() => card.classList.remove("first-look"), 1400);
+        }
         if (!shouldReveal && typeof stopVoiceRecording === "function") stopVoiceRecording({ cancel: true });
-        if (shouldReveal && state.turnBasedReveal) {
+        // A quiet reopen (a highlight jump) is not a player's turn, so it must not pass the turn.
+        if (shouldReveal && state.turnBasedReveal && !quiet) {
           state.activeTurn = state.activeTurn === 0 ? 1 : 0;
           const banner = document.querySelector(".turn-banner strong");
           if (banner) banner.textContent = `${state.names[state.activeTurn || 0] || "Player 1"}’s turn`;
@@ -23297,21 +23389,27 @@ var qrcode = function() {
           sendNearbyMessage(changeMessage);
         }
         const matchInfo = matchInfoById.get(id);
+        const readText = firstLook ? guessReadText(questions.find((item) => item.id === id)) : "";
+        const readSpoken = readText ? ` ${readText.replace(/^\S+ /, "")}` : "";
         if (shouldReveal) {
           const qIdx = questions.findIndex((q) => q.id === id);
           const qNum = qIdx >= 0 ? `Card ${qIdx + 1}` : "Card";
           const matchVerdict = matchInfo?.unrated ? "answers revealed, rate them below" : matchInfo?.isMatch ? "answers aligned" : "different answers";
-          if (typeof announce === "function") announce(`${qNum} revealed: ${matchVerdict}.`);
+          // The read rides this announcement: a second announce() from the chip would clear it unheard.
+          if (typeof announce === "function") announce(`${qNum} revealed: ${matchVerdict}.${readSpoken}`);
         }
         const streak = firstLook ? noteRevealStreak(matchInfo) : 0;
         const soundPlace = { pan: ((rect.left + rect.width / 2) / window.innerWidth - 0.5) * 0.8, topic: questions.find((item) => item.id === id)?.topic, degree: questions.findIndex((item) => item.id === id) };
         const isMatch = Boolean(shouldReveal && matchInfo?.isMatch);
+        // A last-card read must not have the score count-up tick over its chime.
+        if (readText && !isMatch) audioEngine.lastMatchAt = Math.max(audioEngine.lastMatchAt || 0, Date.now() + 520);
         // A golden card that is also an opposite gets its fanfare once, the spark on re-flips.
         const spark = !isMatch && !goldenFirstLook && shouldReveal && sparkIds.has(id);
         // The golden fanfare is its own cue, distinct from the match chime.
         const soundKind = isMatch ? "match" : goldenFirstLook ? "open" : spark ? "spark" : shouldReveal ? "reveal" : "tap";
         const feedback = (hapticDone) => {
-          playSound(soundKind, isMatch ? { ...soundPlace, exact: matchInfo.exact, streak, hapticDone } : { ...soundPlace, hapticDone });
+          // A quiet fold rides along with the next card's reveal cue, so it adds no sound of its own.
+          if (!quiet) playSound(soundKind, isMatch ? { ...soundPlace, exact: matchInfo.exact, streak, hapticDone } : { ...soundPlace, hapticDone });
           // If this was the last card, the score unlock waits out the fanfare as it does a match chime.
           if (goldenFirstLook && !isMatch) audioEngine.lastMatchAt = Date.now();
           if (card.isConnected) {
@@ -23320,11 +23418,25 @@ var qrcode = function() {
           }
           saveState();
         };
-        if (isMatch && streak >= 2) showStreakPop(card, streak);
+        // The streak chip's own announce() replaces the reveal line, so it carries the read along or the read goes unheard.
+        if (isMatch && streak >= 2) {
+          showStreakPop(card, streak, { speak: !readText });
+          if (readText) announce(`${streak} matches in a row!${readSpoken}`);
+        }
+        else if (readText) window.setTimeout(() => {
+          if (!card.isConnected || !card.classList.contains("flipped")) return;
+          showStreakPop(card, 0, { text: readText, speak: false });
+          // A match card already rang its chime; the read gets the chip only.
+          if (!isMatch) {
+            // Re-stamped at the chime itself, since a golden or spark cue in between moves the stamp back.
+            audioEngine.lastMatchAt = Math.max(audioEngine.lastMatchAt || 0, Date.now());
+            playSound("rate", { ...soundPlace, agree: true });
+          }
+        }, motionReduced() ? 0 : 520);
         if (spark) {
           markSparkFresh(card);
           window.clearTimeout(sparkBurstTimers.get(card));
-          // Near the end of the 620 ms flip, so the marker rects are close to final.
+          // Near the end of the 620 ms flip (or after the first-look glide settles), so the marker rects are close to final.
           sparkBurstTimers.set(card, window.setTimeout(() => {
             if (!card.classList.contains("flipped")) return;
             card.querySelectorAll(".marker-one, .marker-two, .pick-name").forEach((el) => {
@@ -23333,13 +23445,13 @@ var qrcode = function() {
               const blue = el.classList.contains("marker-one") || /--blue/.test(el.getAttribute("style") || "");
               triggerSparkles(r.left + r.width / 2, r.top + r.height / 2, 7, 38, [blue ? "var(--blue)" : "var(--green)", "var(--violet)"]);
             });
-          }, 450));
+          }, firstLook && !motionReduced() ? 760 : 450));
         }
         // Reduced motion has no rotation to paint first, and its score unlock times itself off the match sound.
         if (motionReduced()) feedback(false);
         else {
           // The hand feels the tap now; the sound, confetti and save follow the first rotated frame.
-          if (audioAllowed()) pulseHaptic(soundKind);
+          if (audioAllowed() && !quiet) pulseHaptic(soundKind);
           requestAnimationFrame(() => window.setTimeout(() => feedback(true), 0));
         }
         updateRevealAllButton();
@@ -23383,6 +23495,18 @@ var qrcode = function() {
         card.querySelector("[data-next-card]")?.addEventListener("click", (event) => {
           const next = flipCards[Number(event.currentTarget.dataset.nextCard)];
           if (!next) return;
+          // On a phone the board reads one card at a time: the finished card folds (and folds on the partner's phone too).
+          const current = event.currentTarget.closest(".flip-card");
+          const grid = current && current.parentElement;
+          const singleColumn = Boolean(grid) && getComputedStyle(grid).gridTemplateColumns.trim().split(/\s+/).length === 1;
+          const info = current ? matchInfoById.get(current.dataset.questionId) : null;
+          if (current && shouldFoldOnNext({
+            singleColumn,
+            flipped: current.classList.contains("flipped"),
+            unrated: Boolean(info?.unrated),
+            recording: Boolean(voiceMediaRecorder || voiceStarting),
+            timerRunning: Boolean(discussionTimers[current.dataset.questionId]?.running)
+          })) toggleCard(current, { focus: false, scroll: false, quiet: true });
           if (!next.classList.contains("flipped")) toggleCard(next, { scroll: false });
           else {
             const back = next.querySelector(".card-back");
@@ -23406,6 +23530,8 @@ var qrcode = function() {
       document.querySelectorAll("[data-jump-card]").forEach((button) => button.addEventListener("click", () => {
         const card = flipCards.find((item) => item.dataset.questionId === button.dataset.jumpCard);
         if (!card) return;
+        // A highlight points at the answers, so a card folded on the way down reopens.
+        if (!card.classList.contains("flipped")) toggleCard(card, { focus: false, scroll: false, quiet: true });
         card.scrollIntoView({ block: "start", behavior: motionReduced() ? "auto" : "smooth" });
         const face = card.classList.contains("flipped") ? card.querySelector(".card-back") : card.querySelector(".card-front");
         if (face && !face.hasAttribute("tabindex") && face.classList.contains("card-back")) face.setAttribute("tabindex", "-1");
@@ -23452,6 +23578,12 @@ var qrcode = function() {
         };
         btn.addEventListener("click", toggleWager);
       });
+      app.querySelectorAll(".flip-card .card-more").forEach((details) => details.addEventListener("toggle", () => {
+        const id = details.closest(".flip-card")?.dataset.questionId;
+        if (!id) return;
+        if (details.open) keepTalkingOpen.add(id);
+        else keepTalkingOpen.delete(id);
+      }));
       document.querySelectorAll("[data-timer-toggle]").forEach((btn) => {
         btn.addEventListener("click", (e) => {
           e.stopPropagation();

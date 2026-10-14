@@ -117,3 +117,20 @@ describe("Daily ritual sits below the start flow and needs an answer", () => {
     assert.match(modal, /streakDays === 1 \? "day" : "days"/);
   });
 });
+
+describe("Round-one reveal stays uncluttered", () => {
+  const reveal = grab(/function renderReveal\([\s\S]*?\n    \}\n/, "renderReveal");
+
+  it("shows the rivalry banner only from a second round tonight", () => {
+    assert.match(reveal, /const tonightRounds = roundsPlayedToday\(\);/);
+    assert.match(reveal, /\$\{allRevealed && tonightRounds >= 2 && \(rivalry\.hits0 > 0 \|\| rivalry\.hits1 > 0\) \? `\s*<div class="rivalry-banner"/);
+  });
+
+  it("keeps the reaction bar to two-phone play", () => {
+    assert.match(reveal, /\$\{state\.playStyle === "nearby" \? `\s*<div class="reaction-bar" aria-label="Reactions">/);
+  });
+
+  it("offers Library Progress from the second completed round", () => {
+    assert.match(reveal, /\$\{\(state\.completedRounds\?\.length \|\| 0\) >= 2 \? `<button class="secondary-btn" id="open-library-journey-btn"/);
+  });
+});
