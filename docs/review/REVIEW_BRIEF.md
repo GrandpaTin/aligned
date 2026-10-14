@@ -326,3 +326,39 @@ Applied all 12 proposed improvements to Aligned:
 11. **Redundant STUN & TURN Relay Fallback:** Enhanced `RTCPeerConnection` configuration with Google STUN fallback alongside Cloudflare STUN for cross-carrier network resilience.
 12. **Version Bump to 1.5.0 & Builds:** Updated `APP_VERSION`, `package.json`, and service worker cache `aligned-v36`; rebuilt offline standalone HTML bundle (1088 KB) and signed Android APK (10500). All automated production and signaling checks passed 100%.
 
+
+## 2026-10-13/14 loop: 1.6.0 → 1.7.3
+
+The work used the subagent pipeline: an 11-area audit, a skeptic check on each finding, cluster fixes built in sandboxes, a serial merge, and the full e2e suite. Scratch files are in `aligned-scratch/p13` and `p14`.
+
+Releases:
+- **1.7.0** (e5bc33d): 55 verified fixes plus 12 verifier fixes. This includes the two-phone reload regression: 4 e2e tests were failing on 1.6.0.
+- **1.7.1** (dcf9cf6): 6 fun upgrades that make existing moments land.
+- **1.7.2** (5cb01e0): 54 pass-3 fixes from the fresh re-score.
+- **1.7.3** (ed3eb44): steadier Reveal-all cascade and timer fallbacks.
+
+| Area (mobile / desktop) | Pass 1 on 1.6.0 | Pass 2 on 1.7.1 |
+|---|---|---|
+| Visual design | 6.4 / 7.3 | 8.2 / 9.0 |
+| UX & ergonomics | 8.4 / 8.4 | 9.0 / 9.3 |
+| Motion & juice | 7.0 / 8.6 | 8.2 / 8.4 |
+| Fun & game design | 7.2 / 7.6 | 7.6 / 7.3 |
+| Two-phone multiplayer | 5.5 / 5.5 | 8.6 / 8.6 |
+| Performance & offline | 8.5 / 8.9 | 7.4 / 8.2 |
+| Bugs & robustness | 6.8 / 7.0 | 8.4 / 8.2 |
+| Privacy & security | 6.5 / 6.5 | 7.4 / 7.4 |
+
+The 1.7.2/1.7.3 fixes have not been re-scored yet. The browser verifier measured these results on 1.7.2:
+- Reveal board opens in 239 ms at 4x CPU (was 1.4–3 s).
+- Final rating tap: longest task 204 ms (was 1.1 s).
+- A 7.5-minute soak shows no crash and a flat heap.
+- Profiles exclude romantic prompts for friends, roommates and collaborators.
+- Pastel contrast fixed; zero console errors.
+
+The e2e suite (`aligned-scratch/suite.sh`) now runs 16 scripts, including android-sim and smalltext, and all 16 pass. `npm test` has 386 checks.
+
+Open items:
+- Not yet re-scored toward the 9.8 target. Fun and privacy are the lowest.
+- Reveal-all now starts after a ~340 ms warm-up task at 4x CPU, but the gaps between flips are even.
+- Not deployed: the worker hardening in worker/src (1.7.0), because wrangler isn't logged in here. Run `npx wrangler@4 login`, then `npx wrangler@4 deploy --config worker/wrangler.jsonc`.
+- Test pitfall: a deliberate 400 ms post-screen-change click guard swallows taps. e2e scripts must wait ≥450 ms after a screen change.
