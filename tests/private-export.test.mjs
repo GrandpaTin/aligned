@@ -16,6 +16,9 @@ const grab = (re, name) => {
 const sources = [
   grab(/function createBackupPayload\(\) \{[\s\S]*?\n    \}(?=\n\n    function backupToState)/, "createBackupPayload"),
   grab(/function backupToState\(payload\) \{[\s\S]*?\n    \}(?=\n\n    function exportBackup)/, "backupToState"),
+  grab(/function roundHandOffPending\(\) \{[\s\S]*?\n    \}/, "roundHandOffPending"),
+  grab(/function unreadablePinHashes\(keys\) \{[\s\S]*?\n    \}/, "unreadablePinHashes"),
+  grab(/function savedQuestionAnswersMarkup\(question, round\) \{[\s\S]*?\n    \}/, "savedQuestionAnswersMarkup"),
   grab(/function readableBackupPayload\(\) \{[\s\S]*?\n    \}/, "readableBackupPayload"),
   grab(/function keepLocalPrivateNotes\(importedState\) \{[\s\S]*?\n    \}/, "keepLocalPrivateNotes"),
   grab(/function bytesToBase64\(bytes\) \{[\s\S]*?\n    \}/, "bytesToBase64"),
@@ -25,7 +28,7 @@ const sources = [
   grab(/async function derivePinHash\(pin, salt, iterations\) \{[\s\S]*?\n    \}/, "derivePinHash"),
   grab(/async function createPinHash\(pin\) \{[\s\S]*?\n    \}/, "createPinHash"),
   grab(/function legacyLocalPinHash\(pin\) \{[\s\S]*?\n    \}/, "legacyLocalPinHash"),
-  grab(/async function verifyPin\(pin\) \{[\s\S]*?\n    \}/, "verifyPin")
+  grab(/async function verifyPin\(pin, storedOverride\) \{[\s\S]*?\n    \}/, "verifyPin")
 ].join("\n\n");
 
 function makeContext(state, { withCrypto = true } = {}) {
@@ -38,11 +41,16 @@ function makeContext(state, { withCrypto = true } = {}) {
     btoa: (str) => Buffer.from(str, "binary").toString("base64"),
     atob: (str) => Buffer.from(str, "base64").toString("binary"),
     window: withCrypto ? { crypto: crypto.webcrypto } : {},
-    crypto: crypto.webcrypto
+    crypto: crypto.webcrypto,
+    storage: {},
+    escapeHTML: (value) => String(value).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`),
+    formatRoundDate: (value) => String(value || ""),
+    pickLabel: () => ""
   };
+  context.localStorage = { getItem: (key) => (key in context.storage ? context.storage[key] : null) };
   context.saveState = () => { context.saves += 1; };
   vm.createContext(context);
-  vm.runInContext(`${sources}\nthis.api = { createBackupPayload, backupToState, readableBackupPayload, keepLocalPrivateNotes, hashPin, createPinHash, verifyPin, legacyLocalPinHash };`, context);
+  vm.runInContext(`${sources}\nthis.api = { createBackupPayload, backupToState, readableBackupPayload, keepLocalPrivateNotes, hashPin, createPinHash, verifyPin, legacyLocalPinHash, roundHandOffPending, unreadablePinHashes, savedQuestionAnswersMarkup };`, context);
   return context;
 }
 
@@ -166,5 +174,97 @@ describe("Salted PIN hashing (A-54)", () => {
       state.privatePinHash = bad;
       assert.equal(await ctx.api.verifyPin("1234"), false, bad);
     }
+  });
+});
+
+describe("Import cannot replace the device PIN (A-01)", () => {
+  it("keeps the local PIN when a hand-edited readable file carries its own hash", () => {
+    const state = sampleState();
+    const { api } = makeContext(state);
+    const payload = JSON.parse(JSON.stringify(api.readableBackupPayload()));
+    payload.settings.privatePinHash = api.legacyLocalPinHash("0000");
+    const restored = api.keepLocalPrivateNotes(api.backupToState(payload));
+    assert.equal(restored.completedRounds[0].privateNotes[0].q1, "Ana secret", "Notes are still carried over");
+    assert.equal(restored.privatePinHash, "p2$1$AAAA$BBBB", "The device PIN must survive");
+  });
+
+  it("drops a forged hash when the device has no PIN", () => {
+    const state = sampleState();
+    state.privatePinHash = "";
+    const { api } = makeContext(state);
+    const payload = JSON.parse(JSON.stringify(api.readableBackupPayload()));
+    payload.settings.privatePinHash = api.legacyLocalPinHash("0000");
+    const restored = api.keepLocalPrivateNotes(api.backupToState(payload));
+    assert.equal(restored.privatePinHash, "");
+  });
+});
+
+describe("Readable export mid hand-off (A-02)", () => {
+  function handOffState() {
+    const state = sampleState();
+    state.screen = "intermission";
+    state.completedPlayers = [true, false];
+    state.answers = [{ q1: "I resent your mother" }, {}];
+    state.comments = [{ q1: "P1 comment" }, {}];
+    state.guesses = [{ q1: "P1 guess" }, {}];
+    state.importance = [{ q1: 3 }, {}];
+    return state;
+  }
+
+  it("leaves out the round in progress so locked answers stay hidden", () => {
+    const { api } = makeContext(handOffState());
+    assert.equal(api.roundHandOffPending(), true);
+    const payload = api.readableBackupPayload();
+    const text = JSON.stringify(payload);
+    for (const leak of ["I resent", "P1 comment", "P1 guess"]) assert(!text.includes(leak), leak);
+    assert.equal(payload.currentRoundOmitted, true);
+    assert.equal(payload.history.completedRounds[0].answers[1].q1, "No", "History stays in the backup");
+    const restored = api.backupToState(JSON.parse(text));
+    assert.deepEqual(JSON.parse(JSON.stringify(restored.completedPlayers)), [false, false], "No locked-but-empty player on restore");
+    assert.equal(restored.selectedQuestionIds.length, 0);
+  });
+
+  it("keeps the current round when nobody or both players have finished", () => {
+    for (const done of [[false, false], [true, true]]) {
+      const state = handOffState();
+      state.completedPlayers = done;
+      const { api } = makeContext(state);
+      assert.equal(api.roundHandOffPending(), false);
+      const payload = api.readableBackupPayload();
+      assert.equal(payload.currentGame.answers[0].q1, "I resent your mother");
+      assert.equal(payload.currentRoundOmitted, undefined);
+    }
+  });
+});
+
+describe("Held cards in the Library (A-33)", () => {
+  it("hides both answers and comments for a held card", () => {
+    const { api } = makeContext(sampleState());
+    const round = { completedAt: "2026-10-01", names: ["Ana", "Ben"], answers: [{ q9: 2 }, {}], comments: [{}, { q9: "BEN'S HELD CONTEXT" }], notReady: [{}, { q9: true }] };
+    const html = api.savedQuestionAnswersMarkup({ id: "q9", type: "slider" }, round);
+    assert(html.includes("Held privately"));
+    assert(!html.includes("HELD CONTEXT"));
+    assert(!html.includes("2 / 10"));
+    const open = api.savedQuestionAnswersMarkup({ id: "q9", type: "slider" }, { ...round, notReady: [{}, {}] });
+    assert(open.includes("2 / 10"), "Unheld cards still show answers");
+  });
+});
+
+describe("Unreadable save PIN gate (A-55)", () => {
+  it("finds the PIN hash inside an unparseable blob and verifies it without touching state", async () => {
+    const state = sampleState();
+    state.privatePinHash = "";
+    const ctx = makeContext(state);
+    const hash = await ctx.api.createPinHash("2468");
+    ctx.storage["k1"] = `{"settings":{"privatePinHash":"${hash}"},"broken`;
+    ctx.storage["k2"] = "not json at all";
+    const hashes = ctx.api.unreadablePinHashes(["k1", "k2"]);
+    assert.deepEqual([...hashes], [hash]);
+    assert.equal(await ctx.api.verifyPin("2468", hash), true);
+    assert.equal(await ctx.api.verifyPin("1111", hash), false);
+    const legacy = ctx.api.legacyLocalPinHash("2468");
+    assert.equal(await ctx.api.verifyPin("2468", legacy), true);
+    assert.equal(state.privatePinHash, "", "Checking an external hash must not plant it on the current state");
+    assert.equal(ctx.saves, 0);
   });
 });

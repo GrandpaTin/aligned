@@ -115,6 +115,8 @@ function createReconnectionContext(role = "host") {
     nearbyRuntime,
     nearbyDataChannel: null,
     nearbyOutbox: [],
+    nearbyMixSentThisLink: false,
+    nearbyPeerWaitingCheck: 0,
     nearbyNegotiationFailures: 0,
     nearbyPeerLostTimer: 0,
     nearbyAutoStartTimer: 0,
@@ -361,6 +363,20 @@ describe("WebRTC Reconnection Outbox & Deduplication Test Suite", () => {
 
     assert.equal(ctx.nearbyOutbox.some((item) => item.key.startsWith("reveal-state:q_")), false, "All single card flips must be purged");
     assert.equal(ctx.nearbyOutbox.some((item) => item.key === "reveal-state:all"), true, "reveal-state:all must be queued");
+
+    // A queued snapshot keeps queued hides (a union snapshot cannot remove a card) but drops queued reveals.
+    ctx.nearbyOutbox = [];
+    ctx.sendNearbyMessage({ type: "reveal-state", change: { id: "q_1", revealed: false } });
+    ctx.sendNearbyMessage({ type: "reveal-state", change: { id: "q_2", revealed: true } });
+    ctx.sendNearbyMessage({ type: "reveal-state", revealedIds: ["q_3"] });
+    assert.deepEqual([...ctx.nearbyOutbox.map((item) => item.key)], ["reveal-state:q_1", "reveal-state:snapshot"]);
+
+    // An offline hide-all survives a later queued snapshot too, or the partner's union could never hide anything.
+    ctx.nearbyOutbox = [];
+    ctx.sendNearbyMessage({ type: "reveal-state", all: false });
+    ctx.sendNearbyMessage({ type: "reveal-state", change: { id: "q_2", revealed: true } });
+    ctx.sendNearbyMessage({ type: "reveal-state", revealedIds: ["q_2"] });
+    assert.deepEqual([...ctx.nearbyOutbox.map((item) => item.key)], ["reveal-state:all", "reveal-state:snapshot"]);
   });
 
   it("3.3: Preserves unique instances of rapid floating reactions and nudges", () => {

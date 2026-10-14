@@ -68,4 +68,16 @@ describe("Radar Compass & Storybook Export Suite", () => {
     assert(html.includes('id="storybook-close-btn"'), "Storybook must include close button");
     assert(html.includes('data-modal-cancel'), "Storybook close button must have data-modal-cancel for back-navigation");
   });
+
+  it("storybook mode drops the duplicate title and never reuses the Results card's ids", () => {
+    const rounds = [{ alignment: { overall: 70, fitOverall: 74, topics: [{ topic: "connection", score: 80 }] } }];
+    const markup = resonanceCompassMarkup(rounds, { inStorybook: true });
+    assert(!markup.includes('id="radar-heading"'), "Storybook copy must not repeat the h3 title or its id");
+    assert(!markup.includes('id="open-storybook-btn"'), "Storybook copy must not offer to open itself");
+    assert(!markup.includes('resonance-compass-table'), "Storybook copy must not duplicate the Results table id");
+    assert(markup.includes('aria-labelledby="storybook-compass-heading"'), "Card must be labelled by the sheet's h4");
+    assert(markup.includes('aria-describedby="storybook-compass-table"') && markup.includes('<table id="storybook-compass-table">'));
+    assert(markup.includes('class="radar-polygon"'), "Radar polygon must still render in the storybook");
+    assert(html.includes('<h4 id="storybook-compass-heading">'), "Storybook section heading must carry the label id");
+  });
 });

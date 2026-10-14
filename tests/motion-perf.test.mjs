@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import vm from "node:vm";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -137,4 +138,34 @@ test("motion loops on the reveal board are bounded and the old body-append path 
   assert.doesNotMatch(html, /golden-sheen [^;]*infinite/);
   assert.doesNotMatch(html, /document\.body\.appendChild\(spark\)/);
   assert.doesNotMatch(html, /\.wager-chip[^}]*transition: all/);
+});
+
+test("cascaded partner-flip haptics are spaced at least 60 ms apart and respect the haptics toggle", () => {
+  const calls = [];
+  let clock = 1000;
+  const sandbox = { state: { hapticsEnabled: true }, navigator: { vibrate: (p) => calls.push([clock, p]) }, performance: { now: () => clock } };
+  vm.runInNewContext(`let lastPartnerFlipHapticAt = 0;
+${extractFunction("pulseHaptic")}; this.pulseHaptic = pulseHaptic;`, sandbox);
+  sandbox.pulseHaptic("partner-flip");
+  clock += 3; sandbox.pulseHaptic("partner-flip");
+  clock += 70; sandbox.pulseHaptic("partner-flip");
+  clock += 1; sandbox.pulseHaptic("tap");
+  assert.deepEqual(calls.map((c) => c[1]), [10, 10, 14], "the 3 ms follow-up is dropped; other kinds are not gated");
+  sandbox.state.hapticsEnabled = false;
+  clock += 500; sandbox.pulseHaptic("partner-flip");
+  assert.equal(calls.length, 3, "haptics off stays silent");
+});
+
+test("ambient rest pauses the last-card beckon and the golden sheen runs one delayed pass", () => {
+  const rest = html.slice(html.indexOf("html.ambient-rest :is("), html.indexOf("animation-play-state: paused !important"));
+  for (const sel of [".flip-card.final-card .final-glow", ".flip-card.final-card .card-pair span", ".reveal-dot.final"]) {
+    assert.ok(rest.includes(sel), `${sel} rests with the other decorative loops`);
+  }
+  assert.match(html, /\.flip-card\.golden:not\(\.flipped\) \.card-front::before \{ animation: golden-sheen 6s ease-in-out 1\.5s 1; \}/);
+  assert.match(html, /\.flip-card:not\(\.flipped\):active \.flip-card-inner \{ transform: scale\(0\.985\); transition-duration: var\(--dur-press\); \}/);
+});
+
+test("burstConfetti accepts a rect read earlier as well as an element", () => {
+  const src = extractFunction("burstConfetti");
+  assert.match(src, /typeof element\.getBoundingClientRect === "function" \? element\.getBoundingClientRect\(\) : element/);
 });

@@ -105,3 +105,50 @@ test("pastel repaints dark-slate feature surfaces and pale-ink pills", () => {
   assert.ok(html.includes('<div class="modal-card exit-dialog" style="text-align:center">'), "daily ritual uses the shared dialog surface");
   assert.ok(!html.includes('margin:6px 0 0;color:#fff">${escapeHTML(String(savedAnswer'), "saved ritual answer must use theme text");
 });
+
+function hslToRgb(h, s, l) {
+  s /= 100; l /= 100;
+  const k = (n) => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return [f(0), f(8), f(4)].map((v) => Math.round(v * 255));
+}
+function luminance([r, g, b]) {
+  const c = [r, g, b].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+}
+function ratio(a, b) {
+  const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p);
+  return (x + 0.05) / (y + 0.05);
+}
+
+test("pastel alignment score colours pass AA on paper for every score, and High Contrast steps them darker", () => {
+  const src = html.match(/function alignmentColor\(percent\) \{[\s\S]*?\n    \}/);
+  assert.ok(src, "alignmentColor must stay findable");
+  const make = (state) => new Function("state", `${src[0]}; return alignmentColor;`)(state);
+  const tile = [228, 239, 236];
+  for (const highContrast of [false, true]) {
+    const color = make({ visualTheme: "pastel", highContrast });
+    let worst = Infinity;
+    for (let score = 0; score <= 100; score++) {
+      const m = color(score).match(/^hsl\((\d+) 85% (\d+)%\)$/);
+      assert.ok(m, `unexpected pastel colour ${color(score)}`);
+      worst = Math.min(worst, ratio(hslToRgb(+m[1], 85, +m[2]), tile));
+    }
+    assert.ok(worst >= (highContrast ? 6 : 4.5), `pastel${highContrast ? " HC" : ""} worst score contrast ${worst.toFixed(2)}`);
+  }
+  assert.equal(make({ visualTheme: "midnight", highContrast: true })(90), "var(--green)", "dark themes keep the token branch");
+});
+
+test("contrast-tokens cluster: pastel disclosure, HC accent text, unavailable card and small badges", () => {
+  assert.match(css, /\[data-theme="pastel"\] \.setup-customization-disclosure \{ background: var\(--card-light\);/);
+  assert.match(css, /\[data-theme="pastel"\] \.customization-summary-tag \{ background: rgba\(79, 91, 120, 0\.08\); color: var\(--text-2\); \}/);
+  assert.match(css, /\.customization-summary-tag \{[^}]*white-space: nowrap;/);
+  assert.match(css, /\.high-contrast :is\(\.topic-progress-top strong, \.library-overall strong, \.storybook-section h4, \.saved-answer-name\) \{ color: var\(--text\); \}/);
+  assert.ok(css.indexOf(".high-contrast :is(.topic-progress-top strong") > css.indexOf('[data-theme="pastel"] .storybook-section h4'), "HC rule must win on source order");
+  assert.match(css, /\[data-theme="pastel"\]\.high-contrast \.discussion-card p \{ color: var\(--text\); \}/);
+  assert.ok(!/\.play-style-card\.unavailable \{ opacity/.test(css), "the unavailable explanation must not be faded with the card");
+  assert.match(css, /\.play-style-card\.unavailable strong \{ opacity: \.62; \}/);
+  assert.match(css, /\[data-theme="sunset"\] \.type-chip \{ color: #dbeafe; \}/);
+  assert.ok(!css.includes("#62548e"), "pastel discussion prompt uses the AAA ink");
+});

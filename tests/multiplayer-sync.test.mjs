@@ -38,6 +38,8 @@ function makeContext(role, overrides = {}) {
   const ctx = {
     state,
     nearbyRuntime: { role, partnerLeft: false },
+    nearbyMixSentThisLink: false,
+    nearbyOfflineHidden: { roundId: "", ids: new Set() },
     APP_VERSION: "1.6.1",
     compareVersions: () => 0,
     showToast: () => {},
@@ -112,6 +114,20 @@ describe("two-phone hello", () => {
     assert.deepEqual({ ...host.state.ambientMix }, hostMix);
   });
 
+  it("lets a joiner that flushed an offline mix change keep it instead of swapping", () => {
+    const host = makeContext("host", { screen: "setup", nearbyRoundId: "" });
+    const join = makeContext("join", { screen: "setup", nearbyRoundId: "", ambientMix: { synth: 0.2, rain: 0.9, hearth: 0 } });
+    const joinMix = { ...join.state.ambientMix };
+    host.ctx.sendNearbyHello();
+    const hostHello = host.sent.find((p) => p.type === "hello");
+    // flushNearbyOutbox delivered the queued ambient-mix on this link; the host adopts it via the ambient-mix handler.
+    join.ctx.nearbyMixSentThisLink = true;
+    host.ctx.handleNearbyMessage(msg({ type: "ambient-mix", mix: joinMix }));
+    join.ctx.handleNearbyMessage(msg(hostHello));
+    assert.deepEqual({ ...join.state.ambientMix }, joinMix, "join keeps its offline change");
+    assert.deepEqual({ ...host.state.ambientMix }, joinMix, "host adopts the queued change");
+  });
+
   it("keeps the joiner's mix off the wire so a 1.6.0 host cannot adopt it", () => {
     const join = makeContext("join", { screen: "setup", nearbyRoundId: "" });
     join.ctx.sendNearbyHello();
@@ -154,5 +170,60 @@ describe("turn-based reveal sync", () => {
     join.ctx.handleNearbyMessage(msg({ type: "reveal-state", roundId: "round_1", turn: { on: "yes", active: 7 } }));
     assert.equal(join.state.turnBasedReveal, false);
     assert.equal(join.state.activeTurn, 0);
+  });
+});
+
+describe("offline hides across a reconnect", () => {
+  it("keeps a card hidden offline hidden when the partner's union snapshot still has it", () => {
+    const join = makeContext("join", { revealedIds: ["q2"] });
+    join.ctx.nearbyOfflineHidden = { roundId: "round_1", ids: new Set(["q1"]) };
+    join.ctx.handleNearbyMessage(msg({ type: "reveal-state", roundId: "round_1", revealedIds: ["q1", "q2"] }));
+    assert.deepEqual([...join.state.revealedIds], ["q2"]);
+    assert.equal(join.ctx.nearbyOfflineHidden.ids.size, 0, "the skip applies to the first snapshot only");
+    join.ctx.handleNearbyMessage(msg({ type: "reveal-state", roundId: "round_1", revealedIds: ["q1", "q2"] }));
+    assert.deepEqual([...join.state.revealedIds].sort(), ["q1", "q2"]);
+  });
+
+  it("stops skipping a card once the partner sends a change for it", () => {
+    const join = makeContext("join", { revealedIds: [] });
+    join.ctx.nearbyOfflineHidden = { roundId: "round_1", ids: new Set(["q1", "q2"]) };
+    join.ctx.handleNearbyMessage(msg({ type: "reveal-state", roundId: "round_1", change: { id: "q1", revealed: true } }));
+    assert.deepEqual([...join.ctx.nearbyOfflineHidden.ids], ["q2"]);
+  });
+
+  it("ignores the offline set for a different round", () => {
+    const join = makeContext("join", { revealedIds: [] });
+    join.ctx.nearbyOfflineHidden = { roundId: "round_0", ids: new Set(["q1"]) };
+    join.ctx.handleNearbyMessage(msg({ type: "reveal-state", roundId: "round_1", revealedIds: ["q1"] }));
+    assert.deepEqual([...join.state.revealedIds], ["q1"]);
+  });
+
+  it("lets an explicit partner reveal-all win over offline hides", () => {
+    const join = makeContext("join", { screen: "celebration", revealedIds: [] });
+    join.ctx.nearbyOfflineHidden = { roundId: "round_1", ids: new Set(["q1"]) };
+    join.ctx.handleNearbyMessage(msg({ type: "reveal-state", roundId: "round_1", all: true }));
+    assert.deepEqual([...join.state.revealedIds], ["q1", "q2"]);
+    assert.equal(join.ctx.nearbyOfflineHidden.ids.size, 0);
+  });
+});
+
+describe("partner reactions", () => {
+  const reactionCode = grab(/function triggerFloatingReaction\(emoji, originX, originY\) \{[\s\S]*?\n    function /, /\n    function $/);
+  it("places a partner burst on this screen and keeps sparks with the clamped emoji", () => {
+    const sparks = [];
+    const span = { style: { setProperty: () => {} }, addEventListener: () => {} };
+    const ctx = {
+      window: { innerWidth: 412, innerHeight: 800 },
+      document: { createElement: () => span, body: { appendChild: () => {} } },
+      triggerSparkles: (x, y) => sparks.push([x, y]),
+      state: { hapticsEnabled: false },
+      navigator: {},
+      Math, Number
+    };
+    vm.runInNewContext(reactionCode, ctx);
+    ctx.triggerFloatingReaction("x", 1366 * 0.5, 768 * 0.75);
+    assert.equal(span.style.left, "364px");
+    assert.ok(sparks[0][0] <= 412, "sparks stay inside a narrow viewport");
+    assert.equal(handleCode.includes("triggerFloatingReaction(payload.emoji, payload.x"), false, "receiver ignores the sender's pixel coordinates");
   });
 });

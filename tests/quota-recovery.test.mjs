@@ -118,15 +118,27 @@ describe("LocalStorage Quota Exceeded & Storage Failure Recovery", () => {
     assert.equal(mockStorage.getItem("aligned-state-v1-unreadable"), "{bad");
   });
 
-  it("returns true on success and trims only the oldest voice memories beyond eight on retry", () => {
+  // Trimming used to delete the oldest recordings silently and returned true, so the recorder's
+  // reject-the-new-memory rollback could never run.
+  it("never trims voice memories on quota failure", () => {
     const voiceNotes = {};
     for (let i = 0; i < 10; i++) voiceNotes[`q${i}`] = "data:audio/webm;base64," + "A".repeat(300);
     vmContext.state.voiceNotes = voiceNotes;
-    maxStorageChars = 3000; // 10 notes (~3.3k) fail, 8 notes (~2.7k) fit
+    maxStorageChars = 3000; // 10 notes (~3.3k) don't fit
+    const saveStateFn = vm.runInNewContext(`(${saveStateMatch[0]})`, vmContext);
+    assert.equal(saveStateFn(), false);
+    assert.deepEqual(Object.keys(vmContext.state.voiceNotes), ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9"]);
+    assert.equal(mockStorage.getItem(vmContext.STORAGE_KEY), null);
+  });
+
+  it("returns true and keeps every voice memory when they fit", () => {
+    const voiceNotes = {};
+    for (let i = 0; i < 10; i++) voiceNotes[`q${i}`] = "data:audio/webm;base64," + "A".repeat(300);
+    vmContext.state.voiceNotes = voiceNotes;
+    maxStorageChars = 100000;
     const saveStateFn = vm.runInNewContext(`(${saveStateMatch[0]})`, vmContext);
     assert.equal(saveStateFn(), true);
-    assert.deepEqual(Object.keys(vmContext.state.voiceNotes), ["q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9"]);
-    assert.notEqual(mockStorage.getItem(vmContext.STORAGE_KEY), null);
+    assert.equal(Object.keys(vmContext.state.voiceNotes).length, 10);
   });
 
   it("handles storage restoration after transient storage unavailability", () => {

@@ -32,6 +32,8 @@ describe("Two-Phone WebRTC Peer Simulation & Message Protocol", () => {
     return {
       state,
       nearbyRuntime: runtime,
+      nearbyMixSentThisLink: false,
+      nearbyOfflineHidden: { roundId: "", ids: new Set() },
       APP_VERSION: "1.0.0",
       compareVersions: (a, b) => (a === b ? 0 : a > b ? 1 : -1),
       showToast: () => {},

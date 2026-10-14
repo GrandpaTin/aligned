@@ -536,6 +536,23 @@ describe("Procedural Ambient Soundscape Engine Comprehensive Test Suite", () => 
   });
 
   describe("5. Low-Power Idle Throttling & Battery Conservation", () => {
+    it("starts the crackle loop on the first start, not only after a rest/wake cycle", () => {
+      const env = createProceduralEnvironment();
+      env.sandbox.state.ambientMix = { synth: 0, rain: 0, hearth: 0.8 };
+      env.ambientSoundscape.start();
+      const hearth = env.ambientSoundscape.hearthLayer;
+      assert.ok(hearth, "Hearth layer started");
+      assert.ok(hearth.timer > 0, "first scheduleCrackle queued a real timer");
+      const queued = env.timeouts.find((t) => t.id === hearth.timer);
+      assert.ok(queued && queued.fn === hearth.scheduleCrackle, "the queued timer is the crackle loop");
+      env.ambientSoundscape.stopHearth();
+      assert.equal(env.ambientSoundscape.hearthLayer, null, "stopHearth drops the layer");
+      assert.equal(queued.cleared, true, "stopping the hearth clears the live crackle timer");
+      const before = env.timeouts.length;
+      queued.fn();
+      assert.equal(env.timeouts.length, before, "a stale loop does not reschedule after stop");
+    });
+
     it("throttles crackle scheduler timer to 5000ms when hearth layer is muted", () => {
       const env = createProceduralEnvironment();
       env.sandbox.state.ambientMix = { synth: 0, rain: 0, hearth: 0.8 };
