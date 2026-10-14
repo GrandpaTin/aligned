@@ -12959,7 +12959,7 @@ var qrcode = function() {
     let nearbyPeerWaitingCheck = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.7.2";
+    const APP_VERSION = "1.7.3";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -21336,7 +21336,13 @@ var qrcode = function() {
         openBoardBtn.textContent = "Opening…";
         // Paint the press first: the board's first layout is one long task on slow phones, and a tap that changes
         // nothing on screen for a second reads as dead.
-        requestAnimationFrame(() => window.setTimeout(() => {
+        // A timer races the frame, since a stalled rAF (background tab, Low Power Mode) must not leave the tap dead.
+        let opened = false;
+        requestAnimationFrame(() => window.setTimeout(openBoard, 0));
+        window.setTimeout(openBoard, 120);
+        function openBoard() {
+          if (opened) return;
+          opened = true;
           // A celebration re-render in between (two-phone traffic) must not swallow the tap the user already saw land.
           if (state.screen !== "celebration" || !document.getElementById("open-reveal-board")) return;
           state.screen = "reveal";
@@ -21344,7 +21350,7 @@ var qrcode = function() {
           render();
           // Ring the chime with the board's first painted frame, not over a frozen one.
           requestAnimationFrame(() => requestAnimationFrame(() => playSound("open")));
-        }, 0));
+        }
       });
       bindScoreCalls();
     }
@@ -24188,6 +24194,13 @@ var qrcode = function() {
           const rect = card.getBoundingClientRect();
           return [card, ((rect.left + rect.width / 2) / window.innerWidth - 0.5) * 0.8];
         }));
+        // Lay out every face-down back in this one task, before step 0: left to each step, that first layout made
+        // a step a 150 ms task on slow phones, so steps missed their slot and then landed in pairs.
+        if (cascade.length) {
+          cascade.forEach((card) => card.classList.remove("cold-back"));
+          const grid = document.querySelector(".reveal-grid");
+          if (grid) void grid.offsetHeight;
+        }
         // The button sits above the board, so its click-time rect stays right (a re-rendered button is read fresh).
         // The golden card can move as the cards above it grow, so its burst reads its rect a frame after the last flip.
         const revealBtnEl = document.getElementById("reveal-all");
@@ -24229,7 +24242,7 @@ var qrcode = function() {
         if (!cascade.length) finishReveal();
         // One rAF loop keyed to click time, at most one flip per frame: a row of timers all fired back to back
         // after a long task, bunching flips, notes and haptics into a stutter.
-        const runStep = (index) => {
+        const runStep = (index, quiet) => {
           const card = cascade[index];
           const last = index === cascade.length - 1;
           const id = card.dataset.questionId;
@@ -24237,11 +24250,11 @@ var qrcode = function() {
           if (card.isConnected && state.revealedIds.includes(id) && !card.classList.contains("flipped")) {
             if (sparkIds.has(id)) { markSparkFresh(card); freshSpark = true; }
             applyCardState(card, true);
-            if (!last) {
+            if (!last && !quiet) {
               playSound("partner-flip", { pan: pans.get(card) || 0, topic: questions.find((item) => item.id === id)?.topic, degree: index, match: Boolean(matchInfoById.get(id)?.isMatch) });
             }
-            if (cascadeSizingHold) sizeCard(card);
-            else scheduleCardResize();
+            // Held: releaseSizing's single full pass sizes the board, so a step stays a class toggle and a note.
+            if (!cascadeSizingHold) scheduleCardResize();
           }
           if (last) releaseSizing();
           // A Hide all relayed from the partner's phone mid-cascade must not be answered with the reveal fanfare.
@@ -24256,7 +24269,18 @@ var qrcode = function() {
           }
           if (nextStep < cascade.length) requestAnimationFrame(cascadeTick);
         };
-        if (cascade.length) requestAnimationFrame(cascadeTick);
+        if (cascade.length) {
+          requestAnimationFrame(cascadeTick);
+          // rAF stalls in a background tab, Low Power Mode or headless WebKit; flush whatever is left so no card
+          // stays face-down under a revealed state. runStep re-checks each card, so a late flush is harmless. The
+          // caught-up cards land in one task, so they stay silent: a chord of notes and haptics is the stutter again.
+          window.setTimeout(() => {
+            while (nextStep < cascade.length) {
+              runStep(nextStep, true);
+              nextStep += 1;
+            }
+          }, cascadeMs + 400);
+        }
         updateRevealAllButton();
         saveState();
         scheduleCardResize();

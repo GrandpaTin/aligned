@@ -1,6 +1,6 @@
 {
   "name": "aligned",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "private": true,
   "description": "A two-player compatibility game for meaningful, playful, and honest conversations.",
   "type": "module",
