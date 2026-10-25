@@ -1,4 +1,4 @@
-const CACHE_NAME = "aligned-v52";
+const CACHE_NAME = "aligned-v53";
 const NAVIGATION_TIMEOUT_MS = 3000;
 // "./" is the page itself (index.html would store the same 1.1 MB twice; the navigate fallback serves "./" for /index.html).
 // og-image.jpg is only for link-preview crawlers, which never go through this worker.

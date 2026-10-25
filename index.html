@@ -9146,7 +9146,10 @@ var qrcode = function() {
       font-weight: 760;
     }
 
-    .setting-row select,
+    .setting-row select {
+      width: min(58%, 230px);
+    }
+
     .setting-row input[type="range"] {
       width: min(48%, 190px);
     }
@@ -11529,10 +11532,20 @@ var qrcode = function() {
     }
 
     /* Turn Mode */
+    .turn-mode-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
     .turn-mode-btn.active {
       background: rgba(96, 165, 250, 0.2);
       border-color: var(--blue);
       color: #bfdbfe;
+    }
+    [data-theme="pastel"] .turn-mode-btn.active {
+      background: rgba(37, 99, 235, 0.12);
+      color: #1d4ed8;
     }
     .turn-banner {
       display: inline-flex;
@@ -13069,7 +13082,7 @@ var qrcode = function() {
     let nearbyPeerWaitingCheck = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.7.6";
+    const APP_VERSION = "1.7.7";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -14158,6 +14171,8 @@ var qrcode = function() {
           // The sender's x/y are its own viewport pixels (always its centre-bottom), so place the burst on this screen instead.
           triggerFloatingReaction(payload.emoji);
           playSound("pop", { hapticDone: true });
+          const partner = state.names[nearbyLocalPlayer() === 0 ? 1 : 0] || "Partner";
+          if (typeof announce === "function") announce(`${partner} sent a ${payload.emoji} reaction.`);
         }
       } else if (payload.type === "nudge") {
         if (sameRound && typeof payload.text === "string") {
@@ -16094,8 +16109,17 @@ var qrcode = function() {
       }
     }
 
+    const reducedMotionQuery = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    const coarsePointerQuery = window.matchMedia?.("(pointer: coarse)");
+    const TEXT_ENTRY_SELECTOR = "input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea, [contenteditable]";
+    let textEntryFocused = false;
+    document.addEventListener("focusin", (event) => {
+      textEntryFocused = Boolean(event.target instanceof Element && event.target.matches(TEXT_ENTRY_SELECTOR));
+    }, true);
+    document.addEventListener("focusout", () => { textEntryFocused = false; }, true);
+
     function motionReduced() {
-      return Boolean(state.reducedMotion) || Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+      return Boolean(state.reducedMotion) || Boolean(reducedMotionQuery?.matches);
     }
 
     // One pointer-events:none canvas serves every burst. Particles live in preallocated typed arrays (nothing is
@@ -16107,11 +16131,11 @@ var qrcode = function() {
       // [kind, count, speed min/max, ttl min/max, size min/max, gravity, drag, upward bias, colours, light-scheme colours, area]
       // kind 1 confetti, 2 glint, 3 heart, 4 ring, 5 still glow (reduced motion)
       const PRESETS = {
-        sparkle: [2, 26, 70, 200, 450, 850, 3, 6, 0, 2.5, 0, ["--sun", "--violet", "--blue"]],
-        confetti: [1, 120, 220, 560, 900, 1300, 6, 10, 760, 1.6, 0.35, ["--coral", "--blue", "--green", "--violet", "--sun"]],
-        heart: [3, 44, 60, 170, 900, 1300, 7, 12, -90, 1.2, 0.6, ["--coral", "--coral-dark", "--violet"]],
+        sparkle: [2, 28, 75, 210, 500, 900, 5, 9, 0, 2.5, 0, ["--sun", "--violet", "--blue"]],
+        confetti: [1, 120, 95, 210, 750, 1100, 6, 10, -25, 2.6, 0.35, ["--coral", "--blue", "--green", "--violet", "--sun"]],
+        heart: [3, 48, 28, 78, 750, 1050, 9, 15, -45, 1.8, 0.55, ["--coral", "--coral-dark", "--violet"]],
         ripple: [4, 3, 0, 0, 650, 900, 60, 110, 0, 0, 0, ["--violet"]],
-        golden: [2, 40, 15, 60, 800, 1300, 5, 10, -40, 0.8, 0, ["--sun", "#fff3c4"], ["--sun", "--coral-dark"], 1]
+        golden: [2, 42, 12, 34, 850, 1250, 8, 14, -22, 1.4, 0.2, ["--sun", "#fff3c4"], ["--sun", "--coral-dark"], 1]
       };
       const HC = ["--text", "--sun"], HC_HEART = ["--coral", "--text"];
       const swatch = [];
@@ -16124,7 +16148,7 @@ var qrcode = function() {
           canvas.setAttribute("aria-hidden", "true");
           doc.body.appendChild(canvas);
           ctx = canvas.getContext("2d");
-          star = star || new win.Path2D("M0 -1L.22 -.22 1 0 .22 .22 0 1 -.22 .22 -1 0 -.22 -.22Z");
+          star = star || new win.Path2D("M0 -1L.32 -.32 1 0 .32 .32 0 1 -.32 .32 -1 0 -.32 -.32Z");
           heart = heart || new win.Path2D("M0 .9C-1.1 .1-.95-.75-.45-.75-.2-.75 0-.55 0-.4 0-.55.2-.75.45-.75.95-.75 1.1 .1 0 .9Z");
           w = 0;
         }
@@ -16136,7 +16160,7 @@ var qrcode = function() {
           canvas.style.width = `${w}px`; canvas.style.height = `${h}px`;
           x0 = 0; y0 = 0; x1 = 0; y1 = 0;
         }
-        canvas.style.display = "block";
+        if (canvas.style.display !== "block") canvas.style.display = "block";
         return true;
       }
       // Canvas cannot resolve var(): tokens are read once per theme and name, then cached. The computed style object is
@@ -16164,11 +16188,12 @@ var qrcode = function() {
         const reduced = hooks.reduced();
         // Reduced motion: small moments show nothing; big ones get one still glow that fades in and out.
         if (reduced && k < 0.7) return 0;
-        if (!surface()) return 0;
         theme();
+        if (!surface()) return 0;
         const coarse = hooks.coarse(), kind = p[0];
-        // Area shimmers spread their particles over a whole card, so phones keep a floor or the moment barely registers.
-        const n = Math.max(reduced ? 1 : coarse && p[13] ? 24 : 1, Math.min(coarse ? 60 : 120, reduced ? 1 : opts.count > 0 ? opts.count : Math.round(p[1] * k * (coarse ? 0.55 : 1))));
+        // Area shimmers and heart reads keep a phone floor so the moment always registers on small screens.
+        const floor = reduced ? 1 : coarse ? (p[13] ? 24 : kind === 3 ? 18 : 1) : 1;
+        const n = Math.max(floor, Math.min(coarse ? 60 : 120, reduced ? 1 : opts.count > 0 ? opts.count : Math.round(p[1] * k * (coarse ? 0.55 : 1))));
         // Light schemes lose pale gold on a pale page, and nothing draws additively, so light themes swap in deeper tones.
         // High contrast wins over a call site's own colours: those are tuned for looks, not legibility.
         const names = hc ? (kind === 3 ? HC_HEART : HC) : opts.colors || (p[12] && light ? p[12] : p[11]);
@@ -16179,15 +16204,38 @@ var qrcode = function() {
         for (let i = 0; i < n; i += 1) {
           // A full pool overwrites the oldest particle, so a new moment always shows.
           const s = next; next = (next + 1) % MAX;
-          const angle = (i / n) * 6.2832 + Math.random() * 0.6;
+          const side = i & 1 ? 1 : -1;
+          const crown = i % 3 === 0;
+          const angle = !reduced && kind === 1
+            ? (crown ? -1.5708 + (Math.random() - 0.5) * 0.65 : -1.5708 - side * (0.04 + Math.random() * 0.12))
+            : !reduced && (area || kind === 3)
+              ? -1.5708 + (Math.random() - 0.5) * (area ? 0.36 : 0.85)
+              : (i / n) * 6.2832 + Math.random() * 0.6;
           const speed = reduced ? 0 : (p[2] + Math.random() * (p[3] - p[2])) * (0.7 + 0.3 * k) * spread;
-          X[s] = x + (area ? (Math.random() - 0.5) * opts.w : 0);
-          Y[s] = y + (area ? (Math.random() - 0.5) * (opts.h || 0) : 0);
+          if (!reduced && area) {
+            X[s] = x + side * (opts.w * 0.48 + (Math.random() - 0.3) * 14);
+            Y[s] = y + (Math.random() - 0.5) * (opts.h || 200) * 1.3;
+          } else if (!reduced && kind === 1) {
+            const spanW = opts.w > 0 ? opts.w : Math.min(356, (w || 390) - 24);
+            const topY = Math.min(y, 136);
+            X[s] = crown
+              ? x + (Math.random() - 0.5) * spanW * 0.88
+              : x + side * (spanW * 0.48 + 2 + Math.random() * 10);
+            Y[s] = crown
+              ? Math.max(58, topY - 8 - Math.random() * 24)
+              : topY + 16 + Math.random() * 150;
+          } else if (!reduced && kind === 3) {
+            X[s] = x + (Math.random() - 0.5) * 84;
+            Y[s] = y + (Math.random() - 0.5) * 14;
+          } else {
+            X[s] = x;
+            Y[s] = y;
+          }
           VX[s] = Math.cos(angle) * speed;
           VY[s] = Math.sin(angle) * speed - p[10] * speed;
-          AGE[s] = kind === 4 ? -i * 120 : -Math.random() * 60;
-          TTL[s] = reduced ? 700 : p[4] + Math.random() * (p[5] - p[4]);
-          SIZE[s] = (reduced ? 70 : p[6] + Math.random() * (p[7] - p[6])) * (hc ? 1.3 : 1);
+          AGE[s] = kind === 4 ? -i * 120 : 36;
+          TTL[s] = reduced ? 1200 : p[4] + Math.random() * (p[5] - p[4]);
+          SIZE[s] = (reduced ? 164 : p[6] + Math.random() * (p[7] - p[6])) * (hc ? 1.3 : 1);
           ROT[s] = Math.random() * 6.2832;
           VR[s] = (Math.random() - 0.5) * 12;
           GRAV[s] = reduced ? 0 : p[8];
@@ -16195,13 +16243,18 @@ var qrcode = function() {
           KIND[s] = reduced ? 5 : kind;
           COLOR[s] = PAL[i % pal];
         }
-        if (!raf) { last = 0; raf = win.requestAnimationFrame(fxFrame); }
+        if (!raf) {
+          last = 0;
+          if (win.performance) fxFrame(win.performance.now());
+          else raf = win.requestAnimationFrame(fxFrame);
+        }
         return n;
       }
       function fxFrame(now) {
         raf = 0;
-        // Clamped so a throttled or janky frame never teleports particles.
+        // Velocity is clamped so a janky frame never teleports particles; aging uses wall-clock delta so low-fps engines finish on time.
         const dt = last ? Math.min(0.033, Math.max(0, (now - last) / 1000)) : 0.016;
+        const ageMs = last ? Math.max(0, now - last) : 16;
         last = now;
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         // Only last frame's particle box is cleared, so raster cost scales with the burst, not the screen.
@@ -16211,7 +16264,7 @@ var qrcode = function() {
         for (let i = 0; i < MAX; i += 1) {
           const kind = KIND[i];
           if (!kind) continue;
-          AGE[i] += dt * 1000;
+          AGE[i] += ageMs;
           if (AGE[i] < 0) { alive += 1; continue; }
           const t = AGE[i] / TTL[i];
           if (t >= 1) { KIND[i] = 0; continue; }
@@ -16223,7 +16276,7 @@ var qrcode = function() {
           Y[i] += VY[i] * dt;
           ROT[i] += VR[i] * dt;
           const x = X[i], y = Y[i], size = SIZE[i];
-          const pad = kind >= 4 ? size + 4 : size * 1.5 + 2;
+          const pad = kind >= 4 ? size + 16 : size * 1.5 + 2;
           if (x - pad < x0) x0 = x - pad;
           if (y - pad < y0) y0 = y - pad;
           if (x + pad > x1) x1 = x + pad;
@@ -16236,7 +16289,7 @@ var qrcode = function() {
             ctx.setTransform(c, s, -s * f, c * f, x * dpr, y * dpr);
             ctx.fillRect(-size / 2, -size * 0.3, size, size * 0.6);
           } else if (kind === 2 || kind === 3) {
-            const z = (kind === 2 ? 0.65 + 0.35 * Math.cos(AGE[i] * 0.0126) : 1) * size * dpr;
+            const z = (kind === 2 ? 0.78 + 0.22 * Math.cos(AGE[i] * 0.0126) : 1) * size * dpr;
             ctx.setTransform(z, 0, 0, z, x * dpr, y * dpr);
             ctx.fill(kind === 2 ? star : heart);
           } else {
@@ -16247,9 +16300,17 @@ var qrcode = function() {
               ctx.arc(x, y, size * (1 - (1 - t) * (1 - t)), 0, 6.2832);
               ctx.stroke();
             } else {
-              // Stacked translucent discs read as a soft glow without allocating a gradient each frame.
-              ctx.globalAlpha *= 0.09;
-              for (let ring = 4; ring >= 1; ring -= 1) { ctx.beginPath(); ctx.arc(x, y, size * ring / 4, 0, 6.2832); ctx.fill(); }
+              // Outer perimeter halo rings: unmistakable around the card without tinting or crossing the text inside.
+              const a = ctx.globalAlpha;
+              ctx.globalAlpha = a * 0.34;
+              ctx.lineWidth = 12;
+              ctx.arc(x, y, size, 0, 6.2832);
+              ctx.stroke();
+              ctx.beginPath();
+              ctx.globalAlpha = a * 0.14;
+              ctx.lineWidth = 26;
+              ctx.arc(x, y, size, 0, 6.2832);
+              ctx.stroke();
             }
           }
         }
@@ -16270,18 +16331,17 @@ var qrcode = function() {
       function fromElement(target, name, opts = {}) {
         const r = target && typeof target.getBoundingClientRect === "function" ? target.getBoundingClientRect() : target;
         if (!r || (!r.width && !r.height)) return 0;
-        const area = name === "golden" ? { w: r.width, h: Math.min(r.height, 360) } : null;
-        // Confetti falls from the card’s top edge so it clears the answers quickly instead of drifting across them.
-        return burst(name, r.left + r.width / 2, name === "confetti" ? r.top + Math.min(24, r.height / 2) : r.top + Math.min(r.height / 2, 180), area ? { ...area, ...opts } : opts);
+        const area = name === "golden" || name === "confetti" ? { w: r.width, h: Math.min(r.height, 360) } : null;
+        // Confetti crowns the card’s top canopy and outer side rails so it never drifts across the answers.
+        return burst(name, r.left + r.width / 2, name === "confetti" ? Math.min(Math.max(58, r.top), 136) : r.top + Math.min(r.height / 2, 180), area ? { ...area, ...opts } : opts);
       }
       function clear() { KIND.fill(0); rest(); }
       return { burst, fromElement, clear };
     }
     const fx = createFx(window, document, {
-      enabled: () => state.effectsEnabled !== false && !document.hidden
-        && !document.activeElement?.matches?.("input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea, [contenteditable]"),
+      enabled: () => state.effectsEnabled !== false && !document.hidden && !textEntryFocused,
       reduced: motionReduced,
-      coarse: () => Boolean(window.matchMedia?.("(pointer: coarse)").matches)
+      coarse: () => Boolean(coarsePointerQuery?.matches)
     });
     // Phones get fewer particles, scaled rather than capped so a longer streak still visibly bursts bigger.
     function sparkBudget(amount) {
@@ -20241,6 +20301,7 @@ var qrcode = function() {
         const fxKind = streakDays && streakDays % 7 === 0 ? "confetti" : "heart";
         if (fxArea) fx.fromElement(fxArea, fxKind, { intensity: fxKind === "confetti" ? 0.7 : 0.6 });
         else fx.burst(fxKind, window.innerWidth / 2, window.innerHeight / 2, { intensity: fxKind === "confetti" ? 0.7 : 0.6 });
+        if (pairMode && typeof announce === "function") announce(`Daily Ritual complete! Both answers revealed. Streak: ${streakDays} ${streakDays === 1 ? "day" : "days"}.`);
         showToast(`✨ Daily Ritual complete! Streak: ${streakDays} ${streakDays === 1 ? "day" : "days"} 🔥`, { tone: "special" });
         render();
       });
@@ -21639,8 +21700,9 @@ var qrcode = function() {
       // Anticipation, deliberately smaller than the scores finale so the night escalates.
       requestAnimationFrame(() => {
         const orb = document.querySelector(".celebration-orb");
-        fx.fromElement(orb, "ripple", { intensity: 0.6, colors: ["--coral"] });
-        fx.fromElement(orb, "sparkle", { intensity: 0.45 });
+        const orbRect = orb ? orb.getBoundingClientRect() : null;
+        fx.fromElement(orbRect, "ripple", { intensity: 0.6, colors: ["--coral"] });
+        fx.fromElement(orbRect, "sparkle", { intensity: 0.45 });
       });
       const openBoardBtn = document.getElementById("open-reveal-board");
       openBoardBtn.addEventListener("click", () => {
@@ -23866,6 +23928,7 @@ var qrcode = function() {
           playSound("rate", { degree: questions.findIndex((item) => item.id === button.dataset.ratingQuestion), agree: ["aligned", "nuanced"].includes(button.dataset.textRating) });
           // Paint the tap first: mark this card's choice now, then rebuild the board (scores, highlights and
           // prompts all depend on the rating) after that frame, so the unlock tap never waits on a full render.
+          const targetRect = !ratingRenderQueued ? button.getBoundingClientRect() : null;
           const group = button.closest(".alignment-rating");
           if (group) {
             group.querySelectorAll("[data-text-rating]").forEach((option) => {
@@ -23882,7 +23945,6 @@ var qrcode = function() {
           ratingRenderQueued = true;
           const targetQid = button.dataset.ratingQuestion;
           const targetRating = button.dataset.textRating;
-          const targetRect = button.getBoundingClientRect();
           // The snapshot and save run after the tap paints; every rating made in that frame is captured by this one save.
           roundSnapshotSavePending = true;
           requestAnimationFrame(() => window.setTimeout(() => {
@@ -23898,14 +23960,16 @@ var qrcode = function() {
             if (!document.querySelector(".reveal-screen")) return;
             render();
             // Anchor the rated button at the exact same viewport position so it never jumps under the cursor
-            const updatedButton = document.querySelector(`[data-text-rating="${targetRating}"][data-rating-question="${targetQid}"]`);
-            if (updatedButton) {
-              const newRect = updatedButton.getBoundingClientRect();
-              const delta = newRect.top - targetRect.top;
-              if (Math.abs(delta) > 0.5) {
-                window.scrollBy({ top: delta, behavior: "auto" });
+            if (targetRect && revealUnfinished()) requestAnimationFrame(() => {
+              const updatedButton = document.querySelector(`[data-text-rating="${targetRating}"][data-rating-question="${targetQid}"]`);
+              if (updatedButton) {
+                const newRect = updatedButton.getBoundingClientRect();
+                const delta = newRect.top - targetRect.top;
+                if (Math.abs(delta) > 0.5) {
+                  window.scrollBy({ top: delta, behavior: "auto" });
+                }
               }
-            }
+            });
           }, 0));
         });
       });
@@ -24020,14 +24084,19 @@ var qrcode = function() {
         saveState(); playSound("tap");
       }));
 
+      let cardScrollMarginTop = 0;
       function sizeCard(card) {
         const front = card.querySelector(".card-front");
         const back = card.querySelector(".card-back");
-        card.classList.remove("row-filled");
-        const activeFace = card.classList.contains("flipped") ? back : front;
-        const requiredHeight = Math.max(card.classList.contains("flipped") ? activeFace.scrollHeight : activeFace.offsetHeight, 210);
-        if (!card.classList.contains("flipped")) card.dataset.closedHeight = String(requiredHeight);
-        card.style.height = `${requiredHeight}px`;
+        if (card.classList.contains("row-filled")) card.classList.remove("row-filled");
+        const flipped = card.classList.contains("flipped");
+        const activeFace = flipped ? back : front;
+        const cachedOpen = flipped ? Number(card.dataset.openHeight) || 0 : 0;
+        const requiredHeight = Math.max(cachedOpen || (flipped ? activeFace.scrollHeight : activeFace.offsetHeight), 210);
+        if (!flipped) card.dataset.closedHeight = String(requiredHeight);
+        else if (!cachedOpen) card.dataset.openHeight = String(requiredHeight);
+        const nextHeight = `${requiredHeight}px`;
+        if (card.style.height !== nextHeight) card.style.height = nextHeight;
       }
 
       // A row whose cards are all open stretches every back face to the tallest one, so the board has no
@@ -24035,34 +24104,41 @@ var qrcode = function() {
       function fillOpenRow(row) {
         const heights = row.map((card) => parseFloat(card.style.height) || 0);
         const open = shouldFillOpenRow(heights, row.every((card) => card.classList.contains("flipped")));
-        row.forEach((card) => card.classList.toggle("row-filled", open));
+        row.forEach((card) => { if (card.classList.contains("row-filled") !== open) card.classList.toggle("row-filled", open); });
         if (!open) return;
         const tallest = Math.max(...heights);
-        row.forEach((card) => { card.style.height = `${tallest}px`; });
+        const nextTallest = `${tallest}px`;
+        row.forEach((card) => { if (card.style.height !== nextTallest) card.style.height = nextTallest; });
       }
 
       function sizeAllCards() {
+        if (!cardScrollMarginTop && flipCards[0]) cardScrollMarginTop = parseFloat(getComputedStyle(flipCards[0]).scrollMarginTop) || 0;
+        const singleCol = window.innerWidth <= 600;
         // Measure natural sizes: undo the previous pass's row fill and header padding first, or heights only ratchet up.
         const headers = flipCards.map((card) => {
-          card.classList.remove("row-filled");
+          if (card.classList.contains("row-filled")) card.classList.remove("row-filled");
           const header = card.querySelector(".card-front .card-number");
-          if (header) header.style.minHeight = "";
+          if (header && header.style.minHeight !== "") header.style.minHeight = "";
           return header;
         });
         const rows = new Map();
-        flipCards.forEach((card, index) => {
-          const top = card.offsetTop;
-          if (!rows.has(top)) rows.set(top, []);
-          rows.get(top).push(index);
-        });
-        // A long category wraps its header onto two lines; give the row one header height so the titles line up.
-        rows.forEach((indexes) => {
-          const rowHeaders = indexes.map((index) => headers[index]).filter(Boolean);
-          if (rowHeaders.length < 2) return;
-          const heights = rowHeaders.map((header) => header.offsetHeight);
-          const tallest = Math.max(...heights);
-          rowHeaders.forEach((header, index) => { if (heights[index] < tallest) header.style.minHeight = `${tallest}px`; });
-        });
+        if (!singleCol) {
+          flipCards.forEach((card, index) => {
+            const top = card.offsetTop;
+            if (!rows.has(top)) rows.set(top, []);
+            rows.get(top).push(index);
+          });
+          // A long category wraps its header onto two lines; give the row one header height so the titles line up.
+          const headerFixes = [];
+          rows.forEach((indexes) => {
+            const rowHeaders = indexes.map((index) => headers[index]).filter(Boolean);
+            if (rowHeaders.length < 2) return;
+            const heights = rowHeaders.map((header) => header.offsetHeight);
+            const tallest = Math.max(...heights);
+            rowHeaders.forEach((header, index) => { if (heights[index] < tallest) headerFixes.push([header, `${tallest}px`]); });
+          });
+          headerFixes.forEach(([header, h]) => { header.style.minHeight = h; });
+        }
         const measured = flipCards.map((card) => {
           const flipped = card.classList.contains("flipped");
           const face = card.querySelector(flipped ? ".card-back" : ".card-front");
@@ -24070,67 +24146,95 @@ var qrcode = function() {
         });
         measured.forEach(({ card, flipped, height }) => {
           if (!flipped) card.dataset.closedHeight = String(height);
-          card.style.height = `${height}px`;
+          else card.dataset.openHeight = String(height);
+          const nextHeight = `${height}px`;
+          if (card.style.height !== nextHeight) card.style.height = nextHeight;
         });
-        rows.forEach((indexes) => {
-          const row = indexes.map((index) => flipCards[index]);
-          if (row.length < 2) return;
-          if (row.every((card) => card.classList.contains("flipped"))) { fillOpenRow(row); return; }
-          const closedHeight = (card) => card.classList.contains("flipped") ? Number(card.dataset.closedHeight) || 0 : parseFloat(card.style.height) || 0;
-          const tallest = Math.max(...row.map(closedHeight));
-          row.forEach((card) => { if (!card.classList.contains("flipped")) card.style.height = `${tallest}px`; });
-        });
+        if (!singleCol) {
+          rows.forEach((indexes) => {
+            const row = indexes.map((index) => flipCards[index]);
+            if (row.length < 2) return;
+            if (row.every((card) => card.classList.contains("flipped"))) { fillOpenRow(row); return; }
+            const closedHeight = (card) => card.classList.contains("flipped") ? Number(card.dataset.closedHeight) || 0 : parseFloat(card.style.height) || 0;
+            const tallest = Math.max(...row.map(closedHeight));
+            const nextTallest = `${tallest}px`;
+            row.forEach((card) => { if (!card.classList.contains("flipped") && card.style.height !== nextTallest) card.style.height = nextTallest; });
+          });
+        }
       }
 
       function updateRevealAllButton() {
         const label = document.querySelector("#reveal-all span:last-child");
         const everyCardUp = questions.every((question) => cardSeen(question.id));
         const everything = everyCardUp && !unratedWrittenIds(questions).length;
-        label.textContent = questions.every((question) => state.revealedIds.includes(question.id)) ? "Hide all" : "Reveal all";
+        const nextBtnLabel = questions.every((question) => state.revealedIds.includes(question.id)) ? "Hide all" : "Reveal all";
+        if (label && label.textContent !== nextBtnLabel) label.textContent = nextBtnLabel;
         const turnBanner = document.querySelector(".turn-banner");
         if (turnBanner) {
           const allRevealed = questions.every((question) => state.revealedIds.includes(question.id));
           turnBanner.style.display = allRevealed ? "none" : "";
         }
-        document.getElementById("round-highlights")?.classList.toggle("locked", !everything);
-        document.querySelectorAll("#round-highlights .highlight-locked small").forEach((item) => { item.textContent = everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"; });
+        const highlights = document.getElementById("round-highlights");
+        if (highlights && highlights.classList.contains("locked") !== !everything) highlights.classList.toggle("locked", !everything);
+        const lockCopy = everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock";
+        document.querySelectorAll("#round-highlights .highlight-locked small").forEach((item) => { if (item.textContent !== lockCopy) item.textContent = lockCopy; });
         const count = document.getElementById("reveal-count");
-        if (count) count.textContent = revealProgressCopy(questions);
+        const nextCount = revealProgressCopy(questions);
+        if (count && count.textContent !== nextCount) count.textContent = nextCount;
         const hint = document.getElementById("score-lock-hint");
-        if (hint) hint.textContent = scoreLockHint(questions);
+        const nextHint = scoreLockHint(questions);
+        if (hint && hint.textContent !== nextHint) hint.textContent = nextHint;
         // Handlers only: the first call runs after the let below is initialised.
         if (updateStickyBar) updateStickyBar();
         const rateNext = document.getElementById("rate-next");
-        if (rateNext) rateNext.hidden = !(everyCardUp && unratedWrittenIds(questions).length);
-        document.querySelectorAll("[data-dot]").forEach((dot) => dot.classList.toggle("on", cardSeen(dot.dataset.dot)));
+        const nextRateHidden = !(everyCardUp && unratedWrittenIds(questions).length);
+        if (rateNext && rateNext.hidden !== nextRateHidden) rateNext.hidden = nextRateHidden;
+        document.querySelectorAll("[data-dot]").forEach((dot) => {
+          const on = cardSeen(dot.dataset.dot);
+          if (dot.classList.contains("on") !== on) dot.classList.toggle("on", on);
+        });
         // Partner flips re-render the board, so both phones always mark the same final card.
         const finalId = finalCardId(questions);
         flipCards.forEach((card, index) => {
           // A card that just flipped keeps its front as it was mid-turn; it is re-marked when it closes.
           if (card.classList.contains("flipped")) return;
           const isFinal = Boolean(finalId) && card.dataset.questionId === finalId;
-          card.classList.toggle("final-card", isFinal);
+          if (card.classList.contains("final-card") !== isFinal) card.classList.toggle("final-card", isFinal);
           const question = questions.find((item) => item && item.id === card.dataset.questionId);
           const front = card.querySelector(".card-front");
           const tapHint = front?.querySelector(".tap-hint");
-          if (tapHint && question) tapHint.textContent = isFinal ? finalHintCopy(question) : closedCardHint(cardSeen(question.id), POINTER_VERB);
-          front?.setAttribute("aria-label", revealCardLabel(index, isFinal, card.classList.contains("golden")));
+          if (tapHint && question) {
+            const nextTapHint = isFinal ? finalHintCopy(question) : closedCardHint(cardSeen(question.id), POINTER_VERB);
+            if (tapHint.textContent !== nextTapHint) tapHint.textContent = nextTapHint;
+          }
+          if (front) {
+            const nextAria = revealCardLabel(index, isFinal, card.classList.contains("golden"));
+            if (front.getAttribute("aria-label") !== nextAria) front.setAttribute("aria-label", nextAria);
+          }
         });
-        document.querySelectorAll("[data-dot]").forEach((dot) => dot.classList.toggle("final", Boolean(finalId) && dot.dataset.dot === finalId));
+        document.querySelectorAll("[data-dot]").forEach((dot) => {
+          const isFinalDot = Boolean(finalId) && dot.dataset.dot === finalId;
+          if (dot.classList.contains("final") !== isFinalDot) dot.classList.toggle("final", isFinalDot);
+        });
         const lastRateId = lastRatingId(questions);
         document.querySelectorAll(".alignment-rating.unrated > strong").forEach((heading) => {
           const id = heading.closest(".flip-card")?.dataset.questionId;
-          if (id) heading.textContent = ratingHeadingCopy(id, lastRateId);
+          if (id) {
+            const nextHeading = ratingHeadingCopy(id, lastRateId);
+            if (heading.textContent !== nextHeading) heading.textContent = nextHeading;
+          }
         });
         const dashboard = document.getElementById("alignment-dashboard");
         if (dashboard) {
           const wasLocked = dashboard.classList.contains("locked");
-          dashboard.classList.toggle("locked", !everything);
-          dashboard.querySelector(".score-lock")?.setAttribute("aria-hidden", String(everything));
-          dashboard.querySelectorAll(".dual-score-dashboard, .topic-alignment-area").forEach((part) => {
-            part.inert = !everything;
-            if (everything) part.removeAttribute("aria-hidden"); else part.setAttribute("aria-hidden", "true");
-          });
+          if (wasLocked !== !everything) {
+            dashboard.classList.toggle("locked", !everything);
+            dashboard.querySelector(".score-lock")?.setAttribute("aria-hidden", String(everything));
+            dashboard.querySelectorAll(".dual-score-dashboard, .topic-alignment-area").forEach((part) => {
+              part.inert = !everything;
+              if (everything) part.removeAttribute("aria-hidden"); else part.setAttribute("aria-hidden", "true");
+            });
+          }
           if (everything && wasLocked && count) {
             const rings = [...dashboard.querySelectorAll(".dual-score-dashboard .alignment-ring")].map((ring) => ring.getAttribute("aria-label")).join(", ");
             count.textContent = `${revealProgressCopy(questions)} · scores unlocked: ${rings}`;
@@ -24228,8 +24332,10 @@ var qrcode = function() {
             }
             // A low score gets a gentler burst: the finale celebrates, it never mocks.
             const score = rings.length ? rings.reduce((sum, item) => sum + item.target, 0) / rings.length : 0;
-            fx.fromElement(dashboard, "confetti", { intensity: score >= 80 ? 1 : score >= 50 ? 0.75 : 0.5 });
-            rings.forEach((item) => fx.fromElement(item.ring, "ripple", { intensity: 0.7, colors: ["--sun"] }));
+            const dashRect = dashboard.getBoundingClientRect();
+            const ringRects = rings.map((item) => item.ring.getBoundingClientRect());
+            fx.fromElement(dashRect, "confetti", { intensity: score >= 80 ? 1 : score >= 50 ? 0.75 : 0.5 });
+            ringRects.forEach((r) => fx.fromElement(r, "ripple", { intensity: 0.7, colors: ["--sun"] }));
             playSound("celebrate", { finale: true });
             revealScoreCall(dashboard);
           }, 1100);
@@ -24340,24 +24446,25 @@ var qrcode = function() {
           if (card.isConnected) {
             // Only the first look is the moment: a re-flip of a match gets a glint, not the whole burst again. The pre-flip
             // rect is reused, so the burst forces no layout of the just-flipped board.
-            if (isMatch && firstLook) fx.fromElement(rect, matchInfo.exact ? "confetti" : "sparkle", { intensity: Math.min(0.9, 0.45 + 0.15 * Math.max(0, streak - 1)) });
+            if (isMatch && firstLook) fx.fromElement(rect, matchInfo.exact ? "confetti" : "sparkle", { intensity: Math.min(0.9, (matchInfo.exact && motionReduced() ? 0.7 : 0.45) + 0.15 * Math.max(0, streak - 1)) });
             else if (isMatch) fx.fromElement(rect, "sparkle", { intensity: 0.2 });
             if (goldenFirstLook) fx.fromElement(rect, "golden", { intensity: isMatch ? 0.6 : 0.85 });
             if (isMatch && firstLook && streak >= 3) fx.fromElement(rect, "ripple", { intensity: 0.6, colors: ["--sun"] });
           }
-          saveState();
+          if (motionReduced()) saveState();
+          else scheduleSaveState(60);
         };
         // The streak chip's own announce() replaces the reveal line, so it carries the read along or the read goes unheard.
         if (isMatch && streak >= 2) {
           showStreakPop(card, streak, { speak: !readText });
           if (readText) announce(`${streak} matches in a row!${readSpoken}`);
         }
-        else if (readText) window.setTimeout(() => {
+        if (readText) window.setTimeout(() => {
           if (!card.isConnected || !card.classList.contains("flipped")) return;
           showStreakPop(card, 0, { text: readText, speak: false });
           // Read fresh: the flip may have smooth-scrolled the card since the tap.
           const cardBox = card.getBoundingClientRect();
-          fx.burst("heart", cardBox.right - 48, cardBox.top + 6, { intensity: /^★|read each other/.test(readText) ? 0.7 : 0.45 });
+          fx.burst("heart", cardBox.left + cardBox.width * 0.34, Math.max(72, cardBox.top - 12), { intensity: /^★|read each other/.test(readText) ? 0.75 : 0.55 });
           // A match card already rang its chime; the read gets the chip only.
           if (!isMatch) {
             // Re-stamped at the chime itself, since a golden or spark cue in between moves the stamp back.
@@ -24384,7 +24491,7 @@ var qrcode = function() {
         else {
           // The hand feels the tap now; the sound, confetti and save follow the first rotated frame.
           if (audioAllowed() && !quiet) pulseHaptic(soundKind);
-          requestAnimationFrame(() => window.setTimeout(() => feedback(true), 0));
+          window.setTimeout(() => feedback(true), 16);
         }
         updateRevealAllButton();
         const qid = card.dataset.questionId;
@@ -24393,13 +24500,19 @@ var qrcode = function() {
           if (card.classList.contains("flipped")) openedCardIds.push(qid);
         }
         requestAnimationFrame(() => {
+          const singleCol = window.innerWidth <= 600;
+          const cardTop = singleCol ? 0 : card.offsetTop;
+          const row = singleCol ? [card] : flipCards.filter((other) => other.offsetTop === cardTop);
+          const bar = focus && shouldReveal && scroll ? document.getElementById("reveal-sticky-bar") : null;
+          const viewBottom = bar && bar.classList.contains("visible") ? bar.getBoundingClientRect().top : innerHeight;
+          const viewTop = focus && shouldReveal && scroll ? (cardScrollMarginTop || parseFloat(getComputedStyle(card).scrollMarginTop) || 0) : 0;
           sizeCard(card);
-          if (!card.classList.contains("flipped")) {
-            const neighbours = flipCards.filter((other) => other !== card && other.offsetTop === card.offsetTop);
+          if (!card.classList.contains("flipped") && row.length > 1) {
+            const neighbours = row.filter((other) => other !== card);
             const tallest = Math.max(parseFloat(card.style.height) || 0, ...neighbours.map((other) => other.classList.contains("flipped") ? Number(other.dataset.closedHeight) || 0 : parseFloat(other.style.height) || 0));
             card.style.height = `${tallest}px`;
           }
-          fillOpenRow(flipCards.filter((other) => other.offsetTop === card.offsetTop));
+          if (row.length > 1) fillOpenRow(row);
           if (!focus) return;
           if (shouldReveal) {
             const back = card.querySelector(".card-back");
@@ -24407,12 +24520,8 @@ var qrcode = function() {
             back.focus({ preventScroll: true });
             window.setTimeout(() => { if (card.classList.contains("flipped") && document.activeElement !== back && !back.contains(document.activeElement)) back.focus({ preventScroll: true }); }, 120);
             if (scroll) {
-              // The box still has its closed height here (the height transition waits 0.089s), so measure the target.
-              const rect = card.getBoundingClientRect();
+              // Reuse the pre-flip top so setting card.style.height above never forces a second layout in this frame.
               const targetHeight = parseFloat(card.style.height) || rect.height;
-              const bar = document.getElementById("reveal-sticky-bar");
-              const viewBottom = bar && bar.classList.contains("visible") ? bar.getBoundingClientRect().top : innerHeight;
-              const viewTop = parseFloat(getComputedStyle(card).scrollMarginTop) || 0;
               const block = flipScrollBlock({ top: rect.top, bottom: rect.top + targetHeight, viewTop, viewBottom });
               if (block) card.scrollIntoView({ block, behavior: motionReduced() ? "auto" : "smooth" });
             }
@@ -24527,8 +24636,10 @@ var qrcode = function() {
         btn.addEventListener("click", toggleWager);
       });
       app.querySelectorAll(".flip-card .card-more").forEach((details) => details.addEventListener("toggle", () => {
-        const id = details.closest(".flip-card")?.dataset.questionId;
+        const card = details.closest(".flip-card");
+        const id = card?.dataset.questionId;
         if (!id) return;
+        card.dataset.openHeight = "";
         if (details.open) keepTalkingOpen.add(id);
         else keepTalkingOpen.delete(id);
       }));
@@ -24536,6 +24647,8 @@ var qrcode = function() {
         btn.addEventListener("click", (e) => {
           e.stopPropagation();
           const qid = btn.dataset.timerToggle;
+          const card = btn.closest(".flip-card");
+          if (card) card.dataset.openHeight = "";
           if (!discussionTimers[qid]) {
             discussionTimers[qid] = { seconds: 120, interval: null, running: false, isOpen: false };
           }
@@ -24571,35 +24684,36 @@ var qrcode = function() {
         }
         if (typeof announce === "function") announce(shouldReveal ? `All ${questions.length} cards revealed.` : `All ${questions.length} cards hidden.`);
         const board = document.querySelector(".reveal-screen") || document.body;
-        // Revealing everything cascades across the board, one card every ~70 ms (350 ms at most), each with its
-        // own note, so every answer lands; the round's cue and confetti come with the last card. State is
-        // already final above. Hiding, and reduced motion, keep the single instant snap.
         const cascade = shouldReveal && !motionReduced() ? flipCards.filter((card) => !card.classList.contains("flipped")) : [];
         const step = cascade.length > 1 ? Math.min(70, 350 / (cascade.length - 1)) : 0;
         const cascadeMs = step * Math.max(0, cascade.length - 1);
-        board.classList.add("reveal-bulk");
-        window.setTimeout(() => board.classList.remove("reveal-bulk"), cascadeMs + 900);
-        // Read every pan while layout is still clean: a card's left edge and width do not change with heights.
+        // Read every pan and burst rect while layout is still clean, before any class or attribute mutations.
+        const revealBtnEl = document.getElementById("reveal-all");
+        const revealBtnRect = revealBtnEl ? revealBtnEl.getBoundingClientRect() : null;
+        const goldenRect = goldenFresh && goldenCard ? goldenCard.getBoundingClientRect() : null;
         const pans = new Map(cascade.map((card) => {
           const rect = card.getBoundingClientRect();
           return [card, ((rect.left + rect.width / 2) / window.innerWidth - 0.5) * 0.8];
         }));
-        // Lay out every face-down back in this one task, before step 0: left to each step, that first layout made
-        // a step a 150 ms task on slow phones, so steps missed their slot and then landed in pairs.
-        if (cascade.length) {
-          cascade.forEach((card) => card.classList.remove("cold-back"));
-          const grid = document.querySelector(".reveal-grid");
-          if (grid) void grid.offsetHeight;
-        }
-        // The button sits above the board, so its click-time rect stays right (a re-rendered button is read fresh).
-        // The golden card can move as the cards above it grow, so its burst reads its rect a frame after the last flip.
-        const revealBtnEl = document.getElementById("reveal-all");
-        const revealBtnRect = revealBtnEl ? revealBtnEl.getBoundingClientRect() : null;
-        // During the cascade each step sizes only its own card; one full board pass runs after the last step.
+        board.classList.add("reveal-bulk");
+        window.setTimeout(() => board.classList.remove("reveal-bulk"), cascadeMs + 900);
+        if (cascade.length) cascade[0].classList.remove("cold-back");
+        // During the cascade each step sizes only its own card; multi-column rows align after the last step.
         const releaseSizing = () => {
           if (!cascadeSizingHold) return;
           cascadeSizingHold = false;
-          scheduleCardResize();
+          if (window.innerWidth > 600) {
+            const rows = new Map();
+            flipCards.forEach((card, index) => {
+              const top = card.offsetTop;
+              if (!rows.has(top)) rows.set(top, []);
+              rows.get(top).push(index);
+            });
+            rows.forEach((indexes) => {
+              const row = indexes.map((index) => flipCards[index]);
+              if (row.length > 1 && row.every((card) => card.classList.contains("flipped"))) fillOpenRow(row);
+            });
+          }
         };
         if (cascade.length > 1) {
           cascadeSizingHold = true;
@@ -24609,7 +24723,7 @@ var qrcode = function() {
         flipCards.forEach((card) => {
           if (!cascade.includes(card)) {
             if (shouldReveal && !card.classList.contains("flipped") && sparkIds.has(card.dataset.questionId)) { markSparkFresh(card); freshSpark = true; }
-            applyCardState(card, shouldReveal);
+            if (card.classList.contains("flipped") !== shouldReveal) applyCardState(card, shouldReveal);
           }
         });
         const finishReveal = () => {
@@ -24624,7 +24738,7 @@ var qrcode = function() {
               // Only an opposite turning face up now earns the spark chime; one already open stays quiet.
               playSound(freshSpark ? "spark" : "reveal");
             }
-            if (goldenFresh) requestAnimationFrame(() => { if (goldenCard.isConnected) fx.fromElement(goldenCard, "golden", { intensity: 0.7 }); });
+            if (goldenFresh && goldenCard?.isConnected) fx.fromElement(goldenRect || goldenCard, "golden", { intensity: 0.7 });
           } else {
             playSound("tap");
           }
@@ -24636,19 +24750,22 @@ var qrcode = function() {
           const card = cascade[index];
           const last = index === cascade.length - 1;
           const id = card.dataset.questionId;
+          // Warm the next card one frame ahead so each step only ever un-hides a single back.
+          if (index + 1 < cascade.length) cascade[index + 1].classList.remove("cold-back");
+          // A Hide all relayed from the partner's phone mid-cascade must not be answered with the reveal fanfare.
+          // Run before applyCardState mutates .inert, so hooks.enabled()'s activeElement check never forces a style recalc.
+          if (last && state.revealedIds.length) finishReveal();
           // The board may have re-rendered, or this card been closed by hand, since the click.
           if (card.isConnected && state.revealedIds.includes(id) && !card.classList.contains("flipped")) {
             if (sparkIds.has(id)) { markSparkFresh(card); freshSpark = true; }
             applyCardState(card, true);
+            sizeCard(card);
             if (!last && !quiet) {
               playSound("partner-flip", { pan: pans.get(card) || 0, topic: questions.find((item) => item.id === id)?.topic, degree: index, match: Boolean(matchInfoById.get(id)?.isMatch) });
             }
-            // Held: releaseSizing's single full pass sizes the board, so a step stays a class toggle and a note.
-            if (!cascadeSizingHold) scheduleCardResize();
+            if (!cascadeSizingHold && window.innerWidth > 600) scheduleCardResize();
           }
           if (last) releaseSizing();
-          // A Hide all relayed from the partner's phone mid-cascade must not be answered with the reveal fanfare.
-          if (last && state.revealedIds.length) finishReveal();
         };
         const cascadeStart = performance.now();
         let nextStep = 0;
@@ -24672,8 +24789,9 @@ var qrcode = function() {
           }, cascadeMs + 400);
         }
         updateRevealAllButton();
-        saveState();
-        scheduleCardResize();
+        if (motionReduced()) saveState();
+        else scheduleSaveState(60);
+        if (!cascade.length) scheduleCardResize();
       });
 
       document.getElementById("new-round").addEventListener("click", async () => {
@@ -24809,6 +24927,7 @@ var qrcode = function() {
 
       let cardResizeObserver = null;
       let resizeFrame = 0;
+      let warmTimer = 0;
       // Held while a Reveal-all cascade runs (see its handler), so the ResizeObserver does not re-measure the
       // whole board on every step; the release runs the one full pass.
       let cascadeSizingHold = false;
@@ -24817,6 +24936,20 @@ var qrcode = function() {
         cancelAnimationFrame(resizeFrame);
         resizeFrame = requestAnimationFrame(sizeAllCards);
       };
+      const warmNextColdBack = () => {
+        if (cascadeSizingHold || state.screen !== "reveal") return;
+        const cold = flipCards.find((card) => card.classList.contains("cold-back") && !card.classList.contains("flipped"));
+        if (!cold || !cold.isConnected) return;
+        cascadeSizingHold = true;
+        cold.classList.remove("cold-back");
+        const back = cold.querySelector(".card-back");
+        if (back) cold.dataset.openHeight = String(Math.max(back.scrollHeight, 210));
+        requestAnimationFrame(() => {
+          cascadeSizingHold = false;
+          warmTimer = window.setTimeout(warmNextColdBack, 30);
+        });
+      };
+      warmTimer = window.setTimeout(warmNextColdBack, 80);
 
       if ("ResizeObserver" in window) {
         cardResizeObserver = new ResizeObserver(scheduleCardResize);
@@ -24835,6 +24968,7 @@ var qrcode = function() {
       cleanupResponsiveRender = () => {
         // A rating, voice save or partner flip rebuilds the board in place; only leaving the reveal screen (or a cross-tab swap to another round's reveal) may stop a running discussion timer (its interval re-queries #timer-display-* each tick, so it survives the rebuild).
         if (state.screen !== "reveal" || (state.selectedQuestionIds || []).join("|") !== timerRoundIds) clearAllDiscussionTimers();
+        clearTimeout(warmTimer);
         cancelAnimationFrame(resizeFrame);
         cardResizeObserver?.disconnect();
         window.removeEventListener("resize", scheduleCardResize);
