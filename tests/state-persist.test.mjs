@@ -45,6 +45,17 @@ describe("Round resets keep long-lived state (persistentSetupState)", () => {
     assert.deepEqual(plain(kept.dailyRitual), { streak: 0, lastDate: "", answers: {}, completedDates: [] });
     assert.deepEqual(plain(kept.seenLightningIds), []);
     assert.deepEqual(plain(kept.voiceNotes), {});
+    assert.equal(kept.effectsEnabled, true, "saves from before the Effects switch read as on");
+  });
+
+  it("keeps the Effects switch off once the player turns it off", () => {
+    const state = {
+      names: ["A", "B"], selectedTopics: [], answeredQuestionIds: [], excludedQuestionIds: [], neverQuestionIds: [], favoriteQuestionIds: [],
+      questionEdits: {}, questionFlags: {}, questionTagOverrides: {}, customQuestions: [], customPacks: [], completedRounds: [],
+      conversationStatus: {}, sharedIntentions: [], effectsEnabled: false
+    };
+    const kept = vm.runInNewContext(`(${extract("persistentSetupState")})()`, { state });
+    assert.equal(kept.effectsEnabled, false);
   });
 });
 

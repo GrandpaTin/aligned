@@ -2525,7 +2525,7 @@ var qrcode = function() {
        the current pose, so nothing jumps when input resumes. The last-card beckon is decorative too and rests with them;
        the busy pulse-dot is a status cue and stays live. */
     html.ambient-rest :is(.aurora-blob, .ambient-specks span, .love-orbit, .orbit-heart, .orbit-person, .progress-star, .question-decor span,
-      .lock-icon, .pass-person, .match-badge, .celebration-orb, .brand-mark,
+      .lock-icon, .pass-person, .match-badge, .celebration-orb, .brand-mark, .aura-spark-orb,
       .flip-card.final-card .final-glow, .flip-card.final-card .card-pair span, .reveal-dot.final),
     html.ambient-rest body::after,
     html.ambient-rest .love-orbit::after,
@@ -3080,9 +3080,10 @@ var qrcode = function() {
       transform: scale(0.92);
       box-shadow: 0 0 40px rgba(167, 139, 250, 0.8), inset 0 0 20px #ffffff;
     }
+    /* Transform and opacity only: an infinite box-shadow loop repainted the orb every frame. */
     @keyframes aura-pulse {
-      0% { transform: scale(0.96); box-shadow: 0 0 18px rgba(167, 139, 250, 0.4); }
-      100% { transform: scale(1.04); box-shadow: 0 0 32px rgba(167, 139, 250, 0.7); }
+      0% { transform: scale(0.96); opacity: 0.9; }
+      100% { transform: scale(1.04); opacity: 1; }
     }
     .aura-spark-counter {
       font-size: 0.9rem;
@@ -6142,20 +6143,8 @@ var qrcode = function() {
       background: var(--green);
     }
 
-    .celebration-spark {
-      position: fixed;
-      top: 45%;
-      left: 50%;
-      z-index: 100;
-      width: 9px;
-      height: 9px;
-      border-radius: 3px;
-      pointer-events: none;
-      background: var(--spark-color);
-      animation: sparkle-burst 900ms cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
-    }
-    /* Sparks live in one contained layer so a burst does not restyle the body (and its :has() rules) per spark. */
-    .spark-layer { position: fixed; inset: 0; z-index: 100; pointer-events: none; contain: strict; overflow: hidden; }
+    /* The single effects canvas sits above modal backdrops (200) and below toasts (300), so it never hides text. */
+    .fx-layer { position: fixed; top: 0; left: 0; z-index: 250; pointer-events: none; display: none; }
 
     .library-launch {
       display: flex;
@@ -7933,17 +7922,6 @@ var qrcode = function() {
       }
       50% {
         transform: translateY(-7px) rotate(2deg);
-      }
-    }
-
-    @keyframes sparkle-burst {
-      from {
-        opacity: 1;
-        transform: translate(-50%, -50%) rotate(0deg) translate(0) scale(1);
-      }
-      to {
-        opacity: 0;
-        transform: translate(-50%, -50%) rotate(var(--spark-rotate)) translate(var(--spark-distance)) scale(0.2);
       }
     }
 
@@ -12629,6 +12607,7 @@ var qrcode = function() {
         textSize: "normal",
         highContrast: false,
         reducedMotion: false,
+        effectsEnabled: true,
         privatePinHash: "",
         tutorialSeen: false,
         resumeScreen: null,
@@ -12947,6 +12926,7 @@ var qrcode = function() {
         if (!["small", "normal", "large"].includes(restored.textSize)) restored.textSize = "normal";
         restored.highContrast = restored.highContrast === true;
         restored.reducedMotion = restored.reducedMotion === true;
+        restored.effectsEnabled = restored.effectsEnabled !== false;
         restored.privatePinHash = String(restored.privatePinHash || "");
         restored.playStyleBeforeJoin = restored.playStyleBeforeJoin === "pass-and-play" ? "pass-and-play" : "";
         restored.sessionPreset = restored.sessionPreset === "pack" || SESSION_PRESETS.some((preset) => preset.id === restored.sessionPreset) ? restored.sessionPreset : "custom";
@@ -12998,6 +12978,7 @@ var qrcode = function() {
             textSize: restored.textSize,
             highContrast: restored.highContrast,
             reducedMotion: restored.reducedMotion,
+            effectsEnabled: restored.effectsEnabled,
             privatePinHash: restored.privatePinHash,
             tutorialSeen: restored.tutorialSeen,
             answeredQuestionIds: restored.answeredQuestionIds,
@@ -13088,7 +13069,7 @@ var qrcode = function() {
     let nearbyPeerWaitingCheck = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.7.4";
+    const APP_VERSION = "1.7.5";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -14651,6 +14632,7 @@ var qrcode = function() {
         textSize: state.textSize,
         highContrast: state.highContrast,
         reducedMotion: state.reducedMotion,
+        effectsEnabled: state.effectsEnabled !== false,
         privatePinHash: state.privatePinHash,
         tutorialSeen: state.tutorialSeen,
         answeredQuestionIds: [...state.answeredQuestionIds],
@@ -14700,6 +14682,7 @@ var qrcode = function() {
           textSize: state.textSize,
           highContrast: state.highContrast,
           reducedMotion: state.reducedMotion,
+          effectsEnabled: state.effectsEnabled !== false,
           privatePinHash: state.privatePinHash,
           tutorialSeen: state.tutorialSeen
         },
@@ -14856,6 +14839,7 @@ var qrcode = function() {
           textSize: rawSettings.textSize,
           highContrast: rawSettings.highContrast === true,
           reducedMotion: rawSettings.reducedMotion === true,
+          effectsEnabled: rawSettings.effectsEnabled !== false,
           privatePinHash: typeof rawSettings.privatePinHash === "string" ? rawSettings.privatePinHash : "",
           tutorialSeen: true,
           selectedQuestionIds: Array.isArray(rawCurrentGame.selectedQuestionIds) ? rawCurrentGame.selectedQuestionIds : [],
@@ -16087,7 +16071,7 @@ var qrcode = function() {
       span.style.setProperty("--rand-x", `${(Math.random() * 80 - 40).toFixed(0)}px`);
       document.body.appendChild(span);
       span.addEventListener("animationend", () => span.remove());
-      triggerSparkles(cx + 16, cy + 16, 6, 30);
+      fx.burst(emoji === "💖" || emoji === "🥺" ? "heart" : emoji === "🥂" ? "golden" : "sparkle", cx + 16, cy + 16, { intensity: 0.35, w: 40, h: 40 });
       if (state.hapticsEnabled && navigator.vibrate) {
         try { navigator.vibrate(25); } catch {}
       }
@@ -16114,43 +16098,192 @@ var qrcode = function() {
       return Boolean(state.reducedMotion) || Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
     }
 
-    let sparkLayer = null;
-    function getSparkLayer() {
-      if (!sparkLayer || !sparkLayer.isConnected) {
-        sparkLayer = document.createElement("div");
-        sparkLayer.className = "spark-layer";
-        sparkLayer.setAttribute("aria-hidden", "true");
-        document.body.appendChild(sparkLayer);
+    // One pointer-events:none canvas serves every burst. Particles live in preallocated typed arrays (nothing is
+    // allocated per frame), and the rAF loop runs only while one is alive, then the canvas hides: idle costs 0 frames, 0 timers.
+    function createFx(win, doc, hooks) {
+      const MAX = 240, f32 = () => new Float32Array(MAX);
+      const X = f32(), Y = f32(), VX = f32(), VY = f32(), AGE = f32(), TTL = f32(), SIZE = f32(), ROT = f32(), VR = f32(), GRAV = f32(), DRAG = f32();
+      const KIND = new Uint8Array(MAX), COLOR = new Uint8Array(MAX), PAL = new Uint8Array(8);
+      // [kind, count, speed min/max, ttl min/max, size min/max, gravity, drag, upward bias, colours, light-scheme colours, area]
+      // kind 1 confetti, 2 glint, 3 heart, 4 ring, 5 still glow (reduced motion)
+      const PRESETS = {
+        sparkle: [2, 26, 70, 200, 450, 850, 3, 6, 0, 2.5, 0, ["--sun", "--violet", "--blue"]],
+        confetti: [1, 120, 220, 560, 900, 1300, 6, 10, 760, 1.6, 0.35, ["--coral", "--blue", "--green", "--violet", "--sun"]],
+        heart: [3, 18, 60, 170, 900, 1300, 7, 12, -90, 1.2, 0.6, ["--coral", "--coral-dark", "--violet"]],
+        ripple: [4, 3, 0, 0, 650, 900, 60, 110, 0, 0, 0, ["--violet"]],
+        golden: [2, 34, 15, 60, 800, 1300, 3, 7, -40, 0.8, 0, ["--sun", "#fff3c4"], ["--sun", "--coral-dark"], 1]
+      };
+      const HC = ["--text", "--sun"], HC_HEART = ["--coral", "--text"];
+      const swatch = [];
+      let canvas = null, ctx = null, star = null, heart = null, styles = null, themeKey = null, hc = false, light = false, slot = null;
+      let raf = 0, last = 0, next = 0, dpr = 1, w = 0, h = 0, x0 = 0, y0 = 0, x1 = 0, y1 = 0;
+      function surface() {
+        if (!canvas || !canvas.isConnected) {
+          canvas = doc.createElement("canvas");
+          canvas.className = "fx-layer";
+          canvas.setAttribute("aria-hidden", "true");
+          doc.body.appendChild(canvas);
+          ctx = canvas.getContext("2d");
+          star = star || new win.Path2D("M0 -1L.22 -.22 1 0 .22 .22 0 1 -.22 .22 -1 0 -.22 -.22Z");
+          heart = heart || new win.Path2D("M0 .9C-1.1 .1-.95-.75-.45-.75-.2-.75 0-.55 0-.4 0-.55.2-.75.45-.75.95-.75 1.1 .1 0 .9Z");
+          w = 0;
+        }
+        if (!ctx) return false;
+        const ratio = Math.min(2, win.devicePixelRatio || 1);
+        if (win.innerWidth !== w || win.innerHeight !== h || ratio !== dpr) {
+          w = win.innerWidth; h = win.innerHeight; dpr = ratio;
+          canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+          canvas.style.width = `${w}px`; canvas.style.height = `${h}px`;
+          x0 = 0; y0 = 0; x1 = 0; y1 = 0;
+        }
+        canvas.style.display = "block";
+        return true;
       }
-      return sparkLayer;
+      // Canvas cannot resolve var(): tokens are read once per theme and name, then cached. The computed style object is
+      // live, so reading it on every burst would force a style recalc of whatever the moment just changed.
+      function theme() {
+        const root = doc.documentElement;
+        const key = `${root.dataset.theme || ""}${root.classList.contains("high-contrast") ? "+hc" : ""}`;
+        if (key === themeKey) return;
+        themeKey = key; hc = key.endsWith("+hc"); swatch.length = 0; slot = Object.create(null);
+        styles = win.getComputedStyle(root);
+        light = styles.getPropertyValue("color-scheme").trim() === "light";
+      }
+      function paint(name) {
+        let index = slot[name];
+        if (index !== undefined) return index;
+        const value = name.charAt(0) === "-" ? styles.getPropertyValue(name).trim() || "#fbbf24" : name;
+        index = swatch.indexOf(value);
+        if (index < 0) index = swatch.push(value) - 1;
+        return (slot[name] = index);
+      }
+      function burst(name, x, y, opts = {}) {
+        const p = PRESETS[name];
+        if (!p || !hooks.enabled() || !Number.isFinite(x) || !Number.isFinite(y)) return 0;
+        const k = Math.max(0.15, Math.min(1, opts.intensity == null ? 0.5 : opts.intensity));
+        const reduced = hooks.reduced();
+        // Reduced motion: small moments show nothing; big ones get one still glow that fades in and out.
+        if (reduced && k < 0.7) return 0;
+        if (!surface()) return 0;
+        theme();
+        const coarse = hooks.coarse(), kind = p[0];
+        const n = Math.max(1, Math.min(coarse ? 60 : 120, reduced ? 1 : opts.count > 0 ? opts.count : Math.round(p[1] * k * (coarse ? 0.55 : 1))));
+        // Light schemes lose pale gold on a pale page, and nothing draws additively, so light themes swap in deeper tones.
+        // High contrast wins over a call site's own colours: those are tuned for looks, not legibility.
+        const names = hc ? (kind === 3 ? HC_HEART : HC) : opts.colors || (p[12] && light ? p[12] : p[11]);
+        let pal = 0;
+        for (let i = 0; i < names.length && pal < 8; i += 1) PAL[pal++] = paint(names[i]);
+        const spread = opts.spread > 0 ? opts.spread / 45 : 1;
+        const area = p[13] && opts.w > 0;
+        for (let i = 0; i < n; i += 1) {
+          // A full pool overwrites the oldest particle, so a new moment always shows.
+          const s = next; next = (next + 1) % MAX;
+          const angle = (i / n) * 6.2832 + Math.random() * 0.6;
+          const speed = reduced ? 0 : (p[2] + Math.random() * (p[3] - p[2])) * (0.7 + 0.3 * k) * spread;
+          X[s] = x + (area ? (Math.random() - 0.5) * opts.w : 0);
+          Y[s] = y + (area ? (Math.random() - 0.5) * (opts.h || 0) : 0);
+          VX[s] = Math.cos(angle) * speed;
+          VY[s] = Math.sin(angle) * speed - p[10] * speed;
+          AGE[s] = kind === 4 ? -i * 120 : -Math.random() * 60;
+          TTL[s] = reduced ? 700 : p[4] + Math.random() * (p[5] - p[4]);
+          SIZE[s] = (reduced ? 70 : p[6] + Math.random() * (p[7] - p[6])) * (hc ? 1.3 : 1);
+          ROT[s] = Math.random() * 6.2832;
+          VR[s] = (Math.random() - 0.5) * 12;
+          GRAV[s] = reduced ? 0 : p[8];
+          DRAG[s] = p[9];
+          KIND[s] = reduced ? 5 : kind;
+          COLOR[s] = PAL[i % pal];
+        }
+        if (!raf) { last = 0; raf = win.requestAnimationFrame(fxFrame); }
+        return n;
+      }
+      function fxFrame(now) {
+        raf = 0;
+        // Clamped so a throttled or janky frame never teleports particles.
+        const dt = last ? Math.min(0.033, Math.max(0, (now - last) / 1000)) : 0.016;
+        last = now;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        // Only last frame's particle box is cleared, so raster cost scales with the burst, not the screen.
+        if (x1 > x0) ctx.clearRect(x0 * dpr, y0 * dpr, (x1 - x0) * dpr, (y1 - y0) * dpr);
+        x0 = w; y0 = h; x1 = 0; y1 = 0;
+        let alive = 0, fill = -1;
+        for (let i = 0; i < MAX; i += 1) {
+          const kind = KIND[i];
+          if (!kind) continue;
+          AGE[i] += dt * 1000;
+          if (AGE[i] < 0) { alive += 1; continue; }
+          const t = AGE[i] / TTL[i];
+          if (t >= 1) { KIND[i] = 0; continue; }
+          alive += 1;
+          const drag = 1 - Math.min(1, DRAG[i] * dt);
+          VX[i] *= drag;
+          VY[i] = VY[i] * drag + GRAV[i] * dt;
+          X[i] += VX[i] * dt;
+          Y[i] += VY[i] * dt;
+          ROT[i] += VR[i] * dt;
+          const x = X[i], y = Y[i], size = SIZE[i];
+          const pad = kind >= 4 ? size + 4 : size * 1.5 + 2;
+          if (x - pad < x0) x0 = x - pad;
+          if (y - pad < y0) y0 = y - pad;
+          if (x + pad > x1) x1 = x + pad;
+          if (y + pad > y1) y1 = y + pad;
+          ctx.globalAlpha = t < 0.12 ? t / 0.12 : (1 - t) / 0.88;
+          if (COLOR[i] !== fill) { fill = COLOR[i]; ctx.fillStyle = swatch[fill]; ctx.strokeStyle = swatch[fill]; }
+          if (kind === 1) {
+            // Flutter at 1.75 Hz and twinkle at 2 Hz keep every effect under 3 flashes a second.
+            const c = Math.cos(ROT[i]) * dpr, s = Math.sin(ROT[i]) * dpr, f = Math.cos(AGE[i] * 0.011);
+            ctx.setTransform(c, s, -s * f, c * f, x * dpr, y * dpr);
+            ctx.fillRect(-size / 2, -size * 0.3, size, size * 0.6);
+          } else if (kind === 2 || kind === 3) {
+            const z = (kind === 2 ? 0.65 + 0.35 * Math.cos(AGE[i] * 0.0126) : 1) * size * dpr;
+            ctx.setTransform(z, 0, 0, z, x * dpr, y * dpr);
+            ctx.fill(kind === 2 ? star : heart);
+          } else {
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.beginPath();
+            if (kind === 4) {
+              ctx.lineWidth = 3 * (1 - t) + 0.5;
+              ctx.arc(x, y, size * (1 - (1 - t) * (1 - t)), 0, 6.2832);
+              ctx.stroke();
+            } else {
+              ctx.globalAlpha *= 0.3;
+              ctx.arc(x, y, size, 0, 6.2832);
+              ctx.fill();
+            }
+          }
+        }
+        if (alive) raf = win.requestAnimationFrame(fxFrame);
+        else rest();
+      }
+      function rest() {
+        if (raf) win.cancelAnimationFrame(raf);
+        raf = 0;
+        if (!ctx) return;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // display:none drops the compositor layer too, so an idle overlay costs nothing.
+        canvas.style.display = "none";
+        x0 = 0; y0 = 0; x1 = 0; y1 = 0;
+      }
+      // Hot call sites pass a rect read before their DOM writes, so a burst never forces layout of a just-changed board.
+      function fromElement(target, name, opts = {}) {
+        const r = target && typeof target.getBoundingClientRect === "function" ? target.getBoundingClientRect() : target;
+        if (!r || (!r.width && !r.height)) return 0;
+        const area = name === "golden" ? { w: r.width, h: Math.min(r.height, 360) } : null;
+        return burst(name, r.left + r.width / 2, r.top + Math.min(r.height / 2, 180), area ? { ...area, ...opts } : opts);
+      }
+      function clear() { KIND.fill(0); rest(); }
+      return { burst, fromElement, clear };
     }
+    const fx = createFx(window, document, {
+      enabled: () => state.effectsEnabled !== false && !document.hidden
+        && !document.activeElement?.matches?.("input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea, [contenteditable]"),
+      reduced: motionReduced,
+      coarse: () => Boolean(window.matchMedia?.("(pointer: coarse)").matches)
+    });
     // Phones get fewer particles, scaled rather than capped so a longer streak still visibly bursts bigger.
     function sparkBudget(amount) {
       return window.matchMedia?.("(pointer: coarse)").matches ? Math.max(6, Math.round(amount * 0.55)) : amount;
-    }
-
-    function triggerSparkles(x, y, amount = 10, distance = 45, palette = null) {
-      if (motionReduced()) return;
-      amount = sparkBudget(amount);
-      const frag = document.createDocumentFragment();
-      const made = [];
-      const colors = palette || ["var(--coral)", "var(--blue)", "var(--lavender)", "var(--gold)", "var(--sun)", "#38bdf8", "#a78bfa"];
-      for (let i = 0; i < amount; i++) {
-        const spark = document.createElement("span");
-        spark.className = "celebration-spark";
-        spark.style.left = `${x}px`;
-        spark.style.top = `${y}px`;
-        spark.style.setProperty("--spark-color", colors[randomIndex(colors.length)]);
-        spark.style.setProperty("--spark-rotate", `${i * (360 / amount) + randomIndex(30)}deg`);
-        spark.style.setProperty("--spark-distance", `${15 + randomIndex(distance)}px`);
-        spark.style.animationDuration = `${600 + randomIndex(400)}ms`;
-        if (i % 2 === 0) spark.style.borderRadius = "50%";
-        frag.appendChild(spark);
-        made.push(spark);
-      }
-      // Each burst removes only its own sparks; the layer stays, so overlapping bursts never cut each other short.
-      getSparkLayer().appendChild(frag);
-      window.setTimeout(() => made.forEach((spark) => spark.remove()), 1100);
     }
 
     function requestGyroPermission() {
@@ -16251,6 +16384,7 @@ var qrcode = function() {
           state.textSize = fresh.textSize;
           state.highContrast = fresh.highContrast;
           state.reducedMotion = fresh.reducedMotion;
+          state.effectsEnabled = fresh.effectsEnabled !== false;
           state.soundEnabled = fresh.soundEnabled;
           state.ambientMusicEnabled = fresh.ambientMusicEnabled;
           state.soundVolume = fresh.soundVolume;
@@ -16957,7 +17091,8 @@ var qrcode = function() {
 
     function navigateToScreen(screen) {
       if (typeof stopVoiceRecording === "function") stopVoiceRecording({ cancel: true });
-      document.querySelectorAll(".celebration-spark, .floating-reaction-particle").forEach((s) => s.remove());
+      fx.clear();
+      document.querySelectorAll(".floating-reaction-particle").forEach((s) => s.remove());
       if (state.screen === "nearby") {
         // Nothing is in progress on the pairing screen; leaving it closes the room so a late scan can't hang.
         closeNearbyConnection({ notifyPartner: true });
@@ -17273,30 +17408,10 @@ var qrcode = function() {
     }
 
     function burstConfetti(element, amount = 22) {
-      if (motionReduced()) return;
-      amount = sparkBudget(amount);
-      const frag = document.createDocumentFragment();
-      const made = [];
       // Accepts an element or a rect read earlier while layout was clean.
       const rect = element && typeof element.getBoundingClientRect === "function" ? element.getBoundingClientRect() : element;
-      const originX = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
-      const originY = rect ? rect.top + Math.min(rect.height / 2, 180) : window.innerHeight / 2;
-      const colors = ["var(--coral)", "var(--blue)", "var(--green)", "var(--violet)", "var(--sun)"];
-      for (let index = 0; index < amount; index += 1) {
-        const spark = document.createElement("span");
-        spark.className = "celebration-spark";
-        spark.style.left = `${originX}px`;
-        spark.style.top = `${originY}px`;
-        spark.style.setProperty("--spark-color", colors[index % colors.length]);
-        spark.style.setProperty("--spark-rotate", `${index * (360 / amount) + randomIndex(18)}deg`);
-        spark.style.setProperty("--spark-distance", `${75 + randomIndex(145)}px`);
-        spark.style.animationDelay = `${randomIndex(70)}ms`;
-        if (index % 3 === 0) spark.style.borderRadius = "50%";
-        frag.appendChild(spark);
-        made.push(spark);
-      }
-      getSparkLayer().appendChild(frag);
-      window.setTimeout(() => made.forEach((spark) => spark.remove()), 1200);
+      if (!rect) return fx.burst("confetti", window.innerWidth / 2, window.innerHeight / 2, { count: sparkBudget(amount) });
+      return fx.fromElement(rect, "confetti", { count: sparkBudget(amount) });
     }
 
     function animateRoundSelection(button, onReady) {
@@ -17306,7 +17421,7 @@ var qrcode = function() {
       button.disabled = true;
       button.textContent = "Mixing fresh questions…";
       button.classList.add("selecting-round");
-      burstConfetti(button, 12);
+      fx.fromElement(button, "sparkle", { intensity: 0.35 });
       window.setTimeout(() => {
         button.disabled = false;
         button.textContent = original;
@@ -18111,7 +18226,7 @@ var qrcode = function() {
         orb.style.transform = "scale(0.88)";
         window.setTimeout(() => { orb.style.transform = ""; }, 100);
         if (auraSparkCount % 10 === 0) {
-          burstConfetti(orb, 20);
+          fx.fromElement(orb, "sparkle", { intensity: 0.6, colors: ["--violet", "--blue"] });
           playSound("spark");
         }
       };
@@ -19587,6 +19702,7 @@ var qrcode = function() {
               </div>
               <div class="setting-row"><label for="sound-volume">Volume</label><input id="sound-volume" aria-label="Master volume" class="range-input volume-input" type="range" min="0" max="1" step="0.05" value="${state.soundVolume}" style="--range-progress: ${Math.round(state.soundVolume * 100)}%"></div>
               <label class="setting-row" for="settings-haptics" ${typeof navigator.vibrate === "function" ? "" : "hidden"}><span>Vibration (on phones)</span><input id="settings-haptics" type="checkbox" role="switch" ${state.hapticsEnabled ? "checked" : ""}></label>
+              <label class="setting-row" for="settings-effects"><span>Celebration effects</span><input id="settings-effects" type="checkbox" role="switch" ${state.effectsEnabled !== false ? "checked" : ""}></label>
               <button class="secondary-btn" id="test-sound" type="button" style="margin-top:12px">Test the sound</button>
             </article>
             <article class="settings-card">
@@ -19678,6 +19794,12 @@ var qrcode = function() {
       });
       document.getElementById("sound-volume").addEventListener("change", () => { saveState(); playSound("reveal"); });
       document.getElementById("settings-haptics").addEventListener("change", (event) => { state.hapticsEnabled = event.currentTarget.checked; saveState(); pulseHaptic("tap"); });
+      document.getElementById("settings-effects").addEventListener("change", (event) => {
+        state.effectsEnabled = event.currentTarget.checked;
+        saveState();
+        // Switching on previews a small glint at the switch, so the setting shows what it controls.
+        if (state.effectsEnabled) fx.fromElement(event.currentTarget, "sparkle", { intensity: 0.4 }); else fx.clear();
+      });
       document.getElementById("text-size-toggle").addEventListener("click", (event) => {
         const btn = event.target.closest(".text-size-option");
         if (!btn) return;
@@ -20112,8 +20234,11 @@ var qrcode = function() {
           modal.remove();
         }
         playSound("match");
-        triggerSparkles(window.innerWidth / 2, window.innerHeight / 2, 18, 55);
         const streakDays = state.dailyRitual.streak;
+        const fxArea = pairMode ? modal.querySelector("#daily-answer-area") : null;
+        const fxKind = streakDays && streakDays % 7 === 0 ? "confetti" : "heart";
+        if (fxArea) fx.fromElement(fxArea, fxKind, { intensity: fxKind === "confetti" ? 0.7 : 0.6 });
+        else fx.burst(fxKind, window.innerWidth / 2, window.innerHeight / 2, { intensity: fxKind === "confetti" ? 0.7 : 0.6 });
         showToast(`✨ Daily Ritual complete! Streak: ${streakDays} ${streakDays === 1 ? "day" : "days"} 🔥`, { tone: "special" });
         render();
       });
@@ -21509,7 +21634,12 @@ var qrcode = function() {
           </div>
         </section>
       `;
-      requestAnimationFrame(() => burstConfetti(document.querySelector(".celebration-orb"), 14));
+      // Anticipation, deliberately smaller than the scores finale so the night escalates.
+      requestAnimationFrame(() => {
+        const orb = document.querySelector(".celebration-orb");
+        fx.fromElement(orb, "ripple", { intensity: 0.6, colors: ["--coral"] });
+        fx.fromElement(orb, "sparkle", { intensity: 0.45 });
+      });
       const openBoardBtn = document.getElementById("open-reveal-board");
       openBoardBtn.addEventListener("click", () => {
         if (openBoardBtn.disabled || state.screen !== "celebration") return;
@@ -24031,6 +24161,8 @@ var qrcode = function() {
           const sinceReveal = Date.now() - (audioEngine.lastRevealAt || 0);
           const finaleDelay = Math.max(0, 650 - sinceMatch, 300 - sinceReveal);
           trackScoreTimer(() => playSound("celebrate", { finale: true }), finaleDelay);
+          // Not before the 150 ms jump below, or the glow is drawn where the dashboard was, possibly off screen.
+          trackScoreTimer(() => fx.fromElement(dashboard, "confetti", { intensity: 1 }), Math.max(160, finaleDelay));
           trackScoreTimer(() => {
             // The call is printed now, before the scroll, but its chime waits until the finale has rung out.
             revealScoreCall(dashboard, Math.max(0, finaleDelay - 150) + 1400);
@@ -24092,7 +24224,10 @@ var qrcode = function() {
               heading.setAttribute("tabindex", "-1");
               heading.focus({ preventScroll: true });
             }
-            burstConfetti(dashboard, 40);
+            // A low score gets a gentler burst: the finale celebrates, it never mocks.
+            const score = rings.length ? rings.reduce((sum, item) => sum + item.target, 0) / rings.length : 0;
+            fx.fromElement(dashboard, "confetti", { intensity: score >= 80 ? 1 : score >= 50 ? 0.75 : 0.5 });
+            rings.forEach((item) => fx.fromElement(item.ring, "ripple", { intensity: 0.7, colors: ["--sun"] }));
             playSound("celebrate", { finale: true });
             revealScoreCall(dashboard);
           }, 1100);
@@ -24201,8 +24336,12 @@ var qrcode = function() {
           // If this was the last card, the score unlock waits out the fanfare as it does a match chime.
           if (goldenFirstLook && !isMatch) audioEngine.lastMatchAt = Date.now();
           if (card.isConnected) {
-            if (isMatch) burstConfetti(card, Math.min(50, 26 + 8 * Math.max(0, streak - 1)) + (goldenFirstLook ? 14 : 0));
-            else if (goldenFirstLook) burstConfetti(card, 36);
+            // Only the first look is the moment: a re-flip of a match gets a glint, not the whole burst again. The pre-flip
+            // rect is reused, so the burst forces no layout of the just-flipped board.
+            if (isMatch && firstLook) fx.fromElement(rect, matchInfo.exact ? "confetti" : "sparkle", { intensity: Math.min(0.9, 0.45 + 0.15 * Math.max(0, streak - 1)) });
+            else if (isMatch) fx.fromElement(rect, "sparkle", { intensity: 0.2 });
+            if (goldenFirstLook) fx.fromElement(rect, "golden", { intensity: isMatch ? 0.6 : 0.85 });
+            if (isMatch && firstLook && streak >= 3) fx.fromElement(rect, "ripple", { intensity: 0.6, colors: ["--sun"] });
           }
           saveState();
         };
@@ -24214,6 +24353,9 @@ var qrcode = function() {
         else if (readText) window.setTimeout(() => {
           if (!card.isConnected || !card.classList.contains("flipped")) return;
           showStreakPop(card, 0, { text: readText, speak: false });
+          // Read fresh: the flip may have smooth-scrolled the card since the tap.
+          const cardBox = card.getBoundingClientRect();
+          fx.burst("heart", cardBox.right - 48, cardBox.top + 6, { intensity: /^★|read each other/.test(readText) ? 0.7 : 0.45 });
           // A match card already rang its chime; the read gets the chip only.
           if (!isMatch) {
             // Re-stamped at the chime itself, since a golden or spark cue in between moves the stamp back.
@@ -24231,7 +24373,7 @@ var qrcode = function() {
               const r = el.getBoundingClientRect();
               if (!r.width) return;
               const blue = el.classList.contains("marker-one") || /--blue/.test(el.getAttribute("style") || "");
-              triggerSparkles(r.left + r.width / 2, r.top + r.height / 2, 7, 38, [blue ? "var(--blue)" : "var(--green)", "var(--violet)"]);
+              fx.burst("sparkle", r.left + r.width / 2, r.top + r.height / 2, { intensity: 0.3, spread: 38, colors: [blue ? "--blue" : "--green", "--violet"] });
             });
           }, firstLook && !motionReduced() ? 760 : 450));
         }
@@ -24474,13 +24616,13 @@ var qrcode = function() {
             if (!button) return;
             const matches = questions.filter((question) => matchInfoById.get(question.id)?.isMatch).length;
             if (matches) {
-              burstConfetti(button === revealBtnEl && revealBtnRect ? revealBtnRect : button, 34);
+              fx.fromElement(button === revealBtnEl && revealBtnRect ? revealBtnRect : button, "confetti", { intensity: Math.min(1, 0.4 + 0.1 * matches) });
               playSound("match");
             } else {
               // Only an opposite turning face up now earns the spark chime; one already open stays quiet.
               playSound(freshSpark ? "spark" : "reveal");
             }
-            if (goldenFresh) requestAnimationFrame(() => { if (goldenCard.isConnected) burstConfetti(goldenCard, 24); });
+            if (goldenFresh) requestAnimationFrame(() => { if (goldenCard.isConnected) fx.fromElement(goldenCard, "golden", { intensity: 0.7 }); });
           } else {
             playSound("tap");
           }
@@ -24893,14 +25035,6 @@ var qrcode = function() {
         if (trigger) trigger.setAttribute("aria-expanded", "false");
       }
 
-      const target = event.target;
-      const button = target.closest("button, input[type='radio'], input[type='checkbox'], .topic-chip, .preset-card, .play-style-card, .count-card, .intensity-card, .mode-card, .session-dropdown-trigger, .session-dropdown-item");
-      if (button) {
-        const rect = target.getBoundingClientRect();
-        const x = event.clientX || (rect.left + rect.width / 2);
-        const y = event.clientY || (rect.top + rect.height / 2);
-        triggerSparkles(x, y, 8, 35);
-      }
     });
 
     function reconnectNearbyNow() {
@@ -24914,6 +25048,7 @@ var qrcode = function() {
     window.addEventListener("online", reconnectNearbyNow);
     document.addEventListener("visibilitychange", () => {
       // Silence music and effects while the app is in the background; fade music back in on return.
+      if (document.visibilityState === "hidden") fx.clear();
       if (audioEngine.ctx) {
         if (document.visibilityState === "hidden") audioEngine.ctx.suspend().catch(() => {});
         else if (audioAllowed()) {

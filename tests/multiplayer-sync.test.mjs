@@ -215,7 +215,7 @@ describe("partner reactions", () => {
     const ctx = {
       window: { innerWidth: 412, innerHeight: 800 },
       document: { createElement: () => span, body: { appendChild: () => {} } },
-      triggerSparkles: (x, y) => sparks.push([x, y]),
+      fx: { burst: (preset, x, y) => sparks.push([x, y]) },
       state: { hapticsEnabled: false },
       navigator: {},
       Math, Number
