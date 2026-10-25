@@ -13069,7 +13069,7 @@ var qrcode = function() {
     let nearbyPeerWaitingCheck = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.7.5";
+    const APP_VERSION = "1.7.6";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -16109,9 +16109,9 @@ var qrcode = function() {
       const PRESETS = {
         sparkle: [2, 26, 70, 200, 450, 850, 3, 6, 0, 2.5, 0, ["--sun", "--violet", "--blue"]],
         confetti: [1, 120, 220, 560, 900, 1300, 6, 10, 760, 1.6, 0.35, ["--coral", "--blue", "--green", "--violet", "--sun"]],
-        heart: [3, 18, 60, 170, 900, 1300, 7, 12, -90, 1.2, 0.6, ["--coral", "--coral-dark", "--violet"]],
+        heart: [3, 44, 60, 170, 900, 1300, 7, 12, -90, 1.2, 0.6, ["--coral", "--coral-dark", "--violet"]],
         ripple: [4, 3, 0, 0, 650, 900, 60, 110, 0, 0, 0, ["--violet"]],
-        golden: [2, 34, 15, 60, 800, 1300, 3, 7, -40, 0.8, 0, ["--sun", "#fff3c4"], ["--sun", "--coral-dark"], 1]
+        golden: [2, 40, 15, 60, 800, 1300, 5, 10, -40, 0.8, 0, ["--sun", "#fff3c4"], ["--sun", "--coral-dark"], 1]
       };
       const HC = ["--text", "--sun"], HC_HEART = ["--coral", "--text"];
       const swatch = [];
@@ -16167,7 +16167,8 @@ var qrcode = function() {
         if (!surface()) return 0;
         theme();
         const coarse = hooks.coarse(), kind = p[0];
-        const n = Math.max(1, Math.min(coarse ? 60 : 120, reduced ? 1 : opts.count > 0 ? opts.count : Math.round(p[1] * k * (coarse ? 0.55 : 1))));
+        // Area shimmers spread their particles over a whole card, so phones keep a floor or the moment barely registers.
+        const n = Math.max(reduced ? 1 : coarse && p[13] ? 24 : 1, Math.min(coarse ? 60 : 120, reduced ? 1 : opts.count > 0 ? opts.count : Math.round(p[1] * k * (coarse ? 0.55 : 1))));
         // Light schemes lose pale gold on a pale page, and nothing draws additively, so light themes swap in deeper tones.
         // High contrast wins over a call site's own colours: those are tuned for looks, not legibility.
         const names = hc ? (kind === 3 ? HC_HEART : HC) : opts.colors || (p[12] && light ? p[12] : p[11]);
@@ -16246,9 +16247,9 @@ var qrcode = function() {
               ctx.arc(x, y, size * (1 - (1 - t) * (1 - t)), 0, 6.2832);
               ctx.stroke();
             } else {
-              ctx.globalAlpha *= 0.3;
-              ctx.arc(x, y, size, 0, 6.2832);
-              ctx.fill();
+              // Stacked translucent discs read as a soft glow without allocating a gradient each frame.
+              ctx.globalAlpha *= 0.09;
+              for (let ring = 4; ring >= 1; ring -= 1) { ctx.beginPath(); ctx.arc(x, y, size * ring / 4, 0, 6.2832); ctx.fill(); }
             }
           }
         }
@@ -16270,7 +16271,8 @@ var qrcode = function() {
         const r = target && typeof target.getBoundingClientRect === "function" ? target.getBoundingClientRect() : target;
         if (!r || (!r.width && !r.height)) return 0;
         const area = name === "golden" ? { w: r.width, h: Math.min(r.height, 360) } : null;
-        return burst(name, r.left + r.width / 2, r.top + Math.min(r.height / 2, 180), area ? { ...area, ...opts } : opts);
+        // Confetti falls from the card’s top edge so it clears the answers quickly instead of drifting across them.
+        return burst(name, r.left + r.width / 2, name === "confetti" ? r.top + Math.min(24, r.height / 2) : r.top + Math.min(r.height / 2, 180), area ? { ...area, ...opts } : opts);
       }
       function clear() { KIND.fill(0); rest(); }
       return { burst, fromElement, clear };

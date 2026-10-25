@@ -362,3 +362,47 @@ Open items:
 - Reveal-all now starts after a ~340 ms warm-up task at 4x CPU, but the gaps between flips are even.
 - Not deployed: the worker hardening in worker/src (1.7.0), because wrangler isn't logged in here. Run `npx wrangler@4 login`, then `npx wrangler@4 deploy --config worker/wrangler.jsonc`.
 - Test pitfall: a deliberate 400 ms post-screen-change click guard swallows taps. e2e scripts must wait ≥450 ms after a screen change.
+
+## 2026-10-24/25: 9.9 loop round 1 + "pizazz" effects pass (1.7.3 → 1.7.6)
+
+Round 1 scores, from fresh reviewers on 1.7.3 (mobile / desktop):
+
+| Area | Mobile | Desktop |
+|---|---|---|
+| Fun | 8.4 | 8.6 |
+| Ease of use | 9.3 | 9.4 |
+| Layout intuitiveness | 8.6 | 8.4 |
+| Design & polish | 8.6 | 8.6 |
+| User friendliness | 9.3 | 9.4 |
+
+Releases:
+- **1.7.4** (0841f5d): 28 verified round-1 fixes. Light openers, good-round payoff, landscape/desktop Start, quick-pick order, reveal layout, journal/library actions, AAA tokens, WebKit theme restyle, resume gate.
+- **1.7.5** (c437238): one pooled canvas effects engine. 7 moments, "Celebration effects" switch, the old DOM sparkles removed.
+- **1.7.6**: tuning after measurement. More correct-guess hearts, a golden-shimmer floor on phones, a soft reduced-motion glow, confetti falls from the card top.
+
+Effects measured before (1.7.4) → after, on a phone at 4x throttle:
+
+| Moment | Before | After |
+|---|---|---|
+| Match flip | p95 33.4 ms, longest task 340 ms, 28 effect DOM nodes | p95 16.8 ms, longest 199 ms, 0 effect DOM nodes |
+| Idle after flip | 7.7% CPU | 0.08% CPU, 0 rAF, 0 timers |
+
+No effect caused a long task. Every remaining long task also happens with effects off, so it comes from app render work.
+
+Effects scores (mobile / desktop):
+
+| Area | Mobile | Desktop |
+|---|---|---|
+| Delight | 8.6 | 8.9 |
+| Performance | 9.6 | 9.6 |
+| Clarity & taste | 8.7 | 9.0 |
+| Accessibility & control | 9.3 | 9.3 |
+
+Measured before the 1.7.6 tuning, which targets the delight and clarity gaps.
+
+Next:
+- **Round 2:** a fresh re-score of 1.7.6 toward 9.9.
+- **Profile:** the reveal-all burst (12.6 ms throttled).
+- **Real iPhone:** confirm the canvas hides after a burst.
+- **Worker deploy:** still needs `npx wrangler@4 login`.
+- **Pacing:** the user paces sessions by weekly usage (stop at about 60%).
