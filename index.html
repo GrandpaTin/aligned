@@ -5578,12 +5578,17 @@ var qrcode = function() {
       /* Height snaps at the edge-on moment of the flip, on the faces' own 0.089s swap (toggleCard sets it in
          the frame that starts the turn), instead of growing under the rotating 3D layer, which re-laid-out and
          re-rastered it on every frame of the fastest part of the turn. */
-      transition: transform 180ms ease, height 0s linear 0.089s;
+      transition: transform 220ms ease, height 0s linear 0.089s;
     }
 
-    @media (hover: hover) { .flip-card:hover {
-      transform: translateY(-2px);
-    } }
+    @media (hover: hover) {
+      .flip-card:hover {
+        transform: translateY(-4px) scale(1.015);
+      }
+      .flip-card:hover .flip-card-inner {
+        box-shadow: 0 20px 48px rgba(2, 6, 23, 0.38);
+      }
+    }
 
     .card-front:focus-visible,
     .card-close-button:focus-visible {
@@ -5598,7 +5603,7 @@ var qrcode = function() {
       width: 100%;
       height: 100%;
       transform-style: preserve-3d;
-      transition: transform 680ms var(--ease-out);
+      transition: transform 680ms cubic-bezier(0.34, 1.25, 0.64, 1);
     }
 
     .flip-card.flipped .flip-card-inner {
@@ -9268,22 +9273,33 @@ var qrcode = function() {
     }
 
     .discussion-card {
-      border-color: rgba(167, 139, 250, 0.22);
-      background: linear-gradient(145deg, rgba(167, 139, 250, 0.1), rgba(15, 23, 42, 0.44));
+      border-color: rgba(167, 139, 250, 0.35);
+      background: linear-gradient(145deg, rgba(167, 139, 250, 0.14), rgba(15, 23, 42, 0.55));
+      padding: 12px 14px;
     }
 
-    .discussion-card strong,
+    .discussion-card strong {
+      display: block;
+      color: var(--sun, #fde047);
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+
     .alignment-rating strong {
       display: block;
       color: #e2e8f0;
-      font-size: 0.72rem;
+      font-size: 0.82rem;
+      font-weight: 700;
     }
 
     .discussion-card p {
-      margin: 7px 0 0;
-      color: #ddd6fe;
-      font-size: 0.75rem;
-      line-height: 1.5;
+      margin: 6px 0 0;
+      color: var(--text, #f8fafc);
+      font-size: 0.88rem;
+      line-height: 1.45;
+      font-weight: 600;
     }
 
     .rating-options {
@@ -10621,6 +10637,22 @@ var qrcode = function() {
     [data-theme="cosmic"] :is(.vibe-tile, .quick-pick-option, .quick-guess-option, .pick-side):not(.active):not(.chosen) { border-color: rgba(167, 139, 250, 0.22); background: rgba(10, 4, 32, 0.55); }
     [data-theme="pastel"] :is(.vibe-tile, .quick-guess-option, .pick-side) { color: #1e293b; }
     [data-theme="pastel"] :is(.vibe-tile, .quick-guess-option, .pick-side):not(.active) { background: #ffffff; }
+    .card-more {
+      margin-top: 12px;
+      padding: 6px 10px;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      transition: background 180ms ease, border-color 180ms ease;
+    }
+    .card-more[open] {
+      background: rgba(255, 255, 255, 0.04);
+      border-style: solid;
+      border-color: rgba(167, 139, 250, 0.35);
+      padding: 10px 12px;
+    }
+    .card-more > summary { cursor: pointer; user-select: none; }
+    .card-more > summary:hover .summary-title { color: var(--coral); }
     .answer-extras > summary, .card-more > summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; }
     .answer-extras > summary::before, .card-more > summary::before { content: "▸"; color: var(--muted); }
     .answer-extras[open] > summary::before, .card-more[open] > summary::before { content: "▾"; }
@@ -12121,24 +12153,24 @@ var qrcode = function() {
           "Who would be the first to brag about this match?",
           "Picture doing this together next weekend — what happens first?",
           "Rate this match out of ten, with a dramatic reason.",
-          "What snack would celebrate this answer best?",
+          "What secret assumption did you make about my answer before seeing it?",
           "Name a movie couple who would answer exactly the same.",
           "Who would win a quiz about this answer?",
           "Turn this match into a tiny tradition — what would you call it?",
           "What is the most dramatic way to celebrate agreeing?",
           "Which friend would be most surprised you agree?",
-          "Act out your answer like a nature documentary narrator.",
+          "If we bet $100 on each other’s answer 3 years ago, who wins?",
           "What song should play every time this comes up?",
           "What is the luxury version of this, money no object?",
           "Make a pinky promise about this one.",
           "Who said it first in real life, do you think?",
-          "Describe this answer using only emojis, out loud.",
+          "Where do you think we actually agree more than this number shows?",
           "What would your friends’ group chat say about this match?",
           "Give this match a sports commentator’s replay.",
-          "High five — then name the snack that celebrates this match.",
+          "What’s one small thing I do that shaped why you answered this way?",
           "If this match were a movie, what would the poster say?",
           "Who called it first? Make your case.",
-          "Turn this match into a team motto.",
+          "What part of your answer would surprise someone who only knows you casually?",
           "What song should play when you both agree like this?",
           "Invent a secret handshake for this one."
         ],
@@ -12161,7 +12193,7 @@ var qrcode = function() {
           "What is the silliest reason behind your answer?",
           "Would a vacation change either answer?",
           "Describe each other’s answer as a fortune cookie.",
-          "Which answer would a toddler pick, and why?",
+          "If an honest friend heard this debate, whose side would they secretly take?",
           "What tiny bribe would change your answer?",
           "Swap one detail of your answers and see how it feels.",
           "What would the perfect compromise be called on a menu?",
@@ -12170,7 +12202,7 @@ var qrcode = function() {
           "Split the difference: what’s the silliest fair compromise?",
           "Flip a coin in your heads — who wins this one?",
           "Try the other answer for a day: what would change?",
-          "Describe the middle ground as a pizza topping.",
+          "What would the 10-years-from-now version of us think about this?",
           "Who would a game-show host side with, and why?",
           "What tiny bet could settle this one playfully?"
         ],
@@ -12178,11 +12210,11 @@ var qrcode = function() {
           "Opposite ends! Each of you pitch your side like a movie trailer.",
           "Name one thing you’d each happily try from the other side.",
           "If this were a reality show, what would the episode be called?",
-          "Draw your answer in the air — can the other guess it?",
-          "Which side would a toddler pick, and why?",
+          "What’s the most generous reading of why the other person sees this so differently?",
+          "What part of their side are you secretly a little bit envious of?",
           "Make the other side sound irresistible in one sentence.",
           "Give your answer a fake award and a speech.",
-          "What snack represents each side?",
+          "What would happen if we tried their approach for just one weekend?",
           "Which side would win in a game of rock-paper-scissors?",
           "Turn this difference into a team cheer.",
           "What would your pet (or dream pet) vote for?",
@@ -12192,11 +12224,11 @@ var qrcode = function() {
           "Which of you is secretly a little bit right about the other side?",
           "Invent a rule that lets both answers happily coexist.",
           "What is the funniest possible compromise?",
-          "Which answer would a cartoon villain choose?",
+          "Is this difference a source of friction, or does it actually balance us out?",
           "Give one compliment about the other side.",
           "Plan a night where both answers get a turn.",
           "Whose answer would your friends bet on?",
-          "Draw your answer in the air — can the other one guess it?"
+          "What is one assumption you made that might be totally wrong?"
         ]
       },
       warm: {
@@ -12388,15 +12420,15 @@ var qrcode = function() {
         "Which answer would make the better bumper sticker?",
         "Read their answer like a breaking-news headline.",
         "Which answer would win a game show?",
-        "Which answer would a toddler explain best?",
+        "What part of their answer feels most authentically them?",
         "Which answer would your grandparents love most?",
         "Act out one word from their answer — can they guess it?",
         "Which answer would make the better holiday postcard?",
-        "Score their answer for creativity out of ten.",
-        "Which answer would a cartoon character give?",
+        "Score their answer for creativity out of ten?",
+        "What’s the most surprising phrase in their answer?",
         "Read their answer in a whisper — does it change?",
         "Which answer would you put on a mug?",
-        "Swap one word in their answer to make it sillier.",
+        "If you had to expand their answer by one honest sentence, what would you add?",
         "What emoji would they use to sign this answer?",
         "Which answer would make a better board-game card?",
         "Guess how long they took to write it."
@@ -16615,6 +16647,7 @@ var qrcode = function() {
         finale: [20, 40, 20, 40, 20, 80, 60],
         match: [12, 40, 12, 40, 24],
         spark: [16, 60, 16],
+        "near-miss": [14, 35, 14],
         error: [60, 50, 60],
         delete: 30,
         whoosh: 12,
@@ -16888,6 +16921,12 @@ var qrcode = function() {
           [pentatonic(d), pentatonic(d + 2)].forEach((frequency, index) => { end = Math.max(end, note(frequency, start + index * gap(0.07) + 0.01, 0.06)); });
           end = Math.max(end, note(pentatonic(d + 5), start + gap(0.2), 0.05, { decay: 0.5 }));
           duck = 0.55;
+        } else if (kind === "near-miss") {
+          audioEngine.lastMatchAt = Date.now();
+          noiseSweep(ctx, start, { from: 1200, to: 2400, duration: 0.08, peak: 0.03 });
+          const d = (Number(options.degree) || 0) % 5;
+          sequence([pentatonic(d), pentatonic(d + 2), pentatonic(d + 4)], 0.065, 0.09 * (themeName === "dreamy" ? 0.8 : 1));
+          duck = 0.6;
         } else if (kind === "whoosh") {
           end = noiseSweep(ctx, start, { from: 500, to: 2600, duration: 0.26, peak: 0.2, q: 0.8 });
           end = Math.max(end, note(pentatonic(5), start + 0.22, 0.05, { decay: 0.12, dry: true }));
@@ -17295,10 +17334,10 @@ var qrcode = function() {
     }
 
     const TEXT_RATING_INFO = {
-      aligned: { label: "You agree", color: "#4ade80", isMatch: true },
-      nuanced: { label: "Similar, with nuance", color: "#86efac", isMatch: true },
-      discuss: { label: "Worth discussing", color: "#fbbf24", isMatch: false },
-      different: { label: "Very different", color: "#fb7185", isMatch: false }
+      aligned: { label: "In sync ✦", color: "#4ade80", isMatch: true },
+      nuanced: { label: "Similar angle ≈", color: "#86efac", isMatch: true },
+      discuss: { label: "Great to talk about 💬", color: "#fbbf24", isMatch: false },
+      different: { label: "Fresh perspective ⇄", color: "#fb7185", isMatch: false }
     };
 
     // The couple decides how close two written answers are; until then the card says so instead of guessing.
@@ -21992,10 +22031,10 @@ var qrcode = function() {
         </div>
       ` : "";
       const ratings = [
-        ["aligned", "Aligned", "#4ade80"],
-        ["nuanced", "Similar + nuance", "#86efac"],
-        ["discuss", "Worth discussing", "#fbbf24"],
-        ["different", "Very different", "#fb7185"]
+        ["aligned", "✦ In sync", "#4ade80"],
+        ["nuanced", "≈ Similar angle", "#86efac"],
+        ["discuss", "💬 Talk about it", "#fbbf24"],
+        ["different", "⇄ Fresh perspective", "#fb7185"]
       ];
       const rating = state.textRatings[question.id];
       // The unrated prompt sits below the buttons, where the rated panel puts it, so rating never moves them.
@@ -22210,7 +22249,7 @@ var qrcode = function() {
     }
 
     function ratingHeadingCopy(questionId, lastId) {
-      return lastId && lastId === questionId ? "Rate this one to unlock your scores ✦" : "Now rate them together";
+      return lastId && lastId === questionId ? "Rate this one to unlock your scores ✦" : "Compare your perspectives together";
     }
 
     function scoreLockHint(questions) {
@@ -23668,7 +23707,8 @@ var qrcode = function() {
         // Written cards resolve from the couple's own rating, so a bet there would settle itself: sliders and picks only.
         const canWager = !answerHeld && question.type !== "text" && (state.completedRounds?.length || 0) > 1;
         // Gap 6+ covers "Different temperatures" at 6, "Opposite ends" and every split quick pick (2 vs 9); never a match.
-        const opposite = !answerHeld && question.type === "slider" && !matchInfo.missing && matchInfo.gap >= 6;
+        const isQpSplit = !answerHeld && isQuickPickQuestion(question) && !matchInfo.isMatch;
+        const opposite = !answerHeld && ((question.type === "slider" && !matchInfo.missing && matchInfo.gap >= 6) || isQpSplit);
         if (opposite) sparkIds.add(question.id);
         const sparkLabel = ["Opposites spark", "Two sides, one story", "Plot twist", "Fascinating split"][[...String(question.id)].reduce((total, char) => total + char.charCodeAt(0), 0) % 4];
         const answers = answerHeld
@@ -23746,6 +23786,7 @@ var qrcode = function() {
                 <span class="card-question">${escapeHTML(question.prompt)}</span>
                 ${!answerHeld && matchInfo.isMatch && !(pickLabel(question, firstAnswer) && pickLabel(question, secondAnswer)) ? `<span class="match-badge"><span class="match-star" aria-hidden="true">★</span>${matchInfo.exact ? "Exact match" : "Close match"}</span>` : ""}
                 ${opposite ? `<span class="spark-badge"><span class="spark-icon" aria-hidden="true">⇄</span>${sparkLabel}</span>` : ""}
+                ${!answerHeld && !matchInfo.isMatch && !opposite && question.type === "slider" && matchInfo.gap === 2 ? `<span class="spark-badge near-miss-badge" style="border-color:rgba(250,204,21,0.5);background:rgba(250,204,21,0.12);color:var(--text)"><span class="spark-icon" aria-hidden="true">💫</span>Almost synced · 2 pts apart</span>` : ""}
                 ${answers}
                 ${state.cardWagers?.[question.id] && !answerHeld && question.type !== "text" ? `
                   <div class="wager-outcome-badge ${matchInfo.unrated ? "pending" : (state.cardWagers[question.id] === "match" && matchInfo.isMatch) || (state.cardWagers[question.id] === "diff" && !matchInfo.isMatch) ? "correct" : "different"}">
@@ -24434,15 +24475,19 @@ var qrcode = function() {
         const isMatch = Boolean(shouldReveal && matchInfo?.isMatch);
         // A last-card read must not have the score count-up tick over its chime.
         if (readText && !isMatch) audioEngine.lastMatchAt = Math.max(audioEngine.lastMatchAt || 0, Date.now() + 520);
+        const currentQuestion = questions.find((item) => item.id === id);
+        const answerHeld = Boolean(state.notReady?.[0]?.[id] || state.notReady?.[1]?.[id]);
         // A golden card that is also an opposite gets its fanfare once, the spark on re-flips.
-        const spark = !isMatch && !goldenFirstLook && shouldReveal && sparkIds.has(id);
+        const isQpSplit = !answerHeld && isQuickPickQuestion(currentQuestion) && !matchInfo?.isMatch;
+        const isNearMiss = !isMatch && !answerHeld && currentQuestion?.type === "slider" && matchInfo?.gap === 2;
+        const spark = !isMatch && !goldenFirstLook && shouldReveal && (sparkIds.has(id) || isQpSplit);
         // The golden fanfare is its own cue, distinct from the match chime.
-        const soundKind = isMatch ? "match" : goldenFirstLook ? "open" : spark ? "spark" : shouldReveal ? "reveal" : "tap";
+        const soundKind = isMatch ? "match" : goldenFirstLook ? "open" : spark ? "spark" : isNearMiss ? "near-miss" : shouldReveal ? "reveal" : "tap";
         const feedback = (hapticDone) => {
           // A quiet fold rides along with the next card's reveal cue, so it adds no sound of its own.
           if (!quiet) playSound(soundKind, isMatch ? { ...soundPlace, exact: matchInfo.exact, streak, hapticDone } : { ...soundPlace, hapticDone });
           // If this was the last card, the score unlock waits out the fanfare as it does a match chime.
-          if (goldenFirstLook && !isMatch) audioEngine.lastMatchAt = Date.now();
+          if ((goldenFirstLook || isMatch || spark || isNearMiss) && shouldReveal) audioEngine.lastMatchAt = Date.now();
           if (card.isConnected) {
             // Only the first look is the moment: a re-flip of a match gets a glint, not the whole burst again. The pre-flip
             // rect is reused, so the burst forces no layout of the just-flipped board.
@@ -24450,6 +24495,7 @@ var qrcode = function() {
             else if (isMatch) fx.fromElement(rect, "sparkle", { intensity: 0.2 });
             if (goldenFirstLook) fx.fromElement(rect, "golden", { intensity: isMatch ? 0.6 : 0.85 });
             if (isMatch && firstLook && streak >= 3) fx.fromElement(rect, "ripple", { intensity: 0.6, colors: ["--sun"] });
+            if (isNearMiss && firstLook) fx.fromElement(rect, "sparkle", { intensity: 0.45, colors: ["--coral", "--sun"] });
           }
           if (motionReduced()) saveState();
           else scheduleSaveState(60);
@@ -24491,7 +24537,8 @@ var qrcode = function() {
         else {
           // The hand feels the tap now; the sound, confetti and save follow the first rotated frame.
           if (audioAllowed() && !quiet) pulseHaptic(soundKind);
-          window.setTimeout(() => feedback(true), 16);
+          if (shouldReveal && firstLook && !quiet) playSound("whoosh", { ...soundPlace, quiet: false });
+          window.setTimeout(() => feedback(true), shouldReveal && firstLook ? 420 : 16);
         }
         updateRevealAllButton();
         const qid = card.dataset.questionId;
