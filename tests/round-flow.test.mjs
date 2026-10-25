@@ -181,3 +181,48 @@ describe("Wrapped reel de-duplication (A-52)", () => {
     assert.match(functionSource("highlightAnswersMarkup"), /escapeHTML\(state\.names\[0\]\)/);
   });
 });
+
+describe("Highlights payoff on well-matched rounds (R1-01, R1-06)", () => {
+  // Run renderReveal's highlight picks in isolation against a stubbed round.
+  const start = html.indexOf("const closestHighlight = [...comparable]");
+  const end = html.indexOf("const usedPrompts = new Set();", start);
+  assert(start > 0 && end > start, "could not locate the highlight picks");
+  const pick = (comparable, state, guesses = {}) => vm.runInNewContext(`(() => { ${html.slice(start, end)}
+    return { closestHighlight, guessSurprise, surpriseHighlight, surpriseNote, conversationHighlight, sweetHighlight, storyHighlight }; })()`, {
+    comparable, state,
+    guessHit: (question, player) => guesses[`${question.id}:${player}`] || null,
+    isQuickPickQuestion: () => false,
+    pickLabel: () => "",
+    sliderMeaning: () => "",
+  });
+  const item = (id, type, percent, importance = 1) => ({ question: { id, type, prompt: id }, match: { percent, isMatch: percent >= 75 }, importance });
+  const base = () => ({ names: ["A", "B"], answers: [{}, {}], comments: [{}, {}], textRatings: {} });
+
+  it("never offers a written answer rated close as the surprise", () => {
+    const state = base();
+    state.textRatings.song = "nuanced";
+    const r = pick([item("s1", "slider", 100), item("song", "text", 75)], state);
+    assert.equal(r.surpriseHighlight, undefined);
+    assert.equal(r.surpriseNote, "");
+  });
+  it("only calls a card a misread when a guess actually missed", () => {
+    assert.match(html, /guessSurprise && surpriseHighlight === guessSurprise && surpriseHighlight\.match\.isMatch \? "Biggest misread 🔮"/);
+    assert(!/surpriseNote && surpriseHighlight\?\.match\.isMatch/.test(html));
+  });
+  it("fills a surprise-free round with a sweetest match and a story prompt", () => {
+    const state = base();
+    state.textRatings.t1 = "aligned";
+    state.textRatings.t2 = "aligned";
+    const r = pick([item("s1", "slider", 100), item("t1", "text", 100, 1), item("t2", "text", 100, 3)], state);
+    assert.equal(r.surpriseHighlight, undefined);
+    assert.equal(r.conversationHighlight, undefined);
+    assert.equal(r.sweetHighlight.question.id, "t2");
+    assert.equal(r.storyHighlight.question.id, "t1");
+    assert.match(html, /highlightCard\("Sweetest match", sweetHighlight/);
+  });
+  it("leaves the surprise slot alone when there is a real gap", () => {
+    const r = pick([item("s1", "slider", 100), item("s2", "slider", 40)], base());
+    assert.equal(r.surpriseHighlight.question.id, "s2");
+    assert.equal(r.sweetHighlight, null);
+  });
+});

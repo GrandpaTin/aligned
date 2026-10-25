@@ -205,6 +205,43 @@ describe("Question Bank Taxonomy, Preset Pools & Intensity Ramp Suite", () => {
     }
   });
 
+  it("opens on a Fun slider when the round has one and never closes on a Fun prompt that could come early", () => {
+    const byId = new Map(allQuestions.map((q) => [q.id, q]));
+    const topicsInOrder = [...new Set(allQuestions.map((q) => q.topic))].filter((t) => t !== "fun");
+    const funSliders = allQuestions.filter((q) => q.topic === "fun" && q.type === "slider");
+    const funTexts = allQuestions.filter((q) => q.topic === "fun" && q.type === "text");
+    const others = topicsInOrder.map((t) => allQuestions.filter((q) => q.topic === t));
+    assert(funTexts.length > 0, "Catalog needs Fun text prompts");
+    let checked = 0;
+    // Deterministic sweep: Fun question placed LAST in selection order so selection order cannot rescue it.
+    for (let seed = 0; seed < 60; seed += 1) {
+      const filler = [];
+      for (let k = 0; k < 4; k += 1) {
+        const pool = others[(seed + k) % others.length];
+        if (pool.length) filler.push(pool[(seed * 7 + k * 3) % pool.length]);
+      }
+      if (filler.length < 4) continue;
+      const fun = seed % 2 === 0 && funSliders.length ? funSliders[seed % funSliders.length] : funTexts[seed % funTexts.length];
+      const ids = [...filler.map((q) => q.id), fun.id];
+      const ramped = orderRoundAsRamp(ids);
+      assert.deepEqual(new Set(ramped), new Set(ids));
+      const funIndex = ramped.indexOf(fun.id);
+      // With two or more other gentle prompts, one can open and one can close, so Fun text belongs up front.
+      const hasNonFunGentle = filler.filter((q) => questionTone(q) !== "deep").length >= 2;
+      if (fun.type === "slider") {
+        assert.equal(funIndex, 0, `Fun slider ${fun.id} should open the round, got index ${funIndex}`);
+      } else if (hasNonFunGentle) {
+        assert.notEqual(funIndex, ramped.length - 1, `Fun text ${fun.id} should not be the closer`);
+        assert(funIndex <= 1, `Fun text ${fun.id} should land near the start, got index ${funIndex}`);
+      }
+      const closer = byId.get(ramped[ramped.length - 1]);
+      // The opener takes one gentle prompt; a second one is needed for a gentle closer.
+      if (ids.filter((id) => questionTone(byId.get(id)) !== "deep").length >= 2) assert.notEqual(questionTone(closer), "deep");
+      checked += 1;
+    }
+    assert(checked > 20, "Sweep should cover a meaningful number of rounds");
+  });
+
   it("detects semantic prompt twins to prevent duplicate-feeling questions in a round", () => {
     const qTwin1 = { id: "mock_1", prompt: "How much do you value physical affection when out in public?" };
     const qTwin2 = { id: "mock_2", prompt: "How comfortable are you with public affection?" };

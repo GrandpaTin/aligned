@@ -80,7 +80,7 @@ test("high-impact selected/press states keep a plain base and a guarded color-mi
 test("unguarded color-mix declarations never grow (ratchet)", () => {
   // Remaining ones mix per-element variables (--topic-color, --question-color…) and have no plain fallback;
   // old WebKit drops them to the base tint. Lower this number as they get guarded — never raise it.
-  assert.ok(unguardedColorMix.length <= 63, `unguarded color-mix grew to ${unguardedColorMix.length}:\n${unguardedColorMix.join("\n")}`);
+  assert.ok(unguardedColorMix.length <= 51, `unguarded color-mix grew to ${unguardedColorMix.length}:\n${unguardedColorMix.join("\n")}`);
 });
 
 test("every theme defines a placeholder token dimmer than text", () => {
@@ -144,11 +144,44 @@ test("contrast-tokens cluster: pastel disclosure, HC accent text, unavailable ca
   assert.match(css, /\[data-theme="pastel"\] \.setup-customization-disclosure \{ background: var\(--card-light\);/);
   assert.match(css, /\[data-theme="pastel"\] \.customization-summary-tag \{ background: rgba\(79, 91, 120, 0\.08\); color: var\(--text-2\); \}/);
   assert.match(css, /\.customization-summary-tag \{[^}]*white-space: nowrap;/);
-  assert.match(css, /\.high-contrast :is\(\.topic-progress-top strong, \.library-overall strong, \.storybook-section h4, \.saved-answer-name\) \{ color: var\(--text\); \}/);
+  assert.match(css, /\.high-contrast :is\(\.topic-progress-top strong, \.library-overall strong, \.storybook-section h4, \.saved-answer-name, \.offline-ready\.ready, \.round-score small\) \{ color: var\(--text\); \}/);
   assert.ok(css.indexOf(".high-contrast :is(.topic-progress-top strong") > css.indexOf('[data-theme="pastel"] .storybook-section h4'), "HC rule must win on source order");
   assert.match(css, /\[data-theme="pastel"\]\.high-contrast \.discussion-card p \{ color: var\(--text\); \}/);
   assert.ok(!/\.play-style-card\.unavailable \{ opacity/.test(css), "the unavailable explanation must not be faded with the card");
   assert.match(css, /\.play-style-card\.unavailable strong \{ opacity: \.62; \}/);
   assert.match(css, /\[data-theme="sunset"\] \.type-chip \{ color: #dbeafe; \}/);
   assert.ok(!css.includes("#62548e"), "pastel discussion prompt uses the AAA ink");
+});
+
+test("theme contrast tokens: pastel primary, tutorial digits, sunset active chip, hero text, HC numerals, pastel rail", () => {
+  const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const over = (fg, a, bg) => fg.map((c, i) => Math.round(c * a + bg[i] * (1 - a)));
+  const white = [255, 255, 255];
+  // Pastel primary: the white label clears AAA on both stops and hover only darkens (never a brightening filter).
+  const primary = css.match(/\[data-theme="pastel"\] \.primary-btn \{ color: #fff; background: linear-gradient\(135deg, (#[0-9a-f]{6}), (#[0-9a-f]{6})\)/);
+  assert.ok(primary, "pastel primary gradient rule present");
+  for (const stop of primary.slice(1)) assert.ok(ratio(white, hex(stop)) >= 7, `white on ${stop} >= 7:1`);
+  const hover = css.match(/\[data-theme="pastel"\] \.primary-btn:hover \{ filter: brightness\(([\d.]+)\)/);
+  assert.ok(hover && Number(hover[1]) <= 1, "pastel primary hover must not brighten");
+  // Pastel tutorial digits on their tint over the pastel tile over white.
+  const tile = over([247, 248, 255], 0.9, white);
+  assert.match(css, /\[data-theme="pastel"\] \.tutorial-step span \{ color: #9f1239; background: rgba\(233, 103, 130, 0\.12\); \}/);
+  assert.ok(ratio(hex("#9f1239"), over([233, 103, 130], 0.12, tile)) >= 4.5);
+  assert.match(css, /\.tutorial-step span \{[^}]*font-weight: 800;/);
+  // Sunset active chip: opaque wine base, composited fill keeps #fff8ed above AA.
+  assert.match(css, /\[data-theme="sunset"\] \.library-filter\.active \{[^}]*linear-gradient\(rgba\(241, 167, 197, 0\.22\), rgba\(241, 167, 197, 0\.22\)\), #5a2136;/);
+  assert.ok(ratio(hex("#fff8ed"), over([241, 167, 197], 0.22, hex("#5a2136"))) >= 7);
+  assert.ok(css.lastIndexOf('[data-theme="sunset"] .library-filter.active') > css.lastIndexOf("[data-theme] .library-filter.active"), "sunset active chip must follow the shared rule to win the tie");
+  // Hero: sunset bottom glow dimmed, per-theme eyebrow/lede inks.
+  assert.ok(css.includes("rgba(255, 209, 102, 0.25), transparent 36rem") && !css.includes("rgba(255, 209, 102, 0.42)"));
+  assert.match(css, /\[data-theme="pastel"\] \.eyebrow \{ color: #881337; \}/);
+  assert.match(css, /\[data-theme="midnight"\]:not\(\.high-contrast\) \.lede \{ color: #dbe3ee; \}/);
+  // HC numerals and no fading of round-score labels.
+  assert.ok(!/\.round-score small \{[^}]*opacity/.test(css));
+  assert.match(css, /\.high-contrast \.trend-row strong, \.high-contrast \.home-topic-result strong \{ color: var\(--text\) !important; \}/);
+  // Pastel mode icons and the quiet slider rail meet 3:1 (non-text) on white.
+  assert.match(css, /\[data-theme="pastel"\] \.mode-icon \{ color: #be123c; \}/);
+  assert.ok(ratio(hex("#be123c"), over([233, 103, 130], 0.1, tile)) >= 3);
+  assert.ok(ratio(hex("#7c8aa0"), white) >= 3 && ratio(hex("#7c8aa0"), over([138, 115, 211], 0.08, white)) >= 3);
+  assert.ok(css.lastIndexOf('[data-theme="pastel"]:not(.high-contrast) .guess-panel:not(.guessed) .guess-input::-webkit-slider-runnable-track') > css.lastIndexOf(".guess-panel:not(.guessed) .guess-input::-webkit-slider-runnable-track { background: #475569; }"));
 });

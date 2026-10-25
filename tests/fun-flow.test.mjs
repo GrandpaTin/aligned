@@ -134,3 +134,32 @@ describe("Round-one reveal stays uncluttered", () => {
     assert.match(reveal, /\$\{\(state\.completedRounds\?\.length \|\| 0\) >= 2 \? `<button class="secondary-btn" id="open-library-journey-btn"/);
   });
 });
+
+describe("Side modals open in a usable state", () => {
+  it("daily ritual is named by its prompt and focuses the answer, not submit", () => {
+    const modal = grab(/function openDailyRitualModal\(\) \{[\s\S]*?\n    \}/, "openDailyRitualModal");
+    assert.match(modal, /modal\.setAttribute\("aria-labelledby", "daily-ritual-title"\)/);
+    assert.match(modal, /<h3 id="daily-ritual-title" tabindex="-1"/);
+    // The textarea must not grab focus on touch (soft keyboard), and focus must be placed before submit could win.
+    assert.match(modal, /\(!COARSE_POINTER \? modal\.querySelector\("#daily-text-input"\) : null\)/);
+    assert.match(modal, /firstField\?\.focus\(\{ preventScroll: true \}\)/);
+  });
+
+  it("storybook has a sticky top close control that print hides", () => {
+    const fn = grab(/function openStorybookModal\(\) \{[\s\S]*?\n    \}/, "openStorybookModal");
+    assert.match(fn, /<div class="storybook-sheet">\s*<div class="storybook-topbar"><button class="storybook-x-btn" id="storybook-x-btn" data-modal-cancel type="button" aria-label="Close storybook">/);
+    assert.match(fn, /querySelector\("#storybook-x-btn"\)\.addEventListener\("click", close\)/);
+    assert.match(html, /\.storybook-topbar \{ position: sticky;/);
+    assert.match(html, /\.storybook-x-btn \{ width: 48px; height: 48px;/);
+    assert.match(html, /\.storybook-topbar \{ display: none !important; \}/);
+  });
+
+  it("warmup opens on a ready gate and only starts Player 1's clock from it", () => {
+    const fn = grab(/function openLightningRoundModal\(\) \{[\s\S]*?\n    \}\n/, "openLightningRoundModal");
+    assert.match(fn, /let currentStep = "ready";/);
+    assert.match(fn, /querySelector\("#start-p0-btn"\)\?\.addEventListener\("click", \(\) => \{\s*currentStep = "p0";\s*startClock\(\);/);
+    const tail = fn.slice(fn.indexOf("document.body.appendChild(overlay);"));
+    assert.doesNotMatch(tail, /startClock\(\)/, "opening the warmup must not start a clock");
+    assert.doesNotMatch(fn, /escapeHTML\(p0Name\)/, "p0Name is already escaped");
+  });
+});

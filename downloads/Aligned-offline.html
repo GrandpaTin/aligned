@@ -2436,6 +2436,7 @@ var qrcode = function() {
 
     button,
     input,
+    select,
     textarea {
       font: inherit;
     }
@@ -3924,6 +3925,12 @@ var qrcode = function() {
       padding-bottom: 20px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
+    /* The sheet is taller than a phone, so the close control sticks to the top of the scroller and never slides below
+       the fold. The zero-height bar adds no layout; the button takes the sheet's own background so it stays opaque over
+       scrolled text and matches every theme's sheet (dark slate, theme card, Pastel paper). */
+    .storybook-topbar { position: sticky; top: 12px; height: 0; display: flex; justify-content: flex-end; z-index: 2; background: inherit; }
+    .storybook-x-btn { width: 48px; height: 48px; margin: -8px -6px 0 0; padding: 0; border-radius: 50%; border: 1px solid rgba(127, 127, 127, 0.55); background: inherit; color: inherit; font-size: 1.1rem; line-height: 1; display: grid; place-items: center; cursor: pointer; }
+    .storybook-x-btn:focus-visible { outline: 3px solid currentColor; outline-offset: 2px; }
     .storybook-section {
       margin-top: 24px;
     }
@@ -3968,6 +3975,7 @@ var qrcode = function() {
       .storybook-section h4 { color: #4338ca !important; }
       .storybook-section div { background: #f8fafc !important; border-color: #e2e8f0 !important; color: #0f172a !important; }
       .storybook-actions { display: none !important; }
+      .storybook-topbar { display: none !important; }
       .radar-grid { stroke: #cbd5e1 !important; }
       .radar-axis { stroke: #94a3b8 !important; }
       .radar-label { fill: #0f172a !important; font-weight: 750; }
@@ -4346,22 +4354,34 @@ var qrcode = function() {
       place-items: center;
       border-radius: 6px;
       color: var(--topic-color);
-      background: color-mix(in srgb, var(--topic-color) 12%, transparent);
+      background: rgba(148, 163, 184, 0.12);
       font-size: 0.7rem;
       font-weight: 900;
     }
 
+    @supports (color: color-mix(in srgb, red, blue)) { .topic-icon { background: color-mix(in srgb, var(--topic-color) 12%, transparent); } }
+
     @media (hover: hover) { .topic-option:hover .topic-chip {
-      border-color: color-mix(in srgb, var(--topic-color) 48%, transparent);
+      border-color: var(--topic-color);
       transform: translateY(-2px);
     } }
 
+    @media (hover: hover) { @supports (color: color-mix(in srgb, red, blue)) { .topic-option:hover .topic-chip {
+      border-color: color-mix(in srgb, var(--topic-color) 48%, transparent);
+    } } }
+
     .topic-option input:checked + .topic-chip {
-      border-color: color-mix(in srgb, var(--topic-color) 70%, transparent);
+      border-color: var(--topic-color);
       color: var(--text);
+      background: rgba(15, 23, 42, 0.7);
+      box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.12);
+    }
+
+    @supports (color: color-mix(in srgb, red, blue)) { .topic-option input:checked + .topic-chip {
+      border-color: color-mix(in srgb, var(--topic-color) 70%, transparent);
       background: color-mix(in srgb, var(--topic-color) 13%, rgba(15, 23, 42, 0.7));
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--topic-color) 7%, transparent);
-    }
+    } }
 
     .topic-option input:focus-visible + .topic-chip,
     .count-option input:focus-visible + .count-card {
@@ -5288,6 +5308,13 @@ var qrcode = function() {
       background: rgba(15, 23, 42, 0.35);
       font-size: 0.61rem;
       font-weight: 780;
+    }
+
+    /* Desktop: a tighter latest-alignment card for returning couples (Start stays reachable via the sticky bar). */
+    @media (min-width: 900px) {
+      .home-results { padding: 16px 20px; margin: 4px 0 14px; align-items: center; }
+      .home-results .alignment-ring { --ring-size: 84px; }
+      .home-results .alignment-ring-content strong { font-size: 1.25rem; }
     }
 
     .home-topic-results {
@@ -6433,6 +6460,17 @@ var qrcode = function() {
     }
 
     .library-add[open] > summary::before { content: "−"; }
+
+    .library-tools { margin-bottom: 18px; }
+    .library-tools > .library-add:last-child { margin-bottom: 0; }
+    @media (min-width: 1024px) {
+      /* 5x2 tiles and side-by-side disclosures bring the first question above the fold at 1366x768. */
+      .topic-progress-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+      .topic-progress-card { padding: 10px 12px; }
+      .topic-progress-track { margin-top: 7px; }
+      .library-tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; }
+      .library-tools > .library-add { margin-bottom: 0; }
+    }
 
     .custom-form {
       padding: 0 18px 18px;
@@ -8732,6 +8770,13 @@ var qrcode = function() {
       .dual-score-dashboard { grid-template-columns: 1fr; }
     }
 
+    .journal-header-actions { margin-top: 14px; flex-wrap: wrap; gap: 10px; }
+    @media (max-width: 700px) {
+      /* Side by side on 360px+ phones; stacks on 320px where two 124px rings cannot fit. */
+      /* The card centers its children (shrink-to-fit), and auto-fit counts one column at an indefinite width, so stretch it. */
+      .journal-card .dual-score-dashboard { justify-self: stretch; width: 100%; grid-template-columns: repeat(auto-fit, minmax(min(100%, 124px), 1fr)); justify-items: center; gap: 12px; }
+    }
+
     @media (max-width: 420px) {
       .preset-grid,
       .play-style-grid,
@@ -9005,14 +9050,17 @@ var qrcode = function() {
       margin-left: auto;
     }
 
-    .question-card .category-pill {
-      border-color: color-mix(in srgb, var(--question-color) 42%, transparent);
-      color: color-mix(in srgb, var(--question-color) 72%, white);
-      background: color-mix(in srgb, var(--question-color) 11%, transparent);
-    }
+    /* Whole rules guarded: a var()-based color-mix on old WebKit resets to unset and would cancel the coral base pill. */
+    @supports (color: color-mix(in srgb, red, blue)) {
+      .question-card .category-pill {
+        border-color: color-mix(in srgb, var(--question-color) 42%, transparent);
+        color: color-mix(in srgb, var(--question-color) 72%, white);
+        background: color-mix(in srgb, var(--question-color) 11%, transparent);
+      }
 
-    .question-card .category-symbol {
-      background: color-mix(in srgb, var(--question-color) 22%, transparent);
+      .question-card .category-symbol {
+        background: color-mix(in srgb, var(--question-color) 22%, transparent);
+      }
     }
 
     .alignment-ring {
@@ -9347,6 +9395,7 @@ var qrcode = function() {
       border-radius: 12px;
       place-items: center;
       color: var(--coral);
+      font-weight: 800;
       background: rgba(251, 113, 133, 0.1);
     }
 
@@ -9481,7 +9530,7 @@ var qrcode = function() {
     [data-theme="sunset"] body {
       font-family: "Trebuchet MS", "Avenir Next", Avenir, sans-serif;
       background:
-        radial-gradient(ellipse at 50% 112%, rgba(255, 209, 102, 0.42), transparent 36rem),
+        radial-gradient(ellipse at 50% 112%, rgba(255, 209, 102, 0.25), transparent 36rem),
         radial-gradient(circle at 92% 4%, rgba(255, 152, 100, 0.12), transparent 28rem),
         linear-gradient(158deg, #2a0d1d 0%, #6f2738 48%, #a74640 100%);
     }
@@ -9596,6 +9645,13 @@ var qrcode = function() {
       border-radius: 16px 6px 16px 6px;
       color: var(--text);
       background: rgba(78, 25, 42, 0.62);
+    }
+
+    /* The shared translucent active fill lands lighter than inactive chips on sunset's warm page (4.4:1); an opaque wine base keeps the selection darker and ~7.5:1. */
+    [data-theme="sunset"] .library-filter.active {
+      border-color: var(--violet);
+      color: var(--text);
+      background: linear-gradient(rgba(241, 167, 197, 0.22), rgba(241, 167, 197, 0.22)), #5a2136;
     }
 
     [data-theme="sunset"] .progress-bar {
@@ -9911,6 +9967,9 @@ var qrcode = function() {
       box-shadow: 0 9px 22px rgba(85, 74, 112, 0.075);
     }
 
+    /* Pastel coral digits read 2.7:1 on their tint; the deep rose eyebrow ink reaches ~6.9:1. */
+    [data-theme="pastel"] .tutorial-step span { color: #9f1239; background: rgba(233, 103, 130, 0.12); }
+
     [data-theme="pastel"] :is(.name-input, .answer-textarea, .comment-textarea, .custom-input, .custom-select, .session-dropdown-trigger, .library-search, .journal-search, .pairing-code, .private-note-input) {
       border-color: rgba(79, 91, 120, 0.19);
       color: var(--text);
@@ -10060,10 +10119,15 @@ var qrcode = function() {
 
     [data-theme="pastel"] .topic-option input:checked + .topic-chip {
       border-color: var(--topic-color) !important;
-      background: color-mix(in srgb, var(--topic-color) 18%, white) !important;
+      background: #ffffff !important;
       color: var(--text) !important;
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--topic-color) 12%, transparent), 0 8px 18px rgba(85, 74, 112, 0.08) !important;
+      box-shadow: 0 0 0 3px rgba(79, 91, 120, 0.12), 0 8px 18px rgba(85, 74, 112, 0.08) !important;
     }
+
+    @supports (color: color-mix(in srgb, red, blue)) { [data-theme="pastel"] .topic-option input:checked + .topic-chip {
+      background: color-mix(in srgb, var(--topic-color) 18%, white) !important;
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--topic-color) 12%, transparent), 0 8px 18px rgba(85, 74, 112, 0.08) !important;
+    } }
 
     /* Custom tooltips for topbar actions */
     @media (hover: hover) {
@@ -10291,8 +10355,11 @@ var qrcode = function() {
     .question-library-actions > * { min-width: 0; }
     .question-library-actions .feedback-menu { flex-basis: 100%; }
     [data-theme="pastel"] .eyebrow { color: #be123c; }
-    [data-theme="pastel"] .primary-btn { color: #fff; background: linear-gradient(135deg, #be123c, #9f1239); box-shadow: 0 14px 28px rgba(190, 18, 60, 0.24); }
-    @media (hover: hover) { [data-theme="pastel"] .primary-btn:hover { filter: brightness(1.1) saturate(1.08); box-shadow: 0 16px 36px rgba(190, 18, 60, 0.35); } }
+    /* Pastel primary: both gradient stops clear 7:1 for the white label; hover only darkens so contrast never drops. */
+    [data-theme="pastel"] .primary-btn { color: #fff; background: linear-gradient(135deg, #9f1239, #881337); box-shadow: 0 14px 28px rgba(159, 18, 57, 0.24); }
+    @media (hover: hover) { [data-theme="pastel"] .primary-btn:hover { filter: brightness(0.9) saturate(1.05); box-shadow: 0 18px 38px rgba(136, 19, 55, 0.42); } }
+    [data-theme="pastel"] .mode-icon { color: #be123c; }
+    .high-contrast[data-theme="pastel"] .mode-icon { color: #9f1239; }
     [data-theme="sunset"] .footer-note { color: #fbcfe8; }
     [data-theme="sunset"] .tap-hint { color: #ffe4e6; }
     [data-theme="sunset"] .type-chip { color: #dbeafe; }
@@ -10307,7 +10374,7 @@ var qrcode = function() {
     [data-theme="pastel"] .theme-option input:focus-visible + .theme-card { outline-color: #be123c; }
     .comparison-wrap .comparison-legend { margin-top: 26px; }
     .round-score { width: 64px; height: 64px; align-content: center; justify-items: center; line-height: 1.1; text-align: center; }
-    .round-score small { display: block; font-size: .6rem; font-weight: 700; opacity: .9; }
+    .round-score small { display: block; font-size: .6rem; font-weight: 700; }
     .version-tag { margin-left: 6px; color: var(--muted); font-size: .66rem; font-weight: 700; }
     .nearby-banner {
       position: fixed;
@@ -10454,9 +10521,12 @@ var qrcode = function() {
     [data-theme="pastel"] .quick-pick-option { background: #ffffff; color: #1e293b; }
     .nowrap { white-space: nowrap; }
     /* DES-05 / DES-07 / DES-08: small labels that sat under 7:1 in individual themes. */
-    [data-theme="midnight"] .eyebrow { color: #ffb3c0; }
-    [data-theme="sunset"] .eyebrow { color: #ffe3a3; }
-    [data-theme="pastel"] .eyebrow { color: #9f1239; }
+    [data-theme="midnight"] .eyebrow { color: #ffd1d9; }
+    [data-theme="sunset"] .eyebrow { color: #ffecc2; }
+    [data-theme="pastel"] .eyebrow { color: #881337; }
+    /* Not in High contrast: its --text-2 (#e2e8f0) is already brighter than this ink. */
+    [data-theme="midnight"]:not(.high-contrast) .lede { color: #dbe3ee; }
+    [data-theme="sunset"] .lede { color: var(--text); }
     [data-theme="sunset"] .favorite-button { background: rgba(42, 13, 29, 0.55); }
     [data-theme="midnight"] .card-close-button { color: #ffc2cc; }
     [data-theme="cosmic"] .card-close-button { color: #ff9ad8; }
@@ -10549,13 +10619,16 @@ var qrcode = function() {
       [data-text-size="large"] .quick-guess-option { flex: 1 1 100%; }
     }
     /* M2: the light theme's category label needs a darker mix to stay readable on its tint. */
-    [data-theme="pastel"] .question-card .category-pill { color: color-mix(in srgb, var(--question-color, #7c3aed) 50%, #1e293b) !important; }
+    [data-theme="pastel"] .question-card .category-pill { color: #1e293b !important; }
+    @supports (color: color-mix(in srgb, red, blue)) { [data-theme="pastel"] .question-card .category-pill { color: color-mix(in srgb, var(--question-color, #7c3aed) 50%, #1e293b) !important; } }
     [data-theme="pastel"] .card-close-button { color: #9f1239; }
     [data-theme="pastel"] .answer-box { background: #ffffff; border-color: rgba(148, 163, 184, 0.35); }
     [data-theme="pastel"] .answer-name { filter: brightness(0.5) saturate(1.3); }
     [data-theme="pastel"] :is(.topic-progress-top strong, .library-overall strong) { filter: brightness(0.5) saturate(1.3); }
     /* HC: small accent-coloured data text reads at AAA; identity colour stays on borders/bars. */
-    .high-contrast :is(.topic-progress-top strong, .library-overall strong, .storybook-section h4, .saved-answer-name) { color: var(--text); }
+    .high-contrast :is(.topic-progress-top strong, .library-overall strong, .storybook-section h4, .saved-answer-name, .offline-ready.ready, .round-score small) { color: var(--text); }
+    /* Trend and home-topic numerals get alignmentColor() inline, so HC needs !important to reach AAA. */
+    .high-contrast .trend-row strong, .high-contrast .home-topic-result strong { color: var(--text) !important; }
     [data-theme="pastel"] .streak-pill { color: #7c2d12; background: rgba(251, 146, 60, 0.18); border-color: rgba(194, 65, 12, 0.45); }
     [data-theme="pastel"] .rivalry-score { color: #4c1d95; }
     [data-theme="pastel"] .wildcard-btn:not(.active) { color: #78350f; border-color: rgba(180, 83, 9, 0.55); }
@@ -10716,6 +10789,18 @@ var qrcode = function() {
     }
     .screen.question-screen { margin-top: 0; }
     .quick-pick-hint { margin: 4px 0 0; color: var(--muted); font-size: max(12px, .78rem); }
+    .quick-pick-hint .quick-pick-context-link { display: inline; min-height: 0; padding: 0 !important; border: 0; background: none; font: inherit; font-weight: 750; color: var(--text); text-decoration: underline; text-underline-offset: 2px; vertical-align: baseline; cursor: pointer; }
+    .quick-pick-hint .quick-pick-context-text { display: none; }
+    /* An inline link can't reach a 48 px touch target, so touch screens keep the plain wording (their summary sits in view). */
+    @media (pointer: coarse) {
+      .quick-pick-hint .quick-pick-context-link { display: none; }
+      .quick-pick-hint .quick-pick-context-text { display: inline; }
+    }
+    /* Until a side is picked, Next keeps its size but drops the filled look so the picks read as the next step. */
+    .question-actions .primary-btn.submit-quiet { border: 1px solid rgba(148, 163, 184, 0.34); color: var(--text); background: rgba(148, 163, 184, 0.1); box-shadow: none; text-shadow: none; }
+    [data-theme="pastel"] .question-actions .primary-btn.submit-quiet { border-color: rgba(79, 91, 120, 0.22); color: var(--text); background: #ffffff; box-shadow: 0 7px 16px rgba(85, 74, 112, 0.08); }
+    .high-contrast .question-actions .primary-btn.submit-quiet { border: 2px solid #ffffff !important; color: #ffffff !important; background: transparent !important; }
+    [data-theme="pastel"].high-contrast .question-actions .primary-btn.submit-quiet { border-color: rgba(17, 24, 39, 0.85) !important; color: #111827 !important; background: #ffffff !important; }
     @media (min-width: 601px) {
       body:has(.question-screen) .app-toast { top: auto; bottom: 120px; max-width: 300px; }
     }
@@ -10835,7 +10920,7 @@ var qrcode = function() {
        so a checked card keeps its own -2px (higher specificity) instead of dropping 2px under the pointer. */
     @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) { .intensity-option:hover .intensity-card { transform: none; } }
     @media (hover: hover) and (pointer: fine) { :where(.reduced-motion) .intensity-option:hover .intensity-card { transform: none; } }
-    /* Phone landscape: the sticky action bar would cover the prompt itself, so it scrolls with the card. */
+    /* Phone landscape: the topbar scrolls away on question and handoff screens, so a compact sticky Next bar fits without covering the prompt. */
     @media (orientation: landscape) and (max-height: 520px) {
       .question-screen .turn-name { font-size: 1.15rem !important; line-height: 1.2; }
       .question-screen .question-header .eyebrow { margin-bottom: 0; }
@@ -10850,7 +10935,13 @@ var qrcode = function() {
       .question-screen .quick-guess-option { min-height: 44px; padding: 4px 8px; font-size: 0.8rem; }
       .question-screen .quick-pick { margin: 8px 0 4px; }
       .question-screen .quick-pick-hint { display: none; }
-      .question-screen .question-actions { position: static !important; box-shadow: none !important; }
+      /* The var(--card) fill is the fallback for WebKit before color-mix (iOS 15.4-16.1), where the 601px+ bar's background is dropped. */
+      .question-screen .question-actions { position: sticky !important; bottom: 0; background: var(--card); padding-block: 4px calc(4px + env(safe-area-inset-bottom)) !important; }
+      .question-screen .question-actions > button { padding-block: 6px; }
+      body:has(.question-screen, .lock-screen) .topbar { position: static; }
+      /* Keyboard up: the visible viewport is ~150px, so the bar scrolls with the card again. */
+      body:has(.question-screen textarea:focus, .question-screen input:not([type=range]):not([type=checkbox]):focus) .question-screen .question-actions { position: static !important; box-shadow: none !important; }
+      html:has(.question-screen .question-actions) { scroll-padding-top: calc(12px + env(safe-area-inset-top)); scroll-padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
       .question-screen .question-actions::before { display: none; }
       .question-screen .progress-constellation { display: none; }
       .question-screen .question-header { margin-bottom: 4px; }
@@ -10871,6 +10962,11 @@ var qrcode = function() {
     .guess-panel.guessed .guess-input::-webkit-slider-runnable-track { background: linear-gradient(90deg, var(--violet) 0, var(--violet) var(--range-progress), #475569 var(--range-progress), #475569 100%); }
     .guess-panel:not(.guessed) .guess-input::-webkit-slider-runnable-track { background: #475569; }
     .guess-panel:not(.guessed) .guess-input::-webkit-slider-thumb { opacity: .7; }
+    /* Pastel: the unfilled track is a quiet 3:1 rail (1.4.11), not a near-black bar competing with the question. */
+    [data-theme="pastel"]:not(.high-contrast) .range-input::-webkit-slider-runnable-track { background: linear-gradient(90deg, var(--coral) 0, var(--coral) var(--range-progress), #7c8aa0 var(--range-progress), #7c8aa0 100%); }
+    [data-theme="pastel"]:not(.high-contrast) .range-input::-moz-range-track { background: #7c8aa0; }
+    [data-theme="pastel"]:not(.high-contrast) .guess-panel.guessed .guess-input::-webkit-slider-runnable-track { background: linear-gradient(90deg, var(--violet) 0, var(--violet) var(--range-progress), #7c8aa0 var(--range-progress), #7c8aa0 100%); }
+    [data-theme="pastel"]:not(.high-contrast) .guess-panel:not(.guessed) .guess-input::-webkit-slider-runnable-track { background: #7c8aa0; }
     .answer-extras { margin-top: 14px; border: 1px solid var(--line); border-radius: 16px; padding: 4px 14px; }
     .answer-extras > summary { cursor: pointer; font-weight: 750; }
     .answer-extras > summary small, .card-more > summary small { margin-left: 6px; color: var(--muted); font-weight: 600; }
@@ -11032,11 +11128,14 @@ var qrcode = function() {
         margin-inline: -12px;
         padding: 12px;
         border-radius: 18px;
-        background: color-mix(in srgb, var(--card) 92%, transparent);
+        /* Opaque fallback first: on WebKit before color-mix (iOS 15.4-16.1) a var()-based color-mix computes to unset,
+           which left this bar (and the later short-landscape bar it overrides) transparent over the prompt. */
+        background: var(--card);
         box-shadow: 0 -12px 30px rgba(2, 6, 23, 0.35);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
       }
+      @supports (color: color-mix(in srgb, red, blue)) { .question-screen .question-actions { background: color-mix(in srgb, var(--card) 92%, transparent); } }
       [data-theme="pastel"] .question-screen .question-actions { background: rgba(255, 248, 246, 0.94); box-shadow: 0 -10px 24px rgba(148, 163, 184, 0.25); }
     }
     @media (min-width: 900px) and (max-height: 820px) {
@@ -11499,6 +11598,36 @@ var qrcode = function() {
       [data-theme="pastel"].high-contrast .setup-start-actions { border-color: rgba(17, 24, 39, 0.85); }
     }
     @media (min-width: 601px) and (min-height: 521px) { body:has(.session-dropdown-container.open) .setup-start-actions { visibility: hidden; } }
+    /* Desktop: a full-width sticky Start bar sat on the whole vibe row at a 768px fold; a content-width pill leaves the left-hand tiles readable. */
+    @media (min-width: 1024px) and (min-height: 521px) {
+      .setup-start-actions { width: fit-content; max-width: calc(100% + 20px); margin: 16px -10px 0 auto; border-radius: 999px; padding: 8px 10px; }
+    }
+    /* Reserve the sticky bar's height (~76px bar + 12px offset) so keyboard focus on setup tiles scrolls clear of it. */
+    @media (min-width: 601px) and (min-height: 521px) {
+      html:has(.setup-start-actions) { scroll-padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+    }
+    /* Landscape phones: pin Start while the keyboard is down (the form runs 800-1100px below the fold); unpin while a text field has focus, because the ~150px keyboard-up viewport is why the 521px rule leaves them out. */
+    @media (min-width: 601px) and (max-height: 520px) {
+      .setup-start-actions {
+        position: sticky;
+        z-index: 30;
+        bottom: max(6px, env(safe-area-inset-bottom)) !important;
+        margin: 10px -8px 0;
+        padding: 6px 10px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(15, 23, 42, 0.96);
+        box-shadow: 0 10px 28px rgba(2, 6, 23, 0.34);
+      }
+      @supports (color: color-mix(in srgb, red, blue)) {
+        .setup-start-actions { background: color-mix(in srgb, var(--card) 96%, transparent); }
+      }
+      [data-theme="pastel"] .setup-start-actions { background: rgba(255, 255, 255, 0.96); border-color: rgba(79, 91, 120, 0.13); box-shadow: 0 10px 26px rgba(85, 74, 112, 0.16); }
+      [data-theme="pastel"].high-contrast .setup-start-actions { border-color: rgba(17, 24, 39, 0.85); }
+      html:has(.setup-start-actions) { scroll-padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+      body:has(#setup-form input:not([type=range]):not([type=checkbox]):focus, #setup-form textarea:focus) .setup-start-actions { position: static; box-shadow: none; }
+      body:has(.session-dropdown-container.open) .setup-start-actions { visibility: hidden; }
+    }
   </style>
 </head>
 <body>
@@ -12957,7 +13086,7 @@ var qrcode = function() {
     let nearbyPeerWaitingCheck = 0;
     const NEARBY_PEER_SILENCE_MS = 15000;
     let nearbyFailedReconnects = 0;
-    const APP_VERSION = "1.7.3";
+    const APP_VERSION = "1.7.4";
     const COARSE_POINTER = window.matchMedia?.("(pointer: coarse)").matches === true;
     const POINTER_VERB = COARSE_POINTER ? "Tap" : "Click";
     const NEARBY_SESSION_KEY = "aligned-nearby-session-v1";
@@ -15364,6 +15493,19 @@ var qrcode = function() {
       }
     }, true);
 
+    // Shared by Save & exit → Continue and a mid-turn relaunch so the privacy copy cannot drift.
+    // Raw names on purpose: openConfirmDialog escapes every string once.
+    function confirmResumeTurn() {
+      const activeName = state.names[state.activePlayer] || `Player ${state.activePlayer + 1}`;
+      return openConfirmDialog({
+        title: `Resume ${activeName}’s turn?`,
+        copy: `This round is currently paused on ${activeName}’s turn. Make sure only ${activeName} is viewing the screen before resuming.`,
+        confirmLabel: `I am ${activeName}`,
+        cancelLabel: "Not now",
+        safeFirst: true
+      });
+    }
+
     // safeFirst styles the cancel choice as the main button when staying put is the recommended path.
     function openConfirmDialog({ eyebrow = "", title, copy = "", confirmLabel = "Continue", cancelLabel = "Cancel", danger = false, safeFirst = false, tag = "" }) {
       return new Promise((resolve) => {
@@ -17254,11 +17396,14 @@ var qrcode = function() {
       const items = questionIds.map((id) => catalogById.get(id)).filter(Boolean);
       if (items.length < 3) return questionIds;
       const weight = { light: 0, warm: 1, deep: 2 };
-      const sorted = [...items].sort((a, b) => weight[questionTone(a)] - weight[questionTone(b)]);
+      // Within a tone, the Fun pack sorts first so the laugh prompt opens the round instead of closing it.
+      const rampKey = (question) => weight[questionTone(question)] * 2 + (question.topic === "fun" ? 0 : 1);
+      const sorted = [...items].sort((a, b) => rampKey(a) - rampKey(b));
       // Open on a tap-and-go slider or quick pick rather than a blank text box.
       const opener = sorted.find((question) => question.type === "slider" && questionTone(question) !== "deep") || sorted[0];
       sorted.splice(sorted.indexOf(opener), 1);
-      const closer = sorted.find((question) => questionTone(question) !== "deep") || sorted[0];
+      // Close on the warmest gentle prompt; a light or Fun one is better spent near the start.
+      const closer = [...sorted].reverse().find((question) => questionTone(question) !== "deep") || sorted[0];
       sorted.splice(sorted.indexOf(closer), 1);
       const middle = sorted;
       const deepest = middle.filter((question) => questionTone(question) === "deep");
@@ -18399,6 +18544,7 @@ var qrcode = function() {
 
           <div class="topic-progress-grid">${progressCards}</div>
 
+          <div class="library-tools">
           <details class="library-add" id="library-add">
             <summary>Add your own question</summary>
             <form class="custom-form" id="custom-question-form" novalidate>
@@ -18444,6 +18590,7 @@ var qrcode = function() {
               <p class="error" id="pack-error" role="alert"></p>
             </div>
           </details>
+          </div>
 
           <div class="library-controls">
             <input class="library-search" id="library-search" type="search" placeholder="Search all ${catalog.length} questions…" value="${escapeHTML(libraryView.search)}" aria-label="Search questions" aria-describedby="library-search-status">
@@ -19015,6 +19162,7 @@ var qrcode = function() {
 
       modal.innerHTML = `
         <div class="storybook-sheet">
+          <div class="storybook-topbar"><button class="storybook-x-btn" id="storybook-x-btn" data-modal-cancel type="button" aria-label="Close storybook">✕</button></div>
           <div class="storybook-header">
             <p class="eyebrow storybook-eyebrow" style="font-weight:800;letter-spacing:0.08em">ALIGNED · OUR STORYBOOK</p>
             <h2 class="storybook-title" style="font-size:1.8rem;margin:6px 0 10px">${p1} & ${p2}</h2>
@@ -19074,6 +19222,7 @@ var qrcode = function() {
       modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
       modal.querySelector("#storybook-print-btn").addEventListener("click", () => window.print());
       modal.querySelector("#storybook-close-btn").addEventListener("click", close);
+      modal.querySelector("#storybook-x-btn").addEventListener("click", close);
       syncModalState();
     }
 
@@ -19145,6 +19294,7 @@ var qrcode = function() {
           <p class="eyebrow">Results Journal</p>
           <h2 id="results-title">Your alignment, <span class="accent-text">over time.</span></h2>
           <p class="lede">A private record of common ground, evolving answers, and conversations worth revisiting.</p>
+          <div class="actions journal-header-actions"><button class="${revealUnfinished() ? "secondary-btn" : "primary-btn"}" id="results-home" type="button">Start a round</button><button class="secondary-btn" id="journal-jump-saved" type="button">Saved rounds ↓</button></div>
           ${revealUnfinished() ? `<section class="resume-card" aria-label="Unfinished reveal"><span class="resume-icon" aria-hidden="true">▶</span><div class="resume-copy"><strong>Your latest round is waiting on its reveal board</strong><span>${escapeHTML(revealRemainingCopy() || "Almost there")} · it joins your Journal when the scores unlock</span></div><button class="primary-btn" id="journal-back-to-reveal" type="button">Continue</button></section>` : ""}
 
           <div class="journal-overview">
@@ -19259,6 +19409,11 @@ var qrcode = function() {
       `;
 
       document.getElementById("open-storybook-btn")?.addEventListener("click", openStorybookModal);
+      document.getElementById("results-home")?.addEventListener("click", () => navigateToScreen("setup"));
+      document.getElementById("journal-jump-saved")?.addEventListener("click", () => {
+        const target = document.getElementById("round-history-container");
+        (target?.closest(".journal-card") || target)?.scrollIntoView({ block: "start", behavior: motionReduced() ? "auto" : "smooth" });
+      });
       const searchInput = document.getElementById("journal-search-input");
       const filterChips = document.querySelectorAll(".journal-filter-chip");
       const applyJournalFilter = () => {
@@ -19471,7 +19626,9 @@ var qrcode = function() {
       `;
 
       document.querySelectorAll('input[name="visual-theme"]').forEach((input) => input.addEventListener("change", () => {
-        state.visualTheme = input.value; saveState(); applyPreferences(); playSound("tap");
+        // WebKit does not restyle existing nodes for every [data-theme]/:checked rule when the attribute on <html>
+        // flips (stale headings and cards until reload); re-rendering inserts fresh nodes that match the new theme.
+        state.visualTheme = input.value; saveState(); render(); playSound("tap");
       }));
       document.getElementById("settings-sound").addEventListener("change", (event) => { state.soundEnabled = event.currentTarget.checked; saveState(); applyPreferences(); playSound("tap"); });
       document.getElementById("settings-ambient").addEventListener("change", (event) => {
@@ -19531,7 +19688,7 @@ var qrcode = function() {
           b.setAttribute("aria-checked", b === btn);
         });
       });
-      document.getElementById("high-contrast").addEventListener("change", (event) => { state.highContrast = event.currentTarget.checked; saveState(); applyPreferences(); });
+      document.getElementById("high-contrast").addEventListener("change", (event) => { state.highContrast = event.currentTarget.checked; saveState(); render(); });
       document.getElementById("reduced-motion").addEventListener("change", (event) => { state.reducedMotion = event.currentTarget.checked; saveState(); applyPreferences(); });
       document.getElementById("test-sound").addEventListener("click", () => {
         if (!state.soundEnabled) showToast("Game sounds are off — turn on Sounds to hear them.");
@@ -19810,7 +19967,7 @@ var qrcode = function() {
             <h3>✨ Daily Connection Ritual</h3>
             <p>${isDone ? "Today’s ritual is complete! Tap to reflect." : escapeHTML(q ? q.prompt : "One quick question to connect today.")}</p>
           </div>
-          <button type="button" class="primary-btn" id="open-daily-ritual-btn" style="padding:8px 16px;font-size:0.84rem;white-space:nowrap">${isDone ? "View Answer" : "Start Ritual"}</button>
+          <button type="button" class="secondary-btn" id="open-daily-ritual-btn" style="padding:8px 16px;font-size:0.84rem;white-space:nowrap">${isDone ? "View Answer" : "Start Ritual"}</button>
         </div>
       `;
     }
@@ -19825,6 +19982,7 @@ var qrcode = function() {
       modal.className = "modal-backdrop";
       modal.setAttribute("role", "dialog");
       modal.setAttribute("aria-modal", "true");
+      modal.setAttribute("aria-labelledby", "daily-ritual-title");
 
       const savedAnswer = state.dailyRitual?.answers?.[today];
       const isSlider = q.type === "slider";
@@ -19840,7 +19998,7 @@ var qrcode = function() {
       modal.innerHTML = `
         <div class="modal-card exit-dialog" style="text-align:center">
           <div class="streak-pill" style="margin-bottom:8px">${modalStreak > 0 ? `🔥 ${modalStreak}-day streak · ` : ""}Today’s prompt</div>
-          <h3 style="font-size:1.15rem;margin:6px 0 12px;color:var(--text)">${escapeHTML(q.prompt)}</h3>
+          <h3 id="daily-ritual-title" tabindex="-1" style="font-size:1.15rem;margin:6px 0 12px;color:var(--text)">${escapeHTML(q.prompt)}</h3>
           ${isDone ? `
             ${savedPair ? dailyCompareMarkup(q, savedPair) : `<div style="padding:16px;border-radius:12px;background:rgba(255,255,255,0.05);margin:14px 0">
               <span class="eyebrow">Today’s response</span>
@@ -19876,6 +20034,11 @@ var qrcode = function() {
         modal.querySelector("#daily-close-btn")?.addEventListener("click", () => modal.remove());
         return;
       }
+      // Land on the answer, not on submit (Enter there only warns). Text fields stay unfocused on touch so the soft
+      // keyboard doesn't cover the dialog (same rule as renderQuestion). Focusing before the MutationObserver's
+      // microtask means syncModalState finds focus already inside and leaves it.
+      const firstField = modal.querySelector("#daily-slider-input") || (!COARSE_POINTER ? modal.querySelector("#daily-text-input") : null) || modal.querySelector("#daily-ritual-title");
+      firstField?.focus({ preventScroll: true });
 
       const sliderInput = modal.querySelector("#daily-slider-input");
       const sliderVal = modal.querySelector("#daily-slider-val");
@@ -20413,14 +20576,7 @@ var qrcode = function() {
       document.getElementById("resume-round")?.addEventListener("click", async () => {
         if (!state.resumeScreen) { render(); return; }
         if (state.playStyle !== "nearby" && state.resumeScreen === "question") {
-          const activeName = state.names[state.activePlayer] || `Player ${state.activePlayer + 1}`;
-          const ok = await openConfirmDialog({
-            title: `Resume ${escapeHTML(activeName)}’s turn?`,
-            copy: `This round is currently paused on ${escapeHTML(activeName)}’s turn. Make sure only ${escapeHTML(activeName)} is viewing the screen before resuming.`,
-            confirmLabel: `I am ${escapeHTML(activeName)}`,
-            cancelLabel: "Not now",
-            safeFirst: true
-          });
+          const ok = await confirmResumeTurn();
           if (!ok) return;
         }
         state.screen = state.resumeScreen;
@@ -20698,6 +20854,16 @@ var qrcode = function() {
       return hash % 3 === 0;
     }
 
+    // A pick question moves on when a side is tapped, so until one is chosen (or the player opts out) Next is a dead end
+    // and must not outrank the picks. The last card keeps full weight: "Lock my answers" is the real next step there.
+    function quickPickSubmitWaiting(question, playerIndex, questionIndex, totalQuestions) {
+      if (!question || !isQuickPickQuestion(question)) return false;
+      if (questionIndex >= totalQuestions - 1) return false;
+      if (state.notReady?.[playerIndex]?.[question.id] === true) return false;
+      // Mirrors the submit backstop exactly (=== undefined), so quiet always means "Next would refuse".
+      return state.answers?.[playerIndex]?.[question.id] === undefined;
+    }
+
     function renderQuestion() {
       const questions = getSelectedQuestions();
       const totalQuestions = questions.length;
@@ -20755,7 +20921,7 @@ var qrcode = function() {
             <button class="quick-pick-option ${quickPickChosen && Number(savedAnswer) === 2 ? "active" : ""}" type="button" data-quick-pick="2" aria-pressed="${quickPickChosen && Number(savedAnswer) === 2}"><span aria-hidden="true">◀</span>${escapeHTML(question.labels[0])}</button>
             <button class="quick-pick-option ${quickPickChosen && Number(savedAnswer) === 9 ? "active" : ""}" type="button" data-quick-pick="9" aria-pressed="${quickPickChosen && Number(savedAnswer) === 9}">${escapeHTML(question.labels[1])}<span aria-hidden="true">▶</span></button>
           </div>
-          <p class="quick-pick-hint">${POINTER_VERB} a side to move on — open “Add context” first if you want to explain.</p>
+          <p class="quick-pick-hint">${POINTER_VERB} a side to move on — <button type="button" class="text-btn quick-pick-context-link" data-open-context>open “Add context”</button><span class="quick-pick-context-text">open “Add context”</span> first if you want to explain.</p>
           <details class="quick-pick-between"><summary>Somewhere in between?</summary>` : ""}
           <div class="slider-panel">
             <div class="slider-value" id="slider-value" aria-hidden="true">${Number(savedAnswer)}</div>
@@ -20852,6 +21018,12 @@ var qrcode = function() {
       const input = document.getElementById("answer-input");
       const error = document.getElementById("answer-error");
       const guessInput = document.getElementById("guess-input");
+      // Same .primary-btn geometry either way, so promoting it on the pick never shifts the sticky bar.
+      const syncSubmitEmphasis = () => {
+        const submit = form.querySelector('.question-actions button[type="submit"]');
+        if (submit) submit.classList.toggle("submit-quiet", quickPickSubmitWaiting(question, state.activePlayer, state.questionIndex, totalQuestions));
+      };
+      syncSubmitEmphasis();
       document.querySelectorAll("[data-quick-guess]").forEach((button) => button.addEventListener("click", () => {
         const value = Number(button.dataset.quickGuess);
         const current = state.guesses[state.activePlayer]?.[question.id];
@@ -20898,6 +21070,14 @@ var qrcode = function() {
       document.querySelectorAll("#question-form .comment-details, #question-form .answer-extras, #question-form .private-reflection").forEach((details) => details.addEventListener("toggle", () => {
         if (details.open) revealAboveStickyBar(details);
       }));
+      // The hint's link sits above the fold; the summary itself can be hidden under the sticky bar on short laptop screens.
+      document.querySelector("[data-open-context]")?.addEventListener("click", () => {
+        const details = document.querySelector("#question-form .comment-details");
+        if (!details) return;
+        // Opening fires the toggle listener (revealAboveStickyBar: clears the bar, respects reduced motion); an already-open box fires no toggle.
+        if (details.open) revealAboveStickyBar(details); else details.open = true;
+        document.getElementById("comment-input")?.focus({ preventScroll: true });
+      });
       between?.addEventListener("toggle", () => {
         if (!between.open) return;
         if (state.answers[state.activePlayer][question.id] === undefined) playSound("tap", { value: Number(input.value) });
@@ -21005,6 +21185,7 @@ var qrcode = function() {
         event.currentTarget.textContent = active ? "Not ready — this won’t be scored" : "I’m not ready to answer this";
         error.className = active ? "not-ready-note" : "error";
         error.textContent = active ? "That’s completely okay. This question will stay private and unscored." : "";
+        syncSubmitEmphasis();
         saveState();
         playSound("tap");
       });
@@ -21072,6 +21253,7 @@ var qrcode = function() {
           document.getElementById("not-ready-answer").setAttribute("aria-pressed", "false");
           document.getElementById("not-ready-answer").textContent = "I’m not ready to answer this";
         }
+        syncSubmitEmphasis();
         scheduleSaveState();
 
         if (question.type === "slider") {
@@ -21728,6 +21910,22 @@ var qrcode = function() {
     // "Next card" folds the finished card only on a one-column board, and never while something on it is unfinished.
     function shouldFoldOnNext({ singleColumn, flipped, unrated, recording, timerRunning }) {
       return Boolean(singleColumn && flipped && !unrated && !recording && !timerRunning);
+    }
+
+    // Filling a fully open row hides small holes; past ~120 px the stretched card reads as an empty, unfinished panel.
+    const ROW_FILL_MAX_GAP = 120;
+    function shouldFillOpenRow(heights, allFlipped) {
+      if (heights.length < 2 || !allFlipped) return false;
+      return Math.max(...heights) - Math.min(...heights) <= ROW_FILL_MAX_GAP;
+    }
+
+    // Blink's "nearest" never scrolls a box taller than the viewport that is already partly on screen, which
+    // left a flipped written card's rating under the fold on small phones. A card that does not fit aligns to its
+    // top instead: "start" depends only on the top edge, which the delayed height snap (0.089s) does not move,
+    // whereas "nearest"/"end" would align the stale closed-height box and still leave the rating hidden.
+    function flipScrollBlock({ top, bottom, viewTop, viewBottom }) {
+      if (top >= viewTop && bottom <= viewBottom) return null;
+      return "start";
     }
 
     // The golden card is derived only from data both phones already hold once both answers are in
@@ -22707,7 +22905,8 @@ var qrcode = function() {
       overlay.setAttribute("aria-label", "60-Second Speed Warmup");
 
       const pairs = selectLightningPairs(10);
-      let currentStep = "p0";
+      // Player 1 gets the same ready gate Player 2 gets at the handoff, so nobody's minute starts before they've read the screen.
+      let currentStep = "ready";
       let p0Answers = [];
       let p1Answers = [];
       let qIndex = 0;
@@ -22824,6 +23023,32 @@ var qrcode = function() {
             });
           });
           overlay.querySelector("[data-modal-cancel]")?.addEventListener("click", close);
+        } else if (currentStep === "ready") {
+          overlay.innerHTML = `
+            <section class="exit-dialog lightning-panel" style="max-width:480px;text-align:center">
+              <span class="eyebrow">⚡ 60-Second Speed Warmup</span>
+              <h2>${p0Name} goes first</h2>
+              <p class="dialog-copy">${pairs.length} quick either/or picks${clockOff ? "" : ", one minute per player"}. ${p0Name} picks first while ${p1Name} looks away, then you swap.</p>
+              <div class="actions" style="justify-content:center;margin-top:20px">
+                <button type="button" class="primary-btn" id="start-p0-btn">I’m ${p0Name}, Let’s Go!</button>
+              </div>
+              <div class="lightning-footer-actions">
+                ${clockOff ? "" : `<button type="button" class="text-btn" data-lightning-clock-off>No clock, please</button>`}
+                <button type="button" class="text-btn" data-modal-cancel>Quit Warmup</button>
+              </div>
+            </section>
+          `;
+          overlay.querySelector("#start-p0-btn")?.addEventListener("click", () => {
+            currentStep = "p0";
+            startClock();
+            render();
+          });
+          overlay.querySelector("[data-lightning-clock-off]")?.addEventListener("click", () => {
+            clockOff = true;
+            render();
+            overlay.querySelector("#start-p0-btn")?.focus();
+          });
+          overlay.querySelector("[data-modal-cancel]")?.addEventListener("click", close);
         } else if (currentStep === "handoff") {
           overlay.innerHTML = `
             <section class="exit-dialog lightning-panel" style="max-width:480px;text-align:center">
@@ -22883,8 +23108,8 @@ var qrcode = function() {
 
       document.body.appendChild(overlay);
       if (typeof syncModalState === "function") syncModalState();
-      startClock();
       render();
+      overlay.querySelector("#start-p0-btn")?.focus({ preventScroll: true });
     }
 
     // ----------------------------------------------------
@@ -23199,11 +23424,13 @@ var qrcode = function() {
       const guessSurprise = [...comparable].filter((item) => item !== closestHighlight && biggestMiss(item) >= 3).sort((a, b) => biggestMiss(b) - biggestMiss(a))[0];
       // A gap both partners predicted correctly is no surprise, so it never stands in for one.
       const bothReadIt = (item) => [0, 1].every((player) => guessHit(item.question, player)?.distance === 0);
-      const surpriseHighlight = guessSurprise || [...comparable].filter((item) => item !== closestHighlight && !bothReadIt(item) && item.match.percent < (closestHighlight?.match.percent ?? 101)).sort((a, b) => a.match.percent - b.match.percent)[0];
+      const surpriseHighlight = guessSurprise || [...comparable].filter((item) => item !== closestHighlight && !bothReadIt(item) && item.match.percent < (closestHighlight?.match.percent ?? 101)
+        // A written answer the couple rated close is not a surprise, whatever its score.
+        && !(item.question.type === "text" && ["aligned", "nuanced"].includes(state.textRatings[item.question.id]))).sort((a, b) => a.match.percent - b.match.percent)[0];
       const surpriseNote = (() => {
         // A written answer standing in as the surprise says why: the couple's own rating.
         if (!guessSurprise && surpriseHighlight?.question.type === "text") {
-          const label = { discuss: "Worth discussing", different: "Very different", nuanced: "Similar + nuance" }[state.textRatings[surpriseHighlight.question.id]];
+          const label = { discuss: "Worth discussing", different: "Very different" }[state.textRatings[surpriseHighlight.question.id]];
           return label ? `You rated this “${label}”.` : "";
         }
         if (!guessSurprise || surpriseHighlight !== guessSurprise) return "";
@@ -23221,6 +23448,13 @@ var qrcode = function() {
       const realTalkingPoint = (item) => item.match.percent < 75 || ["discuss", "different"].includes(state.textRatings[item.question.id]) || [0, 1].some((player) => String(state.comments[player]?.[item.question.id] || "").trim());
       const conversationHighlight = [...comparable].filter((item) => item !== closestHighlight && item !== surpriseHighlight && realTalkingPoint(item) && !isQuickPickQuestion(item.question)).sort((a, b) => talkWeight(b) - talkWeight(a))[0]
         || [...comparable].filter((item) => item !== closestHighlight && item !== surpriseHighlight && (item.match.percent < 75 || ["discuss", "different"].includes(state.textRatings[item.question.id]))).sort((a, b) => a.match.percent - b.match.percent)[0];
+      // A round with no surprise still earns a payoff: the sweetest agreement fills that slot.
+      // Separate from surpriseHighlight/conversationHighlight, which the story reel reads as-is.
+      const sweetHighlight = surpriseHighlight ? null
+        : [...comparable].filter((item) => item !== closestHighlight && item !== conversationHighlight && item.question.type === "text" && state.textRatings[item.question.id] === "aligned").sort((a, b) => b.importance - a.importance)[0]
+        || [...comparable].filter((item) => item !== closestHighlight && item !== conversationHighlight && item.match.isMatch && !oppositeSides(item)).sort((a, b) => b.match.percent - a.match.percent || b.importance - a.importance)[0];
+      const storyHighlight = conversationHighlight ? null
+        : [...comparable].filter((item) => item !== closestHighlight && item !== surpriseHighlight && item !== sweetHighlight && item.question.type === "text" && ["aligned", "nuanced"].includes(state.textRatings[item.question.id]) && !isQuickPickQuestion(item.question)).sort((a, b) => b.importance - a.importance)[0];
       const usedPrompts = new Set();
       const finalId = finalCardId(questions);
       const lastRateId = lastRatingId(questions);
@@ -23411,8 +23645,10 @@ var qrcode = function() {
           </section>
           <section class="highlight-grid ${allRevealed ? "" : "locked"}" aria-label="Round highlights" id="round-highlights">
             ${highlightCard(closestHighlight && (closestHighlight.match.percent < 60 || oppositeSides(closestHighlight)) ? "Nearest common ground" : "Closest match", closestHighlight, "Complete more scored answers to unlock this highlight.", "", closestHighlight && (closestHighlight.match.percent < 60 || oppositeSides(closestHighlight)) ? "Your nearest common ground is waiting…" : "One answer lines up beautifully…")}
-            ${highlightCard(surpriseNote && surpriseHighlight?.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No big surprises this round.", surpriseNote, guessSurprise ? "Someone is in for a surprise…" : surpriseHighlight ? "The widest gap is waiting…" : "Will anything surprise you?")}
-            ${conversationHighlight ? highlightCard("Best conversation starter", conversationHighlight, "", "", "There is a story waiting in one card…") : ""}
+            ${surpriseHighlight || !sweetHighlight
+              ? highlightCard(guessSurprise && surpriseHighlight === guessSurprise && surpriseHighlight.match.isMatch ? "Biggest misread 🔮" : "Biggest surprise", surpriseHighlight, "No big surprises this round.", surpriseNote, guessSurprise ? "Someone is in for a surprise…" : surpriseHighlight ? "The widest gap is waiting…" : "Will anything surprise you?")
+              : highlightCard("Sweetest match", sweetHighlight, "", "Not one surprise between you.", "Something sweet is waiting…")}
+            ${conversationHighlight ? highlightCard("Best conversation starter", conversationHighlight, "", "", "There is a story waiting in one card…") : storyHighlight ? highlightCard("Best conversation starter", storyHighlight, "", "You agree — tell the story behind it.", "There is a story waiting in one card…") : ""}
             ${tally.some((item) => item.made) || bets.made ? `<article class="highlight-card mind-reader"><span>🔮 Mind-reader ${allRevealed && !mindReaderTied && bestGuesser && bestGuesser.hits > 0 ? '<span class="crown-drop" aria-label="Winner crown">👑</span>' : ""}</span><strong class="highlight-answer">${tally.some((item) => item.made) ? mindReaderHeadline(tally) : wagerHeadline(bets)}<small class="highlight-note">${[...tally.filter((item) => item.made).map((item) => `${escapeHTML(state.names[item.player])} read ${escapeHTML(state.names[item.player === 0 ? 1 : 0])} ${item.hits}/${item.made}`), ...(bets.made ? [`Your bets ${bets.hits}/${bets.made}`] : [])].join(" · ")}</small></strong><strong class="highlight-locked">${tally.some((item) => item.hits) ? "Someone read the other’s mind… " : "Did anyone read minds tonight? "}<small>${everyCardUp ? "Rate the written answers to unlock" : "Flip every card to unlock"}</small></strong></article>` : ""}
             ${state.whileYouWait?.answered ? (() => {
               const wyw = state.whileYouWait;
@@ -23661,12 +23897,13 @@ var qrcode = function() {
       }
 
       // A row whose cards are all open stretches every back face to the tallest one, so the board has no
-      // holes under the shorter answers. Mixed rows keep natural heights (row-filled is dropped).
+      // holes under the shorter answers. Mixed rows, and open rows whose heights differ a lot, keep natural heights.
       function fillOpenRow(row) {
-        const open = row.length > 1 && row.every((card) => card.classList.contains("flipped"));
+        const heights = row.map((card) => parseFloat(card.style.height) || 0);
+        const open = shouldFillOpenRow(heights, row.every((card) => card.classList.contains("flipped")));
         row.forEach((card) => card.classList.toggle("row-filled", open));
         if (!open) return;
-        const tallest = Math.max(...row.map((card) => parseFloat(card.style.height) || 0));
+        const tallest = Math.max(...heights);
         row.forEach((card) => { card.style.height = `${tallest}px`; });
       }
 
@@ -24023,7 +24260,16 @@ var qrcode = function() {
             if (!back.hasAttribute("tabindex")) back.setAttribute("tabindex", "-1");
             back.focus({ preventScroll: true });
             window.setTimeout(() => { if (card.classList.contains("flipped") && document.activeElement !== back && !back.contains(document.activeElement)) back.focus({ preventScroll: true }); }, 120);
-            if (scroll) card.scrollIntoView({ block: "nearest", behavior: motionReduced() ? "auto" : "smooth" });
+            if (scroll) {
+              // The box still has its closed height here (the height transition waits 0.089s), so measure the target.
+              const rect = card.getBoundingClientRect();
+              const targetHeight = parseFloat(card.style.height) || rect.height;
+              const bar = document.getElementById("reveal-sticky-bar");
+              const viewBottom = bar && bar.classList.contains("visible") ? bar.getBoundingClientRect().top : innerHeight;
+              const viewTop = parseFloat(getComputedStyle(card).scrollMarginTop) || 0;
+              const block = flipScrollBlock({ top: rect.top, bottom: rect.top + targetHeight, viewTop, viewBottom });
+              if (block) card.scrollIntoView({ block, behavior: motionReduced() ? "auto" : "smooth" });
+            }
           } else {
             // The front is visible (if still transparent) at once; retry once in case a busy engine applied styles late.
             const refocusFront = () => { if (!card.classList.contains("flipped")) card.querySelector(".card-front")?.focus({ preventScroll: true }); };
@@ -24717,8 +24963,30 @@ var qrcode = function() {
     checkPackImportHash();
     if (!handleNearbyJoinLaunch()) {
       resumeNearbySession();
-      render();
-      if (state.screen !== "setup") focusScreenHeading();
+      // A relaunch mid-turn gets the same "only this player is looking" check as Save & exit → Continue.
+      // Boot only: loadState also serves cross-tab sync and backup import, which must not prompt.
+      const relaunchTurnOwner = state.playStyle !== "nearby" && state.screen === "question"
+        && state.selectedQuestionIds.length > 0
+        // Comments, private notes and guesses render on the question screen too, so any of them counts as something to hide.
+        && ["answers", "comments", "privateNotes", "guesses", "notReady"].some((key) => Object.keys(state[key]?.[state.activePlayer] || {}).length > 0);
+      if (relaunchTurnOwner) {
+        state.resumeScreen = "question";
+        state.screen = "setup";
+        saveState();
+        render();
+        confirmResumeTurn().then((ok) => {
+          // "Not now" leaves the same paused Home that Save & exit does; Continue offers the gate again.
+          if (!ok || state.screen !== "setup" || state.resumeScreen !== "question") return;
+          state.screen = "question";
+          state.resumeScreen = null;
+          saveState();
+          render();
+          focusScreenHeading();
+        });
+      } else {
+        render();
+        if (state.screen !== "setup") focusScreenHeading();
+      }
     }
   </script>
 </body>
