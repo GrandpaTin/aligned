@@ -5581,10 +5581,28 @@ var qrcode = function() {
 
     @media (hover: hover) {
       .flip-card:hover {
-        transform: translateY(-4px) scale(1.015);
+        transform: translateY(-5px) scale(1.018);
       }
       .flip-card:hover .flip-card-inner {
-        box-shadow: 0 20px 48px rgba(2, 6, 23, 0.38);
+        box-shadow: 0 22px 50px rgba(2, 6, 23, 0.42), 0 0 20px -2px rgba(251, 113, 133, 0.14);
+      }
+    }
+
+    @keyframes card-reveal-enter {
+      from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal-grid .flip-card {
+        animation: card-reveal-enter 440ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        animation-delay: calc(var(--card-index, 0) * 45ms);
       }
     }
 
@@ -5617,12 +5635,12 @@ var qrcode = function() {
       min-height: 170px;
       padding: clamp(14px, 4vw, 22px);
       overflow: hidden;
-      border: 1px solid var(--line);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: var(--radius-md);
       background:
         radial-gradient(circle at 92% 12%, rgba(251, 113, 133, 0.12), transparent 10rem),
         linear-gradient(145deg, #253349, var(--card));
-      box-shadow: 0 14px 34px rgba(2, 6, 23, 0.24);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 16px 36px -4px rgba(2, 6, 23, 0.38);
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
     }
@@ -7216,6 +7234,12 @@ var qrcode = function() {
       margin-top: -11px;
       border-width: 5px;
       box-shadow: 0 5px 18px rgba(2, 6, 23, 0.58), 0 0 0 5px rgba(251, 113, 133, 0.1);
+      transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 160ms ease;
+    }
+
+    .range-input:active::-webkit-slider-thumb {
+      transform: scale(1.18);
+      box-shadow: 0 8px 24px rgba(2, 6, 23, 0.6), 0 0 0 8px rgba(251, 113, 133, 0.28);
     }
 
     .range-input::-moz-range-thumb {
@@ -7223,6 +7247,12 @@ var qrcode = function() {
       height: 23px;
       border-width: 5px;
       box-shadow: 0 5px 18px rgba(2, 6, 23, 0.58), 0 0 0 5px rgba(251, 113, 133, 0.1);
+      transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 160ms ease;
+    }
+
+    .range-input:active::-moz-range-thumb {
+      transform: scale(1.18);
+      box-shadow: 0 8px 24px rgba(2, 6, 23, 0.6), 0 0 0 8px rgba(251, 113, 133, 0.28);
     }
 
     .card-face,
@@ -7922,9 +7952,11 @@ var qrcode = function() {
       0%,
       100% {
         transform: translateY(0) rotate(-2deg);
+        box-shadow: 0 16px 40px rgba(251, 113, 133, 0.15), 0 0 16px rgba(251, 113, 133, 0.12);
       }
       50% {
         transform: translateY(-7px) rotate(2deg);
+        box-shadow: 0 22px 48px rgba(251, 113, 133, 0.32), 0 0 28px rgba(251, 113, 133, 0.25);
       }
     }
 
@@ -10511,10 +10543,15 @@ var qrcode = function() {
     [data-theme="pastel"] .vibe-tile { background: rgba(255, 255, 255, 0.7); }
     @media (min-width: 760px) { .vibe-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
+    @keyframes qp-pop {
+      0% { transform: scale(0.95); }
+      50% { transform: scale(1.05); }
+      100% { transform: translateY(-2px) scale(1.02); }
+    }
     .quick-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0 8px; }
-    .quick-pick-option { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 96px; padding: 16px; border: 2px solid var(--line); border-radius: 20px; color: var(--text); background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)); font: inherit; font-size: 1.05rem; font-weight: 800; text-align: center; cursor: pointer; transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease; }
-    @media (hover: hover) { .quick-pick-option:hover { border-color: color-mix(in srgb, var(--question-color, var(--coral)) 45%, var(--line)); } }
-    .quick-pick-option.active { border-color: var(--question-color, var(--coral)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--question-color, var(--coral)) 22%, transparent); transform: translateY(-2px); }
+    .quick-pick-option { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 96px; padding: 16px; border: 2px solid var(--line); border-radius: 20px; color: var(--text); background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)); font: inherit; font-size: 1.05rem; font-weight: 800; text-align: center; cursor: pointer; transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1), border-color 140ms ease, box-shadow 140ms ease; }
+    @media (hover: hover) { .quick-pick-option:hover { border-color: color-mix(in srgb, var(--question-color, var(--coral)) 45%, var(--line)); transform: translateY(-2px); } }
+    .quick-pick-option.active { border-color: var(--question-color, var(--coral)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--question-color, var(--coral)) 22%, transparent); transform: translateY(-2px) scale(1.02); animation: qp-pop 240ms cubic-bezier(0.34, 1.56, 0.64, 1); }
     [data-theme="pastel"] .quick-pick-option { background: #ffffff; color: #1e293b; }
     .nowrap { white-space: nowrap; }
     /* DES-05 / DES-07 / DES-08: small labels that sat under 7:1 in individual themes. */
@@ -10741,8 +10778,9 @@ var qrcode = function() {
     .score-call-title { margin: 0; color: var(--text); font-weight: 800; font-size: max(12px, .85rem); }
     .score-call { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; margin-top: 8px; }
     .score-call .reveal-buddy { flex: 0 0 auto; }
-    .score-call .score-call-chip { min-width: 44px; padding-inline: 10px; font-size: max(12px, .8rem); font-variant-numeric: tabular-nums; }
-    .score-call .score-call-chip.active { box-shadow: inset 0 0 0 1px var(--violet); }
+    .score-call .score-call-chip { min-width: 44px; padding-inline: 10px; font-size: max(12px, .8rem); font-variant-numeric: tabular-nums; transition: transform 140ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 140ms ease, border-color 140ms ease; }
+    .score-call .score-call-chip:active { transform: scale(0.92); }
+    .score-call .score-call-chip.active { box-shadow: inset 0 0 0 1px var(--violet), 0 4px 12px rgba(167, 139, 250, 0.3); transform: translateY(-2px) scale(1.04); }
     .score-call-panel small { display: block; margin-top: 8px; color: var(--muted); font-size: max(12px, .75rem); }
     .score-call-result { margin: 10px 0 0; color: var(--text); text-align: center; font-weight: 750; font-size: max(12px, .85rem); overflow-wrap: anywhere; }
     .celebration-card.has-score-call .celebration-orb { width: 84px; height: 84px; margin-bottom: 14px; font-size: 2.1rem; }
@@ -11162,11 +11200,21 @@ var qrcode = function() {
     /* Golden card: border, glow and a permanent foil from the existing holo layer. No background override:
        one at this specificity would turn the pastel fronts dark. */
     .flip-card.golden .card-front {
-      border-color: rgba(251, 191, 36, 0.75);
-      box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.35), 0 0 0 2px rgba(251, 191, 36, 0.28), 0 14px 34px rgba(251, 191, 36, 0.2);
+      border-color: rgba(251, 191, 36, 0.85);
+      box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.45), 0 0 28px -4px rgba(251, 191, 36, 0.35), 0 16px 36px rgba(2, 6, 23, 0.35);
+      transition: border-color 220ms ease, box-shadow 220ms ease;
+    }
+    @media (hover: hover) {
+      .flip-card.golden:hover .card-front {
+        box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.6), 0 0 36px rgba(251, 191, 36, 0.5), 0 20px 48px rgba(2, 6, 23, 0.45);
+      }
     }
     [data-theme="pastel"] .flip-card.golden .card-front { border-color: #d99327; }
-    .flip-card.golden .card-front::before { opacity: max(0.28, var(--holo-opacity, 0)); }
+    .flip-card.golden .card-front::before { opacity: max(0.32, var(--holo-opacity, 0)); }
+    .question-screen .question-card {
+      box-shadow: 0 16px 42px -10px rgba(0, 0, 0, 0.45), 0 0 36px -6px color-mix(in srgb, var(--question-color, var(--coral)) 14%, transparent), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+      transition: box-shadow 320ms ease, border-color 320ms ease;
+    }
     @media (prefers-reduced-motion: no-preference) {
       /* Bounded to one delayed pass: background-position under color-dodge repaints every frame, so it waits for
          the entrance and first flips, then runs once. It starts and ends at the resting holo position, so the
@@ -16932,6 +16980,11 @@ var qrcode = function() {
         } else if (kind === "pop") {
           end = note(pentatonic(4, 6) * (pentatonic(7) * shift > 1770 ? 0.5 : 1), start, 0.08 * jitter(), { ...wobble(), decay: themeName === "dreamy" ? 0.12 : 0.05, dry: true });
           duck = 0.85;
+        } else if (kind === "wager") {
+          const d = (Number(options.degree) || 2) % 5;
+          sequence([pentatonic(d), pentatonic(d + 3)], 0.055, 0.08);
+          end = Math.max(end, note(pentatonic(d + 5), start + gap(0.12), 0.055, { decay: 0.35, dry: true }));
+          duck = 0.7;
         } else {
           // An unhandled kind must not dip the music for a sound that never plays.
           armIdleSuspend();
@@ -21322,7 +21375,14 @@ var qrcode = function() {
         input.value = button.dataset.quickPick;
         input.dispatchEvent(new Event("input", { bubbles: true }));
         document.querySelectorAll("[data-quick-pick]").forEach((item) => { item.classList.toggle("active", item === button); item.setAttribute("aria-pressed", String(item === button)); });
-        playSound("tap");
+        const isOpt1 = button.dataset.quickPick === "1";
+        playSound("tap", { value: isOpt1 ? 3 : 8 });
+        try {
+          const r = button.getBoundingClientRect();
+          if (typeof fx !== "undefined" && fx.burst) {
+            fx.burst("sparkle", r.left + r.width / 2, r.top + r.height / 2, { count: 10, intensity: 0.45 });
+          }
+        } catch (_) {}
         const comment = document.getElementById("comment-input");
         const addingMore = document.querySelector("#question-form .comment-details[open], #question-form .answer-extras[open]") || (comment && comment.value.trim());
         const lastQuestion = state.questionIndex >= state.selectedQuestionIds.length - 1;
@@ -21652,6 +21712,13 @@ var qrcode = function() {
         render();
       });
       document.getElementById("unlock-turn").addEventListener("click", () => {
+        try {
+          const btn = document.getElementById("unlock-turn");
+          const rect = btn ? btn.getBoundingClientRect() : null;
+          if (rect && typeof fx !== "undefined" && fx.burst) {
+            fx.burst("sparkle", rect.left + rect.width / 2, rect.top + rect.height / 2, { count: 16, intensity: 0.65 });
+          }
+        } catch (_) {}
         state.activePlayer = nextIndex;
         state.questionIndex = 0;
         state.screen = "question";
@@ -22298,6 +22365,14 @@ var qrcode = function() {
         });
         // The tap climbs the scale with the bracket, so a high call sounds hopeful.
         playSound("tap", { value: 2 + 2 * index });
+        if (calls[player] !== null) {
+          try {
+            const r = button.getBoundingClientRect();
+            if (typeof fx !== "undefined" && fx.burst) {
+              fx.burst("sparkle", r.left + r.width / 2, r.top + r.height / 2, { count: 8, intensity: 0.35 });
+            }
+          } catch (_) {}
+        }
       }));
     }
 
@@ -23745,6 +23820,7 @@ var qrcode = function() {
           <article
             class="flip-card${isFlipped ? " flipped" : " cold-back"}${question.id === finalId ? " final-card" : ""}${question.id === goldenId ? " golden" : ""}${canWager ? " has-wager" : ""}"
             data-question-id="${escapedQuestionId}"
+            style="--card-index: ${index};"
           >
             <div class="flip-card-inner">
               <button
@@ -24673,9 +24749,18 @@ var qrcode = function() {
           const qid = btn.dataset.wagerQid;
           const wager = btn.dataset.wagerType;
           state.cardWagers = state.cardWagers || {};
-          state.cardWagers[qid] = state.cardWagers[qid] === wager ? "" : wager;
+          const isPlaced = state.cardWagers[qid] === wager;
+          state.cardWagers[qid] = isPlaced ? "" : wager;
           saveState();
-          playSound("tap");
+          playSound(!isPlaced ? "wager" : "tap");
+          if (!isPlaced) {
+            try {
+              const r = btn.getBoundingClientRect();
+              if (typeof fx !== "undefined" && fx.burst) {
+                fx.burst("sparkle", r.left + r.width / 2, r.top + r.height / 2, { count: 8, intensity: 0.35 });
+              }
+            } catch (_) {}
+          }
           render();
         };
         btn.addEventListener("click", toggleWager);
