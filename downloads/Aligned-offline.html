@@ -2357,6 +2357,8 @@ var qrcode = function() {
   <style>
     :root {
       color-scheme: dark;
+      --font-display: "Playfair Display", "Cormorant Garamond", "Newsreader", "Fraunces", "Iowan Old Style", "Apple Garamond", "Baskerville", "Times New Roman", "Georgia", serif;
+      --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --midnight: #0f172a;
       --card: #1e293b;
       --card-light: #273449;
@@ -4564,11 +4566,12 @@ var qrcode = function() {
 
     .secondary-btn {
       min-height: 40px;
-      padding: 0 14px;
-      border: 1px solid rgba(148, 163, 184, 0.22);
-      border-radius: 11px;
+      padding: 0 16px;
+      border: 1px solid rgba(255, 240, 220, 0.16);
+      border-radius: 999px;
       color: var(--text);
-      background: rgba(148, 163, 184, 0.08);
+      background: rgba(36, 28, 48, 0.65);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 4px 12px rgba(4, 2, 8, 0.3);
     }
 
     @media (hover: hover) { .secondary-btn:hover {
@@ -4857,6 +4860,12 @@ var qrcode = function() {
       background: rgba(15, 23, 42, 0.48);
     }
 
+    @keyframes slider-bump {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.22); }
+      100% { transform: scale(1); }
+    }
+
     .slider-value {
       width: max-content;
       min-width: 54px;
@@ -4869,6 +4878,12 @@ var qrcode = function() {
       font-weight: 900;
       text-align: center;
       box-shadow: 0 8px 24px rgba(251, 113, 133, 0.18);
+      will-change: transform;
+      transition: transform 140ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .slider-value.bump {
+      animation: slider-bump 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .range-input {
@@ -5635,12 +5650,16 @@ var qrcode = function() {
       min-height: 170px;
       padding: clamp(14px, 4vw, 22px);
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 235, 215, 0.14);
       border-radius: var(--radius-md);
       background:
-        radial-gradient(circle at 92% 12%, rgba(251, 113, 133, 0.12), transparent 10rem),
-        linear-gradient(145deg, #253349, var(--card));
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 16px 36px -4px rgba(2, 6, 23, 0.38);
+        radial-gradient(ellipse at 92% 12%, rgba(251, 113, 133, 0.14), transparent 12rem),
+        linear-gradient(165deg, rgba(38, 30, 48, 0.98), rgba(24, 19, 32, 0.99));
+      box-shadow:
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.16),
+        inset 0 -1px 1px 0 rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(255, 240, 220, 0.05),
+        0 18px 46px -6px rgba(4, 2, 8, 0.62);
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
     }
@@ -5684,28 +5703,28 @@ var qrcode = function() {
     [data-theme="midnight"] .flip-card:nth-child(5n + 2) .card-front {
       background:
         radial-gradient(circle at 92% 12%, rgba(96, 165, 250, 0.15), transparent 10rem),
-        linear-gradient(145deg, #26364e, var(--card));
+        linear-gradient(165deg, rgba(30, 36, 56, 0.98), rgba(20, 24, 38, 0.99));
     }
 
     :root:not([data-theme]) .flip-card:nth-child(5n + 3) .card-front,
     [data-theme="midnight"] .flip-card:nth-child(5n + 3) .card-front {
       background:
         radial-gradient(circle at 92% 12%, rgba(167, 139, 250, 0.15), transparent 10rem),
-        linear-gradient(145deg, #2a334d, var(--card));
+        linear-gradient(165deg, rgba(42, 28, 54, 0.98), rgba(26, 18, 36, 0.99));
     }
 
     :root:not([data-theme]) .flip-card:nth-child(5n + 4) .card-front,
     [data-theme="midnight"] .flip-card:nth-child(5n + 4) .card-front {
       background:
         radial-gradient(circle at 92% 12%, rgba(74, 222, 128, 0.11), transparent 10rem),
-        linear-gradient(145deg, #23394a, var(--card));
+        linear-gradient(165deg, rgba(24, 42, 38, 0.98), rgba(16, 28, 26, 0.99));
     }
 
     :root:not([data-theme]) .flip-card:nth-child(5n + 5) .card-front,
     [data-theme="midnight"] .flip-card:nth-child(5n + 5) .card-front {
       background:
         radial-gradient(circle at 92% 12%, rgba(251, 191, 36, 0.12), transparent 10rem),
-        linear-gradient(145deg, #303547, var(--card));
+        linear-gradient(165deg, rgba(46, 36, 24, 0.98), rgba(28, 22, 16, 0.99));
     }
 
     .card-front::after {
@@ -5722,7 +5741,14 @@ var qrcode = function() {
     .card-back {
       height: max-content;
       transform: rotateY(180deg);
-      background: linear-gradient(145deg, #253349, var(--card));
+      background:
+        radial-gradient(ellipse at 50% -20%, rgba(251, 191, 36, 0.08), transparent 14rem),
+        linear-gradient(165deg, rgba(34, 27, 44, 0.98), rgba(20, 16, 27, 0.99));
+      box-shadow:
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.16),
+        inset 0 -1px 1px 0 rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(255, 240, 220, 0.05),
+        0 18px 46px -6px rgba(4, 2, 8, 0.62);
     }
 
     .card-number {
@@ -6913,10 +6939,10 @@ var qrcode = function() {
 
     body {
       background:
-        radial-gradient(ellipse at 12% -5%, rgba(251, 113, 133, 0.26), transparent 34rem),
-        radial-gradient(ellipse at 105% 25%, rgba(167, 139, 250, 0.18), transparent 36rem),
-        radial-gradient(ellipse at 45% 110%, rgba(96, 165, 250, 0.15), transparent 34rem),
-        linear-gradient(155deg, var(--midnight-deep), var(--midnight) 45%, #111c31);
+        radial-gradient(ellipse 90% 70% at 50% -10%, rgba(220, 150, 70, 0.12), transparent 70%),
+        radial-gradient(ellipse 70% 50% at 90% 20%, rgba(251, 113, 133, 0.14), transparent 60%),
+        radial-gradient(ellipse 80% 60% at 50% 110%, rgba(180, 50, 90, 0.1), transparent 70%),
+        linear-gradient(165deg, var(--midnight-deep), #0d0a14 45%, #150f1e);
       background-attachment: fixed;
     }
 
@@ -7014,6 +7040,18 @@ var qrcode = function() {
       min-width: 0;
     }
 
+    h1,
+    h2,
+    h3,
+    #reveal-title,
+    #lock-title,
+    #alignment-title,
+    #question-title,
+    .prompt {
+      font-family: var(--font-display);
+      letter-spacing: -0.025em;
+    }
+
     h1 {
       text-wrap: balance;
       text-shadow: 0 12px 38px rgba(2, 6, 23, 0.38);
@@ -7025,12 +7063,23 @@ var qrcode = function() {
       text-wrap: pretty;
     }
 
+    .card-question {
+      font-family: var(--font-display);
+      font-size: clamp(1.08rem, 2.8vw, 1.34rem);
+      font-weight: 650;
+      line-height: 1.42;
+      letter-spacing: -0.015em;
+    }
+
     .accent-text {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-weight: 500;
       color: transparent;
-      background: linear-gradient(110deg, #fda4af 4%, var(--coral) 42%, #c4b5fd 95%);
+      background: linear-gradient(110deg, #ffe0b2 4%, #fbbf24 38%, #fb7185 85%, #e879f9 100%);
       background-clip: text;
       -webkit-background-clip: text;
-      filter: drop-shadow(0 8px 22px rgba(251, 113, 133, 0.18));
+      filter: drop-shadow(0 8px 22px rgba(251, 191, 36, 0.22));
     }
 
     .love-orbit::before,
@@ -7159,11 +7208,15 @@ var qrcode = function() {
 
     .primary-btn {
       min-height: 54px;
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      color: #1f0610;
-      background: linear-gradient(135deg, #fda4af, var(--coral) 58%, #f472b6);
-      box-shadow: 0 14px 34px rgba(251, 113, 133, 0.27), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.15);
+      padding-inline: 24px;
+      border: 1px solid rgba(255, 240, 220, 0.32);
+      border-radius: 999px;
+      color: #1a0812;
+      background: linear-gradient(135deg, #ffe0b2 0%, #fbbf24 32%, #fb7185 82%, #f472b6 100%);
+      box-shadow: 0 16px 36px rgba(251, 113, 133, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.5), inset 0 -1px 1px rgba(0, 0, 0, 0.2);
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+      font-weight: 850;
+      letter-spacing: -0.01em;
     }
 
     .secondary-btn,
@@ -10549,7 +10602,30 @@ var qrcode = function() {
       100% { transform: translateY(-2px) scale(1.02); }
     }
     .quick-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0 8px; }
-    .quick-pick-option { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 96px; padding: 16px; border: 2px solid var(--line); border-radius: 20px; color: var(--text); background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)); font: inherit; font-size: 1.05rem; font-weight: 800; text-align: center; cursor: pointer; transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1), border-color 140ms ease, box-shadow 140ms ease; }
+    .quick-pick-option {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 96px;
+      padding: 16px;
+      border: 1px solid rgba(255, 235, 215, 0.16);
+      border-radius: 20px;
+      color: var(--text);
+      background: linear-gradient(165deg, rgba(38, 30, 48, 0.92), rgba(22, 17, 30, 0.94));
+      box-shadow:
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.14),
+        inset 0 -1px 1px 0 rgba(0, 0, 0, 0.4),
+        0 10px 24px -4px rgba(4, 2, 8, 0.45);
+      font: inherit;
+      font-family: var(--font-display, inherit);
+      font-size: 1.12rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1), border-color 140ms ease, box-shadow 140ms ease, background 160ms ease;
+    }
     @media (hover: hover) { .quick-pick-option:hover { border-color: color-mix(in srgb, var(--question-color, var(--coral)) 45%, var(--line)); transform: translateY(-2px); } }
     .quick-pick-option.active { border-color: var(--question-color, var(--coral)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--question-color, var(--coral)) 22%, transparent); transform: translateY(-2px) scale(1.02); animation: qp-pop 240ms cubic-bezier(0.34, 1.56, 0.64, 1); }
     [data-theme="pastel"] .quick-pick-option { background: #ffffff; color: #1e293b; }
@@ -21544,7 +21620,14 @@ var qrcode = function() {
         scheduleSaveState();
 
         if (question.type === "slider") {
-          document.getElementById("slider-value").textContent = input.value;
+          const valEl = document.getElementById("slider-value");
+          if (valEl && valEl.textContent !== input.value) {
+            valEl.textContent = input.value;
+            valEl.classList.remove("bump");
+            void valEl.offsetWidth;
+            valEl.classList.add("bump");
+            playSound("tap", { value: Number(input.value) });
+          }
           input.style.setProperty("--range-progress", `${((Number(input.value) - 1) / 9) * 100}%`);
           input.setAttribute("aria-valuetext", `${input.value} out of 10 (1 = ${question.labels?.[0] || "Low"}, 10 = ${question.labels?.[1] || "High"})`);
         } else {
