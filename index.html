@@ -7351,6 +7351,9 @@ var qrcode = function() {
       background-clip: text;
       -webkit-background-clip: text;
       filter: drop-shadow(0 8px 22px rgba(251, 191, 36, 0.22));
+      display: inline-block;
+      padding-right: 0.12em;
+      margin-right: -0.06em;
     }
 
     .love-orbit::before,
@@ -11666,7 +11669,22 @@ var qrcode = function() {
     @media (forced-colors: active) {
       .golden-ribbon { border: 1px solid CanvasText; }
     }
-    /* M-07 / M-28: EAS-05 removed the chip behind the mark, so each theme needs a glyph colour that reads on the bare tile. */
+    /* Brand mark: vibrant jewel-toned heart in parity with header action stations */
+    .topbar .brand-mark {
+      font-size: 1.25rem !important;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 2px 5px rgba(251, 113, 133, 0.4));
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
+    }
+    @media (hover: hover) {
+      .brand:hover .brand-mark {
+        transform: scale(1.15);
+        filter: drop-shadow(0 2px 8px rgba(251, 113, 133, 0.6));
+      }
+    }
     [data-theme="pastel"] .topbar .brand-mark { color: #be123c; }
     .high-contrast[data-theme="pastel"] .topbar .brand-mark { color: #881337; }
     [data-theme="cosmic"] .topbar .brand-mark { color: var(--coral); }
@@ -12141,7 +12159,7 @@ var qrcode = function() {
     <div class="topbar-band" aria-hidden="true"></div>
     <header class="topbar">
       <div class="brand" aria-label="Aligned">
-        <span class="brand-mark" aria-hidden="true">♡&#xFE0E;</span>
+        <span class="brand-mark" aria-hidden="true">💖</span>
         <span class="brand-text">Aligned</span>
       </div>
       <div class="topbar-actions" style="display:flex;gap:6px">
@@ -20927,13 +20945,13 @@ var qrcode = function() {
         <section class="screen setup-screen" aria-labelledby="setup-title">
           <div class="setup-hero">
             <div>
-              <p class="eyebrow">Discover how well you align.</p>
-              <h1 id="setup-title">How well do we <span class="accent-text">align?</span></h1>
-              <p class="lede">Take turns, lock your answers, then discover the little gaps and delightful matches together.</p>
+              <p class="eyebrow">The two-player conversation game</p>
+              <h1 id="setup-title">How well do we <span class="accent-text">align</span>?</h1>
+              <p class="lede">Answer privately, reveal together, and uncover where your worlds connect.</p>
             </div>
             <div class="love-orbit" aria-hidden="true">
               <div class="orbit-ring"></div>
-              <div class="orbit-heart">♡</div>
+              <div class="orbit-heart">💖</div>
               <div class="orbit-person one">${escapeHTML(initials(state.names[0]))}</div>
               <div class="orbit-person two">${escapeHTML(initials(state.names[1]))}</div>
             </div>
