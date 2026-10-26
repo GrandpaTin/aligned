@@ -2804,10 +2804,22 @@ var qrcode = function() {
     }
 
     .home-icon {
-      display: grid;
-      place-items: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       color: var(--btn-chroma, var(--coral));
-      font-size: 1.05rem;
+      font-size: 1.25rem;
+      line-height: 1;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.22));
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
+    }
+
+    .home-icon .btn-emoji {
+      font-size: 1.22rem;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     /* Chromatic line icons with multi-hue depth */
@@ -2835,6 +2847,11 @@ var qrcode = function() {
       background: var(--btn-bg-tint) !important;
       box-shadow: 0 0 16px var(--btn-glow) !important;
       transform: translateY(-2px);
+    }
+
+    .home-btn:hover .home-icon {
+      transform: scale(1.15);
+      filter: drop-shadow(0 2px 8px var(--btn-glow, rgba(251, 113, 133, 0.4)));
     }
 
     .home-btn:hover .home-icon svg {
@@ -2879,11 +2896,11 @@ var qrcode = function() {
 
     .home-icon .icon-off,
     .home-icon.is-muted .icon-on {
-      display: none;
+      display: none !important;
     }
 
     .home-icon.is-muted .icon-off {
-      display: block;
+      display: inline-flex !important;
     }
 
     .high-contrast .home-icon {
@@ -10863,7 +10880,17 @@ var qrcode = function() {
     @media (hover: hover) { .vibe-tile:hover { transform: translateY(-2px); border-color: var(--coral); } }
     .vibe-tile.active { border-color: var(--coral); background: linear-gradient(145deg, color-mix(in srgb, var(--coral) 18%, transparent), color-mix(in srgb, var(--violet) 10%, transparent)); }
     .vibe-tile small { color: var(--muted); font-size: max(12px, .74rem); line-height: 1.35; }
-    .vibe-icon { font-size: 1.4rem; }
+    .vibe-icon {
+      font-size: 1.85rem;
+      line-height: 1.1;
+      display: inline-block;
+      margin-bottom: 2px;
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .vibe-tile:hover .vibe-icon {
+      transform: scale(1.16) translateY(-2px);
+    }
     [data-theme="pastel"] .vibe-tile { background: rgba(255, 255, 255, 0.7); }
     @media (min-width: 760px) { .vibe-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
@@ -11701,8 +11728,14 @@ var qrcode = function() {
       box-shadow: 0 0 16px rgba(251, 113, 133, 0.18);
     }
     .profile-card .profile-icon {
-      font-size: 1.15rem;
-      color: var(--coral);
+      font-size: 1.55rem;
+      line-height: 1.1;
+      display: inline-block;
+      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.16));
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .profile-card:hover .profile-icon {
+      transform: scale(1.15);
     }
     .profile-card strong {
       font-size: max(13px, 0.85rem);
@@ -12111,32 +12144,32 @@ var qrcode = function() {
       </div>
       <div class="topbar-actions" style="display:flex;gap:6px">
         <button class="home-btn" id="home-button" type="button" aria-label="Go to Setup / Home page" data-tooltip="Home / Setup">
-          <span class="home-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path class="duo-bg" d="M6.5 20.5V11a5.5 5.5 0 0 1 11 0v9.5z"/><path d="M4.5 21V10.5a7.5 7.5 0 0 1 15 0V21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M2.5 21h19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 2.5l1.5 2-1.5 1.5-1.5-1.5z" fill="currentColor" stroke="none" class="duo-accent"/><path class="duo-accent" d="M12 18c-1.6 0-2.6-1.1-2.6-2.5 0-1.7 2.6-4.6 2.6-4.6s2.6 2.9 2.6 4.6c0 1.4-1 2.5-2.6 2.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle class="duo-core" cx="12" cy="16.2" r="1"/></svg></span>
+          <span class="home-icon" aria-hidden="true"><span class="btn-emoji">🏡</span></span>
         </button>
         <button class="home-btn" id="library-button" type="button" aria-label="Go to Library page" data-tooltip="Question Library">
-          <span class="home-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path class="duo-bg" d="M12 6.5C9.5 4.8 6.5 4.8 3.5 6v12.5c3-1.2 6-1.2 8.5.5 2.5-1.7 5.5-1.7 8.5-.5V6c-3-1.2-6-1.2-8.5.5z"/><path d="M12 6.5C9.5 4.8 6.5 4.8 3.5 6v12.5c3-1.2 6-1.2 8.5.5 2.5-1.7 5.5-1.7 8.5-.5V6c-3-1.2-6-1.2-8.5.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 6.5V20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="duo-accent" d="M13.8 6.2v7l1.7-1.3 1.7 1.3v-7z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/><path d="M6 10.5h3.5 M6 13.5h3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity="0.65"/></svg></span>
+          <span class="home-icon" aria-hidden="true"><span class="btn-emoji">📚</span></span>
         </button>
         <button class="home-btn" id="results-button" type="button" aria-label="Go to Results / Journal page" data-tooltip="Results Journal">
-          <span class="home-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.4" stroke-dasharray="2 2"/><path class="duo-bg" d="M12 2.5l2.4 6.6 6.6 2.4-6.6 2.4-2.4 6.6-2.4-6.6-6.6-2.4 6.6-2.4z"/><path d="M12 2.5l2.4 6.6 6.6 2.4-6.6 2.4-2.4 6.6-2.4-6.6-6.6-2.4 6.6-2.4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M6.8 6.8l1.8 1.8 M17.2 6.8l-1.8 1.8 M17.2 17.2l-1.8-1.8 M6.8 17.2l1.8-1.8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity="0.75"/><circle class="duo-core" cx="12" cy="12" r="1.8"/></svg></span>
+          <span class="home-icon" aria-hidden="true"><span class="btn-emoji">🏆</span></span>
         </button>
         <button class="home-btn" id="sound-toggle" type="button" aria-label="Toggle sound effects" data-tooltip="Game Sounds">
-          <span class="home-icon" aria-hidden="true"><svg class="icon-on" viewBox="0 0 24 24" focusable="false"><path class="duo-bg" d="M12 6.8c-3 0-5.2 2.2-5.5 8.2h11c-.3-6-2.5-8.2-5.5-8.2z"/><circle cx="12" cy="3.8" r="1.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 6.5c-3.2 0-5.5 2.4-5.8 8.5h11.6c-.3-6.1-2.6-8.5-5.8-8.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4.5 15.5h15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle class="duo-accent" cx="12" cy="18" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 11a4.5 4.5 0 0 0 0 4 M20.5 11a4.5 4.5 0 0 1 0 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><svg class="icon-off" viewBox="0 0 24 24" focusable="false"><path class="duo-bg" d="M12 6.8c-3 0-5.2 2.2-5.5 8.2h11c-.3-6-2.5-8.2-5.5-8.2z"/><circle cx="12" cy="3.8" r="1.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 6.5c-3.2 0-5.5 2.4-5.8 8.5h11.6c-.3-6.1-2.6-8.5-5.8-8.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4.5 15.5h15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle class="duo-accent" cx="12" cy="18" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 3.5l17 17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+          <span class="home-icon" aria-hidden="true"><span class="icon-on btn-emoji">🔔</span><span class="icon-off btn-emoji">🔕</span></span>
         </button>
         <button class="home-btn" id="ambient-toggle" type="button" aria-label="Toggle ambient music" data-tooltip="Ambient Music">
-          <span class="home-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><ellipse class="duo-bg" cx="6.8" cy="17" rx="3.2" ry="2.3" transform="rotate(-15 6.8 17)"/><ellipse class="duo-bg" cx="17.2" cy="14" rx="3.2" ry="2.3" transform="rotate(-15 17.2 14)"/><path d="M2.5 12.8c3-2 5.5 1.5 8.5 0s5.5-2 8.5 0" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity="0.45"/><path d="M9 16.2V6.2 M19.5 13.2V3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M9 6.5l10.5-2.8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><ellipse cx="6.8" cy="17" rx="3.2" ry="2.3" transform="rotate(-15 6.8 17)" fill="none" stroke="currentColor" stroke-width="1.6"/><ellipse cx="17.2" cy="14" rx="3.2" ry="2.3" transform="rotate(-15 17.2 14)" fill="none" stroke="currentColor" stroke-width="1.6"/><path class="duo-core" d="M14 2.8l.5 1 1 .5-1 .5-.5 1-.5-1-1-.5 1-.5z"/></svg></span>
+          <span class="home-icon" aria-hidden="true"><span class="btn-emoji">🎶</span></span>
         </button>
         <button class="home-btn" id="settings-button" type="button" aria-label="Go to Settings page" data-tooltip="Game Settings">
-          <span class="home-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><circle class="duo-bg" cx="12" cy="12" r="5.8"/><circle cx="12" cy="12" r="8.8" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="5.8" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/><path d="M12 2v2.2 M12 19.8v2.2 M2 12h2.2 M19.8 12h2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 6.2v3.2 M12 14.6v3.2 M6.2 12h3.2 M14.6 12h3.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity="0.7"/><circle class="duo-accent" cx="16.2" cy="7.8" r="0.8"/><circle class="duo-accent" cx="16.2" cy="16.2" r="0.8"/><circle class="duo-accent" cx="7.8" cy="16.2" r="0.8"/><circle class="duo-accent" cx="7.8" cy="7.8" r="0.8"/><circle class="duo-core" cx="12" cy="12" r="1.8"/></svg></span>
+          <span class="home-icon" aria-hidden="true"><span class="btn-emoji">⚙️</span></span>
         </button>
       </div>
     </header>
     <div id="app"></div>
   </main>
   <nav class="bottom-nav" id="bottom-nav" aria-label="Main navigation">
-    <button type="button" data-app-route="setup"><span class="bottom-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" width="22" height="22"><path class="duo-bg" d="M6.5 20.5V11a5.5 5.5 0 0 1 11 0v9.5z"/><path d="M4.5 21V10.5a7.5 7.5 0 0 1 15 0V21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M2.5 21h19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 2.5l1.5 2-1.5 1.5-1.5-1.5z" fill="currentColor" stroke="none" class="duo-accent"/><path class="duo-accent" d="M12 18c-1.6 0-2.6-1.1-2.6-2.5 0-1.7 2.6-4.6 2.6-4.6s2.6 2.9 2.6 4.6c0 1.4-1 2.5-2.6 2.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle class="duo-core" cx="12" cy="16.2" r="1"/></svg></span><span>Home</span></button>
-    <button type="button" data-app-route="library"><span class="bottom-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" width="22" height="22"><path class="duo-bg" d="M12 6.5C9.5 4.8 6.5 4.8 3.5 6v12.5c3-1.2 6-1.2 8.5.5 2.5-1.7 5.5-1.7 8.5-.5V6c-3-1.2-6-1.2-8.5.5z"/><path d="M12 6.5C9.5 4.8 6.5 4.8 3.5 6v12.5c3-1.2 6-1.2 8.5.5 2.5-1.7 5.5-1.7 8.5-.5V6c-3-1.2-6-1.2-8.5.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 6.5V20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="duo-accent" d="M13.8 6.2v7l1.7-1.3 1.7 1.3v-7z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/><path d="M6 10.5h3.5 M6 13.5h3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity="0.65"/></svg></span><span>Library</span></button>
-    <button type="button" data-app-route="results"><span class="bottom-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" width="22" height="22"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.4" stroke-dasharray="2 2"/><path class="duo-bg" d="M12 2.5l2.4 6.6 6.6 2.4-6.6 2.4-2.4 6.6-2.4-6.6-6.6-2.4 6.6-2.4z"/><path d="M12 2.5l2.4 6.6 6.6 2.4-6.6 2.4-2.4 6.6-2.4-6.6-6.6-2.4 6.6-2.4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M6.8 6.8l1.8 1.8 M17.2 6.8l-1.8 1.8 M17.2 17.2l-1.8-1.8 M6.8 17.2l1.8-1.8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity="0.75"/><circle class="duo-core" cx="12" cy="12" r="1.8"/></svg></span><span>Results</span></button>
-    <button type="button" data-app-route="settings"><span class="bottom-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" width="22" height="22"><circle class="duo-bg" cx="12" cy="12" r="5.8"/><circle cx="12" cy="12" r="8.8" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="5.8" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/><path d="M12 2v2.2 M12 19.8v2.2 M2 12h2.2 M19.8 12h2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 6.2v3.2 M12 14.6v3.2 M6.2 12h3.2 M14.6 12h3.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity="0.7"/><circle class="duo-accent" cx="16.2" cy="7.8" r="0.8"/><circle class="duo-accent" cx="16.2" cy="16.2" r="0.8"/><circle class="duo-accent" cx="7.8" cy="16.2" r="0.8"/><circle class="duo-accent" cx="7.8" cy="7.8" r="0.8"/><circle class="duo-core" cx="12" cy="12" r="1.8"/></svg></span><span>Settings</span></button>
+    <button type="button" data-app-route="setup"><span class="bottom-nav-icon" aria-hidden="true">🏡</span><span>Home</span></button>
+    <button type="button" data-app-route="library"><span class="bottom-nav-icon" aria-hidden="true">📚</span><span>Library</span></button>
+    <button type="button" data-app-route="results"><span class="bottom-nav-icon" aria-hidden="true">🏆</span><span>Results</span></button>
+    <button type="button" data-app-route="settings"><span class="bottom-nav-icon" aria-hidden="true">⚙️</span><span>Settings</span></button>
   </nav>
   <div id="toast-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
@@ -12528,16 +12561,16 @@ var qrcode = function() {
       "Wild Cards": "fun"
     };
     const TOPIC_OPTIONS = [
-      { id: "connection", label: "Connection", icon: "♡", tone: "blue" },
-      { id: "lifestyle", label: "Lifestyle", icon: "◇", tone: "violet" },
-      { id: "future", label: "Future", icon: "↗", tone: "green" },
-      { id: "love", label: "Love", icon: "✦", tone: "coral" },
-      { id: "fun", label: "Fun", icon: "✺", tone: "sun" },
+      { id: "connection", label: "Connection", icon: "🤝", tone: "blue" },
+      { id: "lifestyle", label: "Lifestyle", icon: "🌿", tone: "violet" },
+      { id: "future", label: "Future", icon: "🚀", tone: "green" },
+      { id: "love", label: "Love", icon: "💖", tone: "coral" },
+      { id: "fun", label: "Fun", icon: "🎉", tone: "sun" },
       { id: "lore", label: "Lore", icon: "📖", tone: "violet" },
-      { id: "spicy", label: "Spicy", icon: "♨", tone: "coral" },
-      { id: "money", label: "Money", icon: "$", tone: "green" },
-      { id: "politics", label: "Politics", icon: "⚖", tone: "blue" },
-      { id: "dealbreakers", label: "Dealbreakers", icon: "!", tone: "violet" }
+      { id: "spicy", label: "Spicy", icon: "🌶️", tone: "coral" },
+      { id: "money", label: "Money", icon: "💰", tone: "green" },
+      { id: "politics", label: "Politics", icon: "⚖️", tone: "blue" },
+      { id: "dealbreakers", label: "Dealbreakers", icon: "🛑", tone: "violet" }
     ];
     const DEFAULT_TOPICS = ["connection", "lifestyle", "future", "love", "fun"];
     const ALL_QUESTIONS = [
@@ -12546,29 +12579,29 @@ var qrcode = function() {
     ];
     const INTENSITY_OPTIONS = [
       { id: "cozy", label: "Cozy", icon: "☕", copy: "Warm, playful, low-pressure" },
-      { id: "curious", label: "Curious", icon: "✦", copy: "Balanced and meaningful" },
-      { id: "deep", label: "Deep", icon: "◇", copy: "Vulnerable, honest conversations" },
-      { id: "spicy", label: "Spicy", icon: "♨", copy: "Flirty and more intimate" },
-      { id: "no-filter", label: "No‑filter", icon: "!", copy: "Bold topics and dealbreakers" }
+      { id: "curious", label: "Curious", icon: "🌱", copy: "Balanced and meaningful" },
+      { id: "deep", label: "Deep", icon: "🌊", copy: "Vulnerable, honest conversations" },
+      { id: "spicy", label: "Spicy", icon: "🌶️", copy: "Flirty and more intimate" },
+      { id: "no-filter", label: "No‑filter", icon: "🔥", copy: "Bold topics and dealbreakers" }
     ];
     const SENSITIVE_TOPICS = new Set(["spicy", "money", "politics", "dealbreakers"]);
     const SESSION_PRESETS = [
-      { id: "custom", label: "Build your own", icon: "✦", copy: "Choose every detail yourself" },
-      { id: "check-in", label: "Quick Check‑in", icon: "☀", copy: "5 caring questions for right now", count: 5, intensity: "curious", mode: "slider-heavy", topics: ["connection", "love"] },
-      { id: "date-night", label: "Cozy Date Night", icon: "♡", copy: "Warm connection with a little play", count: 10, intensity: "cozy", mode: "mixed", topics: ["connection", "love", "fun"] },
-      { id: "couple-lore", label: "Couple Lore", icon: "📖", copy: "Inside jokes, origin stories, and predicting the past", count: 10, intensity: "curious", mode: "mixed", topics: ["lore", "connection", "fun"] },
-      { id: "deep-dive", label: "Deep Dive", icon: "◇", copy: "Honest values and future conversations", count: 10, intensity: "deep", mode: "mixed", topics: ["connection", "lifestyle", "future", "money"] },
-      { id: "spicy-night", label: "Spicy Night", icon: "♨", copy: "Flirty, intimate, and opt-in", count: 10, intensity: "spicy", mode: "mixed", topics: ["connection", "love", "spicy"], focus: "spicy" },
-      { id: "money-meeting", label: "Money Meeting", icon: "$", copy: "Habits, goals, and financial expectations", count: 10, intensity: "deep", mode: "slider-heavy", topics: ["money", "future"] },
-      { id: "future-planning", label: "Future Planning", icon: "↗", copy: "Dreams, logistics, and shared direction", count: 10, intensity: "deep", mode: "mixed", topics: ["future", "lifestyle", "money"] },
-      { id: "repair", label: "Conflict Repair", icon: "☂", copy: "Slow, caring prompts for reconnection", count: 5, intensity: "deep", mode: "mixed", topics: ["connection", "love"] },
-      { id: "dealbreakers", label: "Dealbreaker Check", icon: "!", copy: "Direct questions about essential boundaries", count: 10, intensity: "no-filter", mode: "slider-heavy", topics: ["dealbreakers", "politics", "money"] },
-      { id: "road-trip", label: "Silly Road Trip", icon: "✺", copy: "Fast, funny, and delightfully random", count: 10, intensity: "cozy", mode: "slider-heavy", topics: ["fun", "lifestyle"], tone: "light" }
+      { id: "custom", label: "Build your own", icon: "🎨", copy: "Choose every detail yourself" },
+      { id: "check-in", label: "Quick Check‑in", icon: "☕", copy: "5 caring questions for right now", count: 5, intensity: "curious", mode: "slider-heavy", topics: ["connection", "love"] },
+      { id: "date-night", label: "Cozy Date Night", icon: "🍷", copy: "Warm connection with a little play", count: 10, intensity: "cozy", mode: "mixed", topics: ["connection", "love", "fun"] },
+      { id: "couple-lore", label: "Couple Lore", icon: "🔮", copy: "Inside jokes, origin stories, and predicting the past", count: 10, intensity: "curious", mode: "mixed", topics: ["lore", "connection", "fun"] },
+      { id: "deep-dive", label: "Deep Dive", icon: "🌊", copy: "Honest values and future conversations", count: 10, intensity: "deep", mode: "mixed", topics: ["connection", "lifestyle", "future", "money"] },
+      { id: "spicy-night", label: "Spicy Night", icon: "🌶️", copy: "Flirty, intimate, and opt-in", count: 10, intensity: "spicy", mode: "mixed", topics: ["connection", "love", "spicy"], focus: "spicy" },
+      { id: "money-meeting", label: "Money Meeting", icon: "💰", copy: "Habits, goals, and financial expectations", count: 10, intensity: "deep", mode: "slider-heavy", topics: ["money", "future"] },
+      { id: "future-planning", label: "Future Planning", icon: "🗺️", copy: "Dreams, logistics, and shared direction", count: 10, intensity: "deep", mode: "mixed", topics: ["future", "lifestyle", "money"] },
+      { id: "repair", label: "Conflict Repair", icon: "🩹", copy: "Slow, caring prompts for reconnection", count: 5, intensity: "deep", mode: "mixed", topics: ["connection", "love"] },
+      { id: "dealbreakers", label: "Dealbreaker Check", icon: "🛑", copy: "Direct questions about essential boundaries", count: 10, intensity: "no-filter", mode: "slider-heavy", topics: ["dealbreakers", "politics", "money"] },
+      { id: "road-trip", label: "Silly Road Trip", icon: "🚗", copy: "Fast, funny, and delightfully random", count: 10, intensity: "cozy", mode: "slider-heavy", topics: ["fun", "lifestyle"], tone: "light" }
     ];
     const IMPORTANCE_LEVELS = [
-      { value: 0, label: "Not important", icon: "○" },
-      { value: 1, label: "Meaningful", icon: "◇" },
-      { value: 2, label: "Essential", icon: "◆" }
+      { value: 0, label: "Not important", icon: "🌱" },
+      { value: 1, label: "Meaningful", icon: "⭐" },
+      { value: 2, label: "Essential", icon: "💎" }
     ];
     const QUESTION_TAG_RULES = [
       ["children", /child|kids|parent|family planning/i], ["religion", /faith|religion|spiritual/i],
@@ -13002,10 +13035,10 @@ var qrcode = function() {
     };
 
     const RELATIONSHIP_PROFILES = [
-      { id: "romantic", icon: "♡", label: "Romantic", subtitle: "Partners & couples", fitLabel: "Relationship fit" },
-      { id: "friends", icon: "★", label: "Friends", subtitle: "Besties & close friends", fitLabel: "Friendship fit" },
-      { id: "roommates", icon: "⌂", label: "Roommates", subtitle: "Shared home & co-living", fitLabel: "Household fit" },
-      { id: "collaborators", icon: "⚡", label: "Collaborators", subtitle: "Co-founders & teammates", fitLabel: "Synergy fit" }
+      { id: "romantic", icon: "💖", label: "Romantic", subtitle: "Partners & couples", fitLabel: "Relationship fit" },
+      { id: "friends", icon: "🌻", label: "Friends", subtitle: "Besties & close friends", fitLabel: "Friendship fit" },
+      { id: "roommates", icon: "🏠", label: "Roommates", subtitle: "Shared home & co-living", fitLabel: "Household fit" },
+      { id: "collaborators", icon: "💡", label: "Collaborators", subtitle: "Co-founders & teammates", fitLabel: "Synergy fit" }
     ];
 
     function currentRelationshipProfile(profileId = state?.relationshipProfile) {
@@ -20933,8 +20966,8 @@ var qrcode = function() {
 
             <p class="setup-section-title">How are you playing?</p>
             <div class="play-style-grid" role="group" aria-label="Play style">
-              <button class="play-style-card ${state.playStyle === "pass-and-play" ? "active" : ""}" type="button" data-play-style="pass-and-play"><strong>▣ One device</strong><small>Pass the phone and keep answers locked between turns.</small></button>
-              <button class="play-style-card ${state.playStyle === "nearby" ? "active" : ""} ${NEARBY_PLAY_SUPPORTED ? "" : "unavailable"}" type="button" data-play-style="nearby" ${NEARBY_PLAY_SUPPORTED ? "" : 'aria-disabled="true"'}><strong>⌁ Two phones · one scan</strong><small>${NEARBY_PLAY_SUPPORTED ? "Scan once, connect automatically, and answer privately on separate phones." : IS_OFFLINE_FILE ? "Needs the installed or online app — this offline copy plays on one device." : "Not available in this browser — play on one device."}</small></button>
+              <button class="play-style-card ${state.playStyle === "pass-and-play" ? "active" : ""}" type="button" data-play-style="pass-and-play"><strong>📱 One device</strong><small>Pass the phone and keep answers locked between turns.</small></button>
+              <button class="play-style-card ${state.playStyle === "nearby" ? "active" : ""} ${NEARBY_PLAY_SUPPORTED ? "" : "unavailable"}" type="button" data-play-style="nearby" ${NEARBY_PLAY_SUPPORTED ? "" : 'aria-disabled="true"'}><strong>📲 Two phones · one scan</strong><small>${NEARBY_PLAY_SUPPORTED ? "Scan once, connect automatically, and answer privately on separate phones." : IS_OFFLINE_FILE ? "Needs the installed or online app — this offline copy plays on one device." : "Not available in this browser — play on one device."}</small></button>
             </div>
 
             ${renderDailyRitualCard()}
@@ -20970,7 +21003,7 @@ var qrcode = function() {
             <details class="setup-customization-disclosure" id="setup-customization-details">
               <summary class="setup-customization-summary">
                 <span class="customization-summary-title">
-                  <span class="customization-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" width="16" height="16" style="vertical-align:middle"><circle class="duo-bg" cx="12" cy="12" r="5.8"/><circle cx="12" cy="12" r="8.8" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="5.8" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/><path d="M12 2v2.2 M12 19.8v2.2 M2 12h2.2 M19.8 12h2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 6.2v3.2 M12 14.6v3.2 M6.2 12h3.2 M14.6 12h3.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity="0.7"/><circle class="duo-core" cx="12" cy="12" r="1.8"/></svg></span>
+                  <span class="customization-icon" aria-hidden="true">🎛️</span>
                   <span>Custom pack, length & format</span>
                 </span>
                 <span class="customization-summary-tag">${setupCount}Q · ${state.questionMode === "mixed" ? "Mixed" : state.questionMode === "slider-heavy" ? "Slider‑heavy" : "Sliders only"}</span>
@@ -21006,21 +21039,21 @@ var qrcode = function() {
                   <label class="mode-option">
                     <input type="radio" name="question-mode" value="mixed" ${state.questionMode === "mixed" ? "checked" : ""}>
                     <span class="mode-card">
-                      <span class="mode-topline"><span>Mixed</span><span class="mode-icon">◐</span></span>
+                      <span class="mode-topline"><span>Mixed</span><span class="mode-icon">🔀</span></span>
                       <span class="mode-description" data-mode-summary="mixed">${modeSummary("mixed", setupCount)}</span>
                     </span>
                   </label>
                   <label class="mode-option">
                     <input type="radio" name="question-mode" value="slider-heavy" ${state.questionMode === "slider-heavy" ? "checked" : ""}>
                     <span class="mode-card">
-                      <span class="mode-topline"><span>Slider‑heavy</span><span class="mode-icon">≋</span></span>
+                      <span class="mode-topline"><span>Slider‑heavy</span><span class="mode-icon">📊</span></span>
                       <span class="mode-description" data-mode-summary="slider-heavy">${modeSummary("slider-heavy", setupCount)}</span>
                     </span>
                   </label>
                   <label class="mode-option">
                     <input type="radio" name="question-mode" value="sliders-only" ${state.questionMode === "sliders-only" ? "checked" : ""}>
                     <span class="mode-card">
-                      <span class="mode-topline"><span>Sliders only</span><span class="mode-icon">↔</span></span>
+                      <span class="mode-topline"><span>Sliders only</span><span class="mode-icon">🎚️</span></span>
                       <span class="mode-description" data-mode-summary="sliders-only">${modeSummary("sliders-only", setupCount)}</span>
                     </span>
                   </label>
@@ -21051,7 +21084,7 @@ var qrcode = function() {
               <button class="primary-btn" id="start-round" type="submit">Start your round</button>
               <button class="secondary-btn" id="start-lightning-btn" type="button" style="display:inline-flex;align-items:center;justify-content:center;gap:6px"><span aria-hidden="true">⚡</span> Rapid-fire warmup (60s)</button>
             </div>
-            <p class="privacy-note"><span aria-hidden="true">⌁</span><span>Your data stays in this browser unless you choose to export a backup.</span></p>
+            <p class="privacy-note"><span aria-hidden="true">🛡️</span><span>Your data stays in this browser unless you choose to export a backup.</span></p>
           </form>
         </section>
       `;
