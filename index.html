@@ -7848,18 +7848,22 @@ var qrcode = function() {
       }
 
       .profile-card {
-        padding: 8px 10px !important;
+        padding: 7px 10px !important;
         gap: 2px !important;
         min-height: 44px !important;
       }
 
       .profile-card .profile-icon {
-        font-size: 1.25rem !important;
-        margin-bottom: 1px !important;
+        font-size: 1.15rem !important;
+        line-height: 1 !important;
+        margin-bottom: 0 !important;
       }
 
       .profile-card strong {
-        font-size: 0.8rem !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 5px !important;
+        font-size: 0.82rem !important;
         line-height: 1.15 !important;
       }
 
@@ -7913,18 +7917,22 @@ var qrcode = function() {
       }
 
       .vibe-tile {
-        padding: 8px 10px !important;
-        min-height: 64px !important;
+        padding: 7px 10px !important;
+        min-height: 44px !important;
         gap: 2px !important;
       }
 
       .vibe-tile .vibe-icon {
-        font-size: 1.25rem !important;
-        margin-bottom: 1px !important;
+        font-size: 1.15rem !important;
+        line-height: 1 !important;
+        margin-bottom: 0 !important;
       }
 
       .vibe-tile strong {
-        font-size: 0.8rem !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 5px !important;
+        font-size: 0.82rem !important;
         line-height: 1.15 !important;
       }
 
@@ -11102,21 +11110,48 @@ var qrcode = function() {
     }
     .screen, .question-screen, .flip-card, .error, #setup-error { scroll-margin-top: calc(84px + env(safe-area-inset-top, 0px)); }
     .vibe-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 6px; margin-bottom: 8px; }
-    .vibe-tile { display: grid; gap: 2px; min-height: 72px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 18px; color: var(--text); background: rgba(15, 23, 42, 0.5); text-align: left; cursor: pointer; transition: transform 160ms ease, border-color 160ms ease; align-content: flex-start; }
+    .vibe-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 3px;
+      min-height: 48px;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      color: var(--text);
+      background: rgba(15, 23, 42, 0.5);
+      text-align: left;
+      cursor: pointer;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
     @media (hover: hover) { .vibe-tile:hover { transform: translateY(-2px); border-color: var(--coral); } }
     .vibe-tile.active { border-color: var(--coral); background: linear-gradient(145deg, color-mix(in srgb, var(--coral) 18%, transparent), color-mix(in srgb, var(--violet) 10%, transparent)); }
-    .vibe-tile strong { font-size: max(13px, 0.85rem); line-height: 1.2; font-weight: 700; }
-    .vibe-tile small { color: var(--muted); font-size: max(12px, .74rem); line-height: 1.35; margin-top: 1px; }
+    .vibe-tile strong {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: max(13px, 0.85rem);
+      line-height: 1.2;
+      font-weight: 700;
+    }
+    .vibe-tile small {
+      color: var(--muted);
+      font-size: max(12px, .74rem);
+      line-height: 1.35;
+      margin-top: 1px;
+    }
     .vibe-icon {
-      font-size: 1.55rem;
-      line-height: 1.1;
+      font-size: 1.25rem;
+      line-height: 1;
       display: inline-block;
-      margin-bottom: 2px;
-      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+      flex-shrink: 0;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.16));
       transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .vibe-tile:hover .vibe-icon {
-      transform: scale(1.16) translateY(-2px);
+      transform: scale(1.18);
     }
     [data-theme="pastel"] .vibe-tile { background: rgba(255, 255, 255, 0.7); }
     @media (min-width: 760px) { .vibe-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; } }
@@ -11968,8 +12003,8 @@ var qrcode = function() {
       flex-direction: column;
       align-items: flex-start;
       justify-content: flex-start;
-      gap: 2px;
-      padding: 10px 12px;
+      gap: 3px;
+      padding: 9px 12px;
       border-radius: var(--radius-md);
       background: rgba(30, 41, 59, 0.7);
       border: 1px solid var(--line);
@@ -11988,26 +12023,30 @@ var qrcode = function() {
       background: rgba(251, 113, 133, 0.12);
       box-shadow: 0 0 16px rgba(251, 113, 133, 0.18);
     }
-    .profile-card .profile-icon {
-      font-size: 1.45rem;
-      line-height: 1.1;
-      margin-bottom: 2px;
-      display: inline-block;
-      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.16));
-      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .profile-card:hover .profile-icon {
-      transform: scale(1.15);
-    }
     .profile-card strong {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       font-size: max(13px, 0.85rem);
       font-weight: 700;
       line-height: 1.2;
+    }
+    .profile-card .profile-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+      display: inline-block;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.16));
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+      flex-shrink: 0;
+    }
+    .profile-card:hover .profile-icon {
+      transform: scale(1.18);
     }
     .profile-card small {
       font-size: max(12px, 0.72rem);
       color: var(--muted);
       line-height: 1.35;
+      margin-top: 1px;
     }
 
     /* These feature cards were built with dark-slate fills; on Cloud Nine's paper cards that left --text at ~2.2:1.
@@ -21281,8 +21320,7 @@ var qrcode = function() {
             <div class="relationship-profile-grid" role="group" aria-label="Who is playing">
               ${RELATIONSHIP_PROFILES.map((p) => `
                 <button class="profile-card ${(state.relationshipProfile || "romantic") === p.id ? "active" : ""}" type="button" data-relationship-profile="${p.id}" aria-pressed="${(state.relationshipProfile || "romantic") === p.id}">
-                  <span class="profile-icon" aria-hidden="true">${p.icon}</span>
-                  <strong>${escapeHTML(p.label)}</strong>
+                  <strong><span class="profile-icon" aria-hidden="true">${p.icon}</span> ${escapeHTML(p.label)}</strong>
                   <small>${escapeHTML(p.subtitle)}</small>
                 </button>
               `).join("")}
@@ -21297,7 +21335,7 @@ var qrcode = function() {
             ${renderDailyRitualCard()}
             <p class="setup-section-title">Pick tonight’s vibe</p>
             <div class="vibe-tiles" role="group" aria-label="Quick start presets">
-              ${["date-night", "road-trip", "check-in", "deep-dive"].map((id) => profilePreset(SESSION_PRESETS.find((preset) => preset.id === id))).filter((preset) => profilePresetVisible(preset)).map((preset) => `<button class="vibe-tile ${shownPreset === preset.id ? "active" : ""}" type="button" data-vibe="${preset.id}" aria-pressed="${shownPreset === preset.id}"><span class="vibe-icon" aria-hidden="true">${preset.icon}</span><strong>${preset.label}</strong><small>${preset.copy}</small></button>`).join("")}
+              ${["date-night", "road-trip", "check-in", "deep-dive"].map((id) => profilePreset(SESSION_PRESETS.find((preset) => preset.id === id))).filter((preset) => profilePresetVisible(preset)).map((preset) => `<button class="vibe-tile ${shownPreset === preset.id ? "active" : ""}" type="button" data-vibe="${preset.id}" aria-pressed="${shownPreset === preset.id}"><strong><span class="vibe-icon" aria-hidden="true">${preset.icon}</span> ${preset.label}</strong><small>${preset.copy}</small></button>`).join("")}
             </div>
             <div class="vibe-running-low-slot">${vibeRunningLow()}</div>
             ${state.customPacks.length ? `<p class="setup-section-title">Your packs</p>
