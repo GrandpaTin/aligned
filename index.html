@@ -13129,6 +13129,7 @@ var qrcode = function() {
         names: ["", ""],
         relationshipProfile: "romantic",
         sessionPreset: "custom",
+        customizationOpen: true,
         playStyle: "pass-and-play",
         questionMode: "mixed",
         questionCount: 5,
@@ -13496,6 +13497,7 @@ var qrcode = function() {
             names: restored.names,
             questionMode: restored.questionMode,
             sessionPreset: restored.sessionPreset,
+            customizationOpen: restored.customizationOpen !== false,
             playStyle: restored.playStyle,
             questionCount: restored.questionCount,
             questionIntensity: restored.questionIntensity,
@@ -13553,6 +13555,7 @@ var qrcode = function() {
           0,
           Math.min(Math.max(0, restored.selectedQuestionIds.length - 1), Number(restored.questionIndex) || 0)
         );
+        restored.customizationOpen = restored.customizationOpen !== false;
         return restored;
       } catch {
         loadStateFailed = true;
@@ -18948,6 +18951,10 @@ var qrcode = function() {
     }
 
     function render() {
+      const liveCustomDetails = document.getElementById("setup-customization-details");
+      if (liveCustomDetails) {
+        state.customizationOpen = liveCustomDetails.open;
+      }
       const previousFocusKey = focusKeyFor(document.activeElement);
       const previousProgressWidth = app.querySelector(".question-screen .progress-bar")?.style.width || "";
       if (state.screen === "nearby-wait" && state.nearbyRemote) {
@@ -21020,7 +21027,7 @@ var qrcode = function() {
             </div>
             <div class="session-preset-info" id="session-preset-info"></div>
 
-            <details class="setup-customization-disclosure" id="setup-customization-details">
+            <details class="setup-customization-disclosure" id="setup-customization-details"${state.customizationOpen !== false ? " open" : ""}>
               <summary class="setup-customization-summary">
                 <span class="customization-summary-title">
                   <span class="customization-icon" aria-hidden="true">🎛️</span>
@@ -21288,6 +21295,9 @@ var qrcode = function() {
           const preset = profilePreset(SESSION_PRESETS.find((item) => item.id === presetId));
           if (!preset) return;
           state.sessionPreset = preset.id;
+          if (preset.id === "custom") {
+            state.customizationOpen = true;
+          }
           if (preset.id !== "custom") {
             state.questionCount = preset.count;
             state.questionIntensity = preset.intensity;
@@ -21312,11 +21322,19 @@ var qrcode = function() {
         playSound("unlock");
         render();
       });
+      const customizationDetails = document.getElementById("setup-customization-details");
+      if (customizationDetails) {
+        customizationDetails.addEventListener("toggle", () => {
+          state.customizationOpen = customizationDetails.open;
+          saveState();
+        });
+      }
       document.querySelectorAll('input[name="question-intensity"]').forEach((input) => {
         input.addEventListener("change", () => {
           rememberNames();
           state.sessionPreset = "custom";
           state.questionIntensity = input.value;
+          state.customizationOpen = true;
           const allowed = allowedTopicsForIntensity(input.value);
           state.selectedTopics = state.selectedTopics.filter((topic) => allowed.has(topic));
           if (!state.selectedTopics.length) state.selectedTopics = [...allowed].slice(0, Math.min(3, allowed.size));
