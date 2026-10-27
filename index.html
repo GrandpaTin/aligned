@@ -7751,15 +7751,14 @@ var qrcode = function() {
       }
 
       .primary-btn {
-        min-height: 38px !important;
-        padding: 0 12px !important;
-        font-size: 1rem !important;
-        border-radius: 10px !important;
+        min-height: 42px !important;
+        padding: 0 14px !important;
+        font-size: 0.9375rem !important;
       }
 
       .secondary-btn {
-        min-height: 32px !important;
-        padding: 0 10px !important;
+        min-height: 42px !important;
+        padding: 0 12px !important;
         font-size: 0.875rem !important;
       }
 
@@ -7802,13 +7801,22 @@ var qrcode = function() {
         z-index: 30;
         bottom: calc(74px + env(safe-area-inset-bottom));
         margin: 8px -6px 0;
-        padding: 8px;
+        padding: 6px;
+        gap: 8px !important;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 14px;
+        border-radius: 18px;
         background: rgba(15, 23, 42, 0.88);
         box-shadow: 0 16px 40px rgba(2, 6, 23, 0.36);
         backdrop-filter: blur(18px) saturate(1.2);
         -webkit-backdrop-filter: blur(18px) saturate(1.2);
+      }
+      .setup-start-actions .primary-btn,
+      .setup-start-actions .secondary-btn {
+        min-height: 42px !important;
+        height: 42px !important;
+        font-size: 0.9375rem !important;
+        width: 100%;
+        border-radius: 12px;
       }
 
       .count-card {
@@ -9990,7 +9998,7 @@ var qrcode = function() {
       -webkit-backdrop-filter: none;
     }
 
-    [data-theme="sunset"] :is(.count-card, .mode-card, .topic-chip, .sound-setting, .library-launcher, .data-tool, .preset-card, .play-style-card, .importance-option, .highlight-card, .follow-through-button, .nearby-choice, .slider-panel, .comment-details, .comparison-wrap, .importance-panel, .follow-through, .round-history-item, .discussion-card, .alignment-rating, .rating-option, .private-reflection, .tutorial-step, .resume-card) {
+    [data-theme="sunset"] :is(.count-card, .mode-card, .topic-chip, .sound-setting, .library-launcher, .data-tool, .preset-card, .play-style-card, .importance-option, .highlight-card, .follow-through-button, .nearby-choice, .slider-panel, .comment-details, .comparison-wrap, .importance-panel, .follow-through, .round-history-item, .discussion-card, .alignment-rating, .rating-option, .private-reflection, .tutorial-step, .resume-card, .vibe-tile, .profile-card, .intensity-card) {
       border-color: rgba(255, 226, 191, 0.19);
       border-radius: 22px 8px 22px 8px;
       background: rgba(67, 21, 38, 0.48);
@@ -10017,6 +10025,25 @@ var qrcode = function() {
       border-radius: 16px 6px 16px 6px;
       color: var(--text);
       background: rgba(78, 25, 42, 0.62);
+    }
+
+    [data-theme="sunset"] .setup-start-actions {
+      border-radius: 26px 12px 26px 12px !important;
+      padding: 6px 8px !important;
+      border: 1px solid rgba(255, 226, 191, 0.28) !important;
+      background: rgba(57, 17, 33, 0.96) !important;
+      box-shadow: 0 14px 36px rgba(42, 13, 29, 0.38) !important;
+    }
+    [data-theme="sunset"] .setup-start-actions .primary-btn {
+      border-radius: 20px 8px 20px 8px !important;
+    }
+    [data-theme="sunset"] .setup-start-actions .secondary-btn {
+      border-radius: 18px 7px 18px 7px !important;
+    }
+    [data-theme="sunset"] .reveal-sticky-bar {
+      border-radius: 26px 12px 26px 12px !important;
+      border-color: rgba(255, 226, 191, 0.28) !important;
+      background: rgba(57, 17, 33, 0.96) !important;
     }
 
     /* The shared translucent active fill lands lighter than inactive chips on sunset's warm page (4.4:1); an opaque wine base keeps the selection darker and ~7.5:1. */
@@ -10165,16 +10192,16 @@ var qrcode = function() {
       box-shadow: 0 0 10px rgba(86, 231, 255, 0.45);
     }
 
-    [data-theme="cosmic"] :is(.count-card, .mode-card, .topic-chip, .sound-setting, .library-launcher, .data-tool, .preset-card, .play-style-card, .importance-option, .highlight-card, .follow-through-button, .nearby-choice, .slider-panel, .comment-details, .comparison-wrap, .importance-panel, .follow-through, .round-history-item, .discussion-card, .alignment-rating, .rating-option, .private-reflection, .tutorial-step, .resume-card) {
+    [data-theme="cosmic"] :is(.count-card, .mode-card, .topic-chip, .sound-setting, .library-launcher, .data-tool, .preset-card, .play-style-card, .importance-option, .highlight-card, .follow-through-button, .nearby-choice, .slider-panel, .comment-details, .comparison-wrap, .importance-panel, .follow-through, .round-history-item, .discussion-card, .alignment-rating, .rating-option, .private-reflection, .tutorial-step, .resume-card, .vibe-tile, .profile-card, .intensity-card) {
       border-color: rgba(167, 119, 255, 0.24);
-      border-radius: 5px;
+      border-radius: 6px;
       background: rgba(8, 4, 31, 0.72);
       box-shadow: inset 3px 0 0 rgba(86, 231, 255, 0.18);
     }
 
     [data-theme="cosmic"] :is(.name-input, .answer-textarea, .comment-textarea, .custom-input, .custom-select, .session-dropdown-trigger, .library-search, .pairing-code, .private-note-input) {
       border-color: rgba(86, 231, 255, 0.25);
-      border-radius: 3px;
+      border-radius: 4px;
       color: var(--text);
       background: rgba(4, 1, 15, 0.82);
       box-shadow: inset 0 0 18px rgba(86, 231, 255, 0.035);
@@ -10182,7 +10209,7 @@ var qrcode = function() {
 
     [data-theme="cosmic"] .primary-btn {
       border-color: rgba(255, 255, 255, 0.3);
-      border-radius: 4px;
+      border-radius: 6px;
       color: #05010f;
       background: linear-gradient(100deg, #56e7ff, #b18cff 48%, #ff74c9);
       box-shadow: 0 0 22px rgba(86, 231, 255, 0.28), 0 0 34px rgba(255, 84, 189, 0.16);
@@ -10192,10 +10219,30 @@ var qrcode = function() {
 
     [data-theme="cosmic"] :is(.secondary-btn, .mini-action, .library-filter, .question-library-action) {
       border-color: rgba(86, 231, 255, 0.28);
-      border-radius: 3px;
+      border-radius: 6px;
       color: var(--blue);
       background: rgba(8, 4, 31, 0.76);
       box-shadow: inset 0 0 14px rgba(86, 231, 255, 0.04);
+    }
+
+    [data-theme="cosmic"] .setup-start-actions {
+      border-radius: 12px !important;
+      padding: 6px 8px !important;
+      border: 1px solid rgba(86, 231, 255, 0.35) !important;
+      background: rgba(4, 1, 15, 0.94) !important;
+      box-shadow: 0 0 24px rgba(86, 231, 255, 0.18), inset 0 0 16px rgba(167, 119, 255, 0.08) !important;
+    }
+    [data-theme="cosmic"] .setup-start-actions .primary-btn {
+      border-radius: 6px !important;
+    }
+    [data-theme="cosmic"] .setup-start-actions .secondary-btn {
+      border-radius: 6px !important;
+    }
+    [data-theme="cosmic"] .reveal-sticky-bar {
+      border-radius: 12px !important;
+      border-color: rgba(86, 231, 255, 0.35) !important;
+      background: rgba(4, 1, 15, 0.94) !important;
+      box-shadow: 0 0 24px rgba(86, 231, 255, 0.18) !important;
     }
 
     [data-theme="cosmic"] .progress-track {
@@ -10333,7 +10380,7 @@ var qrcode = function() {
       border-top: 5px solid color-mix(in srgb, var(--question-color, var(--coral)) 58%, white);
     }
 
-    [data-theme="pastel"] :is(.count-card, .mode-card, .topic-chip, .sound-setting, .library-launcher, .data-tool, .preset-card, .play-style-card, .importance-option, .highlight-card, .follow-through-button, .nearby-choice, .slider-panel, .comment-details, .comparison-wrap, .importance-panel, .follow-through, .round-history-item, .discussion-card, .alignment-rating, .rating-option, .private-reflection, .tutorial-step, .resume-card) {
+    [data-theme="pastel"] :is(.count-card, .mode-card, .topic-chip, .sound-setting, .library-launcher, .data-tool, .preset-card, .play-style-card, .importance-option, .highlight-card, .follow-through-button, .nearby-choice, .slider-panel, .comment-details, .comparison-wrap, .importance-panel, .follow-through, .round-history-item, .discussion-card, .alignment-rating, .rating-option, .private-reflection, .tutorial-step, .resume-card, .vibe-tile, .profile-card, .intensity-card) {
       border-color: rgba(79, 91, 120, 0.13);
       border-radius: 18px;
       color: var(--text);
@@ -10412,7 +10459,7 @@ var qrcode = function() {
 
     [data-theme="pastel"] .primary-btn {
       border-color: rgba(207, 73, 104, 0.18);
-      border-radius: 18px;
+      border-radius: 16px;
       color: #ffffff;
       background: linear-gradient(135deg, #ec718b, #d8597b 54%, #8a73d3);
       box-shadow: 0 14px 28px rgba(217, 81, 114, 0.22);
@@ -10421,9 +10468,29 @@ var qrcode = function() {
 
     [data-theme="pastel"] :is(.secondary-btn, .home-btn, .mini-action, .library-filter, .question-library-action) {
       border-color: rgba(79, 91, 120, 0.16);
+      border-radius: 16px;
       color: var(--text);
       background: #ffffff;
       box-shadow: 0 7px 16px rgba(85, 74, 112, 0.08);
+    }
+
+    [data-theme="pastel"] .setup-start-actions {
+      border-radius: 22px !important;
+      padding: 6px 8px !important;
+      border: 1px solid rgba(79, 91, 120, 0.16) !important;
+      background: rgba(255, 255, 255, 0.96) !important;
+      box-shadow: 0 12px 32px rgba(85, 74, 112, 0.15) !important;
+    }
+    [data-theme="pastel"] .setup-start-actions .primary-btn {
+      border-radius: 16px !important;
+    }
+    [data-theme="pastel"] .setup-start-actions .secondary-btn {
+      border-radius: 16px !important;
+    }
+    [data-theme="pastel"] .reveal-sticky-bar {
+      border-radius: 22px !important;
+      border-color: rgba(79, 91, 120, 0.16) !important;
+      background: rgba(255, 255, 255, 0.96) !important;
     }
 
     [data-theme="pastel"] .progress-track,
@@ -12089,6 +12156,39 @@ var qrcode = function() {
       background: var(--blue);
       box-shadow: 0 0 8px var(--blue);
     }
+    .setup-start-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      border-radius: 999px;
+      padding: 6px 8px;
+    }
+    .setup-start-actions .primary-btn,
+    .setup-start-actions .secondary-btn {
+      min-height: 48px !important;
+      height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      margin: 0;
+      transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.16s ease, filter 0.16s ease;
+    }
+    .setup-start-actions .primary-btn {
+      border-radius: 999px;
+    }
+    .setup-start-actions .secondary-btn {
+      border-radius: 999px;
+    }
+    .setup-start-actions .primary-btn:hover,
+    .setup-start-actions .secondary-btn:hover {
+      transform: translateY(-1px);
+    }
+    .setup-start-actions .primary-btn:active,
+    .setup-start-actions .secondary-btn:active {
+      transform: scale(0.97);
+    }
     /* Desktop: keep Start in view; the setup form runs ~250px past an 860px laptop fold. No backdrop-filter, matching the setup card.
        min-height keeps landscape phones out: with the keyboard up their viewport is ~150px and a pinned bar would cover the name fields. */
     @media (min-width: 601px) and (min-height: 521px) {
@@ -12097,9 +12197,8 @@ var qrcode = function() {
         z-index: 30;
         bottom: max(12px, env(safe-area-inset-bottom));
         margin: 16px -10px 0;
-        padding: 10px 12px;
+        padding: 6px 8px;
         border: 1px solid var(--line);
-        border-radius: 18px;
         background: rgba(15, 23, 42, 0.96);
         box-shadow: 0 14px 36px rgba(2, 6, 23, 0.34);
       }
@@ -12116,7 +12215,7 @@ var qrcode = function() {
     @media (min-width: 601px) and (min-height: 521px) { body:has(.session-dropdown-container.open) .setup-start-actions { visibility: hidden; } }
     /* Desktop: a full-width sticky Start bar sat on the whole vibe row at a 768px fold; a content-width pill leaves the left-hand tiles readable. */
     @media (min-width: 1024px) and (min-height: 521px) {
-      .setup-start-actions { width: fit-content; max-width: calc(100% + 20px); margin: 16px -10px 0 auto; border-radius: 999px; padding: 8px 10px; }
+      .setup-start-actions { width: fit-content; max-width: calc(100% + 20px); margin: 16px -10px 0 auto; padding: 6px 8px; }
     }
     /* Reserve the sticky bar's height (~76px bar + 12px offset) so keyboard focus on setup tiles scrolls clear of it. */
     @media (min-width: 601px) and (min-height: 521px) {
